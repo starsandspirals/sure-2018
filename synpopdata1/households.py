@@ -13,13 +13,21 @@ rowsums = data.sum(axis=1)
 people = pandas.Series (rowsums.tolist(), index=sexage)
 
 col_labels = []
+row_labels = []
 
 for i, v in households.items():
   
-  for y in range (1, v):
+  for x in range (1, v+1):
 
-    label = str(y) + ", H" + str(i)
+    label = str(x) + ", H" + str(i)
     col_labels.append(label)
 
-print(col_labels)
-print(households)
+for i, v in people.items():
+
+  for x in range (1, v+1):
+
+    label = str(x) + ", " + i
+    row_labels.append(label)
+
+print(row_labels)
+print(people)
