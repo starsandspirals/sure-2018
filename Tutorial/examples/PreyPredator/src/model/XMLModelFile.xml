@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="FLAMEGPU_vcproj.xslt"?>
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+    <name>PreyPredator</name>
+    <gpu:environment>
+        
+        <gpu:constants>
+            <gpu:variable>
+                <type>float</type>
+                <name>REPRODUCE_PREY_PROB</name>
+                <defaultValue>0.05</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+                <type>float</type>
+                <name>REPRODUCE_PREDATOR_PROB</name>
+                <defaultValue>0.03</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+                <type>int</type>
+                <name>GAIN_FROM_FOOD_PREDATOR</name>
+                <defaultValue>75</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+                <type>int</type>
+                <name>GAIN_FROM_FOOD_PREY</name>
+                <defaultValue>50</defaultValue>
+            </gpu:variable>
+            <gpu:variable>
+                <type>int</type>
+                <name>GRASS_REGROW_CYCLES</name>
+                <defaultValue>100</defaultValue>
+            </gpu:variable>
+        </gpu:constants>
+
+        <gpu:functionFiles>
+            <file>functions.c</file>
+        </gpu:functionFiles>
+        
+        <gpu:initFunctions>
+            <gpu:initFunction>
+                <gpu:name>initLogFile</gpu:name>
+            </gpu:initFunction>
+        </gpu:initFunctions>
+        
+        <gpu:exitFunctions>
+            <gpu:exitFunction>
+                <gpu:name>closeLogFile</gpu:name>
+            </gpu:exitFunction>
+        </gpu:exitFunctions>
+        
+        <gpu:stepFunctions>
+            <gpu:stepFunction>
+                <gpu:name>outputToLogFile</gpu:name>
+            </gpu:stepFunction>
+        </gpu:stepFunctions>
+
+    </gpu:environment>
+
+    <xagents>
+
+        <!-- The prey agent -->
+        <gpu:xagent>
+            <name>prey</name>
+            <description>a simple Prey agent</description>
+            <memory>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>type</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>fx</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>fy</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>steer_x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>steer_y</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>life</name>
+                </gpu:variable>
+            </memory>
+            <functions>
+                <gpu:function>
+                    <!-- Outputs the location of prey. -->
+                    <name>prey_output_location</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <outputs>
+                        <gpu:output>
+                            <messageName>prey_location</messageName>
+                            <gpu:type>single_message</gpu:type>
+                        </gpu:output>
+                    </outputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey avoid predators by updating their velocity. -->
+                    <name>prey_avoid_pred</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>pred_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey flocks with neighbouring prey by updating their velocity. -->
+                    <name>prey_flock</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>prey_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey moves according to velocity -->
+                    <name>prey_move</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey checks nearby predators and is eaten. Notifies predators via prey_eaten message. -->
+                    <name>prey_eaten</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>pred_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <outputs>
+                        <gpu:output>
+                            <messageName>prey_eaten</messageName>
+                            <gpu:type>optional_message</gpu:type>
+                        </gpu:output>
+                    </outputs>
+                    <gpu:reallocate>true</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey gains energy from any grass which has been eaten. Prey dies if energy level is too low. -->
+                    <name>prey_eat_or_starve</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>grass_eaten</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>true</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Prey reproduces to create new prey -->
+                    <name>prey_reproduction</name>
+                    <currentState>default1</currentState>
+                    <nextState>default1</nextState>
+                    <xagentOutputs>
+                        <gpu:xagentOutput>
+                            <xagentName>prey</xagentName>
+                            <state>default1</state>
+                        </gpu:xagentOutput>
+                    </xagentOutputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>true</gpu:RNG>
+                </gpu:function>
+            </functions>
+            <states>
+                <gpu:state>
+                    <name>default1</name>
+                </gpu:state>
+                <initialState>default1</initialState>
+            </states>
+            <gpu:type>continuous</gpu:type>
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:xagent>
+
+
+        <!-- The predator agent -->
+        <gpu:xagent>
+            <name>predator</name>
+            <description>a simple Predator agent</description>
+            <memory>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>type</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>fx</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>fy</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>steer_x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>steer_y</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>life</name>
+                </gpu:variable>
+            </memory>
+            <functions>
+                <gpu:function>
+                    <!-- Predator outputs location. -->
+                    <name>pred_output_location</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <outputs>
+                        <gpu:output>
+                            <messageName>pred_location</messageName>
+                            <gpu:type>single_message</gpu:type>
+                        </gpu:output>
+                    </outputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Predator follows nearest prey to try and eat them. -->
+                    <name>pred_follow_prey</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>prey_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Predator avoids other predators by adjusting velocity-->
+                    <name>pred_avoid</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>pred_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Predator moves according to velocity. -->
+                    <name>pred_move</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Predator gains energy from prey which has been eaten. Predator dies if energy level is too low. -->
+                    <name>pred_eat_or_starve</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>prey_eaten</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <gpu:reallocate>true</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Predator reproduces to create new predators. -->
+                    <name>pred_reproduction</name>
+                    <currentState>default2</currentState>
+                    <nextState>default2</nextState>
+                    <xagentOutputs>
+                        <gpu:xagentOutput>
+                            <xagentName>predator</xagentName>
+                            <state>default2</state>
+                        </gpu:xagentOutput>
+                    </xagentOutputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>true</gpu:RNG>
+                </gpu:function>
+            </functions>
+            <states>
+                <gpu:state>
+                    <name>default2</name>
+                </gpu:state>
+                <initialState>default2</initialState>
+            </states>
+            <gpu:type>continuous</gpu:type>
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:xagent>
+        
+        <!-- The grass agent -->
+        <gpu:xagent>
+            <name>grass</name>
+            <description>a simple grass agent</description>
+            <memory>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>type</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>dead_cycles</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>available</name>
+                </gpu:variable>
+            </memory>
+            <functions>
+                <gpu:function>
+                    <!-- Outputs the location and amount of grass at a specific location. -->
+                    <name>grass_output_location</name>
+                    <currentState>default3</currentState>
+                    <nextState>default3</nextState>
+                    <outputs>
+                        <gpu:output>
+                            <messageName>grass_location</messageName>
+                            <gpu:type>single_message</gpu:type>
+                        </gpu:output>
+                    </outputs>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Grass checks nearly prey and reduces in quantity accordingly. Outputs an grass_eaten message to inform prey. -->
+                    <name>grass_eaten</name>
+                    <currentState>default3</currentState>
+                    <nextState>default3</nextState>
+                    <inputs>
+                        <gpu:input>
+                            <messageName>prey_location</messageName>
+                        </gpu:input>
+                    </inputs>
+                    <outputs>
+                        <gpu:output>
+                            <messageName>grass_eaten</messageName>
+                            <gpu:type>optional_message</gpu:type>
+                        </gpu:output>
+                    </outputs>
+                    <gpu:reallocate>true</gpu:reallocate>
+                    <gpu:RNG>false</gpu:RNG>
+                </gpu:function>
+                <gpu:function>
+                    <!-- Grass regenerates through growth over time -->
+                    <name>grass_growth</name>
+                    <currentState>default3</currentState>
+                    <nextState>default3</nextState>
+                    <gpu:reallocate>false</gpu:reallocate>
+                    <gpu:RNG>true</gpu:RNG>
+                </gpu:function>
+
+            </functions>
+            <states>
+                <gpu:state>
+                    <name>default3</name>
+                </gpu:state>
+                <initialState>default3</initialState>
+            </states>
+            <gpu:type>continuous</gpu:type>
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:xagent>
+        
+    </xagents>
+    
+    <messages>
+        
+        <gpu:message>
+            <name>grass_location</name>
+            <description>a message holding the location of an agent</description>
+            <variables>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+            </variables>
+            <gpu:partitioningNone/>
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:message>
+        
+        <gpu:message>
+            <name>prey_location</name>
+            <description>a message holding the location of an agent</description>
+            <variables>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+            </variables>
+            <gpu:partitioningNone />
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:message>
+        
+        <gpu:message>
+            <name>pred_location</name>
+            <description>a message holding the location of an agent</description>
+            <variables>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>id</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>x</name>
+                </gpu:variable>
+                <gpu:variable>
+                    <type>float</type>
+                    <name>y</name>
+                </gpu:variable>
+            </variables>
+            <gpu:partitioningNone />
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:message>
+        
+        <gpu:message>
+            <name>prey_eaten</name>
+            <description>a message holding the id of a prey and a predator which has eaten it</description>
+            <variables>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>pred_id</name>
+                </gpu:variable>
+            </variables>
+            <gpu:partitioningNone />
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:message>
+        
+        <gpu:message>
+            <name>grass_eaten</name>
+            <description>a message holding the id of a prey and amount of grass eaten</description>
+            <variables>
+                <gpu:variable>
+                    <type>int</type>
+                    <name>prey_id</name>
+                </gpu:variable>
+            </variables>
+            <gpu:partitioningNone />
+            <gpu:bufferSize>262144</gpu:bufferSize>
+        </gpu:message>
+        
+    </messages>
+    
+    <layers>
+
+        <!-- Output functions: Each agent outputs information to be read by other agents -->
+        <layer>
+            <gpu:layerFunction>
+                <name>prey_output_location</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>pred_output_location</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>grass_output_location</name>
+            </gpu:layerFunction>
+        </layer>
+
+        <!-- predator prey interactions -->
+        <layer>
+            <gpu:layerFunction>
+                <name>pred_follow_prey</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>prey_avoid_pred</name>
+            </gpu:layerFunction>
+        </layer>
+
+        <!-- Flocking and avoidance between agents of the same type -->
+        <layer>
+            <gpu:layerFunction>
+                <name>prey_flock</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>pred_avoid</name>
+            </gpu:layerFunction>
+        </layer>
+        
+        <!-- Movement of predators and prey -->
+        <layer>
+            <gpu:layerFunction>
+                <name>prey_move</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>pred_move</name>
+            </gpu:layerFunction>
+        </layer>
+        
+
+
+        <!-- Hunting and grazing behaviour to eat grass and kill prey -->
+        <layer>
+            <gpu:layerFunction>
+                <name>grass_eaten</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>prey_eaten</name>
+            </gpu:layerFunction>
+        </layer>
+
+        <!-- Eating and energy gains -->
+        <layer>
+            <gpu:layerFunction>
+                <name>prey_eat_or_starve</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>pred_eat_or_starve</name>
+            </gpu:layerFunction>
+        </layer>
+        
+        <!-- Regeneration of predators and prey (reproduction and growth) -->
+        <layer>
+            <gpu:layerFunction>
+                <name>pred_reproduction</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>prey_reproduction</name>
+            </gpu:layerFunction>
+            <gpu:layerFunction>
+                <name>grass_growth</name>
+            </gpu:layerFunction>
+        </layer>
+        
+    </layers>
+</gpu:xmodel>
