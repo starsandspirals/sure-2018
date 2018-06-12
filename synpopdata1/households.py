@@ -29,5 +29,6 @@ for i, v in people.items():
     label = str(x) + ", " + i
     row_labels.append(label)
 
-print(row_labels)
-print(people)
+output = pandas.DataFrame(0, index=row_labels, columns=col_labels)
+
+print(output)
