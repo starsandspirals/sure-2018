@@ -527,7 +527,7 @@ __FLAME_GPU_FUNC__ int grass_eaten(xmachine_memory_grass* xmemory, xmachine_mess
 		float distance = length(prey_pos - grass_pos);
 
 		// If distance is closer than nearest prey so far then select this prey as the one which will eat the grass.
-		if (distance < closest_prey)
+		if ((distance < closest_prey) && (xmemory->available == 1))
 		{
 			prey_id = prey_location_message->id;
 			closest_prey = distance;
@@ -540,13 +540,15 @@ __FLAME_GPU_FUNC__ int grass_eaten(xmachine_memory_grass* xmemory, xmachine_mess
 
 	// If one or more prey were within eating distance then notify the nearest prey that it has eaten this grass.
 
-	if (eaten)
+	if (eaten) {
     add_grass_eaten_message(grass_eaten_messages, prey_id);
+		xmemory->dead_cycles = 0;
 		xmemory->type = 3.0f;
 		xmemory->available = 0;
+	}
 
   // Return eaten value to start the regrowth cycle.
-	return eaten;
+	return 0;
 }
 
 // generate grass
@@ -559,13 +561,12 @@ __FLAME_GPU_FUNC__ int grass_growth(xmachine_memory_grass* agent_grass, RNG_rand
 		agent_grass->dead_cycles = 0;
 		agent_grass->type = 2.0f;
 	} 
-	else {
+	else 
+	{
     agent_grass->dead_cycles += 1;
 	}
-	
+
 	return 0;
 }
 
 #endif // #ifndef _FUNCTIONS_H_
-
-
