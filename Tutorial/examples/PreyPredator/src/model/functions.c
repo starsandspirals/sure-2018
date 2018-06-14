@@ -271,6 +271,24 @@ __FLAME_GPU_FUNC__ int prey_eat_or_starve(xmachine_memory_prey* xmemory, xmachin
 {
 	int dead = 0;
 
+	// Iterate the grass eaten messages until NULL is returned which indicates all messages have been read.
+  xmachine_message_grass_eaten* grass_eaten_message = get_first_grass_eaten_message(grass_eaten_messages);
+	while (grass_eaten_message)
+	{
+		// If the grass eaten message indicates that this prey ate some grass then increase the prey's life by adding energy.
+		if (xmemory->id == grass_eaten_message->prey_id) {
+		  xmemory->life += GAIN_FROM_FOOD_PREY;
+	  }
+
+		grass_eaten_message = get_next_grass_eaten_message(grass_eaten_message, grass_eaten_messages);
+	}
+
+	// If the life has reduced to 0 then the prey should die or starve
+	if (xmemory->life < 1)
+	{
+		dead = 1;
+	}
+
         // Excercise 3.3
 
 	//return dead value to remove dead agents from the simulation
