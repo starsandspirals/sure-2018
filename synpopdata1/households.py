@@ -32,9 +32,10 @@ for i, v in people.items():
     label = str(x) + ", " + i
     row_labels.append(label)
 
-random.shuffle(row_labels)
+row_shuffled = list(row_labels)
+random.shuffle(row_shuffled)
 
-result = {}
+assignment = {}
 count = 0
 
 for x in col_labels:
@@ -44,13 +45,29 @@ for x in col_labels:
 
   for y in range (0, size):
 
-    person = row_labels[count]
+    person = row_shuffled[count]
     list.append(person)
     count += 1
 
+  assignment.update({x: list})
+
+result = {}
+result.update({"sexage": row_labels})
+
+for x in col_labels:
+
+  assigned = assignment[x]
+  list = []
+
+  for y in row_labels:
+
+    if y in assigned:
+      list.append(1)
+    else:
+      list.append(0)
+  
   result.update({x: list})
 
-output = pandas.DataFrame(0, index=row_labels, columns=col_labels)
+output = pandas.DataFrame.from_dict(result)
 
-print(result)
 print(output)
