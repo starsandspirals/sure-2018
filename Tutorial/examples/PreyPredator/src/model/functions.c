@@ -494,8 +494,39 @@ __FLAME_GPU_FUNC__ int grass_output_location(xmachine_memory_grass* xmemory, xma
 __FLAME_GPU_FUNC__ int grass_eaten(xmachine_memory_grass* xmemory, xmachine_message_prey_location_list* prey_location_messages, xmachine_message_grass_eaten_list* grass_eaten_messages)
 {
 	// Excercise 3.2 
+  int eaten = 0;
+	int prey_id = -1;
+	float closest_prey = GRASS_EAT_DISTANCE;
 
-	return 0;
+  // Iterate the prey location messages until NULL is returned which indicates all messages have been read.
+	xmachine_message_prey_location* prey_location_message = get_first_prey_location_message(prey_location_messages);
+	while (prey_location_message)
+	{
+  
+	  // Calculate distance between grass and prey
+		float2 prey_pos = float2(prey_location_message->x, prey_location_message->y);
+		float2 grass_pos = float2(xmemory->x, xmemory->y);
+		float distance = length(prey_pos - grass_pos);
+
+		// If distance is closer than nearest prey so far then select this prey as the one which will eat the grass.
+		if (distance < closest_prey)
+		{
+			prey_id = prey_location_message->id;
+			closest_prey = distance;
+			eaten = 1;
+		}
+
+		prey_location_message = get_next_prey_location_message(prey_location_message, prey_location_messages);
+			 
+	}
+
+	// If one or more prey were within eating distance then notify the nearest prey that it has eaten this grass.
+
+	if (eaten)
+    add_grass_eaten_message(grass_eaten_messages, prey_id);
+
+  // Return eaten value to start the regrowth cycle.
+	return eaten;
 }
 
 // generate grass
