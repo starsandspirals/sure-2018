@@ -484,7 +484,7 @@ __FLAME_GPU_FUNC__ int pred_reproduction(xmachine_memory_predator* agent_predato
 __FLAME_GPU_FUNC__ int grass_output_location(xmachine_memory_grass* xmemory, xmachine_message_grass_location_list* grass_location_messages)
 {
 	// Excercise 3.1 : add location message
-	
+	add_grass_location_message(grass_location_messages, xmemory->id, xmemory->x, xmemory->y);
 	return 0;
 }
 
