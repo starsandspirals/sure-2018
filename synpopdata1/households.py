@@ -1,4 +1,5 @@
 import pandas
+import random
 
 data = pandas.read_csv('histo.csv')
 
@@ -13,6 +14,7 @@ rowsums = data.sum(axis=1)
 people = pandas.Series (rowsums.tolist(), index=sexage)
 
 col_labels = []
+col_sizes = {}
 row_labels = []
 
 for i, v in households.items():
@@ -21,6 +23,7 @@ for i, v in households.items():
 
     label = str(x) + ", H" + str(i)
     col_labels.append(label)
+    col_sizes.update({label: i})
 
 for i, v in people.items():
 
@@ -29,6 +32,25 @@ for i, v in people.items():
     label = str(x) + ", " + i
     row_labels.append(label)
 
+random.shuffle(row_labels)
+
+result = {}
+count = 0
+
+for x in col_labels:
+
+  size = int(col_sizes[x])
+  list = []
+
+  for y in range (0, size):
+
+    person = row_labels[count]
+    list.append(person)
+    count += 1
+
+  result.update({x: list})
+
 output = pandas.DataFrame(0, index=row_labels, columns=col_labels)
 
+print(result)
 print(output)
