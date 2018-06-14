@@ -542,6 +542,8 @@ __FLAME_GPU_FUNC__ int grass_eaten(xmachine_memory_grass* xmemory, xmachine_mess
 
 	if (eaten)
     add_grass_eaten_message(grass_eaten_messages, prey_id);
+		xmemory->type = 3.0f;
+		xmemory->available = 0;
 
   // Return eaten value to start the regrowth cycle.
 	return eaten;
@@ -551,6 +553,15 @@ __FLAME_GPU_FUNC__ int grass_eaten(xmachine_memory_grass* xmemory, xmachine_mess
 __FLAME_GPU_FUNC__ int grass_growth(xmachine_memory_grass* agent_grass, RNG_rand48* rand48)
 {
         // Excercise 3.4
+	if (agent_grass->dead_cycles == GRASS_REGROW_CYCLES) 
+	{
+		agent_grass->available = 1;
+		agent_grass->dead_cycles = 0;
+		agent_grass->type = 2.0f;
+	} 
+	else {
+    agent_grass->dead_cycles += 1;
+	}
 	
 	return 0;
 }
