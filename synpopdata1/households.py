@@ -1,73 +1,77 @@
 import pandas
 import random
 
-data = pandas.read_csv('histo.csv')
+def generate(s):
 
-sexage = data['sexage']
-colsums = data.sum(axis=0)[1:]
+  data = pandas.read_csv('histo.csv')
 
-household_sizes = list (map (int, colsums.index.values))
-households = colsums.divide (household_sizes)
-households = households.astype(int)
+  sexage = data['sexage']
+  colsums = data.sum(axis=0)[1:]
 
-rowsums = data.sum(axis=1)
-people = pandas.Series (rowsums.tolist(), index=sexage)
+  household_sizes = list (map (int, colsums.index.values))
+  households = colsums.divide (household_sizes)
+  households = households.astype(int)
 
-col_labels = []
-col_sizes = {}
-row_labels = []
+  rowsums = data.sum(axis=1)
+  people = pandas.Series (rowsums.tolist(), index=sexage)
 
-for i, v in households.items():
-  
-  for x in range (1, v+1):
+  col_labels = []
+  col_sizes = {}
+  row_labels = []
 
-    label = str(x) + ", H" + str(i)
-    col_labels.append(label)
-    col_sizes.update({label: i})
+  for i, v in households.items():
+    
+    for x in range (1, v+1):
 
-for i, v in people.items():
+      label = str(x) + ", H" + str(i)
+      col_labels.append(label)
+      col_sizes.update({label: i})
 
-  for x in range (1, v+1):
+  for i, v in people.items():
 
-    label = str(x) + ", " + i
-    row_labels.append(label)
+    for x in range (1, v+1):
 
-row_shuffled = list(row_labels)
-random.shuffle(row_shuffled)
+      label = str(x) + ", " + i
+      row_labels.append(label)
 
-assignment = {}
-count = 0
+  row_shuffled = list(row_labels)
+  random.shuffle(row_shuffled)
 
-for x in col_labels:
+  assignment = {}
+  count = 0
 
-  size = int(col_sizes[x])
-  list = []
+  for x in col_labels:
 
-  for y in range (0, size):
+    size = int(col_sizes[x])
+    group = []
 
-    person = row_shuffled[count]
-    list.append(person)
-    count += 1
+    for y in range (0, size):
 
-  assignment.update({x: list})
+      person = row_shuffled[count]
+      group.append(person)
+      count += 1
 
-result = {}
-result.update({"sexage": row_labels})
+    assignment.update({x: group})
 
-for x in col_labels:
+  result = {}
+  result.update({"sexage": row_labels})
 
-  assigned = assignment[x]
-  list = []
+  for x in col_labels:
 
-  for y in row_labels:
+    assigned = assignment[x]
+    group = []
 
-    if y in assigned:
-      list.append(1)
-    else:
-      list.append(0)
-  
-  result.update({x: list})
+    for y in row_labels:
 
-output = pandas.DataFrame.from_dict(result)
+      if y in assigned:
+        group.append(1)
+      else:
+        group.append(0)
+    
+    result.update({x: group})
 
-print(output)
+  output = pandas.DataFrame.from_dict(result)
+
+  return output
+
+print(generate('histo.csv'))
