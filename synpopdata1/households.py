@@ -96,7 +96,7 @@ def test(x, c, r):
 
     if int(x) >= current_max:
 
-      row_max.update({y: str(x))})
+      row_max.update({y: int(x)})
 
   for (x, y) in tuple_columns:
 
@@ -104,7 +104,7 @@ def test(x, c, r):
 
     if int(x) >= current_max:
 
-      col_max.update({y[1:]: str(x))})
+      col_max.update({y[1:]: int(x)})
 
   if (c == col_max and r == row_max):
     return True
