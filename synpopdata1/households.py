@@ -11,9 +11,11 @@ def generate(s):
   household_sizes = list(map (int, colsums.index.values))
   households = colsums.divide(household_sizes)
   households = households.astype(int)
+  col_dict = households.to_dict()
 
   rowsums = data.sum(axis=1)
   people = pandas.Series(rowsums.tolist(), index=sexage)
+  row_dict = people.to_dict()
 
   col_labels = []
   col_sizes = {}
@@ -72,9 +74,9 @@ def generate(s):
 
   output = pandas.DataFrame.from_dict(result)
 
-  return output
+  return output, col_dict, row_dict
 
-def test(x, s):
+def test(x, c, r):
 
   row_labels = x.iloc[:, 0].tolist()
   col_labels = x.columns.values[1:].tolist()
@@ -85,7 +87,35 @@ def test(x, s):
   tuple_rows = list(map (tuple, split_rows))
   tuple_columns = list(map (tuple, split_columns))
 
-  print(tuple_rows)
-  print(tuple_columns)
+  row_max = {}
+  col_max = {}
 
-test(generate('histo.csv'), 'test')
+  for (x, y) in tuple_rows:
+
+    current_max = int(row_max.get(y, 0))
+
+    if int(x) >= current_max:
+
+      row_max.update({y: str(x))})
+
+  for (x, y) in tuple_columns:
+
+    current_max = int(col_max.get(y, 0))
+
+    if int(x) >= current_max:
+
+      col_max.update({y[1:]: str(x))})
+
+  if (c == col_max and r == row_max):
+    return True
+  else:
+    return False
+
+output, columns, rows = generate('histo.csv')
+print(output)
+
+if test(output, columns, rows):
+  print("Test succeeded!")
+else:
+  print("Test failed.")
+
