@@ -76,12 +76,10 @@ def generate(s):
 
 def test(x, s):
 
-  row_labels = x.iloc[:, 0]
-  col_labels = pandas.Series(x.columns.values[1:])
+  row_labels = x.iloc[:, 0].tolist()
+  col_labels = x.columns.values[1:].tolist()
 
   print(row_labels)
   print(col_labels)
 
-
-
-print(test(generate('histo.csv'), 'test'))
+test(generate('histo.csv'), 'test')
