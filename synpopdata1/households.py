@@ -79,7 +79,13 @@ def test(x, s):
   row_labels = x.iloc[:, 0].tolist()
   col_labels = x.columns.values[1:].tolist()
 
-  print(row_labels)
-  print(col_labels)
+  split_rows = map (lambda x: x.split(", "), row_labels)
+  split_columns = map (lambda x: x.split(", "), col_labels)
+
+  tuple_rows = list(map (tuple, split_rows))
+  tuple_columns = list(map (tuple, split_columns))
+
+  print(tuple_rows)
+  print(tuple_columns)
 
 test(generate('histo.csv'), 'test')
