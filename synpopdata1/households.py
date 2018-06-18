@@ -8,12 +8,12 @@ def generate(s):
   sexage = data['sexage']
   colsums = data.sum(axis=0)[1:]
 
-  household_sizes = list (map (int, colsums.index.values))
-  households = colsums.divide (household_sizes)
+  household_sizes = list(map (int, colsums.index.values))
+  households = colsums.divide(household_sizes)
   households = households.astype(int)
 
   rowsums = data.sum(axis=1)
-  people = pandas.Series (rowsums.tolist(), index=sexage)
+  people = pandas.Series(rowsums.tolist(), index=sexage)
 
   col_labels = []
   col_sizes = {}
@@ -74,4 +74,14 @@ def generate(s):
 
   return output
 
-print(generate('histo.csv'))
+def test(x, s):
+
+  row_labels = x.iloc[:, 0]
+  col_labels = pandas.Series(x.columns.values[1:])
+
+  print(row_labels)
+  print(col_labels)
+
+
+
+print(test(generate('histo.csv'), 'test'))
