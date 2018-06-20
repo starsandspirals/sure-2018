@@ -191,9 +191,9 @@ __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 /**
  * update FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Agent. This represents a single agent instance and can be modified directly.
- 
+ * @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an argument to the rand48 function for generating random numbers on the GPU.
  */
-__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent);
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48);
   
   
   

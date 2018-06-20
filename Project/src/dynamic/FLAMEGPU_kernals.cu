@@ -297,7 +297,7 @@ __FLAME_GPU_FUNC__ void set_Agent_agent_array_value(T *array, uint index, T valu
 /**
  *
  */
-__global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents){
+__global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents, RNG_rand48* rand48){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -318,7 +318,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents){
 	agent.example_vector = agents->example_vector[index];
 
 	//FLAME function call
-	int dead = !update(&agent);
+	int dead = !update(&agent, rand48);
 	
 
 	//continuous agent: set reallocation flag

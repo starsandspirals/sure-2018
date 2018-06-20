@@ -78,7 +78,7 @@
           <currentState>default</currentState>
           <nextState>default</nextState>
           <gpu:reallocate>true</gpu:reallocate>
-          <gpu:RNG>false</gpu:RNG>
+          <gpu:RNG>true</gpu:RNG>
         </gpu:function>
       </functions>
       <states>

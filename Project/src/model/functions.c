@@ -191,10 +191,11 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
  * Simple agent function, incrementing the time of life of the agent. 
  * If the agent has exceeded the maximum life span, it dies.
  */
-__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
 {
 	// Increment time alive
 	agent->age++;
+	float random = rnd<CONTINUOUS>(rand48);
 	/*if(threadIdx.x + blockDim.x * blockIdx.x < 64){
 		printf(
 			"%u: %u {%u {%d %d %d %d} [%f %f %f %f]}\n", 
@@ -209,7 +210,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
 		);
 	}*/
 	// If agent has been alive long enough, kill them.
-	if (agent->age > MAX_AGE){
+	if (random < (agent->age * SCALE_FACTOR * PROB_DEATH)){
 		return 1;
 	}	
 	return 0;

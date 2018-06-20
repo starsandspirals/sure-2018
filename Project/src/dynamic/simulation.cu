@@ -1426,7 +1426,7 @@ void Agent_update(cudaStream_t &stream){
 	//Input        : 
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_update<<<g, b, sm_size, stream>>>(d_Agents);
+	GPUFLAME_update<<<g, b, sm_size, stream>>>(d_Agents, d_rand48);
 	gpuErrchkLaunch();
 	
 	
