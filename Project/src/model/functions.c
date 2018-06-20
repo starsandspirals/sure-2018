@@ -22,7 +22,7 @@
 
 // Declare global scope variables for host-based agent creation, so allocation of host data is only performed once.
 xmachine_memory_Agent ** h_agent_AoS;
-const unsigned int h_agent_AoS_MAX = 32;
+const unsigned int h_agent_AoS_MAX = 256;
 unsigned int h_nextID;
 
 __host__ unsigned int getNextID(){
@@ -38,15 +38,15 @@ __host__ unsigned int getNextID(){
  */
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	// Initialise host and device constant(s)
-	float prob_death = 0.01;
+	float time_step = 1.0;
+	float scale_factor = 0.01;
 	unsigned int max_age = 100;
-	unsigned int scale_factor = 1;
-	set_PROB_DEATH(&prob_death);
-	set_MAX_AGE(&max_age);
-	set_SCALE_FACTOR(&scale_factor);
-	printf("Set PROB_DEATH = %f\n", prob_death);
+	set_TIME_STEP(&time_step);
+  set_SCALE_FACTOR(&scale_factor);
+  set_MAX_AGE(&max_age);
+	printf("Set TIME_STEP = %f\n", time_step);
+  printf("Set SCALE_FACTOR = %f\n", scale_factor);
 	printf("Set MAX_AGE = %u\n", max_age);
-	printf("Set SCALE_FACTOR = %u\n", scale_factor);
 
 	// Seed the host random number generator.
 	srand(0);
@@ -72,25 +72,29 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
  */
 __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 	printf("Population from initial states XML file: %u\n", get_agent_Agent_default_count());
+
+	for (int i = 0; i < h_agent_AoS_MAX; i++) {
 	
-	// Allocate a single agent struct on the host.
-	xmachine_memory_Agent * h_agent = h_allocate_agent_Agent();
+		// Allocate a single agent struct on the host.
+		xmachine_memory_Agent * h_agent = h_allocate_agent_Agent();
 
-	// Set values as required for the single agent.
-	h_agent->id = getNextID();
-	h_agent->age = rand() % (*get_MAX_AGE());
-	for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
-		h_agent->example_array[i] = rand() / (double)RAND_MAX;
+		// Set values as required for the single agent.
+		h_agent->id = getNextID();
+		h_agent->age = rand() % (*get_MAX_AGE());
+		for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
+			h_agent->example_array[i] = rand() / (double)RAND_MAX;
+		}
+		h_agent->example_vector = {h_agent->id+1,h_agent->id+2,h_agent->id+3,h_agent->id+4};
+		// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent->id, h_agent->time_alive, h_agent->example_vector.x, h_agent->example_vector.y, h_agent->example_vector.z, h_agent->example_vector.w, h_agent->example_array[0]);
+
+
+		// Copy agent data from the host to the device
+		h_add_agent_Agent_default(h_agent);
+
+		// Clear host memory for single struct. The Utility function also deallocates any agent variable arrays.
+		h_free_agent_Agent(&h_agent);
+
 	}
-	h_agent->example_vector = {h_agent->id+1,h_agent->id+2,h_agent->id+3,h_agent->id+4};
-	// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent->id, h_agent->time_alive, h_agent->example_vector.x, h_agent->example_vector.y, h_agent->example_vector.z, h_agent->example_vector.w, h_agent->example_array[0]);
-
-
-	// Copy agent data from the host to the device
-	h_add_agent_Agent_default(h_agent);
-
-	// Clear host memory for single struct. The Utility function also deallocates any agent variable arrays.
-	h_free_agent_Agent(&h_agent);
 	
 	printf("Population after init function: %u\n", get_agent_Agent_default_count());
 }
@@ -103,28 +107,28 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
  */
 __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
 
-	// Can create upto h_agent_AoS_MAX agents in a single pass (the number allocated for) but the full amount does not have to be created.
-	unsigned int count = 32;
+	// // Can create upto h_agent_AoS_MAX agents in a single pass (the number allocated for) but the full amount does not have to be created.
+	// unsigned int count = 32;
 
-	// It is sensible to check if it is possible to create new agents, and if so how many.
-	unsigned int agent_remaining = xmachine_memory_Agent_MAX - get_agent_Agent_default_count();
-	if (agent_remaining > 0) {
-		if (count > agent_remaining) {
-			count = agent_remaining;
-		}
-		// Populate data as required
-		for (unsigned int i = 0; i < count; i++) {
-			h_agent_AoS[i]->id = getNextID();
-			h_agent_AoS[i]->age = rand() % (*get_MAX_AGE());
-			for (unsigned int j = 0; j < xmachine_memory_Agent_example_array_LENGTH; j++) {
-				h_agent_AoS[i]->example_array[j] = rand() / (double)RAND_MAX;
-			}
-			h_agent_AoS[i]->example_vector = {h_agent_AoS[i]->id+1,h_agent_AoS[i]->id+2,h_agent_AoS[i]->id+3,h_agent_AoS[i]->id+4};
-			// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent_AoS[i]->id, h_agent_AoS[i]->time_alive, h_agent_AoS[i]->example_vector.x, h_agent_AoS[i]->example_vector.y, h_agent_AoS[i]->example_vector.z, h_agent_AoS[i]->example_vector.w, h_agent_AoS[i]->example_array[0]);
-		}
-		// Copy the data to the device
-		h_add_agents_Agent_default(h_agent_AoS, count);
-	}
+	// // It is sensible to check if it is possible to create new agents, and if so how many.
+	// unsigned int agent_remaining = xmachine_memory_Agent_MAX - get_agent_Agent_default_count();
+	// if (agent_remaining > 0) {
+	// 	if (count > agent_remaining) {
+	// 		count = agent_remaining;
+	// 	}
+	// 	// Populate data as required
+	// 	for (unsigned int i = 0; i < count; i++) {
+	// 		h_agent_AoS[i]->id = getNextID();
+	// 		h_agent_AoS[i]->age = rand() % (*get_MAX_AGE());
+	// 		for (unsigned int j = 0; j < xmachine_memory_Agent_example_array_LENGTH; j++) {
+	// 			h_agent_AoS[i]->example_array[j] = rand() / (double)RAND_MAX;
+	// 		}
+	// 		h_agent_AoS[i]->example_vector = {h_agent_AoS[i]->id+1,h_agent_AoS[i]->id+2,h_agent_AoS[i]->id+3,h_agent_AoS[i]->id+4};
+	// 		// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent_AoS[i]->id, h_agent_AoS[i]->time_alive, h_agent_AoS[i]->example_vector.x, h_agent_AoS[i]->example_vector.y, h_agent_AoS[i]->example_vector.z, h_agent_AoS[i]->example_vector.w, h_agent_AoS[i]->example_array[0]);
+	// 	}
+	// 	// Copy the data to the device
+	// 	h_add_agents_Agent_default(h_agent_AoS, count);
+	// }
 
 	printf("Population after step function %u\n", get_agent_Agent_default_count());
 
@@ -197,7 +201,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
 {
 	// Increment time alive
-	agent->age++;
+	agent->age += TIME_STEP;
 	float random = rnd<CONTINUOUS>(rand48);
 	/*if(threadIdx.x + blockDim.x * blockIdx.x < 64){
 		printf(
@@ -213,7 +217,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
 		);
 	}*/
 	// If agent has been alive long enough, kill them.
-	if (random < (agent->age * SCALE_FACTOR * PROB_DEATH)){
+	if (random < (agent->age * SCALE_FACTOR * TIME_STEP)){
 		agent->dead = 1;
 	}	
 	return agent->dead;

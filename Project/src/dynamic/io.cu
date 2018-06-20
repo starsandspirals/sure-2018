@@ -149,12 +149,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_A
     fputs("</itno>\n", file);
     fputs("<environment>\n" , file);
     
-    fputs("\t<PROB_DEATH>", file);
-    sprintf(data, "%f", (*get_PROB_DEATH()));
+    fputs("\t<TIME_STEP>", file);
+    sprintf(data, "%f", (*get_TIME_STEP()));
     fputs(data, file);
-    fputs("</PROB_DEATH>\n", file);
+    fputs("</TIME_STEP>\n", file);
     fputs("\t<SCALE_FACTOR>", file);
-    sprintf(data, "%u", (*get_SCALE_FACTOR()));
+    sprintf(data, "%f", (*get_SCALE_FACTOR()));
     fputs(data, file);
     fputs("</SCALE_FACTOR>\n", file);
     fputs("\t<MAX_AGE>", file);
@@ -270,7 +270,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
     
     /* tags for environment global variables */
     int in_env;
-    int in_env_PROB_DEATH;
+    int in_env_TIME_STEP;
     
     int in_env_SCALE_FACTOR;
     
@@ -287,8 +287,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 	unsigned int Agent_dead;
 
     /* Variables for environment variables */
-    float env_PROB_DEATH;
-    unsigned int env_SCALE_FACTOR;
+    float env_TIME_STEP;
+    float env_SCALE_FACTOR;
     unsigned int env_MAX_AGE;
     
 
@@ -311,7 +311,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 	in_Agent_example_array = 0;
 	in_Agent_example_vector = 0;
 	in_Agent_dead = 0;
-    in_env_PROB_DEATH = 0;
+    in_env_TIME_STEP = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
 	//set all Agent values to 0
@@ -338,7 +338,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
     Agent_dead = 0;
 
     /* Default variables for environment variables */
-    env_PROB_DEATH = 0;
+    env_TIME_STEP = 0;
     env_SCALE_FACTOR = 0;
     env_MAX_AGE = 0;
     
@@ -441,8 +441,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 			if(strcmp(buffer, "/dead") == 0) in_Agent_dead = 0;
 			
             /* environment variables */
-            if(strcmp(buffer, "PROB_DEATH") == 0) in_env_PROB_DEATH = 1;
-            if(strcmp(buffer, "/PROB_DEATH") == 0) in_env_PROB_DEATH = 0;
+            if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
+            if(strcmp(buffer, "/TIME_STEP") == 0) in_env_TIME_STEP = 0;
 			if(strcmp(buffer, "SCALE_FACTOR") == 0) in_env_SCALE_FACTOR = 1;
             if(strcmp(buffer, "/SCALE_FACTOR") == 0) in_env_SCALE_FACTOR = 0;
 			if(strcmp(buffer, "MAX_AGE") == 0) in_env_MAX_AGE = 1;
@@ -485,16 +485,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 				
             }
             else if (in_env){
-            if(in_env_PROB_DEATH){
+            if(in_env_TIME_STEP){
               
-                    env_PROB_DEATH = (float) fgpu_atof(buffer);
+                    env_TIME_STEP = (float) fgpu_atof(buffer);
                     
-                    set_PROB_DEATH(&env_PROB_DEATH);
+                    set_TIME_STEP(&env_TIME_STEP);
                   
               }
             if(in_env_SCALE_FACTOR){
               
-                    env_SCALE_FACTOR = (unsigned int) fpgu_strtoul(buffer);
+                    env_SCALE_FACTOR = (float) fgpu_atof(buffer);
                     
                     set_SCALE_FACTOR(&env_SCALE_FACTOR);
                   

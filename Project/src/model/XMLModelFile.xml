@@ -6,10 +6,10 @@
     <gpu:constants>
        <gpu:variable>
          <type>float</type>
-         <name>PROB_DEATH</name>
+         <name>TIME_STEP</name>
        </gpu:variable>
        <gpu:variable>
-        <type>unsigned int</type>
+        <type>float</type>
         <name>SCALE_FACTOR</name>
        </gpu:variable>
        <gpu:variable>

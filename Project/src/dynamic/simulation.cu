@@ -597,32 +597,32 @@ PROFILE_SCOPED_RANGE("singleIteration");
 /* Environment functions */
 
 //host constant declaration
-float h_env_PROB_DEATH;
-unsigned int h_env_SCALE_FACTOR;
+float h_env_TIME_STEP;
+float h_env_SCALE_FACTOR;
 unsigned int h_env_MAX_AGE;
 
 
 //constant setter
-void set_PROB_DEATH(float* h_PROB_DEATH){
-    gpuErrchk(cudaMemcpyToSymbol(PROB_DEATH, h_PROB_DEATH, sizeof(float)));
-    memcpy(&h_env_PROB_DEATH, h_PROB_DEATH,sizeof(float));
+void set_TIME_STEP(float* h_TIME_STEP){
+    gpuErrchk(cudaMemcpyToSymbol(TIME_STEP, h_TIME_STEP, sizeof(float)));
+    memcpy(&h_env_TIME_STEP, h_TIME_STEP,sizeof(float));
 }
 
 //constant getter
-const float* get_PROB_DEATH(){
-    return &h_env_PROB_DEATH;
+const float* get_TIME_STEP(){
+    return &h_env_TIME_STEP;
 }
 
 
 
 //constant setter
-void set_SCALE_FACTOR(unsigned int* h_SCALE_FACTOR){
-    gpuErrchk(cudaMemcpyToSymbol(SCALE_FACTOR, h_SCALE_FACTOR, sizeof(unsigned int)));
-    memcpy(&h_env_SCALE_FACTOR, h_SCALE_FACTOR,sizeof(unsigned int));
+void set_SCALE_FACTOR(float* h_SCALE_FACTOR){
+    gpuErrchk(cudaMemcpyToSymbol(SCALE_FACTOR, h_SCALE_FACTOR, sizeof(float)));
+    memcpy(&h_env_SCALE_FACTOR, h_SCALE_FACTOR,sizeof(float));
 }
 
 //constant getter
-const unsigned int* get_SCALE_FACTOR(){
+const float* get_SCALE_FACTOR(){
     return &h_env_SCALE_FACTOR;
 }
 
