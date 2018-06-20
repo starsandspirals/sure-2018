@@ -140,47 +140,47 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
  * Memory transfer over the PCI-e (or NVLINK in Power9 systems) is handelled transparently, but this is potentially expensive
  * Incorrect use could result in a very slow function due to a huge amount of memcpy.
  */
-__FLAME_GPU_STEP_FUNC__ void customOutputStepFunction(){
+__FLAME_GPU_EXIT_FUNC__ void customOutputExitFunction(){
 
-	// Get some values and construct an output path.
-	const char * directory = getOutputDir();
-	unsigned int iteration = getIterationNumber();
+	// // Get some values and construct an output path.
+	// const char * directory = getOutputDir();
+	// unsigned int iteration = getIterationNumber();
 
-	std::string outputFilename = std::string( std::string(directory) + "custom-output-" + std::to_string(iteration) +".csv");
+	// std::string outputFilename = std::string( std::string(directory) + "custom-output-" + std::to_string(iteration) +".csv");
 
-	// Get a file handle for output.
-	FILE * fp = fopen(outputFilename.c_str(), "w");
-	// If the file has been opened successfully
-	if(fp != nullptr){
-		fprintf(stdout, "Outputting some Agent data to %s\n", outputFilename.c_str());
+	// // Get a file handle for output.
+	// FILE * fp = fopen(outputFilename.c_str(), "w");
+	// // If the file has been opened successfully
+	// if(fp != nullptr){
+	// 	fprintf(stdout, "Outputting some Agent data to %s\n", outputFilename.c_str());
 
-		// Output a header row for the CSV
-		fprintf(fp, "ID, time_alive, example_vector.x, example_vector.y, example_array[0], example_array[1]\n");
+	// 	// Output a header row for the CSV
+	// 	fprintf(fp, "ID, time_alive, example_vector.x, example_vector.y, example_array[0], example_array[1]\n");
 
-		// For each agent of a target type in a target state
-		for(int index = 0; index < get_agent_Agent_default_count(); index++){
-			// Append a row to the CSV file.
-			fprintf(
-				fp, 
-				"%u, %u, %d, %d, %f, %f\n",
-				get_Agent_default_variable_id(index),
-				get_Agent_default_variable_age(index),
-				get_Agent_default_variable_example_vector(index).x,
-				get_Agent_default_variable_example_vector(index).y,
-				get_Agent_default_variable_example_array(index, 0),
-				get_Agent_default_variable_example_array(index, 1)
-			);
-		}
-		// Flush the file handle
-		fflush(fp);
-	} else {
-		fprintf(stderr, "Error: file %s could not be created for customOutputStepFunction\n", outputFilename.c_str());
-	}
-	// Close the file handle if necessary.
-	if (fp != nullptr && fp != stdout && fp != stderr){
-		fclose(fp);
-		fp = nullptr;
-	}
+	// 	// For each agent of a target type in a target state
+	// 	for(int index = 0; index < get_agent_Agent_default_count(); index++){
+	// 		// Append a row to the CSV file.
+	// 		fprintf(
+	// 			fp, 
+	// 			"%u, %u, %d, %d, %f, %f\n",
+	// 			get_Agent_default_variable_id(index),
+	// 			get_Agent_default_variable_age(index),
+	// 			get_Agent_default_variable_example_vector(index).x,
+	// 			get_Agent_default_variable_example_vector(index).y,
+	// 			get_Agent_default_variable_example_array(index, 0),
+	// 			get_Agent_default_variable_example_array(index, 1)
+	// 		);
+	// 	}
+	// 	// Flush the file handle
+	// 	fflush(fp);
+	// } else {
+	// 	fprintf(stderr, "Error: file %s could not be created for customOutputStepFunction\n", outputFilename.c_str());
+	// }
+	// // Close the file handle if necessary.
+	// if (fp != nullptr && fp != stdout && fp != stderr){
+	// 	fclose(fp);
+	// 	fp = nullptr;
+	// }
 }
 
 /*

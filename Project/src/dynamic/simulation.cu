@@ -476,6 +476,21 @@ void cleanup(){
 	printf("Instrumentation: exitFunction = %f (ms)\n", instrument_milliseconds);
 #endif
 	
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) && INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+
+    customOutputExitFunction();
+    PROFILE_PUSH_RANGE("customOutputExitFunction");
+	PROFILE_POP_RANGE();
+
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) && INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: customOutputExitFunction = %f (ms)\n", instrument_milliseconds);
+#endif
+	
 
 	/* Agent data free*/
 	
@@ -562,19 +577,6 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
 	printf("Instrumentation: generateAgentStep = %f (ms)\n", instrument_milliseconds);
-#endif
-#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-    PROFILE_PUSH_RANGE("customOutputStepFunction");
-	customOutputStepFunction();
-	
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: customOutputStepFunction = %f (ms)\n", instrument_milliseconds);
 #endif
 
 #if defined(OUTPUT_POPULATION_PER_ITERATION) && OUTPUT_POPULATION_PER_ITERATION
