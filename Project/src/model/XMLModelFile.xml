@@ -5,8 +5,16 @@
   <gpu:environment>
     <gpu:constants>
        <gpu:variable>
+         <type>float</type>
+         <name>PROB_DEATH</name>
+       </gpu:variable>
+       <gpu:variable>
+        <type>unsigned int</type>
+        <name>SCALE_FACTOR</name>
+       </gpu:variable>
+       <gpu:variable>
          <type>unsigned int</type>
-         <name>MAX_LIFESPAN</name>
+         <name>MAX_AGE</name>
        </gpu:variable>
     </gpu:constants>
 
@@ -49,8 +57,8 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
-          <name>time_alive</name>
-          <defaultValue>12</defaultValue>
+          <name>age</name>
+          <defaultValue>0</defaultValue>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>

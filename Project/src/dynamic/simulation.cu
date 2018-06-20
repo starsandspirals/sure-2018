@@ -106,11 +106,11 @@ int h_xmachine_memory_Agent_s2_count;   /**< Agent population size counter */
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
  */
 unsigned int h_Agents_default_variable_id_data_iteration;
-unsigned int h_Agents_default_variable_time_alive_data_iteration;
+unsigned int h_Agents_default_variable_age_data_iteration;
 unsigned int h_Agents_default_variable_example_array_data_iteration;
 unsigned int h_Agents_default_variable_example_vector_data_iteration;
 unsigned int h_Agents_s2_variable_id_data_iteration;
-unsigned int h_Agents_s2_variable_time_alive_data_iteration;
+unsigned int h_Agents_s2_variable_age_data_iteration;
 unsigned int h_Agents_s2_variable_example_array_data_iteration;
 unsigned int h_Agents_s2_variable_example_vector_data_iteration;
 
@@ -247,11 +247,11 @@ void initialise(char * inputfile){
 
     // Initialise variables for tracking which iterations' data is accessible on the host.
     h_Agents_default_variable_id_data_iteration = 0;
-    h_Agents_default_variable_time_alive_data_iteration = 0;
+    h_Agents_default_variable_age_data_iteration = 0;
     h_Agents_default_variable_example_array_data_iteration = 0;
     h_Agents_default_variable_example_vector_data_iteration = 0;
     h_Agents_s2_variable_id_data_iteration = 0;
-    h_Agents_s2_variable_time_alive_data_iteration = 0;
+    h_Agents_s2_variable_age_data_iteration = 0;
     h_Agents_s2_variable_example_array_data_iteration = 0;
     h_Agents_s2_variable_example_vector_data_iteration = 0;
     
@@ -593,18 +593,46 @@ PROFILE_SCOPED_RANGE("singleIteration");
 /* Environment functions */
 
 //host constant declaration
-unsigned int h_env_MAX_LIFESPAN;
+float h_env_PROB_DEATH;
+unsigned int h_env_SCALE_FACTOR;
+unsigned int h_env_MAX_AGE;
 
 
 //constant setter
-void set_MAX_LIFESPAN(unsigned int* h_MAX_LIFESPAN){
-    gpuErrchk(cudaMemcpyToSymbol(MAX_LIFESPAN, h_MAX_LIFESPAN, sizeof(unsigned int)));
-    memcpy(&h_env_MAX_LIFESPAN, h_MAX_LIFESPAN,sizeof(unsigned int));
+void set_PROB_DEATH(float* h_PROB_DEATH){
+    gpuErrchk(cudaMemcpyToSymbol(PROB_DEATH, h_PROB_DEATH, sizeof(float)));
+    memcpy(&h_env_PROB_DEATH, h_PROB_DEATH,sizeof(float));
 }
 
 //constant getter
-const unsigned int* get_MAX_LIFESPAN(){
-    return &h_env_MAX_LIFESPAN;
+const float* get_PROB_DEATH(){
+    return &h_env_PROB_DEATH;
+}
+
+
+
+//constant setter
+void set_SCALE_FACTOR(unsigned int* h_SCALE_FACTOR){
+    gpuErrchk(cudaMemcpyToSymbol(SCALE_FACTOR, h_SCALE_FACTOR, sizeof(unsigned int)));
+    memcpy(&h_env_SCALE_FACTOR, h_SCALE_FACTOR,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_SCALE_FACTOR(){
+    return &h_env_SCALE_FACTOR;
+}
+
+
+
+//constant setter
+void set_MAX_AGE(unsigned int* h_MAX_AGE){
+    gpuErrchk(cudaMemcpyToSymbol(MAX_AGE, h_MAX_AGE, sizeof(unsigned int)));
+    memcpy(&h_env_MAX_AGE, h_MAX_AGE,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_MAX_AGE(){
+    return &h_env_MAX_AGE;
 }
 
 
@@ -689,39 +717,39 @@ __host__ unsigned int get_Agent_default_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Agent_default_variable_time_alive(unsigned int index)
- * Gets the value of the time_alive variable of an Agent agent in the default state on the host. 
+/** unsigned int get_Agent_default_variable_age(unsigned int index)
+ * Gets the value of the age variable of an Agent agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
- * @return value of agent variable time_alive
+ * @return value of agent variable age
  */
-__host__ unsigned int get_Agent_default_variable_time_alive(unsigned int index){
+__host__ unsigned int get_Agent_default_variable_age(unsigned int index){
     unsigned int count = get_agent_Agent_default_count();
     unsigned int currentIteration = getIterationNumber();
     
     // If the index is within bounds - no need to check >= 0 due to unsigned.
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Agents_default_variable_time_alive_data_iteration != currentIteration){
+        if(h_Agents_default_variable_age_data_iteration != currentIteration){
             
             gpuErrchk(
                 cudaMemcpy(
-                    h_Agents_default->time_alive,
-                    d_Agents_default->time_alive,
+                    h_Agents_default->age,
+                    d_Agents_default->age,
                     count * sizeof(unsigned int),
                     cudaMemcpyDeviceToHost
                 )
             );
             // Update some global value indicating what data is currently present in that host array.
-            h_Agents_default_variable_time_alive_data_iteration = currentIteration;
+            h_Agents_default_variable_age_data_iteration = currentIteration;
         }
 
         // Return the value of the index-th element of the relevant host array.
-        return h_Agents_default->time_alive[index];
+        return h_Agents_default->age[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access time_alive for the %u th member of Agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        fprintf(stderr, "Warning: Attempting to access age for the %u th member of Agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -849,39 +877,39 @@ __host__ unsigned int get_Agent_s2_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Agent_s2_variable_time_alive(unsigned int index)
- * Gets the value of the time_alive variable of an Agent agent in the s2 state on the host. 
+/** unsigned int get_Agent_s2_variable_age(unsigned int index)
+ * Gets the value of the age variable of an Agent agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
- * @return value of agent variable time_alive
+ * @return value of agent variable age
  */
-__host__ unsigned int get_Agent_s2_variable_time_alive(unsigned int index){
+__host__ unsigned int get_Agent_s2_variable_age(unsigned int index){
     unsigned int count = get_agent_Agent_s2_count();
     unsigned int currentIteration = getIterationNumber();
     
     // If the index is within bounds - no need to check >= 0 due to unsigned.
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Agents_s2_variable_time_alive_data_iteration != currentIteration){
+        if(h_Agents_s2_variable_age_data_iteration != currentIteration){
             
             gpuErrchk(
                 cudaMemcpy(
-                    h_Agents_s2->time_alive,
-                    d_Agents_s2->time_alive,
+                    h_Agents_s2->age,
+                    d_Agents_s2->age,
                     count * sizeof(unsigned int),
                     cudaMemcpyDeviceToHost
                 )
             );
             // Update some global value indicating what data is currently present in that host array.
-            h_Agents_s2_variable_time_alive_data_iteration = currentIteration;
+            h_Agents_s2_variable_age_data_iteration = currentIteration;
         }
 
         // Return the value of the index-th element of the relevant host array.
-        return h_Agents_s2->time_alive[index];
+        return h_Agents_s2->age[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access time_alive for the %u th member of Agent_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        fprintf(stderr, "Warning: Attempting to access age for the %u th member of Agent_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -986,7 +1014,7 @@ void copy_single_xmachine_memory_Agent_hostToDevice(xmachine_memory_Agent_list *
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->time_alive, &h_agent->time_alive, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->age, &h_agent->age, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 	for(unsigned int i = 0; i < 4; i++){
 		gpuErrchk(cudaMemcpy(d_dst->example_array + (i * xmachine_memory_Agent_MAX), h_agent->example_array + i, sizeof(float), cudaMemcpyHostToDevice));
@@ -1011,7 +1039,7 @@ void copy_partial_xmachine_memory_Agent_hostToDevice(xmachine_memory_Agent_list 
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->time_alive, h_src->time_alive, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->age, h_src->age, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		for(unsigned int i = 0; i < 4; i++){
 			gpuErrchk(cudaMemcpy(d_dst->example_array + (i * xmachine_memory_Agent_MAX), h_src->example_array + (i * xmachine_memory_Agent_MAX), count * sizeof(float), cudaMemcpyHostToDevice));
@@ -1028,7 +1056,7 @@ xmachine_memory_Agent* h_allocate_agent_Agent(){
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Agent));
 
-    agent->time_alive = 12;
+    agent->age = 0;
 	// Agent variable arrays must be allocated
     agent->example_array = (float*)malloc(4 * sizeof(float));
 	// If we have a default value, set each element correctly.
@@ -1065,7 +1093,7 @@ void h_unpack_agents_Agent_AoS_to_SoA(xmachine_memory_Agent_list * dst, xmachine
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->time_alive[i] = src[i]->time_alive;
+			dst->age[i] = src[i]->age;
 			 
 			for(unsigned int j = 0; j < 4; j++){
 				dst->example_array[(j * xmachine_memory_Agent_MAX) + i] = src[i]->example_array[j];
@@ -1104,7 +1132,7 @@ void h_add_agent_Agent_default(xmachine_memory_Agent* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Agents_default_variable_id_data_iteration = 0;
-    h_Agents_default_variable_time_alive_data_iteration = 0;
+    h_Agents_default_variable_age_data_iteration = 0;
     h_Agents_default_variable_example_array_data_iteration = 0;
     h_Agents_default_variable_example_vector_data_iteration = 0;
     
@@ -1139,7 +1167,7 @@ void h_add_agents_Agent_default(xmachine_memory_Agent** agents, unsigned int cou
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Agents_default_variable_id_data_iteration = 0;
-        h_Agents_default_variable_time_alive_data_iteration = 0;
+        h_Agents_default_variable_age_data_iteration = 0;
         h_Agents_default_variable_example_array_data_iteration = 0;
         h_Agents_default_variable_example_vector_data_iteration = 0;
         
@@ -1174,7 +1202,7 @@ void h_add_agent_Agent_s2(xmachine_memory_Agent* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Agents_s2_variable_id_data_iteration = 0;
-    h_Agents_s2_variable_time_alive_data_iteration = 0;
+    h_Agents_s2_variable_age_data_iteration = 0;
     h_Agents_s2_variable_example_array_data_iteration = 0;
     h_Agents_s2_variable_example_vector_data_iteration = 0;
     
@@ -1209,7 +1237,7 @@ void h_add_agents_Agent_s2(xmachine_memory_Agent** agents, unsigned int count){
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Agents_s2_variable_id_data_iteration = 0;
-        h_Agents_s2_variable_time_alive_data_iteration = 0;
+        h_Agents_s2_variable_age_data_iteration = 0;
         h_Agents_s2_variable_example_array_data_iteration = 0;
         h_Agents_s2_variable_example_vector_data_iteration = 0;
         
@@ -1241,24 +1269,24 @@ unsigned int max_Agent_default_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Agent_default_time_alive_variable(){
+unsigned int reduce_Agent_default_age_variable(){
     //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Agents_default->time_alive),  thrust::device_pointer_cast(d_Agents_default->time_alive) + h_xmachine_memory_Agent_default_count);
+    return thrust::reduce(thrust::device_pointer_cast(d_Agents_default->age),  thrust::device_pointer_cast(d_Agents_default->age) + h_xmachine_memory_Agent_default_count);
 }
 
-unsigned int count_Agent_default_time_alive_variable(int count_value){
+unsigned int count_Agent_default_age_variable(int count_value){
     //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_default->time_alive),  thrust::device_pointer_cast(d_Agents_default->time_alive) + h_xmachine_memory_Agent_default_count, count_value);
+    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_default->age),  thrust::device_pointer_cast(d_Agents_default->age) + h_xmachine_memory_Agent_default_count, count_value);
 }
-unsigned int min_Agent_default_time_alive_variable(){
+unsigned int min_Agent_default_age_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->time_alive);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->age);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Agent_default_time_alive_variable(){
+unsigned int max_Agent_default_age_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->time_alive);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->age);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -1288,24 +1316,24 @@ unsigned int max_Agent_s2_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Agent_s2_time_alive_variable(){
+unsigned int reduce_Agent_s2_age_variable(){
     //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Agents_s2->time_alive),  thrust::device_pointer_cast(d_Agents_s2->time_alive) + h_xmachine_memory_Agent_s2_count);
+    return thrust::reduce(thrust::device_pointer_cast(d_Agents_s2->age),  thrust::device_pointer_cast(d_Agents_s2->age) + h_xmachine_memory_Agent_s2_count);
 }
 
-unsigned int count_Agent_s2_time_alive_variable(int count_value){
+unsigned int count_Agent_s2_age_variable(int count_value){
     //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_s2->time_alive),  thrust::device_pointer_cast(d_Agents_s2->time_alive) + h_xmachine_memory_Agent_s2_count, count_value);
+    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_s2->age),  thrust::device_pointer_cast(d_Agents_s2->age) + h_xmachine_memory_Agent_s2_count, count_value);
 }
-unsigned int min_Agent_s2_time_alive_variable(){
+unsigned int min_Agent_s2_age_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->time_alive);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->age);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Agent_s2_time_alive_variable(){
+unsigned int max_Agent_s2_age_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->time_alive);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->age);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

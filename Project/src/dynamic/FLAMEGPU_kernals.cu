@@ -163,7 +163,7 @@ __global__ void scatter_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xma
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
-		agents_dst->time_alive[output_index] = agents_src->time_alive[index];
+		agents_dst->age[output_index] = agents_src->age[index];
 	    for (int i=0; i<4; i++){
 	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
 	    }        
@@ -188,7 +188,7 @@ __global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmac
 	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
-	    agents_dst->time_alive[output_index] = agents_src->time_alive[index];
+	    agents_dst->age[output_index] = agents_src->age[index];
 	    for (int i=0; i<4; i++){
 	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
 	    }
@@ -200,12 +200,12 @@ __global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmac
  * Continuous Agent agent add agent function writes agent data to agent swap
  * @param agents xmachine_memory_Agent_list to add agents to 
  * @param id agent variable of type unsigned int
- * @param time_alive agent variable of type unsigned int
+ * @param age agent variable of type unsigned int
  * @param example_array agent variable of type float
  * @param example_vector agent variable of type ivec4
  */
 template <int AGENT_TYPE>
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int time_alive, ivec4 example_vector){
+__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector){
 	
 	int index;
     
@@ -225,14 +225,14 @@ __device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int
 
 	//write data to new buffer
 	agents->id[index] = id;
-	agents->time_alive[index] = time_alive;
+	agents->age[index] = age;
 	agents->example_vector[index] = example_vector;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int time_alive, ivec4 example_vector){
-    add_Agent_agent<DISCRETE_2D>(agents, id, time_alive, example_vector);
+__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector){
+    add_Agent_agent<DISCRETE_2D>(agents, id, age, example_vector);
 }
 
 /** reorder_Agent_agents
@@ -249,7 +249,7 @@ __global__ void reorder_Agent_agents(unsigned int* values, xmachine_memory_Agent
 
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
-	ordered_agents->time_alive[index] = unordered_agents->time_alive[old_pos];
+	ordered_agents->age[index] = unordered_agents->age[old_pos];
 	for (int i=0; i<4; i++){
 	  ordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+index] = unordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+old_pos];
 	}
@@ -313,7 +313,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents){
     // Thread bounds already checked, but the agent function will still execute. load default values?
 	
 	agent.id = agents->id[index];
-	agent.time_alive = agents->time_alive[index];
+	agent.age = agents->age[index];
     agent.example_array = &(agents->example_array[index]);
 	agent.example_vector = agents->example_vector[index];
 
@@ -326,7 +326,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents){
 
 	//AoS to SoA - xmachine_memory_update Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
-	agents->time_alive[index] = agent.time_alive;
+	agents->age[index] = agent.age;
 	agents->example_vector[index] = agent.example_vector;
 }
 

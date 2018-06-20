@@ -38,9 +38,12 @@ __host__ unsigned int getNextID(){
  */
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	// Initialise host and device constant(s)
-	unsigned int max_lifespan = 16;
-	set_MAX_LIFESPAN(&max_lifespan);
-	printf("Set MAX_LIFESPAN = %u\n", max_lifespan);
+	float prob_death = 0.01;
+	unsigned int max_age = 100;
+	set_PROB_DEATH(&prob_death);
+	set_MAX_AGE(&max_age);
+	printf("Set PROB_DEATH = %f\n", prob_death);
+	printf("Set MAX_AGE = %u\n", max_age);
 
 	// Seed the host random number generator.
 	srand(0);
@@ -72,7 +75,7 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 
 	// Set values as required for the single agent.
 	h_agent->id = getNextID();
-	h_agent->time_alive = rand() % (*get_MAX_LIFESPAN());
+	h_agent->age = rand() % (*get_MAX_AGE());
 	for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
 		h_agent->example_array[i] = rand() / (double)RAND_MAX;
 	}
@@ -90,7 +93,7 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 }
 
 /*
- * STEP function to demonstrate the addition of multiple agents from the host.
+ * STEP function to demonstrate the addition of multiple agents from the host
  * If it is possible to add new agents to the target agent state on the device, upto 32 agents will be created, with randomised initial data
  * The AoS is allocated (and deallocate) outside of this method, to avoid performance penalty.
  * The AoS is converted to a SoA and copied to the device when h_add_agents_Agent_default() is called.
@@ -109,7 +112,7 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
 		// Populate data as required
 		for (unsigned int i = 0; i < count; i++) {
 			h_agent_AoS[i]->id = getNextID();
-			h_agent_AoS[i]->time_alive = rand() % (*get_MAX_LIFESPAN());
+			h_agent_AoS[i]->age = rand() % (*get_MAX_AGE());
 			for (unsigned int j = 0; j < xmachine_memory_Agent_example_array_LENGTH; j++) {
 				h_agent_AoS[i]->example_array[j] = rand() / (double)RAND_MAX;
 			}
@@ -154,7 +157,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction(){
 				fp, 
 				"%u, %u, %d, %d, %f, %f\n",
 				get_Agent_default_variable_id(index),
-				get_Agent_default_variable_time_alive(index),
+				get_Agent_default_variable_age(index),
 				get_Agent_default_variable_example_vector(index).x,
 				get_Agent_default_variable_example_vector(index).y,
 				get_Agent_default_variable_example_array(index, 0),
@@ -191,7 +194,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
 {
 	// Increment time alive
-	agent->time_alive++;
+	agent->age++;
 	/*if(threadIdx.x + blockDim.x * blockIdx.x < 64){
 		printf(
 			"%u: %u {%u {%d %d %d %d} [%f %f %f %f]}\n", 
@@ -206,7 +209,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent)
 		);
 	}*/
 	// If agent has been alive long enough, kill them.
-	if (agent->time_alive > MAX_LIFESPAN){
+	if (agent->age > MAX_AGE){
 		return 1;
 	}	
 	return 0;

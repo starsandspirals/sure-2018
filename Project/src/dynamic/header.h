@@ -113,7 +113,7 @@ enum AGENT_TYPE{
 struct __align__(16) xmachine_memory_Agent
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
-    unsigned int time_alive;    /**< X-machine memory variable time_alive of type unsigned int.*/
+    unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     float *example_array;    /**< X-machine memory variable example_array of type float.*/
     ivec4 example_vector;    /**< X-machine memory variable example_vector of type ivec4.*/
 };
@@ -137,7 +137,7 @@ struct xmachine_memory_Agent_list
     int _scan_input [xmachine_memory_Agent_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int id [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
-    unsigned int time_alive [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list time_alive of type unsigned int.*/
+    unsigned int age [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     float example_array [xmachine_memory_Agent_MAX*4];    /**< X-machine memory variable list example_array of type float.*/
     ivec4 example_vector [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list example_vector of type ivec4.*/
 };
@@ -203,10 +203,10 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent);
  * Adds a new continuous valued Agent agent to the xmachine_memory_Agent_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Agent_list agent list
  * @param id	agent agent variable of type unsigned int
- * @param time_alive	agent agent variable of type unsigned int
+ * @param age	agent agent variable of type unsigned int
  * @param example_vector	agent agent variable of type ivec4
  */
-__FLAME_GPU_FUNC__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int time_alive, ivec4 example_vector);
+__FLAME_GPU_FUNC__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector);
 
 /** get_Agent_agent_array_value
  *  Template function for accessing Agent agent array memory variables.
@@ -358,14 +358,14 @@ void sort_Agents_s2(void (*generate_key_value_pairs)(unsigned int* keys, unsigne
  */
 __host__ unsigned int get_Agent_default_variable_id(unsigned int index);
 
-/** unsigned int get_Agent_default_variable_time_alive(unsigned int index)
- * Gets the value of the time_alive variable of an Agent agent in the default state on the host. 
+/** unsigned int get_Agent_default_variable_age(unsigned int index)
+ * Gets the value of the age variable of an Agent agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
- * @return value of agent variable time_alive
+ * @return value of agent variable age
  */
-__host__ unsigned int get_Agent_default_variable_time_alive(unsigned int index);
+__host__ unsigned int get_Agent_default_variable_age(unsigned int index);
 
 /** float get_Agent_default_variable_example_array(unsigned int index, unsigned int element)
  * Gets the element-th value of the example_array variable array of an Agent agent in the default state on the host. 
@@ -395,14 +395,14 @@ __host__ ivec4 get_Agent_default_variable_example_vector(unsigned int index);
  */
 __host__ unsigned int get_Agent_s2_variable_id(unsigned int index);
 
-/** unsigned int get_Agent_s2_variable_time_alive(unsigned int index)
- * Gets the value of the time_alive variable of an Agent agent in the s2 state on the host. 
+/** unsigned int get_Agent_s2_variable_age(unsigned int index)
+ * Gets the value of the age variable of an Agent agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
- * @return value of agent variable time_alive
+ * @return value of agent variable age
  */
-__host__ unsigned int get_Agent_s2_variable_time_alive(unsigned int index);
+__host__ unsigned int get_Agent_s2_variable_age(unsigned int index);
 
 /** float get_Agent_s2_variable_example_array(unsigned int index, unsigned int element)
  * Gets the element-th value of the example_array variable array of an Agent agent in the s2 state on the host. 
@@ -522,31 +522,31 @@ unsigned int min_Agent_default_id_variable();
  */
 unsigned int max_Agent_default_id_variable();
 
-/** unsigned int reduce_Agent_default_time_alive_variable();
+/** unsigned int reduce_Agent_default_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-unsigned int reduce_Agent_default_time_alive_variable();
+unsigned int reduce_Agent_default_age_variable();
 
 
 
-/** unsigned int count_Agent_default_time_alive_variable(int count_value){
+/** unsigned int count_Agent_default_age_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Agent_default_time_alive_variable(int count_value);
+unsigned int count_Agent_default_age_variable(int count_value);
 
-/** unsigned int min_Agent_default_time_alive_variable();
+/** unsigned int min_Agent_default_age_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int min_Agent_default_time_alive_variable();
-/** unsigned int max_Agent_default_time_alive_variable();
+unsigned int min_Agent_default_age_variable();
+/** unsigned int max_Agent_default_age_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int max_Agent_default_time_alive_variable();
+unsigned int max_Agent_default_age_variable();
 
 /** ivec4 reduce_Agent_default_example_vector_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -582,31 +582,31 @@ unsigned int min_Agent_s2_id_variable();
  */
 unsigned int max_Agent_s2_id_variable();
 
-/** unsigned int reduce_Agent_s2_time_alive_variable();
+/** unsigned int reduce_Agent_s2_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-unsigned int reduce_Agent_s2_time_alive_variable();
+unsigned int reduce_Agent_s2_age_variable();
 
 
 
-/** unsigned int count_Agent_s2_time_alive_variable(int count_value){
+/** unsigned int count_Agent_s2_age_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Agent_s2_time_alive_variable(int count_value);
+unsigned int count_Agent_s2_age_variable(int count_value);
 
-/** unsigned int min_Agent_s2_time_alive_variable();
+/** unsigned int min_Agent_s2_age_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int min_Agent_s2_time_alive_variable();
-/** unsigned int max_Agent_s2_time_alive_variable();
+unsigned int min_Agent_s2_age_variable();
+/** unsigned int max_Agent_s2_age_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int max_Agent_s2_time_alive_variable();
+unsigned int max_Agent_s2_age_variable();
 
 /** ivec4 reduce_Agent_s2_example_vector_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -620,18 +620,44 @@ ivec4 reduce_Agent_s2_example_vector_variable();
   
 /* global constant variables */
 
-__constant__ unsigned int MAX_LIFESPAN;
+__constant__ float PROB_DEATH;
 
-/** set_MAX_LIFESPAN
- * Sets the constant variable MAX_LIFESPAN on the device which can then be used in the agent functions.
- * @param h_MAX_LIFESPAN value to set the variable
+__constant__ unsigned int SCALE_FACTOR;
+
+__constant__ unsigned int MAX_AGE;
+
+/** set_PROB_DEATH
+ * Sets the constant variable PROB_DEATH on the device which can then be used in the agent functions.
+ * @param h_PROB_DEATH value to set the variable
  */
-extern void set_MAX_LIFESPAN(unsigned int* h_MAX_LIFESPAN);
+extern void set_PROB_DEATH(float* h_PROB_DEATH);
 
-extern const unsigned int* get_MAX_LIFESPAN();
+extern const float* get_PROB_DEATH();
 
 
-extern unsigned int h_env_MAX_LIFESPAN;
+extern float h_env_PROB_DEATH;
+
+/** set_SCALE_FACTOR
+ * Sets the constant variable SCALE_FACTOR on the device which can then be used in the agent functions.
+ * @param h_SCALE_FACTOR value to set the variable
+ */
+extern void set_SCALE_FACTOR(unsigned int* h_SCALE_FACTOR);
+
+extern const unsigned int* get_SCALE_FACTOR();
+
+
+extern unsigned int h_env_SCALE_FACTOR;
+
+/** set_MAX_AGE
+ * Sets the constant variable MAX_AGE on the device which can then be used in the agent functions.
+ * @param h_MAX_AGE value to set the variable
+ */
+extern void set_MAX_AGE(unsigned int* h_MAX_AGE);
+
+extern const unsigned int* get_MAX_AGE();
+
+
+extern unsigned int h_env_MAX_AGE;
 
 
 /** getMaximumBound
