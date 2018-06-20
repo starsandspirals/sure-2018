@@ -109,10 +109,12 @@ unsigned int h_Agents_default_variable_id_data_iteration;
 unsigned int h_Agents_default_variable_age_data_iteration;
 unsigned int h_Agents_default_variable_example_array_data_iteration;
 unsigned int h_Agents_default_variable_example_vector_data_iteration;
+unsigned int h_Agents_default_variable_dead_data_iteration;
 unsigned int h_Agents_s2_variable_id_data_iteration;
 unsigned int h_Agents_s2_variable_age_data_iteration;
 unsigned int h_Agents_s2_variable_example_array_data_iteration;
 unsigned int h_Agents_s2_variable_example_vector_data_iteration;
+unsigned int h_Agents_s2_variable_dead_data_iteration;
 
 
 /* Message Memory */
@@ -250,10 +252,12 @@ void initialise(char * inputfile){
     h_Agents_default_variable_age_data_iteration = 0;
     h_Agents_default_variable_example_array_data_iteration = 0;
     h_Agents_default_variable_example_vector_data_iteration = 0;
+    h_Agents_default_variable_dead_data_iteration = 0;
     h_Agents_s2_variable_id_data_iteration = 0;
     h_Agents_s2_variable_age_data_iteration = 0;
     h_Agents_s2_variable_example_array_data_iteration = 0;
     h_Agents_s2_variable_example_vector_data_iteration = 0;
+    h_Agents_s2_variable_dead_data_iteration = 0;
     
 
 
@@ -838,6 +842,45 @@ __host__ ivec4 get_Agent_default_variable_example_vector(unsigned int index){
     }
 }
 
+/** unsigned int get_Agent_default_variable_dead(unsigned int index)
+ * Gets the value of the dead variable of an Agent agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable dead
+ */
+__host__ unsigned int get_Agent_default_variable_dead(unsigned int index){
+    unsigned int count = get_agent_Agent_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Agents_default_variable_dead_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Agents_default->dead,
+                    d_Agents_default->dead,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Agents_default_variable_dead_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Agents_default->dead[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access dead for the %u th member of Agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Agent_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Agent agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -998,6 +1041,45 @@ __host__ ivec4 get_Agent_s2_variable_example_vector(unsigned int index){
     }
 }
 
+/** unsigned int get_Agent_s2_variable_dead(unsigned int index)
+ * Gets the value of the dead variable of an Agent agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable dead
+ */
+__host__ unsigned int get_Agent_s2_variable_dead(unsigned int index){
+    unsigned int count = get_agent_Agent_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Agents_s2_variable_dead_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Agents_s2->dead,
+                    d_Agents_s2->dead,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Agents_s2_variable_dead_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Agents_s2->dead[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access dead for the %u th member of Agent_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -1021,6 +1103,8 @@ void copy_single_xmachine_memory_Agent_hostToDevice(xmachine_memory_Agent_list *
     }
  
 		gpuErrchk(cudaMemcpy(d_dst->example_vector, &h_agent->example_vector, sizeof(ivec4), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->dead, &h_agent->dead, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -1047,6 +1131,8 @@ void copy_partial_xmachine_memory_Agent_hostToDevice(xmachine_memory_Agent_list 
 
  
 		gpuErrchk(cudaMemcpy(d_dst->example_vector, h_src->example_vector, count * sizeof(ivec4), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->dead, h_src->dead, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -1100,6 +1186,8 @@ void h_unpack_agents_Agent_AoS_to_SoA(xmachine_memory_Agent_list * dst, xmachine
 			}
 			 
 			dst->example_vector[i] = src[i]->example_vector;
+			 
+			dst->dead[i] = src[i]->dead;
 			
 		}
 	}
@@ -1135,6 +1223,7 @@ void h_add_agent_Agent_default(xmachine_memory_Agent* agent){
     h_Agents_default_variable_age_data_iteration = 0;
     h_Agents_default_variable_example_array_data_iteration = 0;
     h_Agents_default_variable_example_vector_data_iteration = 0;
+    h_Agents_default_variable_dead_data_iteration = 0;
     
 
 }
@@ -1170,6 +1259,7 @@ void h_add_agents_Agent_default(xmachine_memory_Agent** agents, unsigned int cou
         h_Agents_default_variable_age_data_iteration = 0;
         h_Agents_default_variable_example_array_data_iteration = 0;
         h_Agents_default_variable_example_vector_data_iteration = 0;
+        h_Agents_default_variable_dead_data_iteration = 0;
         
 
 	}
@@ -1205,6 +1295,7 @@ void h_add_agent_Agent_s2(xmachine_memory_Agent* agent){
     h_Agents_s2_variable_age_data_iteration = 0;
     h_Agents_s2_variable_example_array_data_iteration = 0;
     h_Agents_s2_variable_example_vector_data_iteration = 0;
+    h_Agents_s2_variable_dead_data_iteration = 0;
     
 
 }
@@ -1240,6 +1331,7 @@ void h_add_agents_Agent_s2(xmachine_memory_Agent** agents, unsigned int count){
         h_Agents_s2_variable_age_data_iteration = 0;
         h_Agents_s2_variable_example_array_data_iteration = 0;
         h_Agents_s2_variable_example_vector_data_iteration = 0;
+        h_Agents_s2_variable_dead_data_iteration = 0;
         
 
 	}
@@ -1295,6 +1387,27 @@ ivec4 reduce_Agent_default_example_vector_variable(){
     return thrust::reduce(thrust::device_pointer_cast(d_Agents_default->example_vector),  thrust::device_pointer_cast(d_Agents_default->example_vector) + h_xmachine_memory_Agent_default_count);
 }
 
+unsigned int reduce_Agent_default_dead_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Agents_default->dead),  thrust::device_pointer_cast(d_Agents_default->dead) + h_xmachine_memory_Agent_default_count);
+}
+
+unsigned int count_Agent_default_dead_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_default->dead),  thrust::device_pointer_cast(d_Agents_default->dead) + h_xmachine_memory_Agent_default_count, count_value);
+}
+unsigned int min_Agent_default_dead_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->dead);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Agent_default_dead_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_default->dead);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Agent_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Agents_s2->id),  thrust::device_pointer_cast(d_Agents_s2->id) + h_xmachine_memory_Agent_s2_count);
@@ -1342,6 +1455,27 @@ ivec4 reduce_Agent_s2_example_vector_variable(){
     return thrust::reduce(thrust::device_pointer_cast(d_Agents_s2->example_vector),  thrust::device_pointer_cast(d_Agents_s2->example_vector) + h_xmachine_memory_Agent_s2_count);
 }
 
+unsigned int reduce_Agent_s2_dead_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Agents_s2->dead),  thrust::device_pointer_cast(d_Agents_s2->dead) + h_xmachine_memory_Agent_s2_count);
+}
+
+unsigned int count_Agent_s2_dead_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Agents_s2->dead),  thrust::device_pointer_cast(d_Agents_s2->dead) + h_xmachine_memory_Agent_s2_count, count_value);
+}
+unsigned int min_Agent_s2_dead_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->dead);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Agent_s2_dead_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Agents_s2->dead);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Agent_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 
 
 

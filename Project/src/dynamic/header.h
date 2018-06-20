@@ -116,6 +116,7 @@ struct __align__(16) xmachine_memory_Agent
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     float *example_array;    /**< X-machine memory variable example_array of type float.*/
     ivec4 example_vector;    /**< X-machine memory variable example_vector of type ivec4.*/
+    unsigned int dead;    /**< X-machine memory variable dead of type unsigned int.*/
 };
 
 
@@ -140,6 +141,7 @@ struct xmachine_memory_Agent_list
     unsigned int age [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     float example_array [xmachine_memory_Agent_MAX*4];    /**< X-machine memory variable list example_array of type float.*/
     ivec4 example_vector [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list example_vector of type ivec4.*/
+    unsigned int dead [xmachine_memory_Agent_MAX];    /**< X-machine memory variable list dead of type unsigned int.*/
 };
 
 
@@ -205,8 +207,9 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48);
  * @param id	agent agent variable of type unsigned int
  * @param age	agent agent variable of type unsigned int
  * @param example_vector	agent agent variable of type ivec4
+ * @param dead	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector);
+__FLAME_GPU_FUNC__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector, unsigned int dead);
 
 /** get_Agent_agent_array_value
  *  Template function for accessing Agent agent array memory variables.
@@ -386,6 +389,15 @@ __host__ float get_Agent_default_variable_example_array(unsigned int index, unsi
  */
 __host__ ivec4 get_Agent_default_variable_example_vector(unsigned int index);
 
+/** unsigned int get_Agent_default_variable_dead(unsigned int index)
+ * Gets the value of the dead variable of an Agent agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable dead
+ */
+__host__ unsigned int get_Agent_default_variable_dead(unsigned int index);
+
 /** unsigned int get_Agent_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Agent agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -422,6 +434,15 @@ __host__ float get_Agent_s2_variable_example_array(unsigned int index, unsigned 
  * @return value of agent variable example_vector
  */
 __host__ ivec4 get_Agent_s2_variable_example_vector(unsigned int index);
+
+/** unsigned int get_Agent_s2_variable_dead(unsigned int index)
+ * Gets the value of the dead variable of an Agent agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable dead
+ */
+__host__ unsigned int get_Agent_s2_variable_dead(unsigned int index);
 
 
 
@@ -556,6 +577,32 @@ ivec4 reduce_Agent_default_example_vector_variable();
 
 
 
+/** unsigned int reduce_Agent_default_dead_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Agent_default_dead_variable();
+
+
+
+/** unsigned int count_Agent_default_dead_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Agent_default_dead_variable(int count_value);
+
+/** unsigned int min_Agent_default_dead_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Agent_default_dead_variable();
+/** unsigned int max_Agent_default_dead_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Agent_default_dead_variable();
+
 /** unsigned int reduce_Agent_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -615,6 +662,32 @@ unsigned int max_Agent_s2_age_variable();
 ivec4 reduce_Agent_s2_example_vector_variable();
 
 
+
+/** unsigned int reduce_Agent_s2_dead_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Agent_s2_dead_variable();
+
+
+
+/** unsigned int count_Agent_s2_dead_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Agent_s2_dead_variable(int count_value);
+
+/** unsigned int min_Agent_s2_dead_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Agent_s2_dead_variable();
+/** unsigned int max_Agent_s2_dead_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Agent_s2_dead_variable();
 
 
   

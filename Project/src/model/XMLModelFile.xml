@@ -71,6 +71,10 @@
           <name>example_vector</name>
           <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work-->
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>dead</name>
+        </gpu:variable>
       </memory>
       <functions>
         <gpu:function>

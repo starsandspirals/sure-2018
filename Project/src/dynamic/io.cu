@@ -191,6 +191,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_A
 		fputs(data, file);
 		fputs("</example_vector>\n", file);
         
+		fputs("<dead>", file);
+        sprintf(data, "%u", h_Agents_default->dead[i]);
+		fputs(data, file);
+		fputs("</dead>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Agent agent to xml
@@ -220,6 +225,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_A
         sprintf(data, "%d, %d, %d, %d", h_Agents_s2->example_vector[i].x, h_Agents_s2->example_vector[i].y, h_Agents_s2->example_vector[i].z, h_Agents_s2->example_vector[i].w);
 		fputs(data, file);
 		fputs("</example_vector>\n", file);
+        
+		fputs("<dead>", file);
+        sprintf(data, "%u", h_Agents_s2->dead[i]);
+		fputs(data, file);
+		fputs("</dead>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -256,6 +266,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
     int in_Agent_age;
     int in_Agent_example_array;
     int in_Agent_example_vector;
+    int in_Agent_dead;
     
     /* tags for environment global variables */
     int in_env;
@@ -273,6 +284,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 	unsigned int Agent_age;
     float Agent_example_array[4];
 	ivec4 Agent_example_vector;
+	unsigned int Agent_dead;
 
     /* Variables for environment variables */
     float env_PROB_DEATH;
@@ -298,6 +310,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 	in_Agent_age = 0;
 	in_Agent_example_array = 0;
 	in_Agent_example_vector = 0;
+	in_Agent_dead = 0;
     in_env_PROB_DEATH = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
@@ -311,6 +324,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
             h_Agents->example_array[(i*xmachine_memory_Agent_MAX)+k] = 0;
         }
 		h_Agents->example_vector[k] = {0,0,0,0};
+		h_Agents->dead[k] = 0;
 	}
 	
 
@@ -321,6 +335,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
         Agent_example_array[i] = 1;
     }
     Agent_example_vector = {0,0,0,0};
+    Agent_dead = 0;
 
     /* Default variables for environment variables */
     env_PROB_DEATH = 0;
@@ -393,6 +408,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
                         h_Agents->example_array[(k*xmachine_memory_Agent_MAX)+(*h_xmachine_memory_Agent_count)] = Agent_example_array[k];
                     }
 					h_Agents->example_vector[*h_xmachine_memory_Agent_count] = Agent_example_vector;
+					h_Agents->dead[*h_xmachine_memory_Agent_count] = Agent_dead;
 					(*h_xmachine_memory_Agent_count) ++;	
 				}
 				else
@@ -409,6 +425,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
                     Agent_example_array[i] = 1;
                 }
                 Agent_example_vector = {0,0,0,0};
+                Agent_dead = 0;
                 
                 in_xagent = 0;
 			}
@@ -420,6 +437,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 			if(strcmp(buffer, "/example_array") == 0) in_Agent_example_array = 0;
 			if(strcmp(buffer, "example_vector") == 0) in_Agent_example_vector = 1;
 			if(strcmp(buffer, "/example_vector") == 0) in_Agent_example_vector = 0;
+			if(strcmp(buffer, "dead") == 0) in_Agent_dead = 1;
+			if(strcmp(buffer, "/dead") == 0) in_Agent_dead = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "PROB_DEATH") == 0) in_env_PROB_DEATH = 1;
@@ -459,6 +478,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
                     
                           readArrayInput<int>(&fpgu_strtol, buffer, (int*)&Agent_example_vector, 4); 
                         
+                }
+				if(in_Agent_dead){
+                    Agent_dead = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }

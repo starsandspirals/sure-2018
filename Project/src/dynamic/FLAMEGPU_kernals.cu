@@ -167,7 +167,8 @@ __global__ void scatter_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xma
 	    for (int i=0; i<4; i++){
 	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
 	    }        
-		agents_dst->example_vector[output_index] = agents_src->example_vector[index];
+		agents_dst->example_vector[output_index] = agents_src->example_vector[index];        
+		agents_dst->dead[output_index] = agents_src->dead[index];
 	}
 }
 
@@ -193,6 +194,7 @@ __global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmac
 	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
 	    }
 	    agents_dst->example_vector[output_index] = agents_src->example_vector[index];
+	    agents_dst->dead[output_index] = agents_src->dead[index];
     }
 }
 
@@ -203,9 +205,10 @@ __global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmac
  * @param age agent variable of type unsigned int
  * @param example_array agent variable of type float
  * @param example_vector agent variable of type ivec4
+ * @param dead agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector){
+__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector, unsigned int dead){
 	
 	int index;
     
@@ -227,12 +230,13 @@ __device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int
 	agents->id[index] = id;
 	agents->age[index] = age;
 	agents->example_vector[index] = example_vector;
+	agents->dead[index] = dead;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector){
-    add_Agent_agent<DISCRETE_2D>(agents, id, age, example_vector);
+__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector, unsigned int dead){
+    add_Agent_agent<DISCRETE_2D>(agents, id, age, example_vector, dead);
 }
 
 /** reorder_Agent_agents
@@ -254,6 +258,7 @@ __global__ void reorder_Agent_agents(unsigned int* values, xmachine_memory_Agent
 	  ordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+index] = unordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+old_pos];
 	}
 	ordered_agents->example_vector[index] = unordered_agents->example_vector[old_pos];
+	ordered_agents->dead[index] = unordered_agents->dead[old_pos];
 }
 
 /** get_Agent_agent_array_value
@@ -316,6 +321,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents, RNG_rand48* 
 	agent.age = agents->age[index];
     agent.example_array = &(agents->example_array[index]);
 	agent.example_vector = agents->example_vector[index];
+	agent.dead = agents->dead[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -328,6 +334,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents, RNG_rand48* 
 	agents->id[index] = agent.id;
 	agents->age[index] = agent.age;
 	agents->example_vector[index] = agent.example_vector;
+	agents->dead[index] = agent.dead;
 }
 
 	
