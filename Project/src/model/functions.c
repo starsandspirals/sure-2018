@@ -40,10 +40,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	// Initialise host and device constant(s)
 	float prob_death = 0.01;
 	unsigned int max_age = 100;
+	unsigned int scale_factor = 1;
 	set_PROB_DEATH(&prob_death);
 	set_MAX_AGE(&max_age);
+	set_SCALE_FACTOR(&scale_factor);
 	printf("Set PROB_DEATH = %f\n", prob_death);
 	printf("Set MAX_AGE = %u\n", max_age);
+	printf("Set SCALE_FACTOR = %u\n", scale_factor);
 
 	// Seed the host random number generator.
 	srand(0);
@@ -212,9 +215,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
 	// If agent has been alive long enough, kill them.
 	if (random < (agent->age * SCALE_FACTOR * PROB_DEATH)){
 		agent->dead = 1;
-		return 1;
 	}	
-	return 0;
+	return agent->dead;
 }
 
 
