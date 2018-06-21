@@ -7,14 +7,17 @@
        <gpu:variable>
          <type>float</type>
          <name>TIME_STEP</name>
+         <defaultValue>1.0</defaultValue>
        </gpu:variable>
        <gpu:variable>
         <type>float</type>
         <name>SCALE_FACTOR</name>
+        <defaultValue>0.01</defaultValue>
        </gpu:variable>
        <gpu:variable>
          <type>unsigned int</type>
          <name>MAX_AGE</name>
+         <defaultValue>100</defaultValue>
        </gpu:variable>
     </gpu:constants>
 

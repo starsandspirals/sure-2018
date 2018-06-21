@@ -243,6 +243,18 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_A
 
 }
 
+void initEnvVars()
+{
+PROFILE_SCOPED_RANGE("initEnvVars");
+
+    float t_TIME_STEP = (float)1.0;
+    set_TIME_STEP(&t_TIME_STEP);
+    float t_SCALE_FACTOR = (float)0.01;
+    set_SCALE_FACTOR(&t_SCALE_FACTOR);
+    unsigned int t_MAX_AGE = (unsigned int)100;
+    set_MAX_AGE(&t_MAX_AGE);
+}
+
 void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, int* h_xmachine_memory_Agent_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
@@ -294,6 +306,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 
 
 	/* Initialise variables */
+    initEnvVars();
     agent_maximum.x = 0;
     agent_maximum.y = 0;
     agent_maximum.z = 0;

@@ -38,15 +38,9 @@ __host__ unsigned int getNextID(){
  */
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	// Initialise host and device constant(s)
-	float time_step = 1.0;
-	float scale_factor = 0.01;
-	unsigned int max_age = 100;
-	set_TIME_STEP(&time_step);
-  set_SCALE_FACTOR(&scale_factor);
-  set_MAX_AGE(&max_age);
-	printf("Set TIME_STEP = %f\n", time_step);
-  printf("Set SCALE_FACTOR = %f\n", scale_factor);
-	printf("Set MAX_AGE = %u\n", max_age);
+	printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
+  printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
+	printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
 
 	// Seed the host random number generator.
 	srand(0);
