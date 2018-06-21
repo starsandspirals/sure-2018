@@ -41,6 +41,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
   printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
 	printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
+	printf("Set RANDOM_AGES = %u\n", *get_RANDOM_AGES());
 
 	// Seed the host random number generator.
 	srand(0);
@@ -74,7 +75,11 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
 
 		// Set values as required for the single agent.
 		h_agent->id = getNextID();
-		h_agent->age = rand() % (*get_MAX_AGE());
+		if (*get_RANDOM_AGES()) {
+			h_agent->age = rand() % (*get_MAX_AGE());
+		} else {
+			h_agent->age = 0;
+		}
 		for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
 			h_agent->example_array[i] = rand() / (double)RAND_MAX;
 		}

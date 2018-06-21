@@ -19,6 +19,11 @@
          <name>MAX_AGE</name>
          <defaultValue>100</defaultValue>
        </gpu:variable>
+       <gpu:variable>
+         <type>unsigned int</type>
+         <name>RANDOM_AGES</name>
+         <defaultValue>1</defaultValue>
+       </gpu:variable>
     </gpu:constants>
 
     <gpu:functionFiles>
