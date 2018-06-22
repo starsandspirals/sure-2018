@@ -142,7 +142,7 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep()
  * Memory transfer over the PCI-e (or NVLINK in Power9 systems) is handelled transparently, but this is potentially expensive
  * Incorrect use could result in a very slow function due to a huge amount of memcpy.
  */
-__FLAME_GPU_EXIT_FUNC__ void customOutputExitFunction()
+__FLAME_GPU_STEP_FUNC__ void customOutputStepFunction()
 {
 
 	// Get some values and construct an output path.

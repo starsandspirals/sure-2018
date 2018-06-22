@@ -43,14 +43,14 @@
       <gpu:exitFunction>
         <gpu:name>exitFunction</gpu:name>
       </gpu:exitFunction>
-      <gpu:exitFunction>
-        <gpu:name>customOutputExitFunction</gpu:name>
-      </gpu:exitFunction>
     </gpu:exitFunctions>
 
     <gpu:stepFunctions>
       <gpu:stepFunction>
         <gpu:name>generateAgentStep</gpu:name>
+      </gpu:stepFunction>
+      <gpu:stepFunction>
+        <gpu:name>customOutputStepFunction</gpu:name>
       </gpu:stepFunction>
     </gpu:stepFunctions>
 
