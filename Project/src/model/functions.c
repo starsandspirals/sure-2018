@@ -170,7 +170,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction()
 				//Append a row to the CSV file
 				fprintf(
 						fp,
-						"%u, %u, %d, %d, %f, %f\n",
+						"%u, %u\n",
 						get_Agent_default_variable_id(index),
 						get_Agent_default_variable_age(index)
 						// 			get_Agent_default_variable_example_vector(index).x,
