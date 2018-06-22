@@ -4,6 +4,6 @@
     <TIME_STEP>1.0</TIME_STEP>
     <SCALE_FACTOR>0.001</SCALE_FACTOR>
     <MAX_AGE>100</MAX_AGE>
-    <RANDOM_AGES>0</RANDOM_AGES>
+    <RANDOM_AGES>1</RANDOM_AGES>
   </environment>
 </states>
