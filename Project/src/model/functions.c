@@ -21,25 +21,26 @@
 #include <vector>
 
 // Declare global scope variables for host-based agent creation, so allocation of host data is only performed once.
-xmachine_memory_Agent ** h_agent_AoS;
+xmachine_memory_Agent **h_agent_AoS;
 const unsigned int h_agent_AoS_MAX = 256;
 unsigned int h_nextID;
 
-__host__ unsigned int getNextID(){
+__host__ unsigned int getNextID()
+{
 	unsigned int old = h_nextID;
 	h_nextID++;
 	return old;
 }
 
-
 /*
  * An Init function to initialise environment variables, seed a simple host RNG and pre-allocate an array of structs for host-based agent creation.
  * AoS allocation is performed here rather than in the relevant step function to avoid the performance penalty of repeated allocations.
  */
-__FLAME_GPU_INIT_FUNC__ void initialiseHost() {
+__FLAME_GPU_INIT_FUNC__ void initialiseHost()
+{
 	// Initialise host and device constant(s)
 	printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
-  printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
+	printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
 	printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
 	printf("Set RANDOM_AGES = %u\n", *get_RANDOM_AGES());
 
@@ -55,7 +56,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 	  To avoid a per-iteration performance penalty the allocation is performed in an INIT function, and deallocation in an EXIT function
 	*/
 	h_agent_AoS = h_allocate_agent_Agent_array(h_agent_AoS_MAX);
-
 }
 
 /*
@@ -65,36 +65,40 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
  * When the h_add_agent_Agent_default() function is called, the data from the struct is immediately copied from the host to device.
  * If you wish to create more than one agent of the same type and state is will be much more efficient to use the add_agents_ function.
  */
-__FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
+__FLAME_GPU_INIT_FUNC__ void generateAgentInit()
+{
 	printf("Population from initial states XML file: %u\n", get_agent_Agent_default_count());
 
-	for (int i = 0; i < h_agent_AoS_MAX; i++) {
-	
+	for (int i = 0; i < h_agent_AoS_MAX; i++)
+	{
+
 		// Allocate a single agent struct on the host.
-		xmachine_memory_Agent * h_agent = h_allocate_agent_Agent();
+		xmachine_memory_Agent *h_agent = h_allocate_agent_Agent();
 
 		// Set values as required for the single agent.
 		h_agent->id = getNextID();
-		if (*get_RANDOM_AGES()) {
+		if (*get_RANDOM_AGES())
+		{
 			h_agent->age = rand() % (*get_MAX_AGE());
-		} else {
+		}
+		else
+		{
 			h_agent->age = 0;
 		}
-		for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++) {
+		for (unsigned int i = 0; i < xmachine_memory_Agent_example_array_LENGTH; i++)
+		{
 			h_agent->example_array[i] = rand() / (double)RAND_MAX;
 		}
-		h_agent->example_vector = {h_agent->id+1,h_agent->id+2,h_agent->id+3,h_agent->id+4};
+		h_agent->example_vector = {h_agent->id + 1, h_agent->id + 2, h_agent->id + 3, h_agent->id + 4};
 		// fprintf(stdout, "Create Agent:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent->id, h_agent->time_alive, h_agent->example_vector.x, h_agent->example_vector.y, h_agent->example_vector.z, h_agent->example_vector.w, h_agent->example_array[0]);
-
 
 		// Copy agent data from the host to the device
 		h_add_agent_Agent_default(h_agent);
 
 		// Clear host memory for single struct. The Utility function also deallocates any agent variable arrays.
 		h_free_agent_Agent(&h_agent);
-
 	}
-	
+
 	printf("Population after init function: %u\n", get_agent_Agent_default_count());
 }
 
@@ -104,7 +108,8 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentInit(){
  * The AoS is allocated (and deallocate) outside of this method, to avoid performance penalty.
  * The AoS is converted to a SoA and copied to the device when h_add_agents_Agent_default() is called.
  */
-__FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
+__FLAME_GPU_STEP_FUNC__ void generateAgentStep()
+{
 
 	// // Can create upto h_agent_AoS_MAX agents in a single pass (the number allocated for) but the full amount does not have to be created.
 	// unsigned int count = 32;
@@ -130,63 +135,72 @@ __FLAME_GPU_STEP_FUNC__ void generateAgentStep(){
 	// }
 
 	printf("Population after step function %u\n", get_agent_Agent_default_count());
-
 }
-
 
 /*
  * STEP function to demonstrate access of agent variables on the host.
  * Memory transfer over the PCI-e (or NVLINK in Power9 systems) is handelled transparently, but this is potentially expensive
  * Incorrect use could result in a very slow function due to a huge amount of memcpy.
  */
-__FLAME_GPU_EXIT_FUNC__ void customOutputExitFunction(){
+__FLAME_GPU_EXIT_FUNC__ void customOutputExitFunction()
+{
 
-	// // Get some values and construct an output path.
-	// const char * directory = getOutputDir();
-	// unsigned int iteration = getIterationNumber();
+	// Get some values and construct an output path.
+	const char *directory = getOutputDir();
+	unsigned int iteration = getIterationNumber();
 
-	// std::string outputFilename = std::string( std::string(directory) + "custom-output-" + std::to_string(iteration) +".csv");
+	if (iteration % 5 == 0)
+	{
 
-	// // Get a file handle for output.
-	// FILE * fp = fopen(outputFilename.c_str(), "w");
-	// // If the file has been opened successfully
-	// if(fp != nullptr){
-	// 	fprintf(stdout, "Outputting some Agent data to %s\n", outputFilename.c_str());
+		std::string outputFilename = std::string(std::string(directory) + "custom-output-" + std::to_string(iteration) + ".csv");
 
-	// 	// Output a header row for the CSV
-	// 	fprintf(fp, "ID, time_alive, example_vector.x, example_vector.y, example_array[0], example_array[1]\n");
+		// Get a file handle for output.
+		FILE *fp = fopen(outputFilename.c_str(), "w");
+		// If the file has been opened successfully
+		if (fp != nullptr)
+		{
+			fprintf(stdout, "Outputting some Agent data to %s\n", outputFilename.c_str());
 
-	// 	// For each agent of a target type in a target state
-	// 	for(int index = 0; index < get_agent_Agent_default_count(); index++){
-	// 		// Append a row to the CSV file.
-	// 		fprintf(
-	// 			fp, 
-	// 			"%u, %u, %d, %d, %f, %f\n",
-	// 			get_Agent_default_variable_id(index),
-	// 			get_Agent_default_variable_age(index),
-	// 			get_Agent_default_variable_example_vector(index).x,
-	// 			get_Agent_default_variable_example_vector(index).y,
-	// 			get_Agent_default_variable_example_array(index, 0),
-	// 			get_Agent_default_variable_example_array(index, 1)
-	// 		);
-	// 	}
-	// 	// Flush the file handle
-	// 	fflush(fp);
-	// } else {
-	// 	fprintf(stderr, "Error: file %s could not be created for customOutputStepFunction\n", outputFilename.c_str());
-	// }
-	// // Close the file handle if necessary.
-	// if (fp != nullptr && fp != stdout && fp != stderr){
-	// 	fclose(fp);
-	// 	fp = nullptr;
-	// }
+			// Output a header row for the CSV
+			fprintf(fp, "ID, age\n");
+
+			// For each agent of a target type in a target state
+			for (int index = 0; index < get_agent_Agent_default_count(); index++)
+			{
+				//Append a row to the CSV file
+				fprintf(
+						fp,
+						"%u, %u, %d, %d, %f, %f\n",
+						get_Agent_default_variable_id(index),
+						get_Agent_default_variable_age(index)
+						// 			get_Agent_default_variable_example_vector(index).x,
+						// 			get_Agent_default_variable_example_vector(index).y,
+						// 			get_Agent_default_variable_example_array(index, 0),
+						// 			get_Agent_default_variable_example_array(index, 1)
+				);
+			}
+			// Flush the file handle
+			fflush(fp);
+		}
+		else
+		{
+			fprintf(stderr, "Error: file %s could not be created for customOutputStepFunction\n", outputFilename.c_str());
+		}
+		// Close the file handle if necessary.
+		if (fp != nullptr && fp != stdout && fp != stderr)
+		{
+			fclose(fp);
+			fp = nullptr;
+		}
+	}
 }
 
 /*
  * EXIT function which frees global scope, allocated memory for the AoS.
  * The utility function is used to automatically handle agent array variables.
  */
-__FLAME_GPU_EXIT_FUNC__ void exitFunction(){
+__FLAME_GPU_EXIT_FUNC__ void exitFunction()
+{
 	// Clear host memory for the agent array of structs.
 	h_free_agent_Agent_array(&h_agent_AoS, h_agent_AoS_MAX);
 
@@ -197,7 +211,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction(){
  * Simple agent function, incrementing the time of life of the agent. 
  * If the agent has exceeded the maximum life span, it dies.
  */
-__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Agent *agent, RNG_rand48 *rand48)
 {
 	// Increment time alive
 	agent->age += TIME_STEP;
@@ -216,11 +230,11 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Agent* agent, RNG_rand48* rand48)
 		);
 	}*/
 	// If agent has been alive long enough, kill them.
-	if (random < (agent->age * SCALE_FACTOR * TIME_STEP)){
+	if (random < (agent->age * SCALE_FACTOR * TIME_STEP))
+	{
 		agent->dead = 1;
-	}	
+	}
 	return agent->dead;
 }
-
 
 #endif // #ifndef _FUNCTIONS_H_
