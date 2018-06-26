@@ -16,10 +16,10 @@ for index, row in data.iterrows():
   for index, col in row[1:].iteritems():
     indices.append(index)
     columns.append(col)
-
-  for n in range(1, len(indices)):
-    fileout.write(indices[n-1] + '\n')
-    fileout.write(str(columns[n-1]) + '\n')
+  
+  for n in range(0, len(indices)):
+    fileout.write(indices[n] + '\n')
+    fileout.write(str(columns[n]) + '\n')
   
 fileout.close()
   
