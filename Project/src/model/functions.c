@@ -19,6 +19,7 @@
 
 #include "header.h"
 #include <vector>
+#include <stdio.h>
 
 // Declare global scope variables for host-based agent creation, so allocation of host data is only performed once.
 xmachine_memory_Agent **h_agent_AoS;
@@ -56,6 +57,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 	  To avoid a per-iteration performance penalty the allocation is performed in an INIT function, and deallocation in an EXIT function
 	*/
 	h_agent_AoS = h_allocate_agent_Agent_array(h_agent_AoS_MAX);
+
+	char const* const fileName = "data.in";
+	FILE* file = fopen(fileName, "r");
+	char line[256];
+
+	while (fgets(line, sizeof(line), file)) {
+		printf("%s", line);
+	}
+
+	fclose(file);
 }
 
 /*
