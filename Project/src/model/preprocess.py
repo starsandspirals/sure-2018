@@ -2,7 +2,7 @@ import sys
 import pandas
 
 def generate(s):
-  data = pandas.read_csv('histo.csv')
+  data = pandas.read_csv('src/model/histo.csv')
   fileout = open(s, 'w')
   sizes = len(data.columns) - 1
 
@@ -26,4 +26,3 @@ def generate(s):
   fileout.close()
   
 generate(sys.argv[1])
-

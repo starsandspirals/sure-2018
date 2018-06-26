@@ -10,6 +10,11 @@ EXAMPLE_BIN_DIR := ./bin
 
 EXAMPLE_BUILD_DIR := ./build
 
+build:
+
+run:
+	$(EXEC) python3 src/model/preprocess.py 'bin/linux-x64/Release_Console/data.in'
+	$(EXEC) cd bin/linux-x64/Release_Console && ./Project input.xml $(iter)
 ################################################################################
 # FLAME GPU common Makefile rules
 #
