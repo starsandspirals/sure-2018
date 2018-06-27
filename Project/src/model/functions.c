@@ -63,15 +63,34 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 	FILE* file = fopen(fileName, "r");
 	char line[256];
 
-	char inputSizes[256];
-	strcpy(inputSizes, fgets(line, sizeof(line), file));
-	unsigned int sizes = strtol(inputSizes, NULL, 0);
+	unsigned int sizes = strtol(fgets(line, sizeof(line), file), NULL, 0);
+	unsigned int categories = strtol(fgets(line, sizeof(line), file), NULL, 0);
+
+	/*unsigned int gender;
+	unsigned int minage;
+	unsigned int maxage;
+	unsigned int currentsize;
+	unsigned int amount;
+
+	for (unsigned int i = 0; i < sizes; i++) {
+
+		gender = strtol(fgets(line, sizeof(line), file), NULL, 0);
+		minage = strtol(fgets(line, sizeof(line), file), NULL, 0);
+		maxage = strtol(fgets(line, sizeof(line), file), NULL, 0);
+
+		currentsize = strtol(fgets(line, sizeof(line), file), NULL, 0);
+		amount = strtol(fgets(line, sizeof(line), file), NULL, 0);
+
+
+    
+	}*/
 
 	while (fgets(line, sizeof(line), file)) {
 		printf("%s", line);
 	}
 
 	printf("Sizes = %u\n", sizes);
+	printf("Categories = %u\n", categories);
 
 	fclose(file);
 }

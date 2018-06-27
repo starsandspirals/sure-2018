@@ -4,9 +4,10 @@ import pandas
 def generate(s):
   data = pandas.read_csv('src/model/histo.csv')
   fileout = open(s, 'w')
-  sizes = len(data.columns) - 1
+  categories, sizes = data.shape
 
-  fileout.write(str(sizes) + '\n')
+  fileout.write(str(sizes - 1) + '\n')
+  fileout.write(str(categories) + '\n')
 
   for index, row in data.iterrows():
     indices, columns = [], []
