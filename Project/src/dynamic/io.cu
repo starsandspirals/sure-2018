@@ -112,23 +112,23 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Agent_list* h_Agents_default, xmachine_memory_Agent_list* d_Agents_default, int h_xmachine_memory_Agent_default_count,xmachine_memory_Agent_list* h_Agents_s2, xmachine_memory_Agent_list* d_Agents_s2, int h_xmachine_memory_Agent_s2_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
 	
 	//Device to host memory transfer
 	
-	cudaStatus = cudaMemcpy( h_Agents_default, d_Agents_default, sizeof(xmachine_memory_Agent_list), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy( h_Persons_default, d_Persons_default, sizeof(xmachine_memory_Person_list), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess)
 	{
-		fprintf(stderr,"Error Copying Agent Agent default State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		fprintf(stderr,"Error Copying Person Agent default State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
-	cudaStatus = cudaMemcpy( h_Agents_s2, d_Agents_s2, sizeof(xmachine_memory_Agent_list), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy( h_Persons_s2, d_Persons_s2, sizeof(xmachine_memory_Person_list), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess)
 	{
-		fprintf(stderr,"Error Copying Agent Agent s2 State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		fprintf(stderr,"Error Copying Person Agent s2 State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -167,73 +167,67 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_A
     fputs("</RANDOM_AGES>\n", file);
 	fputs("</environment>\n" , file);
 
-	//Write each Agent agent to xml
-	for (int i=0; i<h_xmachine_memory_Agent_default_count; i++){
+	//Write each Person agent to xml
+	for (int i=0; i<h_xmachine_memory_Person_default_count; i++){
 		fputs("<xagent>\n" , file);
-		fputs("<name>Agent</name>\n", file);
+		fputs("<name>Person</name>\n", file);
         
 		fputs("<id>", file);
-        sprintf(data, "%u", h_Agents_default->id[i]);
+        sprintf(data, "%u", h_Persons_default->id[i]);
 		fputs(data, file);
 		fputs("</id>\n", file);
         
 		fputs("<age>", file);
-        sprintf(data, "%u", h_Agents_default->age[i]);
+        sprintf(data, "%u", h_Persons_default->age[i]);
 		fputs(data, file);
 		fputs("</age>\n", file);
         
-		fputs("<example_array>", file);
-        for (int j=0;j<4;j++){
-            fprintf(file, "%f", h_Agents_default->example_array[(j*xmachine_memory_Agent_MAX)+i]);
-            if(j!=(4-1))
-                fprintf(file, ",");
-        }
-		fputs("</example_array>\n", file);
-        
-		fputs("<example_vector>", file);
-        sprintf(data, "%d, %d, %d, %d", h_Agents_default->example_vector[i].x, h_Agents_default->example_vector[i].y, h_Agents_default->example_vector[i].z, h_Agents_default->example_vector[i].w);
-		fputs(data, file);
-		fputs("</example_vector>\n", file);
-        
 		fputs("<dead>", file);
-        sprintf(data, "%u", h_Agents_default->dead[i]);
+        sprintf(data, "%u", h_Persons_default->dead[i]);
 		fputs(data, file);
 		fputs("</dead>\n", file);
+        
+		fputs("<gender>", file);
+        sprintf(data, "%u", h_Persons_default->gender[i]);
+		fputs(data, file);
+		fputs("</gender>\n", file);
+        
+		fputs("<householdsize>", file);
+        sprintf(data, "%u", h_Persons_default->householdsize[i]);
+		fputs(data, file);
+		fputs("</householdsize>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
-	//Write each Agent agent to xml
-	for (int i=0; i<h_xmachine_memory_Agent_s2_count; i++){
+	//Write each Person agent to xml
+	for (int i=0; i<h_xmachine_memory_Person_s2_count; i++){
 		fputs("<xagent>\n" , file);
-		fputs("<name>Agent</name>\n", file);
+		fputs("<name>Person</name>\n", file);
         
 		fputs("<id>", file);
-        sprintf(data, "%u", h_Agents_s2->id[i]);
+        sprintf(data, "%u", h_Persons_s2->id[i]);
 		fputs(data, file);
 		fputs("</id>\n", file);
         
 		fputs("<age>", file);
-        sprintf(data, "%u", h_Agents_s2->age[i]);
+        sprintf(data, "%u", h_Persons_s2->age[i]);
 		fputs(data, file);
 		fputs("</age>\n", file);
         
-		fputs("<example_array>", file);
-        for (int j=0;j<4;j++){
-            fprintf(file, "%f", h_Agents_s2->example_array[(j*xmachine_memory_Agent_MAX)+i]);
-            if(j!=(4-1))
-                fprintf(file, ",");
-        }
-		fputs("</example_array>\n", file);
-        
-		fputs("<example_vector>", file);
-        sprintf(data, "%d, %d, %d, %d", h_Agents_s2->example_vector[i].x, h_Agents_s2->example_vector[i].y, h_Agents_s2->example_vector[i].z, h_Agents_s2->example_vector[i].w);
-		fputs(data, file);
-		fputs("</example_vector>\n", file);
-        
 		fputs("<dead>", file);
-        sprintf(data, "%u", h_Agents_s2->dead[i]);
+        sprintf(data, "%u", h_Persons_s2->dead[i]);
 		fputs(data, file);
 		fputs("</dead>\n", file);
+        
+		fputs("<gender>", file);
+        sprintf(data, "%u", h_Persons_s2->gender[i]);
+		fputs(data, file);
+		fputs("</gender>\n", file);
+        
+		fputs("<householdsize>", file);
+        sprintf(data, "%u", h_Persons_s2->householdsize[i]);
+		fputs(data, file);
+		fputs("</householdsize>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -261,7 +255,7 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RANDOM_AGES(&t_RANDOM_AGES);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, int* h_xmachine_memory_Agent_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -280,11 +274,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 	/* Variables for checking tags */
 	int reading, i;
 	int in_tag, in_itno, in_xagent, in_name;
-    int in_Agent_id;
-    int in_Agent_age;
-    int in_Agent_example_array;
-    int in_Agent_example_vector;
-    int in_Agent_dead;
+    int in_Person_id;
+    int in_Person_age;
+    int in_Person_dead;
+    int in_Person_gender;
+    int in_Person_householdsize;
     
     /* tags for environment global variables */
     int in_env;
@@ -297,14 +291,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
     int in_env_RANDOM_AGES;
     
 	/* set agent count to zero */
-	*h_xmachine_memory_Agent_count = 0;
+	*h_xmachine_memory_Person_count = 0;
 	
 	/* Variables for initial state data */
-	unsigned int Agent_id;
-	unsigned int Agent_age;
-    float Agent_example_array[4];
-	ivec4 Agent_example_vector;
-	unsigned int Agent_dead;
+	unsigned int Person_id;
+	unsigned int Person_age;
+	unsigned int Person_dead;
+	unsigned int Person_gender;
+	unsigned int Person_householdsize;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -328,37 +322,33 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
     in_env = 0;
     in_xagent = 0;
 	in_name = 0;
-	in_Agent_id = 0;
-	in_Agent_age = 0;
-	in_Agent_example_array = 0;
-	in_Agent_example_vector = 0;
-	in_Agent_dead = 0;
+	in_Person_id = 0;
+	in_Person_age = 0;
+	in_Person_dead = 0;
+	in_Person_gender = 0;
+	in_Person_householdsize = 0;
     in_env_TIME_STEP = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
     in_env_RANDOM_AGES = 0;
-	//set all Agent values to 0
+	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
-	for (int k=0; k<xmachine_memory_Agent_MAX; k++)
+	for (int k=0; k<xmachine_memory_Person_MAX; k++)
 	{	
-		h_Agents->id[k] = 0;
-		h_Agents->age[k] = 0;
-        for (i=0;i<4;i++){
-            h_Agents->example_array[(i*xmachine_memory_Agent_MAX)+k] = 0;
-        }
-		h_Agents->example_vector[k] = {0,0,0,0};
-		h_Agents->dead[k] = 0;
+		h_Persons->id[k] = 0;
+		h_Persons->age[k] = 0;
+		h_Persons->dead[k] = 0;
+		h_Persons->gender[k] = 0;
+		h_Persons->householdsize[k] = 0;
 	}
 	
 
 	/* Default variables for memory */
-    Agent_id = 0;
-    Agent_age = 0;
-    for (i=0;i<4;i++){
-        Agent_example_array[i] = 1;
-    }
-    Agent_example_vector = {0,0,0,0};
-    Agent_dead = 0;
+    Person_id = 0;
+    Person_age = 0;
+    Person_dead = 0;
+    Person_gender = 0;
+    Person_householdsize = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -417,23 +407,21 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
             if(strcmp(buffer, "xagent") == 0) in_xagent = 1;
 			if(strcmp(buffer, "/xagent") == 0)
 			{
-				if(strcmp(agentname, "Agent") == 0)
+				if(strcmp(agentname, "Person") == 0)
 				{
-					if (*h_xmachine_memory_Agent_count > xmachine_memory_Agent_MAX){
-						printf("ERROR: MAX Buffer size (%i) for agent Agent exceeded whilst reading data\n", xmachine_memory_Agent_MAX);
+					if (*h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Person exceeded whilst reading data\n", xmachine_memory_Person_MAX);
 						// Close the file and stop reading
 						fclose(file);
 						exit(EXIT_FAILURE);
 					}
                     
-					h_Agents->id[*h_xmachine_memory_Agent_count] = Agent_id;
-					h_Agents->age[*h_xmachine_memory_Agent_count] = Agent_age;
-                    for (int k=0;k<4;k++){
-                        h_Agents->example_array[(k*xmachine_memory_Agent_MAX)+(*h_xmachine_memory_Agent_count)] = Agent_example_array[k];
-                    }
-					h_Agents->example_vector[*h_xmachine_memory_Agent_count] = Agent_example_vector;
-					h_Agents->dead[*h_xmachine_memory_Agent_count] = Agent_dead;
-					(*h_xmachine_memory_Agent_count) ++;	
+					h_Persons->id[*h_xmachine_memory_Person_count] = Person_id;
+					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
+					h_Persons->dead[*h_xmachine_memory_Person_count] = Person_dead;
+					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
+					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
+					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else
 				{
@@ -443,26 +431,24 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 
 
 				/* Reset xagent variables */
-                Agent_id = 0;
-                Agent_age = 0;
-                for (i=0;i<4;i++){
-                    Agent_example_array[i] = 1;
-                }
-                Agent_example_vector = {0,0,0,0};
-                Agent_dead = 0;
+                Person_id = 0;
+                Person_age = 0;
+                Person_dead = 0;
+                Person_gender = 0;
+                Person_householdsize = 0;
                 
                 in_xagent = 0;
 			}
-			if(strcmp(buffer, "id") == 0) in_Agent_id = 1;
-			if(strcmp(buffer, "/id") == 0) in_Agent_id = 0;
-			if(strcmp(buffer, "age") == 0) in_Agent_age = 1;
-			if(strcmp(buffer, "/age") == 0) in_Agent_age = 0;
-			if(strcmp(buffer, "example_array") == 0) in_Agent_example_array = 1;
-			if(strcmp(buffer, "/example_array") == 0) in_Agent_example_array = 0;
-			if(strcmp(buffer, "example_vector") == 0) in_Agent_example_vector = 1;
-			if(strcmp(buffer, "/example_vector") == 0) in_Agent_example_vector = 0;
-			if(strcmp(buffer, "dead") == 0) in_Agent_dead = 1;
-			if(strcmp(buffer, "/dead") == 0) in_Agent_dead = 0;
+			if(strcmp(buffer, "id") == 0) in_Person_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Person_id = 0;
+			if(strcmp(buffer, "age") == 0) in_Person_age = 1;
+			if(strcmp(buffer, "/age") == 0) in_Person_age = 0;
+			if(strcmp(buffer, "dead") == 0) in_Person_dead = 1;
+			if(strcmp(buffer, "/dead") == 0) in_Person_dead = 0;
+			if(strcmp(buffer, "gender") == 0) in_Person_gender = 1;
+			if(strcmp(buffer, "/gender") == 0) in_Person_gender = 0;
+			if(strcmp(buffer, "householdsize") == 0) in_Person_householdsize = 1;
+			if(strcmp(buffer, "/householdsize") == 0) in_Person_householdsize = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -491,22 +477,20 @@ void readInitialStates(char* inputpath, xmachine_memory_Agent_list* h_Agents, in
 			if(in_name) strcpy(agentname, buffer);
 			else if (in_xagent)
 			{
-				if(in_Agent_id){
-                    Agent_id = (unsigned int) fpgu_strtoul(buffer); 
+				if(in_Person_id){
+                    Person_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
-				if(in_Agent_age){
-                    Agent_age = (unsigned int) fpgu_strtoul(buffer); 
+				if(in_Person_age){
+                    Person_age = (unsigned int) fpgu_strtoul(buffer); 
                 }
-				if(in_Agent_example_array){
-                    readArrayInput<float>(&fgpu_atof, buffer, Agent_example_array, 4);    
+				if(in_Person_dead){
+                    Person_dead = (unsigned int) fpgu_strtoul(buffer); 
                 }
-				if(in_Agent_example_vector){
-                    
-                          readArrayInput<int>(&fpgu_strtol, buffer, (int*)&Agent_example_vector, 4); 
-                        
+				if(in_Person_gender){
+                    Person_gender = (unsigned int) fpgu_strtoul(buffer); 
                 }
-				if(in_Agent_dead){
-                    Agent_dead = (unsigned int) fpgu_strtoul(buffer); 
+				if(in_Person_householdsize){
+                    Person_householdsize = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }

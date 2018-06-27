@@ -35,7 +35,7 @@
         <gpu:name>initialiseHost</gpu:name>
       </gpu:initFunction>
       <gpu:initFunction>
-        <gpu:name>generateAgentInit</gpu:name>
+        <gpu:name>generatePersonInit</gpu:name>
       </gpu:initFunction>
     </gpu:initFunctions>
 
@@ -47,7 +47,7 @@
 
     <gpu:stepFunctions>
       <gpu:stepFunction>
-        <gpu:name>generateAgentStep</gpu:name>
+        <gpu:name>generatePersonStep</gpu:name>
       </gpu:stepFunction>
       <gpu:stepFunction>
         <gpu:name>customOutputStepFunction</gpu:name>
@@ -57,7 +57,7 @@
   </gpu:environment>
   <xagents>
     <gpu:xagent>
-      <name>Agent</name>
+      <name>Person</name>
       <memory>
         <gpu:variable>
           <type>unsigned int</type>
@@ -68,7 +68,7 @@
           <name>age</name>
           <defaultValue>0</defaultValue>
         </gpu:variable>
-        <gpu:variable>
+ <!-->       <gpu:variable>
           <type>float</type>
           <name>example_array</name>
           <arrayLength>4</arrayLength>
@@ -76,12 +76,20 @@
         </gpu:variable>
         <gpu:variable>
           <type>ivec4</type>
-          <name>example_vector</name>
-          <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work-->
-        </gpu:variable>
+          <name>example_vector</name> -->
+          <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work
+        </gpu:variable>-->
         <gpu:variable>
           <type>unsigned int</type>
           <name>dead</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>gender</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>householdsize</name>
         </gpu:variable>
       </memory>
       <functions>

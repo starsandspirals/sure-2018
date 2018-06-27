@@ -39,13 +39,13 @@ GLuint sphereNormals;
 
 //Simulation output buffers/textures
 
-cudaGraphicsResource_t Agent_default_cgr;
-GLuint Agent_default_tbo;
-GLuint Agent_default_displacementTex;
+cudaGraphicsResource_t Person_default_cgr;
+GLuint Person_default_tbo;
+GLuint Person_default_displacementTex;
 
-cudaGraphicsResource_t Agent_s2_cgr;
-GLuint Agent_s2_tbo;
-GLuint Agent_s2_displacementTex;
+cudaGraphicsResource_t Person_s2_cgr;
+GLuint Person_s2_tbo;
+GLuint Person_s2_displacementTex;
 
 
 // mouse controls
@@ -185,7 +185,7 @@ const char fragmentShaderSource[] =
 
 //GPU Kernels
 
-__global__ void output_Agent_agent_to_VBO(xmachine_memory_Agent_list* agents, glm::vec4* vbo, glm::vec3 centralise){
+__global__ void output_Person_agent_to_VBO(xmachine_memory_Person_list* agents, glm::vec4* vbo, glm::vec3 centralise){
 
 	//global thread index
 	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
@@ -233,9 +233,9 @@ void initVisualisation()
 	setVertexBufferData();
 
 	// create TBO
-	createTBO(&Agent_default_cgr, &Agent_default_tbo, &Agent_default_displacementTex, xmachine_memory_Agent_MAX * sizeof( glm::vec4));
+	createTBO(&Person_default_cgr, &Person_default_tbo, &Person_default_displacementTex, xmachine_memory_Person_MAX * sizeof( glm::vec4));
 	
-	createTBO(&Agent_s2_cgr, &Agent_s2_tbo, &Agent_s2_displacementTex, xmachine_memory_Agent_MAX * sizeof( glm::vec4));
+	createTBO(&Person_s2_cgr, &Person_s2_tbo, &Person_s2_displacementTex, xmachine_memory_Person_MAX * sizeof( glm::vec4));
 	
 
 	//set shader uniforms
@@ -279,14 +279,14 @@ void runCuda()
 	glm::vec4 *dptr;
 
 	
-	if (get_agent_Agent_default_count() > 0)
+	if (get_agent_Person_default_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
         size_t accessibleBufferSize = 0;
-        gpuErrchk(cudaGraphicsMapResources(1, &Agent_default_cgr));
-		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Agent_default_cgr));
+        gpuErrchk(cudaGraphicsMapResources(1, &Person_default_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Person_default_cgr));
 		//cuda block size
-		tile_size = (int) ceil((float)get_agent_Agent_default_count()/threads_per_tile);
+		tile_size = (int) ceil((float)get_agent_Person_default_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
 		threads = dim3(threads_per_tile, 1, 1);
         
@@ -294,20 +294,20 @@ void runCuda()
         centralise = getMaximumBounds() + getMinimumBounds();
         centralise /= 2;
         
-		output_Agent_agent_to_VBO<<< grid, threads>>>(get_device_Agent_default_agents(), dptr, centralise);
+		output_Person_agent_to_VBO<<< grid, threads>>>(get_device_Person_default_agents(), dptr, centralise);
 		gpuErrchkLaunch();
 		// unmap buffer object
-        gpuErrchk(cudaGraphicsUnmapResources(1, &Agent_default_cgr));
+        gpuErrchk(cudaGraphicsUnmapResources(1, &Person_default_cgr));
 	}
 	
-	if (get_agent_Agent_s2_count() > 0)
+	if (get_agent_Person_s2_count() > 0)
 	{
 		// map OpenGL buffer object for writing from CUDA
         size_t accessibleBufferSize = 0;
-        gpuErrchk(cudaGraphicsMapResources(1, &Agent_s2_cgr));
-		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Agent_s2_cgr));
+        gpuErrchk(cudaGraphicsMapResources(1, &Person_s2_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Person_s2_cgr));
 		//cuda block size
-		tile_size = (int) ceil((float)get_agent_Agent_s2_count()/threads_per_tile);
+		tile_size = (int) ceil((float)get_agent_Person_s2_count()/threads_per_tile);
 		grid = dim3(tile_size, 1, 1);
 		threads = dim3(threads_per_tile, 1, 1);
         
@@ -315,10 +315,10 @@ void runCuda()
         centralise = getMaximumBounds() + getMinimumBounds();
         centralise /= 2;
         
-		output_Agent_agent_to_VBO<<< grid, threads>>>(get_device_Agent_s2_agents(), dptr, centralise);
+		output_Person_agent_to_VBO<<< grid, threads>>>(get_device_Person_s2_agents(), dptr, centralise);
 		gpuErrchkLaunch();
 		// unmap buffer object
-        gpuErrchk(cudaGraphicsUnmapResources(1, &Agent_s2_cgr));
+        gpuErrchk(cudaGraphicsUnmapResources(1, &Person_s2_cgr));
 	}
 	
 }
@@ -585,11 +585,11 @@ void display()
 	glLightfv(GL_LIGHT0, GL_POSITION, LIGHT_POSITION);
 
 	
-	//Draw Agent Agents in default state
+	//Draw Person Agents in default state
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER_EXT, Agent_default_displacementTex);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, Person_default_displacementTex);
 	//loop
-	for (int i=0; i< get_agent_Agent_default_count(); i++){
+	for (int i=0; i< get_agent_Person_default_count(); i++){
 		glVertexAttrib1f(vs_mapIndex, (float)i);
 		
 		//draw using vertex and attribute data on the gpu (fast)
@@ -608,11 +608,11 @@ void display()
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	
-	//Draw Agent Agents in s2 state
+	//Draw Person Agents in s2 state
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER_EXT, Agent_s2_displacementTex);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, Person_s2_displacementTex);
 	//loop
-	for (int i=0; i< get_agent_Agent_s2_count(); i++){
+	for (int i=0; i< get_agent_Person_s2_count(); i++){
 		glVertexAttrib1f(vs_mapIndex, (float)i);
 		
 		//draw using vertex and attribute data on the gpu (fast)
@@ -672,9 +672,9 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		deleteVBO( &sphereVerts);
 		deleteVBO( &sphereNormals);
 		
-		deleteTBO( &Agent_default_cgr, &Agent_default_tbo);
+		deleteTBO( &Person_default_cgr, &Person_default_tbo);
 		
-		deleteTBO( &Agent_s2_cgr, &Agent_s2_tbo);
+		deleteTBO( &Person_s2_cgr, &Person_s2_tbo);
 		
 		cudaEventDestroy(start);
 		cudaEventDestroy(stop);

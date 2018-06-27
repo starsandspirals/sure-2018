@@ -25,13 +25,13 @@
 
 /* Agent count constants */
 
-__constant__ int d_xmachine_memory_Agent_count;
+__constant__ int d_xmachine_memory_Person_count;
 
 /* Agent state count constants */
 
-__constant__ int d_xmachine_memory_Agent_default_count;
+__constant__ int d_xmachine_memory_Person_default_count;
 
-__constant__ int d_xmachine_memory_Agent_s2_count;
+__constant__ int d_xmachine_memory_Person_s2_count;
 
 
 /* Message constants */
@@ -126,13 +126,13 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Agent agent functions */
+/* Dyanamically created Person agent functions */
 
-/** reset_Agent_scan_input
- * Agent agent reset scan input function
- * @param agents The xmachine_memory_Agent_list agent list
+/** reset_Person_scan_input
+ * Person agent reset scan input function
+ * @param agents The xmachine_memory_Person_list agent list
  */
-__global__ void reset_Agent_scan_input(xmachine_memory_Agent_list* agents){
+__global__ void reset_Person_scan_input(xmachine_memory_Person_list* agents){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
@@ -143,13 +143,13 @@ __global__ void reset_Agent_scan_input(xmachine_memory_Agent_list* agents){
 
 
 
-/** scatter_Agent_Agents
- * Agent scatter agents function (used after agent birth/death)
- * @param agents_dst xmachine_memory_Agent_list agent list destination
- * @param agents_src xmachine_memory_Agent_list agent list source
+/** scatter_Person_Agents
+ * Person scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Person_list agent list destination
+ * @param agents_src xmachine_memory_Person_list agent list source
  * @param dst_agent_count index to start scattering agents from
  */
-__global__ void scatter_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmachine_memory_Agent_list* agents_src, int dst_agent_count, int number_to_scatter){
+__global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, xmachine_memory_Person_list* agents_src, int dst_agent_count, int number_to_scatter){
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
 
@@ -163,22 +163,20 @@ __global__ void scatter_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xma
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
-		agents_dst->age[output_index] = agents_src->age[index];
-	    for (int i=0; i<4; i++){
-	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
-	    }        
-		agents_dst->example_vector[output_index] = agents_src->example_vector[index];        
-		agents_dst->dead[output_index] = agents_src->dead[index];
+		agents_dst->age[output_index] = agents_src->age[index];        
+		agents_dst->dead[output_index] = agents_src->dead[index];        
+		agents_dst->gender[output_index] = agents_src->gender[index];        
+		agents_dst->householdsize[output_index] = agents_src->householdsize[index];
 	}
 }
 
-/** append_Agent_Agents
- * Agent scatter agents function (used after agent birth/death)
- * @param agents_dst xmachine_memory_Agent_list agent list destination
- * @param agents_src xmachine_memory_Agent_list agent list source
+/** append_Person_Agents
+ * Person scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Person_list agent list destination
+ * @param agents_src xmachine_memory_Person_list agent list source
  * @param dst_agent_count index to start scattering agents from
  */
-__global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmachine_memory_Agent_list* agents_src, int dst_agent_count, int number_to_append){
+__global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xmachine_memory_Person_list* agents_src, int dst_agent_count, int number_to_append){
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
 
@@ -190,25 +188,23 @@ __global__ void append_Agent_Agents(xmachine_memory_Agent_list* agents_dst, xmac
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->age[output_index] = agents_src->age[index];
-	    for (int i=0; i<4; i++){
-	      agents_dst->example_array[(i*xmachine_memory_Agent_MAX)+output_index] = agents_src->example_array[(i*xmachine_memory_Agent_MAX)+index];
-	    }
-	    agents_dst->example_vector[output_index] = agents_src->example_vector[index];
 	    agents_dst->dead[output_index] = agents_src->dead[index];
+	    agents_dst->gender[output_index] = agents_src->gender[index];
+	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
     }
 }
 
-/** add_Agent_agent
- * Continuous Agent agent add agent function writes agent data to agent swap
- * @param agents xmachine_memory_Agent_list to add agents to 
+/** add_Person_agent
+ * Continuous Person agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_Person_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param age agent variable of type unsigned int
- * @param example_array agent variable of type float
- * @param example_vector agent variable of type ivec4
  * @param dead agent variable of type unsigned int
+ * @param gender agent variable of type unsigned int
+ * @param householdsize agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector, unsigned int dead){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int dead, unsigned int gender, unsigned int householdsize){
 	
 	int index;
     
@@ -229,23 +225,24 @@ __device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int
 	//write data to new buffer
 	agents->id[index] = id;
 	agents->age[index] = age;
-	agents->example_vector[index] = example_vector;
 	agents->dead[index] = dead;
+	agents->gender[index] = gender;
+	agents->householdsize[index] = householdsize;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Agent_agent(xmachine_memory_Agent_list* agents, unsigned int id, unsigned int age, ivec4 example_vector, unsigned int dead){
-    add_Agent_agent<DISCRETE_2D>(agents, id, age, example_vector, dead);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int dead, unsigned int gender, unsigned int householdsize){
+    add_Person_agent<DISCRETE_2D>(agents, id, age, dead, gender, householdsize);
 }
 
-/** reorder_Agent_agents
- * Continuous Agent agent areorder function used after key value pairs have been sorted
+/** reorder_Person_agents
+ * Continuous Person agent areorder function used after key value pairs have been sorted
  * @param values sorted index values
  * @param unordered_agents list of unordered agents
  * @ param ordered_agents list used to output ordered agents
  */
-__global__ void reorder_Agent_agents(unsigned int* values, xmachine_memory_Agent_list* unordered_agents, xmachine_memory_Agent_list* ordered_agents)
+__global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Person_list* unordered_agents, xmachine_memory_Person_list* ordered_agents)
 {
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
 
@@ -254,42 +251,9 @@ __global__ void reorder_Agent_agents(unsigned int* values, xmachine_memory_Agent
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
-	for (int i=0; i<4; i++){
-	  ordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+index] = unordered_agents->example_array[(i*xmachine_memory_Agent_MAX)+old_pos];
-	}
-	ordered_agents->example_vector[index] = unordered_agents->example_vector[old_pos];
 	ordered_agents->dead[index] = unordered_agents->dead[old_pos];
-}
-
-/** get_Agent_agent_array_value
- *  Template function for accessing Agent agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @return return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ T get_Agent_agent_array_value(T *array, uint index){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    return array[index*xmachine_memory_Agent_MAX];
-    } else {
-    	// Return the default value for this data type 
-	    return 0;
-    }
-}
-
-/** set_Agent_agent_array_value
- *  Template function for setting Agent agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @param return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ void set_Agent_agent_array_value(T *array, uint index, T value){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    array[index*xmachine_memory_Agent_MAX] = value;
-    }
+	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
+	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
 }
 
 
@@ -302,26 +266,26 @@ __FLAME_GPU_FUNC__ void set_Agent_agent_array_value(T *array, uint index, T valu
 /**
  *
  */
-__global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents, RNG_rand48* rand48){
+__global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48* rand48){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
     //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_Agent_count)
+    if (index >= d_xmachine_memory_Person_count)
         return;
     
 
 	//SoA to AoS - xmachine_memory_update Coalesced memory read (arrays point to first item for agent index)
-	xmachine_memory_Agent agent;
+	xmachine_memory_Person agent;
     
     // Thread bounds already checked, but the agent function will still execute. load default values?
 	
 	agent.id = agents->id[index];
 	agent.age = agents->age[index];
-    agent.example_array = &(agents->example_array[index]);
-	agent.example_vector = agents->example_vector[index];
 	agent.dead = agents->dead[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -333,8 +297,9 @@ __global__ void GPUFLAME_update(xmachine_memory_Agent_list* agents, RNG_rand48* 
 	//AoS to SoA - xmachine_memory_update Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->age[index] = agent.age;
-	agents->example_vector[index] = agent.example_vector;
 	agents->dead[index] = agent.dead;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
 }
 
 	
