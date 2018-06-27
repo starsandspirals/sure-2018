@@ -81,10 +81,6 @@
         </gpu:variable>-->
         <gpu:variable>
           <type>unsigned int</type>
-          <name>dead</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
           <name>gender</name>
         </gpu:variable>
         <gpu:variable>

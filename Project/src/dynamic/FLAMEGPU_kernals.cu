@@ -164,7 +164,6 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->age[output_index] = agents_src->age[index];        
-		agents_dst->dead[output_index] = agents_src->dead[index];        
 		agents_dst->gender[output_index] = agents_src->gender[index];        
 		agents_dst->householdsize[output_index] = agents_src->householdsize[index];
 	}
@@ -188,7 +187,6 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->age[output_index] = agents_src->age[index];
-	    agents_dst->dead[output_index] = agents_src->dead[index];
 	    agents_dst->gender[output_index] = agents_src->gender[index];
 	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
     }
@@ -199,12 +197,11 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param agents xmachine_memory_Person_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param age agent variable of type unsigned int
- * @param dead agent variable of type unsigned int
  * @param gender agent variable of type unsigned int
  * @param householdsize agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int dead, unsigned int gender, unsigned int householdsize){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize){
 	
 	int index;
     
@@ -225,15 +222,14 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	//write data to new buffer
 	agents->id[index] = id;
 	agents->age[index] = age;
-	agents->dead[index] = dead;
 	agents->gender[index] = gender;
 	agents->householdsize[index] = householdsize;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int dead, unsigned int gender, unsigned int householdsize){
-    add_Person_agent<DISCRETE_2D>(agents, id, age, dead, gender, householdsize);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize){
+    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize);
 }
 
 /** reorder_Person_agents
@@ -251,7 +247,6 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
-	ordered_agents->dead[index] = unordered_agents->dead[old_pos];
 	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
 	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
 }
@@ -283,7 +278,6 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	
 	agent.id = agents->id[index];
 	agent.age = agents->age[index];
-	agent.dead = agents->dead[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
 
@@ -297,7 +291,6 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	//AoS to SoA - xmachine_memory_update Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->age[index] = agent.age;
-	agents->dead[index] = agent.dead;
 	agents->gender[index] = agent.gender;
 	agents->householdsize[index] = agent.householdsize;
 }

@@ -112,7 +112,6 @@ struct __align__(16) xmachine_memory_Person
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
-    unsigned int dead;    /**< X-machine memory variable dead of type unsigned int.*/
     unsigned int gender;    /**< X-machine memory variable gender of type unsigned int.*/
     unsigned int householdsize;    /**< X-machine memory variable householdsize of type unsigned int.*/
 };
@@ -137,7 +136,6 @@ struct xmachine_memory_Person_list
     
     unsigned int id [xmachine_memory_Person_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int age [xmachine_memory_Person_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
-    unsigned int dead [xmachine_memory_Person_MAX];    /**< X-machine memory variable list dead of type unsigned int.*/
     unsigned int gender [xmachine_memory_Person_MAX];    /**< X-machine memory variable list gender of type unsigned int.*/
     unsigned int householdsize [xmachine_memory_Person_MAX];    /**< X-machine memory variable list householdsize of type unsigned int.*/
 };
@@ -204,11 +202,10 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, RNG_rand48* rand48)
  * @param agents xmachine_memory_Person_list agent list
  * @param id	agent agent variable of type unsigned int
  * @param age	agent agent variable of type unsigned int
- * @param dead	agent agent variable of type unsigned int
  * @param gender	agent agent variable of type unsigned int
  * @param householdsize	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int dead, unsigned int gender, unsigned int householdsize);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize);
 
 
   
@@ -348,15 +345,6 @@ __host__ unsigned int get_Person_default_variable_id(unsigned int index);
  */
 __host__ unsigned int get_Person_default_variable_age(unsigned int index);
 
-/** unsigned int get_Person_default_variable_dead(unsigned int index)
- * Gets the value of the dead variable of an Person agent in the default state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable dead
- */
-__host__ unsigned int get_Person_default_variable_dead(unsigned int index);
-
 /** unsigned int get_Person_default_variable_gender(unsigned int index)
  * Gets the value of the gender variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -392,15 +380,6 @@ __host__ unsigned int get_Person_s2_variable_id(unsigned int index);
  * @return value of agent variable age
  */
 __host__ unsigned int get_Person_s2_variable_age(unsigned int index);
-
-/** unsigned int get_Person_s2_variable_dead(unsigned int index)
- * Gets the value of the dead variable of an Person agent in the s2 state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable dead
- */
-__host__ unsigned int get_Person_s2_variable_dead(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_gender(unsigned int index)
  * Gets the value of the gender variable of an Person agent in the s2 state on the host. 
@@ -545,32 +524,6 @@ unsigned int min_Person_default_age_variable();
  */
 unsigned int max_Person_default_age_variable();
 
-/** unsigned int reduce_Person_default_dead_variable();
- * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the reduced variable value of the specified agent name and state
- */
-unsigned int reduce_Person_default_dead_variable();
-
-
-
-/** unsigned int count_Person_default_dead_variable(int count_value){
- * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
- * @param count_value The unique value which should be counted
- * @return The number of unique values of the count_value found in the agent state variable list
- */
-unsigned int count_Person_default_dead_variable(int count_value);
-
-/** unsigned int min_Person_default_dead_variable();
- * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-unsigned int min_Person_default_dead_variable();
-/** unsigned int max_Person_default_dead_variable();
- * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-unsigned int max_Person_default_dead_variable();
-
 /** unsigned int reduce_Person_default_gender_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -674,32 +627,6 @@ unsigned int min_Person_s2_age_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_age_variable();
-
-/** unsigned int reduce_Person_s2_dead_variable();
- * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the reduced variable value of the specified agent name and state
- */
-unsigned int reduce_Person_s2_dead_variable();
-
-
-
-/** unsigned int count_Person_s2_dead_variable(int count_value){
- * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
- * @param count_value The unique value which should be counted
- * @return The number of unique values of the count_value found in the agent state variable list
- */
-unsigned int count_Person_s2_dead_variable(int count_value);
-
-/** unsigned int min_Person_s2_dead_variable();
- * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-unsigned int min_Person_s2_dead_variable();
-/** unsigned int max_Person_s2_dead_variable();
- * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-unsigned int max_Person_s2_dead_variable();
 
 /** unsigned int reduce_Person_s2_gender_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

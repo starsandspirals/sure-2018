@@ -280,9 +280,9 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent, RNG_rand48 *rand48)
 	// If agent has been alive long enough, kill them.
 	if (random < (agent->age * SCALE_FACTOR * TIME_STEP))
 	{
-		agent->dead = 1;
+		return 1;
 	}
-	return agent->dead;
+	return 0;
 }
 
 #endif // #ifndef _FUNCTIONS_H_

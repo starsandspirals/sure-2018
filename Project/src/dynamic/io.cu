@@ -182,11 +182,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</age>\n", file);
         
-		fputs("<dead>", file);
-        sprintf(data, "%u", h_Persons_default->dead[i]);
-		fputs(data, file);
-		fputs("</dead>\n", file);
-        
 		fputs("<gender>", file);
         sprintf(data, "%u", h_Persons_default->gender[i]);
 		fputs(data, file);
@@ -213,11 +208,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->age[i]);
 		fputs(data, file);
 		fputs("</age>\n", file);
-        
-		fputs("<dead>", file);
-        sprintf(data, "%u", h_Persons_s2->dead[i]);
-		fputs(data, file);
-		fputs("</dead>\n", file);
         
 		fputs("<gender>", file);
         sprintf(data, "%u", h_Persons_s2->gender[i]);
@@ -276,7 +266,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int in_tag, in_itno, in_xagent, in_name;
     int in_Person_id;
     int in_Person_age;
-    int in_Person_dead;
     int in_Person_gender;
     int in_Person_householdsize;
     
@@ -296,7 +285,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	/* Variables for initial state data */
 	unsigned int Person_id;
 	unsigned int Person_age;
-	unsigned int Person_dead;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
 
@@ -324,7 +312,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_name = 0;
 	in_Person_id = 0;
 	in_Person_age = 0;
-	in_Person_dead = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
     in_env_TIME_STEP = 0;
@@ -337,7 +324,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	{	
 		h_Persons->id[k] = 0;
 		h_Persons->age[k] = 0;
-		h_Persons->dead[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
 	}
@@ -346,7 +332,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	/* Default variables for memory */
     Person_id = 0;
     Person_age = 0;
-    Person_dead = 0;
     Person_gender = 0;
     Person_householdsize = 0;
 
@@ -418,7 +403,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     
 					h_Persons->id[*h_xmachine_memory_Person_count] = Person_id;
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
-					h_Persons->dead[*h_xmachine_memory_Person_count] = Person_dead;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
 					(*h_xmachine_memory_Person_count) ++;	
@@ -433,7 +417,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				/* Reset xagent variables */
                 Person_id = 0;
                 Person_age = 0;
-                Person_dead = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
                 
@@ -443,8 +426,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/id") == 0) in_Person_id = 0;
 			if(strcmp(buffer, "age") == 0) in_Person_age = 1;
 			if(strcmp(buffer, "/age") == 0) in_Person_age = 0;
-			if(strcmp(buffer, "dead") == 0) in_Person_dead = 1;
-			if(strcmp(buffer, "/dead") == 0) in_Person_dead = 0;
 			if(strcmp(buffer, "gender") == 0) in_Person_gender = 1;
 			if(strcmp(buffer, "/gender") == 0) in_Person_gender = 0;
 			if(strcmp(buffer, "householdsize") == 0) in_Person_householdsize = 1;
@@ -482,9 +463,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_age){
                     Person_age = (unsigned int) fpgu_strtoul(buffer); 
-                }
-				if(in_Person_dead){
-                    Person_dead = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Person_gender){
                     Person_gender = (unsigned int) fpgu_strtoul(buffer); 
