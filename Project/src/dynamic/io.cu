@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -129,6 +129,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying Person Agent s2 State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Households_hhdefault, d_Households_hhdefault, sizeof(xmachine_memory_Household_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying Household Agent hhdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -221,6 +227,31 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each Household agent to xml
+	for (int i=0; i<h_xmachine_memory_Household_hhdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>Household</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Households_hhdefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<size>", file);
+        sprintf(data, "%u", h_Households_hhdefault->size[i]);
+		fputs(data, file);
+		fputs("</size>\n", file);
+        
+		fputs("<people>", file);
+        for (int j=0;j<32;j++){
+            fprintf(file, "%u", h_Households_hhdefault->people[(j*xmachine_memory_Household_MAX)+i]);
+            if(j!=(32-1))
+                fprintf(file, ",");
+        }
+		fputs("</people>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -245,7 +276,7 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RANDOM_AGES(&t_RANDOM_AGES);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -268,6 +299,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
+    int in_Household_id;
+    int in_Household_size;
+    int in_Household_people;
     
     /* tags for environment global variables */
     int in_env;
@@ -281,12 +315,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
+	*h_xmachine_memory_Household_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
+	unsigned int Household_id;
+	unsigned int Household_size;
+    unsigned int Household_people[32];
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -314,6 +352,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
+	in_Household_id = 0;
+	in_Household_size = 0;
+	in_Household_people = 0;
     in_env_TIME_STEP = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
@@ -328,12 +369,28 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->householdsize[k] = 0;
 	}
 	
+	//set all Household values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_Household_MAX; k++)
+	{	
+		h_Households->id[k] = 0;
+		h_Households->size[k] = 0;
+        for (i=0;i<32;i++){
+            h_Households->people[(i*xmachine_memory_Household_MAX)+k] = 0;
+        }
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
+    Household_id = 0;
+    Household_size = 0;
+    for (i=0;i<32;i++){
+        Household_people[i] = 0;
+    }
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -407,6 +464,22 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
+				else if(strcmp(agentname, "Household") == 0)
+				{
+					if (*h_xmachine_memory_Household_count > xmachine_memory_Household_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Household exceeded whilst reading data\n", xmachine_memory_Household_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Households->id[*h_xmachine_memory_Household_count] = Household_id;
+					h_Households->size[*h_xmachine_memory_Household_count] = Household_size;
+                    for (int k=0;k<32;k++){
+                        h_Households->people[(k*xmachine_memory_Household_MAX)+(*h_xmachine_memory_Household_count)] = Household_people[k];
+                    }
+					(*h_xmachine_memory_Household_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -419,6 +492,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
+                Household_id = 0;
+                Household_size = 0;
+                for (i=0;i<32;i++){
+                    Household_people[i] = 0;
+                }
                 
                 in_xagent = 0;
 			}
@@ -430,6 +508,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/gender") == 0) in_Person_gender = 0;
 			if(strcmp(buffer, "householdsize") == 0) in_Person_householdsize = 1;
 			if(strcmp(buffer, "/householdsize") == 0) in_Person_householdsize = 0;
+			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Household_id = 0;
+			if(strcmp(buffer, "size") == 0) in_Household_size = 1;
+			if(strcmp(buffer, "/size") == 0) in_Household_size = 0;
+			if(strcmp(buffer, "people") == 0) in_Household_people = 1;
+			if(strcmp(buffer, "/people") == 0) in_Household_people = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -469,6 +553,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_householdsize){
                     Person_householdsize = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Household_id){
+                    Household_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Household_size){
+                    Household_size = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Household_people){
+                    readArrayInput<unsigned int>(&fpgu_strtoul, buffer, Household_people, 32);    
                 }
 				
             }

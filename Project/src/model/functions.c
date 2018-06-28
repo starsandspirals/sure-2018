@@ -306,4 +306,9 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent, RNG_rand48 *rand48)
 	return 0;
 }
 
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *agent)
+{
+	return 0;
+}
+
 #endif // #ifndef _FUNCTIONS_H_

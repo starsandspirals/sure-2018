@@ -101,6 +101,19 @@ xmachine_memory_Person_list* h_Persons_s2;      /**< Pointer to agent list (popu
 xmachine_memory_Person_list* d_Persons_s2;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Person_s2_count;   /**< Agent population size counter */ 
 
+/* Household Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_Household_list* d_Households;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_Household_list* d_Households_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_Household_list* d_Households_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_Household_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_Household_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_Household_values;  /**< Agent sort identifiers value */
+
+/* Household state variables */
+xmachine_memory_Household_list* h_Households_hhdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_Household_list* d_Households_hhdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_Household_hhdefault_count;   /**< Agent population size counter */ 
+
 
 /* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
@@ -113,6 +126,9 @@ unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
 unsigned int h_Persons_s2_variable_gender_data_iteration;
 unsigned int h_Persons_s2_variable_householdsize_data_iteration;
+unsigned int h_Households_hhdefault_variable_id_data_iteration;
+unsigned int h_Households_hhdefault_variable_size_data_iteration;
+unsigned int h_Households_hhdefault_variable_people_data_iteration;
 
 
 /* Message Memory */
@@ -125,6 +141,9 @@ cudaStream_t stream1;
 
 void * d_temp_scan_storage_Person;
 size_t temp_scan_storage_bytes_Person;
+
+void * d_temp_scan_storage_Household;
+size_t temp_scan_storage_bytes_Household;
 
 
 /*Global condition counts*/
@@ -153,6 +172,11 @@ int scan_last_included;      /**< Indicates if last sum value is included in the
  * Agent function prototype for update function of Person agent
  */
 void Person_update(cudaStream_t &stream);
+
+/** Household_hhupdate
+ * Agent function prototype for hhupdate function of Household agent
+ */
+void Household_hhupdate(cudaStream_t &stream);
 
   
 void setPaddingAndOffset()
@@ -254,6 +278,9 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
     h_Persons_s2_variable_householdsize_data_iteration = 0;
+    h_Households_hhdefault_variable_id_data_iteration = 0;
+    h_Households_hhdefault_variable_size_data_iteration = 0;
+    h_Households_hhdefault_variable_people_data_iteration = 0;
     
 
 
@@ -264,6 +291,8 @@ void initialise(char * inputfile){
 	int xmachine_Person_SoA_size = sizeof(xmachine_memory_Person_list);
 	h_Persons_default = (xmachine_memory_Person_list*)malloc(xmachine_Person_SoA_size);
 	h_Persons_s2 = (xmachine_memory_Person_list*)malloc(xmachine_Person_SoA_size);
+	int xmachine_Household_SoA_size = sizeof(xmachine_memory_Household_list);
+	h_Households_hhdefault = (xmachine_memory_Household_list*)malloc(xmachine_Household_SoA_size);
 
 	/* Message memory allocation (CPU) */
 
@@ -272,7 +301,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -291,6 +320,17 @@ void initialise(char * inputfile){
 	/* s2 memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Persons_s2, xmachine_Person_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Persons_s2, h_Persons_s2, xmachine_Person_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* Household Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Households, xmachine_Household_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Households_swap, xmachine_Household_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Households_new, xmachine_Household_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Household_keys, xmachine_memory_Household_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Household_values, xmachine_memory_Household_MAX* sizeof(uint)));
+	/* hhdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Households_hhdefault, xmachine_Household_SoA_size));
+	gpuErrchk( cudaMemcpy( d_Households_hhdefault, h_Households_hhdefault, xmachine_Household_SoA_size, cudaMemcpyHostToDevice));
     	
     PROFILE_POP_RANGE(); // "allocate device"
 
@@ -306,6 +346,17 @@ void initialise(char * inputfile){
         xmachine_memory_Person_MAX
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Person, temp_scan_storage_bytes_Person));
+    
+    d_temp_scan_storage_Household = nullptr;
+    temp_scan_storage_bytes_Household = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Household, 
+        temp_scan_storage_bytes_Household, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_Household_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_Household, temp_scan_storage_bytes_Household));
     
 
 	/*Set global condition counts*/
@@ -391,6 +442,8 @@ void initialise(char * inputfile){
 	
 		printf("Init agent_Person_s2_count: %u\n",get_agent_Person_s2_count());
 	
+		printf("Init agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
+	
 #endif
 } 
 
@@ -451,6 +504,34 @@ void sort_Persons_s2(void (*generate_key_value_pairs)(unsigned int* keys, unsign
 	d_Persons_swap = d_Persons_temp;	
 }
 
+void sort_Households_hhdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Household_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_Household_hhdefault_count); 
+	gridSize = (h_xmachine_memory_Household_hhdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_Household_keys, d_xmachine_memory_Household_values, d_Households_hhdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_Household_keys),  thrust::device_pointer_cast(d_xmachine_memory_Household_keys) + h_xmachine_memory_Household_hhdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_Household_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_Household_agents, no_sm, h_xmachine_memory_Household_hhdefault_count); 
+	gridSize = (h_xmachine_memory_Household_hhdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_Household_agents<<<gridSize, blockSize>>>(d_xmachine_memory_Household_values, d_Households_hhdefault, d_Households_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_Household_list* d_Households_temp = d_Households_hhdefault;
+	d_Households_hhdefault = d_Households_swap;
+	d_Households_swap = d_Households_temp;	
+}
+
 
 void cleanup(){
     PROFILE_SCOPED_RANGE("cleanup");
@@ -486,6 +567,14 @@ void cleanup(){
 	free( h_Persons_s2);
 	gpuErrchk(cudaFree(d_Persons_s2));
 	
+	/* Household Agent variables */
+	gpuErrchk(cudaFree(d_Households));
+	gpuErrchk(cudaFree(d_Households_swap));
+	gpuErrchk(cudaFree(d_Households_new));
+	
+	free( h_Households_hhdefault);
+	gpuErrchk(cudaFree(d_Households_hhdefault));
+	
 
 	/* Message data free */
 	
@@ -495,6 +584,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_Person));
     d_temp_scan_storage_Person = nullptr;
     temp_scan_storage_bytes_Person = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_Household));
+    d_temp_scan_storage_Household = nullptr;
+    temp_scan_storage_bytes_Household = 0;
     
   
   /* CUDA Streams for function layers */
@@ -579,6 +672,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_Person_default_count: %u\n",get_agent_Person_default_count());
 	
 		printf("agent_Person_s2_count: %u\n",get_agent_Person_s2_count());
+	
+		printf("agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
 	
 #endif
 
@@ -686,6 +781,26 @@ xmachine_memory_Person_list* get_device_Person_s2_agents(){
 
 xmachine_memory_Person_list* get_host_Person_s2_agents(){
 	return h_Persons_s2;
+}
+
+    
+int get_agent_Household_MAX_count(){
+    return xmachine_memory_Household_MAX;
+}
+
+
+int get_agent_Household_hhdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_Household_hhdefault_count;
+	
+}
+
+xmachine_memory_Household_list* get_device_Household_hhdefault_agents(){
+	return d_Households_hhdefault;
+}
+
+xmachine_memory_Household_list* get_host_Household_hhdefault_agents(){
+	return h_Households_hhdefault;
 }
 
 
@@ -1004,6 +1119,127 @@ __host__ unsigned int get_Person_s2_variable_householdsize(unsigned int index){
     }
 }
 
+/** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Household_hhdefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->id,
+                    d_Households_hhdefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Household_hhdefault_variable_size(unsigned int index)
+ * Gets the value of the size variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable size
+ */
+__host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_size_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->size,
+                    d_Households_hhdefault->size,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_size_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->size[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access size for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
+ * Gets the element-th value of the people variable array of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable people
+ */
+__host__ unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int numElements = 32;
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count && element < numElements ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_people_data_iteration != currentIteration){
+            
+            for(unsigned int e = 0; e < numElements; e++){
+                gpuErrchk(
+                    cudaMemcpy(
+                        h_Households_hhdefault->people + (e * xmachine_memory_Household_MAX),
+                        d_Households_hhdefault->people + (e * xmachine_memory_Household_MAX), 
+                        count * sizeof(unsigned int), 
+                        cudaMemcpyDeviceToHost
+                    )
+                );
+                // Update some global value indicating what data is currently present in that host array.
+                h_Households_hhdefault_variable_people_data_iteration = currentIteration;
+            }
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->people[index + (element * xmachine_memory_Household_MAX)];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access the %u-th element of people for the %u th member of Household_hhdefault. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -1048,6 +1284,49 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->gender, h_src->gender, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->householdsize, h_src->householdsize, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_Household_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Household_list * d_dst, xmachine_memory_Household * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+	for(unsigned int i = 0; i < 32; i++){
+		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_agent->people + i, sizeof(unsigned int), cudaMemcpyHostToDevice));
+    }
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Household_list * d_dst, xmachine_memory_Household_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		for(unsigned int i = 0; i < 32; i++){
+			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_src->people + (i * xmachine_memory_Household_MAX), count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+        }
+
 
     }
 }
@@ -1237,6 +1516,124 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
 	}
 }
 
+xmachine_memory_Household* h_allocate_agent_Household(){
+	xmachine_memory_Household* agent = (xmachine_memory_Household*)malloc(sizeof(xmachine_memory_Household));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_Household));
+	// Agent variable arrays must be allocated
+    agent->people = (unsigned int*)malloc(32 * sizeof(unsigned int));
+	// If we have a default value, set each element correctly.
+	for(unsigned int index = 0; index < 32; index++){
+		agent->people[index] = 0;
+	}
+	return agent;
+}
+void h_free_agent_Household(xmachine_memory_Household** agent){
+
+    free((*agent)->people);
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_Household** h_allocate_agent_Household_array(unsigned int count){
+	xmachine_memory_Household ** agents = (xmachine_memory_Household**)malloc(count * sizeof(xmachine_memory_Household*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_Household();
+	}
+	return agents;
+}
+void h_free_agent_Household_array(xmachine_memory_Household*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_Household(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, xmachine_memory_Household** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			 
+			dst->size[i] = src[i]->size;
+			 
+			for(unsigned int j = 0; j < 32; j++){
+				dst->people[(j * xmachine_memory_Household_MAX) + i] = src[i]->people[j];
+			}
+			
+		}
+	}
+}
+
+
+void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
+	if (h_xmachine_memory_Household_count + 1 > xmachine_memory_Household_MAX){
+		printf("Error: Buffer size of Household agents in state hhdefault will be exceeded by h_add_agent_Household_hhdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_Household_hostToDevice(d_Households_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Household_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_Household_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Households_hhdefault, d_Households_new, h_xmachine_memory_Household_hhdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_Household_hhdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_Households_hhdefault_variable_id_data_iteration = 0;
+    h_Households_hhdefault_variable_size_data_iteration = 0;
+    h_Households_hhdefault_variable_people_data_iteration = 0;
+    
+
+}
+void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_Household_count + count > xmachine_memory_Household_MAX){
+			printf("Error: Buffer size of Household agents in state hhdefault will be exceeded by h_add_agents_Household_hhdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_Household_AoS_to_SoA(h_Households_hhdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_Household_hostToDevice(d_Households_new, h_Households_hhdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Household_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_Household_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Households_hhdefault, d_Households_new, h_xmachine_memory_Household_hhdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_Household_hhdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_Households_hhdefault_variable_id_data_iteration = 0;
+        h_Households_hhdefault_variable_size_data_iteration = 0;
+        h_Households_hhdefault_variable_people_data_iteration = 0;
+        
+
+	}
+}
+
 
 /*  Analytics Functions */
 
@@ -1408,6 +1805,48 @@ unsigned int max_Person_s2_householdsize_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Household_hhdefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->id),  thrust::device_pointer_cast(d_Households_hhdefault->id) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->id),  thrust::device_pointer_cast(d_Households_hhdefault->id) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Household_hhdefault_size_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->size),  thrust::device_pointer_cast(d_Households_hhdefault->size) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_size_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->size),  thrust::device_pointer_cast(d_Households_hhdefault->size) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_size_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->size);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_size_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->size);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 
 
 
@@ -1548,6 +1987,141 @@ void Person_update(cudaStream_t &stream){
 }
 
 
+
+	
+/* Shared memory size calculator for agent function */
+int Household_hhupdate_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** Household_hhupdate
+ * Agent function prototype for hhupdate function of Household agent
+ */
+void Household_hhupdate(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Household_hhdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Household_hhdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Household_list* Households_hhdefault_temp = d_Households;
+	d_Households = d_Households_hhdefault;
+	d_Households_hhdefault = Households_hhdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_Household_count = h_xmachine_memory_Household_hhdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_count, &h_xmachine_memory_Household_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Household_hhdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_hhupdate, Household_hhupdate_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Household_hhupdate_sm_size(blockSize);
+	
+	
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Household_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_Household_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Households);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (hhupdate)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households);
+	gpuErrchkLaunch();
+	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Household, 
+        temp_scan_storage_bytes_Household, 
+        d_Households->_scan_input,
+        d_Households->_position,
+        h_xmachine_memory_Household_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Household_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_swap, d_Households, 0, h_xmachine_memory_Household_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_Household_list* hhupdate_Households_temp = d_Households;
+	d_Households = d_Households_swap;
+	d_Households_swap = hhupdate_Households_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Households_swap->_position[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Households_swap->_scan_input[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_Household_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_Household_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_count, &h_xmachine_memory_Household_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Household_hhdefault_count+h_xmachine_memory_Household_count > xmachine_memory_Household_MAX){
+		printf("Error: Buffer size of hhupdate agents in state hhdefault will be exceeded moving working agents to next state in function hhupdate\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Household_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_hhdefault, d_Households, h_xmachine_memory_Household_hhdefault_count, h_xmachine_memory_Household_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_Household_hhdefault_count += h_xmachine_memory_Household_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));	
+	
+	
+}
+
+
  
 extern void reset_Person_default_count()
 {
@@ -1557,4 +2131,9 @@ extern void reset_Person_default_count()
 extern void reset_Person_s2_count()
 {
     h_xmachine_memory_Person_s2_count = 0;
+}
+ 
+extern void reset_Household_hhdefault_count()
+{
+    h_xmachine_memory_Household_hhdefault_count = 0;
 }
