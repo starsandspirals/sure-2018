@@ -24,12 +24,21 @@
 #include <vector>
 
 xmachine_memory_Person **h_agent_AoS;
+xmachine_memory_Household **h_household_AoS;
 const unsigned int h_agent_AoS_MAX = 32768;
+const unsigned int h_household_AoS_MAX = 2048;
 unsigned int h_nextID;
+unsigned int h_nextHouseholdID;
 
 __host__ unsigned int getNextID() {
   unsigned int old = h_nextID;
   h_nextID++;
+  return old;
+}
+
+__host__ unsigned int getNextHouseholdID() {
+  unsigned int old = h_nextHouseholdID;
+  h_nextHouseholdID++;
   return old;
 }
 
@@ -108,10 +117,26 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   fclose(file);
 }
 
-__FLAME_GPU_INIT_FUNC__ void generatePersonInit() {
+__FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
 
   printf("Population after init function: %u\n",
          get_agent_Person_default_count());
+
+  unsigned int sizearray[h_agent_AoS_MAX][32];
+  unsigned int currentsize;
+  unsigned int count;
+
+  for (int i = 0; i < 32; i++) {
+    sizearray[0][i] = 0;
+  }
+
+  for (int index = 0; index < get_agent_Person_default_count(); index++) {
+    currentsize = get_Person_default_variable_householdsize(index);
+    count = sizearray[0][currentsize];
+    sizearray[count][currentsize] = get_Person_default_variable_id(index);
+    sizearray[0][currentsize]++;
+  }
+
 }
 
 __FLAME_GPU_STEP_FUNC__ void generatePersonStep() {

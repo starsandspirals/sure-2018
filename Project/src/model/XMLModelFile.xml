@@ -35,7 +35,7 @@
         <gpu:name>initialiseHost</gpu:name>
       </gpu:initFunction>
       <gpu:initFunction>
-        <gpu:name>generatePersonInit</gpu:name>
+        <gpu:name>generateAgentsInit</gpu:name>
       </gpu:initFunction>
     </gpu:initFunctions>
 

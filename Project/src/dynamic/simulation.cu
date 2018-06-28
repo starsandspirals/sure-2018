@@ -420,14 +420,14 @@ void initialise(char * inputfile){
 #if defined(INSTRUMENT_INIT_FUNCTIONS) && INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
-    generatePersonInit();
-    PROFILE_PUSH_RANGE("generatePersonInit");
+    generateAgentsInit();
+    PROFILE_PUSH_RANGE("generateAgentsInit");
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_INIT_FUNCTIONS) && INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: generatePersonInit = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: generateAgentsInit = %f (ms)\n", instrument_milliseconds);
 #endif
 	
   
