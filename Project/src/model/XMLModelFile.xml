@@ -68,17 +68,6 @@
           <name>age</name>
           <defaultValue>0</defaultValue>
         </gpu:variable>
- <!-->       <gpu:variable>
-          <type>float</type>
-          <name>example_array</name>
-          <arrayLength>4</arrayLength>
-          <defaultValue>1</defaultValue>
-        </gpu:variable>
-        <gpu:variable>
-          <type>ivec4</type>
-          <name>example_vector</name> -->
-          <!-- <defaultValue>0,1,2,3</defaultValue> Does not currently work
-        </gpu:variable>-->
         <gpu:variable>
           <type>unsigned int</type>
           <name>gender</name>
