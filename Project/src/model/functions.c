@@ -66,17 +66,29 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 	unsigned int sizes = strtol(fgets(line, sizeof(line), file), NULL, 0);
 	unsigned int categories = strtol(fgets(line, sizeof(line), file), NULL, 0);
 
-	/*unsigned int gender;
+	unsigned int gender;
 	unsigned int minage;
+	
+	char * maximumage;
 	unsigned int maxage;
+
 	unsigned int currentsize;
 	unsigned int amount;
+	unsigned int age;
 
 	for (unsigned int i = 0; i < categories; i++) {
 
 		gender = strtol(fgets(line, sizeof(line), file), NULL, 0);
 		minage = strtol(fgets(line, sizeof(line), file), NULL, 0);
-		maxage = strtol(fgets(line, sizeof(line), file), NULL, 0);
+
+		maximumage = fgets(line, sizeof(line), file);
+
+		if (not strcmp(maximumage, "Inf\n")) {
+			maxage = (*get_MAX_AGE());
+			printf(":O");
+		} else {
+			maxage = strtol(maximumage, NULL, 0);
+		}
 
 		for (unsigned int ii = 0; ii < sizes; ii++) {
 
@@ -85,16 +97,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
 			for (unsigned int iii = 0; iii < amount; iii++) {
 
+				age = (rand() % maxage) + minage;
 
+        printf("id = %u, age = %u, gender = %u, size = %u\n", getNextID(), age, gender, currentsize);
 
 			}
 
-
 		}
-
-
     
-	}*/
+	}
 
 	while (fgets(line, sizeof(line), file)) {
 		printf("%s", line);
