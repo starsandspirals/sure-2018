@@ -103,7 +103,7 @@
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
-      <gpu:bufferSize>256</gpu:bufferSize>
+      <gpu:bufferSize>32768</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
   <messages>

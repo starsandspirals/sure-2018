@@ -24,7 +24,7 @@
 
 // Declare global scope variables for host-based agent creation, so allocation of host data is only performed once.
 xmachine_memory_Person **h_agent_AoS;
-const unsigned int h_agent_AoS_MAX = 256;
+const unsigned int h_agent_AoS_MAX = 32768;
 unsigned int h_nextID;
 
 __host__ unsigned int getNextID()
@@ -85,7 +85,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
 		if (not strcmp(maximumage, "Inf\n")) {
 			maxage = (*get_MAX_AGE());
-			printf(":O");
 		} else {
 			maxage = strtol(maximumage, NULL, 0);
 		}
@@ -97,9 +96,20 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
 			for (unsigned int iii = 0; iii < amount; iii++) {
 
+				xmachine_memory_Person *h_person = h_allocate_agent_Person();
+
 				age = (rand() % maxage) + minage;
 
-        printf("id = %u, age = %u, gender = %u, size = %u\n", getNextID(), age, gender, currentsize);
+        // printf("id = %u, age = %u, gender = %u, size = %u\n", getNextID(), age, gender, currentsize);
+
+				h_person->id = getNextID();
+				h_person->age = age;
+				h_person->gender = gender;
+				h_person->householdsize = currentsize;
+
+				h_add_agent_Person_default(h_person);
+
+				h_free_agent_Person(&h_person);
 
 			}
 
@@ -126,7 +136,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
  */
 __FLAME_GPU_INIT_FUNC__ void generatePersonInit()
 {
-	printf("Population from initial states XML file: %u\n", get_agent_Person_default_count());
+/*	printf("Population from initial states XML file: %u\n", get_agent_Person_default_count());
 
 	for (int i = 0; i < h_agent_AoS_MAX; i++)
 	{
@@ -144,11 +154,11 @@ __FLAME_GPU_INIT_FUNC__ void generatePersonInit()
 		{
 			h_agent->age = 0;
 		}
-	/*	for (unsigned int i = 0; i < xmachine_memory_Person_example_array_LENGTH; i++)
+		for (unsigned int i = 0; i < xmachine_memory_Person_example_array_LENGTH; i++)
 		{
 			h_agent->example_array[i] = rand() / (double)RAND_MAX;
 		}
-		h_agent->example_vector = {h_agent->id + 1, h_agent->id + 2, h_agent->id + 3, h_agent->id + 4};*/
+		h_agent->example_vector = {h_agent->id + 1, h_agent->id + 2, h_agent->id + 3, h_agent->id + 4};
 		// fprintf(stdout, "Create Persson:\tid %u\ttime_alive %u\tvector {%d, %d, %d, %d}\tarray[0] %f\n", h_agent->id, h_agent->time_alive, h_agent->example_vector.x, h_agent->example_vector.y, h_agent->example_vector.z, h_agent->example_vector.w, h_agent->example_array[0]);
 
 		// Copy agent data from the host to the device
@@ -156,8 +166,8 @@ __FLAME_GPU_INIT_FUNC__ void generatePersonInit()
 
 		// Clear host memory for single struct. The Utility function also deallocates any agent variable arrays.
 		h_free_agent_Person(&h_agent);
-	}
-
+	} 
+*/
 	printf("Population after init function: %u\n", get_agent_Person_default_count());
 }
 
