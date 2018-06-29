@@ -130,7 +130,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       h_household->id = getNextHouseholdID();
       h_household->size = h;
-      
+
       for (unsigned int hhh = 0; hhh < h; hhh++) {
         h_household->people[hhh] = count;
         count++;
@@ -139,7 +139,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       h_add_agent_Household_hhdefault(h_household);
 
       h_free_agent_Household(&h_household);
-
     }
   }
 
@@ -223,7 +222,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
   if (iteration % 5 == 0) {
 
     std::string outputFilename =
-        std::string(std::string(directory) + "custom-output-" +
+        std::string(std::string(directory) + "person-output-" +
                     std::to_string(iteration) + ".csv");
 
     FILE *fp = fopen(outputFilename.c_str(), "w");
@@ -232,11 +231,12 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fprintf(stdout, "Outputting some Person data to %s\n",
               outputFilename.c_str());
 
-      fprintf(fp, "ID, age\n");
+      fprintf(fp, "ID, gender, age\n");
 
       for (int index = 0; index < get_agent_Person_default_count(); index++) {
 
-        fprintf(fp, "%u, %u\n", get_Person_default_variable_id(index),
+        fprintf(fp, "%u, %u, %u\n", get_Person_default_variable_id(index),
+                get_Person_default_variable_gender(index),
                 get_Person_default_variable_age(index));
       }
 
