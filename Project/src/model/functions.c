@@ -46,6 +46,21 @@ __host__ unsigned int getNextHouseholdID() {
   return old;
 }
 
+__host__ void shuffle(unsigned int *array, size_t n)
+{
+    if (n > 1) 
+    {
+        size_t i;
+        for (i = 0; i < n - 1; i++) 
+        {
+          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+          unsigned int t = array[j];
+          array[j] = array[i];
+          array[i] = t;
+        }
+    }
+}
+
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
   printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
@@ -130,6 +145,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   count = 0;
   float churchprob;
+  total = get_agent_Person_default_count();
+  unsigned int order[total];
+
+  for (unsigned int m = 0; m < total; m++) {
+    order[m] = m;
+  }
+
+  shuffle(order, total);
 
   for (unsigned int h = 1; h < 32; h++) {
     for (unsigned int hh = 0; hh < (sizearray[h] / h); hh++) {
@@ -140,7 +163,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       h_household->size = h;
 
       for (unsigned int hhh = 0; hhh < h; hhh++) {
-        h_household->people[hhh] = count;
+        h_household->people[hhh] = order[count];
         count++;
       }
 
