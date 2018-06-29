@@ -109,7 +109,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         xmachine_memory_Person *h_person = h_allocate_agent_Person();
 
-        age = (rand() % maxage) + minage;
+        age = (rand() % (maxage - minage)) + minage;
 
         h_person->id = getNextID();
         h_person->age = age;
