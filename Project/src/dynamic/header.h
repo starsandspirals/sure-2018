@@ -925,6 +925,8 @@ __constant__ unsigned int MAX_AGE;
 
 __constant__ unsigned int RANDOM_AGES;
 
+__constant__ float STARTING_POPULATION;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -968,6 +970,17 @@ extern const unsigned int* get_RANDOM_AGES();
 
 
 extern unsigned int h_env_RANDOM_AGES;
+
+/** set_STARTING_POPULATION
+ * Sets the constant variable STARTING_POPULATION on the device which can then be used in the agent functions.
+ * @param h_STARTING_POPULATION value to set the variable
+ */
+extern void set_STARTING_POPULATION(float* h_STARTING_POPULATION);
+
+extern const float* get_STARTING_POPULATION();
+
+
+extern float h_env_STARTING_POPULATION;
 
 
 /** getMaximumBound

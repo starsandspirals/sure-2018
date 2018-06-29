@@ -5,6 +5,10 @@ def generate(s):
   data = pandas.read_csv('src/model/histo.csv')
   fileout = open(s, 'w')
   categories, sizes = data.shape
+  colsums = data.sum(axis=0)[1:]
+  total = colsums.sum()
+
+  fileout.write(str(total) + '\n')
 
   fileout.write(str(sizes - 1) + '\n')
   fileout.write(str(categories) + '\n')

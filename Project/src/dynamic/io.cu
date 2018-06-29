@@ -171,6 +171,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_RANDOM_AGES()));
     fputs(data, file);
     fputs("</RANDOM_AGES>\n", file);
+    fputs("\t<STARTING_POPULATION>", file);
+    sprintf(data, "%f", (*get_STARTING_POPULATION()));
+    fputs(data, file);
+    fputs("</STARTING_POPULATION>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -274,6 +278,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_MAX_AGE(&t_MAX_AGE);
     unsigned int t_RANDOM_AGES = (unsigned int)1;
     set_RANDOM_AGES(&t_RANDOM_AGES);
+    float t_STARTING_POPULATION = (float)30000.0;
+    set_STARTING_POPULATION(&t_STARTING_POPULATION);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count)
@@ -313,6 +319,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_RANDOM_AGES;
     
+    int in_env_STARTING_POPULATION;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
@@ -331,6 +339,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_SCALE_FACTOR;
     unsigned int env_MAX_AGE;
     unsigned int env_RANDOM_AGES;
+    float env_STARTING_POPULATION;
     
 
 
@@ -359,6 +368,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
     in_env_RANDOM_AGES = 0;
+    in_env_STARTING_POPULATION = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -397,6 +407,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_SCALE_FACTOR = 0;
     env_MAX_AGE = 0;
     env_RANDOM_AGES = 0;
+    env_STARTING_POPULATION = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -524,6 +535,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/MAX_AGE") == 0) in_env_MAX_AGE = 0;
 			if(strcmp(buffer, "RANDOM_AGES") == 0) in_env_RANDOM_AGES = 1;
             if(strcmp(buffer, "/RANDOM_AGES") == 0) in_env_RANDOM_AGES = 0;
+			if(strcmp(buffer, "STARTING_POPULATION") == 0) in_env_STARTING_POPULATION = 1;
+            if(strcmp(buffer, "/STARTING_POPULATION") == 0) in_env_STARTING_POPULATION = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -592,6 +605,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_RANDOM_AGES = (unsigned int) fpgu_strtoul(buffer);
                     
                     set_RANDOM_AGES(&env_RANDOM_AGES);
+                  
+              }
+            if(in_env_STARTING_POPULATION){
+              
+                    env_STARTING_POPULATION = (float) fgpu_atof(buffer);
+                    
+                    set_STARTING_POPULATION(&env_STARTING_POPULATION);
                   
               }
             

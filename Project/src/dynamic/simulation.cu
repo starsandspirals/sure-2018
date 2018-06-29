@@ -692,6 +692,7 @@ float h_env_TIME_STEP;
 float h_env_SCALE_FACTOR;
 unsigned int h_env_MAX_AGE;
 unsigned int h_env_RANDOM_AGES;
+float h_env_STARTING_POPULATION;
 
 
 //constant setter
@@ -742,6 +743,19 @@ void set_RANDOM_AGES(unsigned int* h_RANDOM_AGES){
 //constant getter
 const unsigned int* get_RANDOM_AGES(){
     return &h_env_RANDOM_AGES;
+}
+
+
+
+//constant setter
+void set_STARTING_POPULATION(float* h_STARTING_POPULATION){
+    gpuErrchk(cudaMemcpyToSymbol(STARTING_POPULATION, h_STARTING_POPULATION, sizeof(float)));
+    memcpy(&h_env_STARTING_POPULATION, h_STARTING_POPULATION,sizeof(float));
+}
+
+//constant getter
+const float* get_STARTING_POPULATION(){
+    return &h_env_STARTING_POPULATION;
 }
 
 

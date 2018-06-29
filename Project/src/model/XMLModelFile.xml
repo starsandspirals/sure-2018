@@ -24,6 +24,11 @@
          <name>RANDOM_AGES</name>
          <defaultValue>1</defaultValue>
        </gpu:variable>
+       <gpu:variable>
+         <type>float</type>
+         <name>STARTING_POPULATION</name>
+         <defaultValue>30000.0</defaultValue>
+       </gpu:variable>
     </gpu:constants>
 
     <gpu:functionFiles>
