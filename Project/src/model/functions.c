@@ -20,6 +20,7 @@
 
 #include "header.h"
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
@@ -50,7 +51,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
   printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
   printf("Set RANDOM_AGES = %u\n", *get_RANDOM_AGES());
-  printf("Set STARTING_POPULATION = %u\n", (int) *get_STARTING_POPULATION());
+  printf("Set STARTING_POPULATION = %u\n", (int)*get_STARTING_POPULATION());
 
   srand(0);
 
@@ -128,10 +129,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   }
 
   count = 0;
+  float churchprob;
 
   for (unsigned int h = 1; h < 32; h++) {
     for (unsigned int hh = 0; hh < (sizearray[h] / h); hh++) {
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
+      churchprob = 1 / (1 + exp(-beta0 - (beta1 * h)));
 
       h_household->id = getNextHouseholdID();
       h_household->size = h;
@@ -139,6 +142,37 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       for (unsigned int hhh = 0; hhh < h; hhh++) {
         h_household->people[hhh] = count;
         count++;
+      }
+
+      float random = ((float)rand() / (RAND_MAX));
+
+      if (random < churchprob) {
+        h_household->churchgoing = 1;
+      } else {
+        h_household->churchgoing = 0;
+      }
+
+      if (h_household->churchgoing) {
+        random = ((float)rand() / (RAND_MAX));
+        if (random < 0.285569106) {
+          h_household->churchfreq = 0;
+        } else if (random < 0.704268293) {
+          h_household->churchfreq = 1;
+        } else if (random < 0.864329269) {
+          h_household->churchfreq = 2;
+        } else if (random < 0.944613822) {
+          h_household->churchfreq = 3;
+        } else if (random < 0.978658537) {
+          h_household->churchfreq = 4;
+        } else if (random < 0.981707317) {
+          h_household->churchfreq = 5;
+        } else if (random < 0.985772358) {
+          h_household->churchfreq = 6;
+        } else {
+          h_household->churchfreq = 7;
+        }
+      } else {
+        h_household->churchfreq = 0;
       }
 
       h_add_agent_Household_hhdefault(h_household);
@@ -220,13 +254,16 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fprintf(stdout, "Outputting some Household data to %s\n",
               outputFilename.c_str());
 
-      fprintf(fp, "ID, size\n");
+      fprintf(fp, "ID, size, churchgoing, churchfreq\n");
 
       for (int index = 0; index < get_agent_Household_hhdefault_count();
            index++) {
 
-        fprintf(fp, "%u, %u\n", get_Household_hhdefault_variable_id(index),
-                get_Household_hhdefault_variable_size(index));
+        fprintf(fp, "%u, %u, %u, %u\n",
+                get_Household_hhdefault_variable_id(index),
+                get_Household_hhdefault_variable_size(index),
+                get_Household_hhdefault_variable_churchgoing(index),
+                get_Household_hhdefault_variable_churchfreq(index));
       }
 
       fflush(fp);

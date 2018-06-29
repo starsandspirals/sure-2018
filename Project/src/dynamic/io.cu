@@ -254,6 +254,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         }
 		fputs("</people>\n", file);
         
+		fputs("<churchgoing>", file);
+        sprintf(data, "%u", h_Households_hhdefault->churchgoing[i]);
+		fputs(data, file);
+		fputs("</churchgoing>\n", file);
+        
+		fputs("<churchfreq>", file);
+        sprintf(data, "%u", h_Households_hhdefault->churchfreq[i]);
+		fputs(data, file);
+		fputs("</churchfreq>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	
@@ -308,6 +318,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Household_id;
     int in_Household_size;
     int in_Household_people;
+    int in_Household_churchgoing;
+    int in_Household_churchfreq;
     
     /* tags for environment global variables */
     int in_env;
@@ -333,6 +345,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Household_id;
 	unsigned int Household_size;
     int Household_people[32];
+	unsigned int Household_churchgoing;
+	unsigned int Household_churchfreq;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -364,6 +378,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Household_id = 0;
 	in_Household_size = 0;
 	in_Household_people = 0;
+	in_Household_churchgoing = 0;
+	in_Household_churchfreq = 0;
     in_env_TIME_STEP = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
@@ -388,6 +404,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         for (i=0;i<32;i++){
             h_Households->people[(i*xmachine_memory_Household_MAX)+k] = 0;
         }
+		h_Households->churchgoing[k] = 0;
+		h_Households->churchfreq[k] = 0;
 	}
 	
 
@@ -401,6 +419,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     for (i=0;i<32;i++){
         Household_people[i] = -1;
     }
+    Household_churchgoing = 0;
+    Household_churchfreq = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -489,6 +509,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     for (int k=0;k<32;k++){
                         h_Households->people[(k*xmachine_memory_Household_MAX)+(*h_xmachine_memory_Household_count)] = Household_people[k];
                     }
+					h_Households->churchgoing[*h_xmachine_memory_Household_count] = Household_churchgoing;
+					h_Households->churchfreq[*h_xmachine_memory_Household_count] = Household_churchfreq;
 					(*h_xmachine_memory_Household_count) ++;	
 				}
 				else
@@ -508,6 +530,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 for (i=0;i<32;i++){
                     Household_people[i] = -1;
                 }
+                Household_churchgoing = 0;
+                Household_churchfreq = 0;
                 
                 in_xagent = 0;
 			}
@@ -525,6 +549,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/size") == 0) in_Household_size = 0;
 			if(strcmp(buffer, "people") == 0) in_Household_people = 1;
 			if(strcmp(buffer, "/people") == 0) in_Household_people = 0;
+			if(strcmp(buffer, "churchgoing") == 0) in_Household_churchgoing = 1;
+			if(strcmp(buffer, "/churchgoing") == 0) in_Household_churchgoing = 0;
+			if(strcmp(buffer, "churchfreq") == 0) in_Household_churchfreq = 1;
+			if(strcmp(buffer, "/churchfreq") == 0) in_Household_churchfreq = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -575,6 +603,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Household_people){
                     readArrayInput<int>(&fpgu_strtol, buffer, Household_people, 32);    
+                }
+				if(in_Household_churchgoing){
+                    Household_churchgoing = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Household_churchfreq){
+                    Household_churchfreq = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }

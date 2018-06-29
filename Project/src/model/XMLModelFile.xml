@@ -116,6 +116,14 @@
           <arrayLength>32</arrayLength>
           <defaultValue>-1</defaultValue>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchgoing</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchfreq</name>
+        </gpu:variable>
       </memory>
       <functions>
         <gpu:function>

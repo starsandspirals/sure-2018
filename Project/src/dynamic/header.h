@@ -130,6 +130,8 @@ struct __align__(16) xmachine_memory_Household
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
     int *people;    /**< X-machine memory variable people of type int.*/
+    unsigned int churchgoing;    /**< X-machine memory variable churchgoing of type unsigned int.*/
+    unsigned int churchfreq;    /**< X-machine memory variable churchfreq of type unsigned int.*/
 };
 
 
@@ -169,6 +171,8 @@ struct xmachine_memory_Household_list
     unsigned int id [xmachine_memory_Household_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int size [xmachine_memory_Household_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
     int people [xmachine_memory_Household_MAX*32];    /**< X-machine memory variable list people of type int.*/
+    unsigned int churchgoing [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchgoing of type unsigned int.*/
+    unsigned int churchfreq [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchfreq of type unsigned int.*/
 };
 
 
@@ -250,8 +254,10 @@ __FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, un
  * @param agents xmachine_memory_Household_list agent list
  * @param id	agent agent variable of type unsigned int
  * @param size	agent agent variable of type unsigned int
+ * @param churchgoing	agent agent variable of type unsigned int
+ * @param churchfreq	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size);
+__FLAME_GPU_FUNC__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq);
 
 /** get_Household_agent_array_value
  *  Template function for accessing Household agent array memory variables.
@@ -538,6 +544,24 @@ __host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index);
  * @return element-th value of agent variable people
  */
 __host__ int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element);
+
+/** unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index)
+ * Gets the value of the churchgoing variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable churchgoing
+ */
+__host__ unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index);
+
+/** unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index)
+ * Gets the value of the churchfreq variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable churchfreq
+ */
+__host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index);
 
 
 
@@ -912,6 +936,58 @@ unsigned int min_Household_hhdefault_size_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Household_hhdefault_size_variable();
+
+/** unsigned int reduce_Household_hhdefault_churchgoing_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Household_hhdefault_churchgoing_variable();
+
+
+
+/** unsigned int count_Household_hhdefault_churchgoing_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Household_hhdefault_churchgoing_variable(int count_value);
+
+/** unsigned int min_Household_hhdefault_churchgoing_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Household_hhdefault_churchgoing_variable();
+/** unsigned int max_Household_hhdefault_churchgoing_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Household_hhdefault_churchgoing_variable();
+
+/** unsigned int reduce_Household_hhdefault_churchfreq_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Household_hhdefault_churchfreq_variable();
+
+
+
+/** unsigned int count_Household_hhdefault_churchfreq_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Household_hhdefault_churchfreq_variable(int count_value);
+
+/** unsigned int min_Household_hhdefault_churchfreq_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Household_hhdefault_churchfreq_variable();
+/** unsigned int max_Household_hhdefault_churchfreq_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Household_hhdefault_churchfreq_variable();
 
 
   

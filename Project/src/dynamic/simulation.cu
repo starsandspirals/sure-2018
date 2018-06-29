@@ -129,6 +129,8 @@ unsigned int h_Persons_s2_variable_householdsize_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_size_data_iteration;
 unsigned int h_Households_hhdefault_variable_people_data_iteration;
+unsigned int h_Households_hhdefault_variable_churchgoing_data_iteration;
+unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
 
 
 /* Message Memory */
@@ -281,6 +283,8 @@ void initialise(char * inputfile){
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
     h_Households_hhdefault_variable_people_data_iteration = 0;
+    h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
+    h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
     
 
 
@@ -1254,6 +1258,84 @@ __host__ int get_Household_hhdefault_variable_people(unsigned int index, unsigne
     }
 }
 
+/** unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index)
+ * Gets the value of the churchgoing variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable churchgoing
+ */
+__host__ unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_churchgoing_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->churchgoing,
+                    d_Households_hhdefault->churchgoing,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_churchgoing_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->churchgoing[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access churchgoing for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index)
+ * Gets the value of the churchfreq variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable churchfreq
+ */
+__host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_churchfreq_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->churchfreq,
+                    d_Households_hhdefault->churchfreq,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_churchfreq_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->churchfreq[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access churchfreq for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -1317,6 +1399,10 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
 	for(unsigned int i = 0; i < 32; i++){
 		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_agent->people + i, sizeof(int), cudaMemcpyHostToDevice));
     }
+ 
+		gpuErrchk(cudaMemcpy(d_dst->churchgoing, &h_agent->churchgoing, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->churchfreq, &h_agent->churchfreq, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -1341,6 +1427,10 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_src->people + (i * xmachine_memory_Household_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
         }
 
+ 
+		gpuErrchk(cudaMemcpy(d_dst->churchgoing, h_src->churchgoing, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->churchfreq, h_src->churchfreq, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -1575,6 +1665,10 @@ void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, 
 			for(unsigned int j = 0; j < 32; j++){
 				dst->people[(j * xmachine_memory_Household_MAX) + i] = src[i]->people[j];
 			}
+			 
+			dst->churchgoing[i] = src[i]->churchgoing;
+			 
+			dst->churchfreq[i] = src[i]->churchfreq;
 			
 		}
 	}
@@ -1609,6 +1703,8 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
     h_Households_hhdefault_variable_people_data_iteration = 0;
+    h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
+    h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
     
 
 }
@@ -1643,6 +1739,8 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
         h_Households_hhdefault_variable_id_data_iteration = 0;
         h_Households_hhdefault_variable_size_data_iteration = 0;
         h_Households_hhdefault_variable_people_data_iteration = 0;
+        h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
+        h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
         
 
 	}
@@ -1858,6 +1956,48 @@ unsigned int min_Household_hhdefault_size_variable(){
 unsigned int max_Household_hhdefault_size_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->size);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Household_hhdefault_churchgoing_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->churchgoing),  thrust::device_pointer_cast(d_Households_hhdefault->churchgoing) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_churchgoing_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->churchgoing),  thrust::device_pointer_cast(d_Households_hhdefault->churchgoing) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_churchgoing_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchgoing);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_churchgoing_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchgoing);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Household_hhdefault_churchfreq_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->churchfreq),  thrust::device_pointer_cast(d_Households_hhdefault->churchfreq) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_churchfreq_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->churchfreq),  thrust::device_pointer_cast(d_Households_hhdefault->churchfreq) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_churchfreq_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchfreq);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_churchfreq_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchfreq);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
