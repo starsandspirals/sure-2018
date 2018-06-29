@@ -27,8 +27,8 @@
 
 xmachine_memory_Person **h_agent_AoS;
 xmachine_memory_Household **h_household_AoS;
-const unsigned int h_agent_AoS_MAX = 65536;
-const unsigned int h_household_AoS_MAX = 32768;
+const unsigned int h_agent_AoS_MAX = 32768;
+const unsigned int h_household_AoS_MAX = 8192;
 const float beta0 = 2.19261;
 const float beta1 = 0.14679;
 unsigned int h_nextID;
