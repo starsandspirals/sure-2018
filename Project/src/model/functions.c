@@ -253,6 +253,40 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fp = nullptr;
     }
   }
+
+  if (iteration == 1) {
+
+    std::string outputFilename =
+        std::string(std::string(directory) + "household-output.csv");
+
+    FILE *fp = fopen(outputFilename.c_str(), "w");
+
+    if (fp != nullptr) {
+      fprintf(stdout, "Outputting some Household data to %s\n",
+              outputFilename.c_str());
+
+      fprintf(fp, "ID, size\n");
+
+      for (int index = 0; index < get_agent_Household_hhdefault_count();
+           index++) {
+
+        fprintf(fp, "%u, %u\n", get_Household_hhdefault_variable_id(index),
+                get_Household_hhdefault_variable_size(index));
+      }
+
+      fflush(fp);
+    } else {
+      fprintf(
+          stderr,
+          "Error: file %s could not be created for customOutputStepFunction\n",
+          outputFilename.c_str());
+    }
+
+    if (fp != nullptr && fp != stdout && fp != stderr) {
+      fclose(fp);
+      fp = nullptr;
+    }
+  }
 }
 
 __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
