@@ -46,19 +46,16 @@ __host__ unsigned int getNextHouseholdID() {
   return old;
 }
 
-__host__ void shuffle(unsigned int *array, size_t n)
-{
-    if (n > 1) 
-    {
-        size_t i;
-        for (i = 0; i < n - 1; i++) 
-        {
-          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-          unsigned int t = array[j];
-          array[j] = array[i];
-          array[i] = t;
-        }
+__host__ void shuffle(unsigned int *array, size_t n) {
+  if (n > 1) {
+    size_t i;
+    for (i = 0; i < n - 1; i++) {
+      size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+      unsigned int t = array[j];
+      array[j] = array[i];
+      array[i] = t;
     }
+  }
 }
 
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
@@ -100,8 +97,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int sizearray[32];
   signed int count;
 
-  for (unsigned int n = 0; n < 32; n++) {
-    sizearray[n] = 0;
+  for (unsigned int i = 0; i < 32; i++) {
+    sizearray[i] = 0;
   }
 
   for (unsigned int i = 0; i < categories; i++) {
@@ -148,22 +145,22 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   total = get_agent_Person_default_count();
   unsigned int order[total];
 
-  for (unsigned int m = 0; m < total; m++) {
-    order[m] = m;
+  for (unsigned int i = 0; i < total; i++) {
+    order[i] = i;
   }
 
   shuffle(order, total);
 
-  for (unsigned int h = 1; h < 32; h++) {
-    for (unsigned int hh = 0; hh < (sizearray[h] / h); hh++) {
+  for (unsigned int i = 1; i < 32; i++) {
+    for (unsigned int ii = 0; ii < (sizearray[i] / i); ii++) {
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
-      churchprob = 1 / (1 + exp(-beta0 - (beta1 * h)));
+      churchprob = 1 / (1 + exp(-beta0 - (beta1 * i)));
 
       h_household->id = getNextHouseholdID();
-      h_household->size = h;
+      h_household->size = i;
 
-      for (unsigned int hhh = 0; hhh < h; hhh++) {
-        h_household->people[hhh] = order[count];
+      for (unsigned int iii = 0; iii < i; iii++) {
+        h_household->people[iii] = order[count];
         count++;
       }
 
