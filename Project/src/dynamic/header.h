@@ -55,13 +55,13 @@ typedef glm::dvec4 dvec4;
 
 /* Agent population size definitions must be a multiple of THREADS_PER_TILE (default 64) */
 //Maximum buffer size (largest agent buffer size)
-#define buffer_size_MAX 32768
+#define buffer_size_MAX 65536
 
 //Maximum population size of xmachine_memory_Person
-#define xmachine_memory_Person_MAX 32768
+#define xmachine_memory_Person_MAX 65536
 
 //Maximum population size of xmachine_memory_Household
-#define xmachine_memory_Household_MAX 16384 
+#define xmachine_memory_Household_MAX 32768 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32
 
