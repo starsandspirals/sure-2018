@@ -19,6 +19,7 @@
 #define _FUNCTIONS_H_
 
 #include "header.h"
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
@@ -50,9 +51,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   srand(0);
 
-  h_nextID = 0;
+  h_nextID = 1;
 
   h_agent_AoS = h_allocate_agent_Person_array(h_agent_AoS_MAX);
+
+  h_nextHouseholdID = 1;
+
+  h_household_AoS = h_allocate_agent_Household_array(h_household_AoS_MAX);
 
   char const *const fileName = "data.in";
   FILE *file = fopen(fileName, "r");
@@ -70,6 +75,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int currentsize;
   unsigned int amount;
   unsigned int age;
+
+  unsigned int sizearray[32];
+  signed int count;
+
+  for (unsigned int n = 0; n < 32; n++) {
+    sizearray[n] = 0;
+  }
 
   for (unsigned int i = 0; i < categories; i++) {
 
@@ -100,10 +112,34 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->gender = gender;
         h_person->householdsize = currentsize;
 
+        sizearray[currentsize]++;
+
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
       }
+    }
+  }
+
+  count = 0;
+
+  for (unsigned int h = 1; h < 32; h++) {
+
+    for (unsigned int hh = 0; hh < (sizearray[h] / h); hh++) {
+      xmachine_memory_Household *h_household = h_allocate_agent_Household();
+
+      h_household->id = getNextHouseholdID();
+      h_household->size = h;
+      
+      for (unsigned int hhh = 0; hhh < h; hhh++) {
+        h_household->people[hhh] = count;
+        count++;
+      }
+
+      h_add_agent_Household_hhdefault(h_household);
+
+      h_free_agent_Household(&h_household);
+
     }
   }
 
@@ -119,24 +155,58 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
 __FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
 
-  printf("Population after init function: %u\n",
-         get_agent_Person_default_count());
+  /* printf("Population after init function: %u\n",
+          get_agent_Person_default_count());
 
-  unsigned int sizearray[h_agent_AoS_MAX][32];
-  unsigned int currentsize;
-  unsigned int count;
+   h_nextHouseholdID = 1;
+   h_household_AoS = h_allocate_agent_Household_array(h_household_AoS_MAX);
 
-  for (int i = 0; i < 32; i++) {
-    sizearray[0][i] = 0;
-  }
+   unsigned int sizearray[h_agent_AoS_MAX][32];
+   unsigned int currentsize;
+   unsigned int count;
 
-  for (int index = 0; index < get_agent_Person_default_count(); index++) {
-    currentsize = get_Person_default_variable_householdsize(index);
-    count = sizearray[0][currentsize];
-    sizearray[count][currentsize] = get_Person_default_variable_id(index);
-    sizearray[0][currentsize]++;
-  }
+   for (int i = 0; i < 32; i++) {
+     sizearray[0][i] = 0;
+   }
 
+   for (int index = 0; index < get_agent_Person_default_count(); index++) {
+     currentsize = get_Person_default_variable_householdsize(index);
+     count = sizearray[0][currentsize];
+     sizearray[count][currentsize] = get_Person_default_variable_id(index);
+     sizearray[0][currentsize]++;
+   }
+
+   printf("Here at least?");
+
+   for (int i = 0; i < 32; i++) {
+     printf("Made it!");
+     count = sizearray[0][i];
+     sizearray[count][i] = INT_MAX;
+
+     count = 1;
+
+     while (sizearray[count][i] != INT_MAX) {
+
+       xmachine_memory_Household *h_household = h_allocate_agent_Household();
+
+       h_household->id = getNextHouseholdID();
+       h_household->size = i;
+
+       for (int ii = 0; ii < i; ii++) {
+         if (sizearray[count][i] != INT_MAX) {
+           h_household->people[ii] = sizearray[count][i];
+           count++;
+           printf("Add");
+         } else {
+           printf("Don't");
+         }
+       }
+
+       h_add_agent_Household_hhdefault(h_household);
+
+       h_free_agent_Household(&h_household);
+     }
+   }*/
 }
 
 __FLAME_GPU_STEP_FUNC__ void generatePersonStep() {

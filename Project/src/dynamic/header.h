@@ -61,7 +61,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_Person_MAX 32768
 
 //Maximum population size of xmachine_memory_Household
-#define xmachine_memory_Household_MAX 2048 
+#define xmachine_memory_Household_MAX 16384 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32
 
@@ -129,7 +129,7 @@ struct __align__(16) xmachine_memory_Household
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
-    unsigned int *people;    /**< X-machine memory variable people of type unsigned int.*/
+    int *people;    /**< X-machine memory variable people of type int.*/
 };
 
 
@@ -168,7 +168,7 @@ struct xmachine_memory_Household_list
     
     unsigned int id [xmachine_memory_Household_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int size [xmachine_memory_Household_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
-    unsigned int people [xmachine_memory_Household_MAX*32];    /**< X-machine memory variable list people of type unsigned int.*/
+    int people [xmachine_memory_Household_MAX*32];    /**< X-machine memory variable list people of type int.*/
 };
 
 
@@ -529,7 +529,7 @@ __host__ unsigned int get_Household_hhdefault_variable_id(unsigned int index);
  */
 __host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index);
 
-/** unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
+/** int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
  * Gets the element-th value of the people variable array of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
@@ -537,7 +537,7 @@ __host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index);
  * @param element the element index within the variable array
  * @return element-th value of agent variable people
  */
-__host__ unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element);
+__host__ int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element);
 
 
 

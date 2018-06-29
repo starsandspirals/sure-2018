@@ -106,10 +106,10 @@
           <name>size</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>int</type>
           <name>people</name>
           <arrayLength>32</arrayLength>
-          <defaultValue>0</defaultValue>
+          <defaultValue>-1</defaultValue>
         </gpu:variable>
       </memory>
       <functions>
@@ -117,7 +117,7 @@
           <name>hhupdate</name>
           <currentState>hhdefault</currentState>
           <nextState>hhdefault</nextState>
-          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
       </functions>
@@ -126,7 +126,7 @@
         <initialState>hhdefault</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>16384</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
   <messages>

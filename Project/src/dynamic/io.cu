@@ -244,7 +244,7 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("<people>", file);
         for (int j=0;j<32;j++){
-            fprintf(file, "%u", h_Households_hhdefault->people[(j*xmachine_memory_Household_MAX)+i]);
+            fprintf(file, "%d", h_Households_hhdefault->people[(j*xmachine_memory_Household_MAX)+i]);
             if(j!=(32-1))
                 fprintf(file, ",");
         }
@@ -324,7 +324,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_householdsize;
 	unsigned int Household_id;
 	unsigned int Household_size;
-    unsigned int Household_people[32];
+    int Household_people[32];
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -389,7 +389,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Household_id = 0;
     Household_size = 0;
     for (i=0;i<32;i++){
-        Household_people[i] = 0;
+        Household_people[i] = -1;
     }
 
     /* Default variables for environment variables */
@@ -495,7 +495,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Household_id = 0;
                 Household_size = 0;
                 for (i=0;i<32;i++){
-                    Household_people[i] = 0;
+                    Household_people[i] = -1;
                 }
                 
                 in_xagent = 0;
@@ -561,7 +561,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Household_size = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Household_people){
-                    readArrayInput<unsigned int>(&fpgu_strtoul, buffer, Household_people, 32);    
+                    readArrayInput<int>(&fpgu_strtol, buffer, Household_people, 32);    
                 }
 				
             }

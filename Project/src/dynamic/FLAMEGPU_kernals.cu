@@ -329,7 +329,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * @param agents xmachine_memory_Household_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param size agent variable of type unsigned int
- * @param people agent variable of type unsigned int
+ * @param people agent variable of type int
  */
 template <int AGENT_TYPE>
 __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size){

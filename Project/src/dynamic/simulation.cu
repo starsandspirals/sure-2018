@@ -1197,7 +1197,7 @@ __host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index){
     }
 }
 
-/** unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
+/** int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
  * Gets the element-th value of the people variable array of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
@@ -1205,7 +1205,7 @@ __host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index){
  * @param element the element index within the variable array
  * @return element-th value of agent variable people
  */
-__host__ unsigned int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element){
+__host__ int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element){
     unsigned int count = get_agent_Household_hhdefault_count();
     unsigned int numElements = 32;
     unsigned int currentIteration = getIterationNumber();
@@ -1220,7 +1220,7 @@ __host__ unsigned int get_Household_hhdefault_variable_people(unsigned int index
                     cudaMemcpy(
                         h_Households_hhdefault->people + (e * xmachine_memory_Household_MAX),
                         d_Households_hhdefault->people + (e * xmachine_memory_Household_MAX), 
-                        count * sizeof(unsigned int), 
+                        count * sizeof(int), 
                         cudaMemcpyDeviceToHost
                     )
                 );
@@ -1301,7 +1301,7 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
 		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 	for(unsigned int i = 0; i < 32; i++){
-		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_agent->people + i, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_agent->people + i, sizeof(int), cudaMemcpyHostToDevice));
     }
 
 }
@@ -1324,7 +1324,7 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		for(unsigned int i = 0; i < 32; i++){
-			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_src->people + (i * xmachine_memory_Household_MAX), count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_src->people + (i * xmachine_memory_Household_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
         }
 
 
@@ -1521,10 +1521,10 @@ xmachine_memory_Household* h_allocate_agent_Household(){
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Household));
 	// Agent variable arrays must be allocated
-    agent->people = (unsigned int*)malloc(32 * sizeof(unsigned int));
+    agent->people = (int*)malloc(32 * sizeof(int));
 	// If we have a default value, set each element correctly.
 	for(unsigned int index = 0; index < 32; index++){
-		agent->people[index] = 0;
+		agent->people[index] = -1;
 	}
 	return agent;
 }
@@ -2054,50 +2054,15 @@ void Household_hhupdate(cudaStream_t &stream){
 	
 	
 	
-	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Household_scan_input, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	reset_Household_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Households);
-	gpuErrchkLaunch();
-	
 	
 	//MAIN XMACHINE FUNCTION CALL (hhupdate)
-	//Reallocate   : true
+	//Reallocate   : false
 	//Input        : 
 	//Output       : 
 	//Agent Output : 
 	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households);
 	gpuErrchkLaunch();
 	
-	
-	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
-    cub::DeviceScan::ExclusiveSum(
-        d_temp_scan_storage_Household, 
-        temp_scan_storage_bytes_Household, 
-        d_Households->_scan_input,
-        d_Households->_position,
-        h_xmachine_memory_Household_count, 
-        stream
-    );
-
-	//Scatter into swap
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Household_Agents, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	scatter_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_swap, d_Households, 0, h_xmachine_memory_Household_count);
-	gpuErrchkLaunch();
-	//use a temp pointer to make swap default
-	xmachine_memory_Household_list* hhupdate_Households_temp = d_Households;
-	d_Households = d_Households_swap;
-	d_Households_swap = hhupdate_Households_temp;
-	//reset agent count
-	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Households_swap->_position[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
-	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Households_swap->_scan_input[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
-	if (scan_last_included == 1)
-		h_xmachine_memory_Household_count = scan_last_sum+1;
-	else
-		h_xmachine_memory_Household_count = scan_last_sum;
-	//Copy count to device
-	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_count, &h_xmachine_memory_Household_count, sizeof(int)));	
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -2108,11 +2073,10 @@ void Household_hhupdate(cudaStream_t &stream){
       exit(EXIT_FAILURE);
       }
       
-  //append agents to next state list
-  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Household_Agents, no_sm, state_list_size);
-  gridSize = (state_list_size + blockSize - 1) / blockSize;
-  append_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_hhdefault, d_Households, h_xmachine_memory_Household_hhdefault_count, h_xmachine_memory_Household_count);
-  gpuErrchkLaunch();
+  //pointer swap the updated data
+  Households_hhdefault_temp = d_Households;
+  d_Households = d_Households_hhdefault;
+  d_Households_hhdefault = Households_hhdefault_temp;
         
 	//update new state agent size
 	h_xmachine_memory_Household_hhdefault_count += h_xmachine_memory_Household_count;
