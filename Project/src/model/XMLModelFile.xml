@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU"
-        xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
+<gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" 
+  xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>HostAgentCreation</name>
   <gpu:environment>
     <gpu:constants>
-       <gpu:variable>
-         <type>float</type>
-         <name>TIME_STEP</name>
-         <defaultValue>1.0</defaultValue>
-       </gpu:variable>
-       <gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>TIME_STEP</name>
+        <defaultValue>1.0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>SCALE_FACTOR</name>
         <defaultValue>0.01</defaultValue>
-       </gpu:variable>
-       <gpu:variable>
-         <type>unsigned int</type>
-         <name>MAX_AGE</name>
-         <defaultValue>100</defaultValue>
-       </gpu:variable>
-       <gpu:variable>
-         <type>unsigned int</type>
-         <name>RANDOM_AGES</name>
-         <defaultValue>1</defaultValue>
-       </gpu:variable>
-       <gpu:variable>
-         <type>float</type>
-         <name>STARTING_POPULATION</name>
-         <defaultValue>30000.0</defaultValue>
-       </gpu:variable>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>MAX_AGE</name>
+        <defaultValue>100</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>RANDOM_AGES</name>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>STARTING_POPULATION</name>
+        <defaultValue>30000.0</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <gpu:functionFiles>
@@ -92,8 +92,12 @@
         </gpu:function>
       </functions>
       <states>
-        <gpu:state><name>default</name></gpu:state>
-        <gpu:state><name>s2</name></gpu:state>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
+        <gpu:state>
+          <name>s2</name>
+        </gpu:state>
         <initialState>default</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
@@ -135,17 +139,63 @@
         </gpu:function>
       </functions>
       <states>
-        <gpu:state><name>hhdefault</name></gpu:state>
+        <gpu:state>
+          <name>hhdefault</name>
+        </gpu:state>
         <initialState>hhdefault</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
       <gpu:bufferSize>8192</gpu:bufferSize>
     </gpu:xagent>
+    <gpu:xagent>
+      <name>Church</name>
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>size</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>duration</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>households</name>
+          <arrayLength>64</arrayLength>
+          <defaultValue>-1</defaultValue>
+        </gpu:variable>
+      </memory>
+      <functions>
+        <gpu:function>
+          <name>chuupdate</name>
+          <currentState>chudefault</currentState>
+          <nextState>chudefault</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+      <states>
+        <gpu:state>
+          <name>chudefault</name>
+        </gpu:state>
+        <initialState>chudefault</initialState>
+      </states>
+      <gpu:type>continuous</gpu:type>
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:xagent>
   </xagents>
   <messages>
   </messages>
   <layers>
-    <layer><gpu:layerFunction><name>update</name></gpu:layerFunction></layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>update</name>
+      </gpu:layerFunction>
+    </layer>
   </layers>
 
 

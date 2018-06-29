@@ -29,6 +29,8 @@ __constant__ int d_xmachine_memory_Person_count;
 
 __constant__ int d_xmachine_memory_Household_count;
 
+__constant__ int d_xmachine_memory_Church_count;
+
 /* Agent state count constants */
 
 __constant__ int d_xmachine_memory_Person_default_count;
@@ -36,6 +38,8 @@ __constant__ int d_xmachine_memory_Person_default_count;
 __constant__ int d_xmachine_memory_Person_s2_count;
 
 __constant__ int d_xmachine_memory_Household_hhdefault_count;
+
+__constant__ int d_xmachine_memory_Church_chudefault_count;
 
 
 /* Message constants */
@@ -422,6 +426,168 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, uint index, T 
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created Church agent functions */
+
+/** reset_Church_scan_input
+ * Church agent reset scan input function
+ * @param agents The xmachine_memory_Church_list agent list
+ */
+__global__ void reset_Church_scan_input(xmachine_memory_Church_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_Church_Agents
+ * Church scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Church_list agent list destination
+ * @param agents_src xmachine_memory_Church_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_Church_Agents(xmachine_memory_Church_list* agents_dst, xmachine_memory_Church_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->size[output_index] = agents_src->size[index];        
+		agents_dst->duration[output_index] = agents_src->duration[index];
+	    for (int i=0; i<64; i++){
+	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
+	    }
+	}
+}
+
+/** append_Church_Agents
+ * Church scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Church_list agent list destination
+ * @param agents_src xmachine_memory_Church_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xmachine_memory_Church_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->size[output_index] = agents_src->size[index];
+	    agents_dst->duration[output_index] = agents_src->duration[index];
+	    for (int i=0; i<64; i++){
+	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
+	    }
+    }
+}
+
+/** add_Church_agent
+ * Continuous Church agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_Church_list to add agents to 
+ * @param id agent variable of type unsigned int
+ * @param size agent variable of type unsigned int
+ * @param duration agent variable of type unsigned int
+ * @param households agent variable of type int
+ */
+template <int AGENT_TYPE>
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+	agents->size[index] = size;
+	agents->duration[index] = duration;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration){
+    add_Church_agent<DISCRETE_2D>(agents, id, size, duration);
+}
+
+/** reorder_Church_agents
+ * Continuous Church agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Church_list* unordered_agents, xmachine_memory_Church_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->size[index] = unordered_agents->size[old_pos];
+	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
+	for (int i=0; i<64; i++){
+	  ordered_agents->households[(i*xmachine_memory_Church_MAX)+index] = unordered_agents->households[(i*xmachine_memory_Church_MAX)+old_pos];
+	}
+}
+
+/** get_Church_agent_array_value
+ *  Template function for accessing Church agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @return return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ T get_Church_agent_array_value(T *array, uint index){
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    return array[index*xmachine_memory_Church_MAX];
+    } else {
+    	// Return the default value for this data type 
+	    return 0;
+    }
+}
+
+/** set_Church_agent_array_value
+ *  Template function for setting Church agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @param return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ void set_Church_agent_array_value(T *array, uint index, T value){
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    array[index*xmachine_memory_Church_MAX] = value;
+    }
+}
+
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -502,6 +668,42 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 	agents->size[index] = agent.size;
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_Church_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_chuupdate Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Church agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.id = agents->id[index];
+	agent.size = agents->size[index];
+	agent.duration = agents->duration[index];
+    agent.households = &(agents->households[index]);
+
+	//FLAME function call
+	int dead = !chuupdate(&agent);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_chuupdate Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->size[index] = agent.size;
+	agents->duration[index] = agent.duration;
 }
 
 	

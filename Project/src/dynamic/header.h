@@ -61,9 +61,14 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_Person_MAX 32768
 
 //Maximum population size of xmachine_memory_Household
-#define xmachine_memory_Household_MAX 8192 
+#define xmachine_memory_Household_MAX 8192
+
+//Maximum population size of xmachine_memory_Church
+#define xmachine_memory_Church_MAX 2048 
 //Agent variable array length for xmachine_memory_Household->people
-#define xmachine_memory_Household_people_LENGTH 32
+#define xmachine_memory_Household_people_LENGTH 32 
+//Agent variable array length for xmachine_memory_Church->households
+#define xmachine_memory_Church_households_LENGTH 64
 
 
   
@@ -134,6 +139,18 @@ struct __align__(16) xmachine_memory_Household
     unsigned int churchfreq;    /**< X-machine memory variable churchfreq of type unsigned int.*/
 };
 
+/** struct xmachine_memory_Church
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_Church
+{
+    unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
+    unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
+    int *households;    /**< X-machine memory variable households of type int.*/
+};
+
 
 
 /* Message structures */
@@ -173,6 +190,22 @@ struct xmachine_memory_Household_list
     int people [xmachine_memory_Household_MAX*32];    /**< X-machine memory variable list people of type int.*/
     unsigned int churchgoing [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchgoing of type unsigned int.*/
     unsigned int churchfreq [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchfreq of type unsigned int.*/
+};
+
+/** struct xmachine_memory_Church_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_Church_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_Church_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_Church_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_memory_Church_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int size [xmachine_memory_Church_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
+    unsigned int duration [xmachine_memory_Church_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
+    int households [xmachine_memory_Church_MAX*64];    /**< X-machine memory variable list households of type int.*/
 };
 
 
@@ -234,6 +267,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, RNG_rand48* rand48)
  
  */
 __FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent);
+
+/**
+ * chuupdate FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Church. This represents a single agent instance and can be modified directly.
+ 
+ */
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent);
   
   
   
@@ -280,6 +320,36 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, unsigned int i
 
   
 
+/** add_Church_agent
+ * Adds a new continuous valued Church agent to the xmachine_memory_Church_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_Church_list agent list
+ * @param id	agent agent variable of type unsigned int
+ * @param size	agent agent variable of type unsigned int
+ * @param duration	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration);
+
+/** get_Church_agent_array_value
+ *  Template function for accessing Church agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @return return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ T get_Church_agent_array_value(T *array, unsigned int index);
+
+/** set_Church_agent_array_value
+ *  Template function for setting Church agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @param return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ void set_Church_agent_array_value(T *array, unsigned int index, T value);
+
+
+  
+
 
   
 /* Simulation function prototypes implemented in simulation.cu */
@@ -314,8 +384,11 @@ extern void singleIteration();
  * @param h_Households Pointer to agent list on the host
  * @param d_Households Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Household_count Pointer to agent counter
+ * @param h_Churchs Pointer to agent list on the host
+ * @param d_Churchs Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_Church_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count);
 
 
 /** readInitialStates
@@ -325,8 +398,10 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_Person_count Pointer to agent counter
  * @param h_Households Pointer to agent list on the host
  * @param h_xmachine_memory_Household_count Pointer to agent counter
+ * @param h_Churchs Pointer to agent list on the host
+ * @param h_xmachine_memory_Church_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -440,6 +515,46 @@ extern xmachine_memory_Household_list* get_host_Household_hhdefault_agents();
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_Households_hhdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Household_list* agents));
+
+
+    
+/** get_agent_Church_MAX_count
+ * Gets the max agent count for the Church agent type 
+ * @return		the maximum Church agent count
+ */
+extern int get_agent_Church_MAX_count();
+
+
+
+/** get_agent_Church_chudefault_count
+ * Gets the agent count for the Church agent type in state chudefault
+ * @return		the current Church agent count in state chudefault
+ */
+extern int get_agent_Church_chudefault_count();
+
+/** reset_chudefault_count
+ * Resets the agent count of the Church in state chudefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_Church_chudefault_count();
+
+/** get_device_Church_chudefault_agents
+ * Gets a pointer to xmachine_memory_Church_list on the GPU device
+ * @return		a xmachine_memory_Church_list on the GPU device
+ */
+extern xmachine_memory_Church_list* get_device_Church_chudefault_agents();
+
+/** get_host_Church_chudefault_agents
+ * Gets a pointer to xmachine_memory_Church_list on the CPU host
+ * @return		a xmachine_memory_Church_list on the CPU host
+ */
+extern xmachine_memory_Church_list* get_host_Church_chudefault_agents();
+
+
+/** sort_Churchs_chudefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_Churchs_chudefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Church_list* agents));
 
 
 
@@ -563,6 +678,43 @@ __host__ unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int 
  */
 __host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index);
 
+/** unsigned int get_Church_chudefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Church_chudefault_variable_id(unsigned int index);
+
+/** unsigned int get_Church_chudefault_variable_size(unsigned int index)
+ * Gets the value of the size variable of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable size
+ */
+__host__ unsigned int get_Church_chudefault_variable_size(unsigned int index);
+
+/** unsigned int get_Church_chudefault_variable_duration(unsigned int index)
+ * Gets the value of the duration variable of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable duration
+ */
+__host__ unsigned int get_Church_chudefault_variable_duration(unsigned int index);
+
+/** int get_Church_chudefault_variable_households(unsigned int index, unsigned int element)
+ * Gets the element-th value of the households variable array of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable households
+ */
+__host__ int get_Church_chudefault_variable_households(unsigned int index, unsigned int element);
+
 
 
 
@@ -666,6 +818,47 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsigned int count);
+
+/** h_allocate_agent_Church
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated Church struct.
+ */
+xmachine_memory_Church* h_allocate_agent_Church();
+/** h_free_agent_Church
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_Church(xmachine_memory_Church** agent);
+/** h_allocate_agent_Church_array
+ * Utility function to allocate an array of structs for  Church agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_Church** h_allocate_agent_Church_array(unsigned int count);
+/** h_free_agent_Church_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_Church_array(xmachine_memory_Church*** agents, unsigned int count);
+
+
+/** h_add_agent_Church_chudefault
+ * Host function to add a single agent of type Church to the chudefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_Church_chudefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_Church_chudefault(xmachine_memory_Church* agent);
+
+/** h_add_agents_Church_chudefault(
+ * Host function to add multiple agents of type Church to the chudefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of Church agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_Church_chudefault(xmachine_memory_Church** agents, unsigned int count);
 
   
   
@@ -988,6 +1181,84 @@ unsigned int min_Household_hhdefault_churchfreq_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Household_hhdefault_churchfreq_variable();
+
+/** unsigned int reduce_Church_chudefault_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Church_chudefault_id_variable();
+
+
+
+/** unsigned int count_Church_chudefault_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Church_chudefault_id_variable(int count_value);
+
+/** unsigned int min_Church_chudefault_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Church_chudefault_id_variable();
+/** unsigned int max_Church_chudefault_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Church_chudefault_id_variable();
+
+/** unsigned int reduce_Church_chudefault_size_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Church_chudefault_size_variable();
+
+
+
+/** unsigned int count_Church_chudefault_size_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Church_chudefault_size_variable(int count_value);
+
+/** unsigned int min_Church_chudefault_size_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Church_chudefault_size_variable();
+/** unsigned int max_Church_chudefault_size_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Church_chudefault_size_variable();
+
+/** unsigned int reduce_Church_chudefault_duration_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Church_chudefault_duration_variable();
+
+
+
+/** unsigned int count_Church_chudefault_duration_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Church_chudefault_duration_variable(int count_value);
+
+/** unsigned int min_Church_chudefault_duration_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Church_chudefault_duration_variable();
+/** unsigned int max_Church_chudefault_duration_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Church_chudefault_duration_variable();
 
 
   

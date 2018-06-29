@@ -362,14 +362,14 @@ void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 		singleIteration();
 		// Save the iteration data to disk
 		if((i+1) % outputFrequency == 0){
-			saveIterationData(outputpath, i+1, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count());
+			saveIterationData(outputpath, i+1, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count());
 			printf("Iteration %i Saved to XML\n", i+1);
 		}
 	}
 
 	// If we did not yet output the final iteration, output the final iteration.
 	if(iterations % outputFrequency != 0){
-		saveIterationData(outputpath, iterations, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count());
+		saveIterationData(outputpath, iterations, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count());
 		printf("Iteration %i Saved to XML\n", iterations);
 	}
 

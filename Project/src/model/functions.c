@@ -323,4 +323,6 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent,
 
 __FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *agent) { return 0; }
 
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *agent) { return 0; }
+
 #endif
