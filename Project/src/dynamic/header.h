@@ -68,7 +68,7 @@ typedef glm::dvec4 dvec4;
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32 
 //Agent variable array length for xmachine_memory_Church->households
-#define xmachine_memory_Church_households_LENGTH 64
+#define xmachine_memory_Church_households_LENGTH 128
 
 
   
@@ -207,7 +207,7 @@ struct xmachine_memory_Church_list
     unsigned int id [xmachine_memory_Church_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int size [xmachine_memory_Church_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
     unsigned int duration [xmachine_memory_Church_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
-    int households [xmachine_memory_Church_MAX*64];    /**< X-machine memory variable list households of type int.*/
+    int households [xmachine_memory_Church_MAX*128];    /**< X-machine memory variable list households of type int.*/
 };
 
 

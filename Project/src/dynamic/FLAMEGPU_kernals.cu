@@ -471,7 +471,7 @@ __global__ void scatter_Church_Agents(xmachine_memory_Church_list* agents_dst, x
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->size[output_index] = agents_src->size[index];        
 		agents_dst->duration[output_index] = agents_src->duration[index];
-	    for (int i=0; i<64; i++){
+	    for (int i=0; i<128; i++){
 	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
 	    }
 	}
@@ -496,7 +496,7 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->size[output_index] = agents_src->size[index];
 	    agents_dst->duration[output_index] = agents_src->duration[index];
-	    for (int i=0; i<64; i++){
+	    for (int i=0; i<128; i++){
 	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
 	    }
     }
@@ -557,7 +557,7 @@ __global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Chur
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->size[index] = unordered_agents->size[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
-	for (int i=0; i<64; i++){
+	for (int i=0; i<128; i++){
 	  ordered_agents->households[(i*xmachine_memory_Church_MAX)+index] = unordered_agents->households[(i*xmachine_memory_Church_MAX)+old_pos];
 	}
 }

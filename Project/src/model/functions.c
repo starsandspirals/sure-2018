@@ -29,10 +29,20 @@ xmachine_memory_Person **h_agent_AoS;
 xmachine_memory_Household **h_household_AoS;
 const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
+
 const float beta0 = 2.19261;
 const float beta1 = 0.14679;
+
+const unsigned int k1 = 13;
+const unsigned int k2 = 35;
+const unsigned int k3 = 100;
+
+const unsigned int p1 = 0.14;
+const unsigned int p2 = 0.32;
+
 unsigned int h_nextID;
 unsigned int h_nextHouseholdID;
+unsigned int h_nextChurchID;
 
 __host__ unsigned int getNextID() {
   unsigned int old = h_nextID;
@@ -43,6 +53,12 @@ __host__ unsigned int getNextID() {
 __host__ unsigned int getNextHouseholdID() {
   unsigned int old = h_nextHouseholdID;
   h_nextHouseholdID++;
+  return old;
+}
+
+__host__ unsigned int getNextChurchID() {
+  unsigned int old = h_nextChurchID;
+  h_nextChurchID++;
   return old;
 }
 
@@ -225,6 +241,47 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   }
 
   shuffle(hhorder, adult, hhtotal);
+
+  unsigned int hhposition = 0;
+  unsigned int capacity;
+
+  while (hhposition < hhtotal) {
+    xmachine_memory_Church *h_church = h_allocate_agent_Church();
+    capacity = 0;
+
+    h_church->id = getNextChurchID();
+
+    float random = ((float)rand() / (RAND_MAX));
+
+    if (random < p1) {
+      h_church->size = k1;
+    } else if (random < p2) {
+      h_church->size = k2;
+    } else {
+      h_church->size = k3;
+    }
+
+    random = ((float)rand() / (RAND_MAX));
+
+    if (random < 0.5) {
+      h_church->duration = 1.5;
+    } else {
+      h_church->duration = 3.5;
+    }
+
+    count = 0;
+
+    while (capacity < h_church->size && hhposition < hhtotal) {
+      h_church->households[count] = hhorder[hhposition];
+      count++;
+      capacity += adult[hhposition];
+      hhposition++;
+    }
+
+    h_add_agent_Church_chudefault(h_church);
+
+    h_free_agent_Church(&h_church);
+  }
 
   while (fgets(line, sizeof(line), file)) {
     printf("%s", line);

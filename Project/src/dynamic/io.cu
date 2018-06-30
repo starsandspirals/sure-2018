@@ -298,9 +298,9 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</duration>\n", file);
         
 		fputs("<households>", file);
-        for (int j=0;j<64;j++){
+        for (int j=0;j<128;j++){
             fprintf(file, "%d", h_Churchs_chudefault->households[(j*xmachine_memory_Church_MAX)+i]);
-            if(j!=(64-1))
+            if(j!=(128-1))
                 fprintf(file, ",");
         }
 		fputs("</households>\n", file);
@@ -398,7 +398,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Church_id;
 	unsigned int Church_size;
 	unsigned int Church_duration;
-    int Church_households[64];
+    int Church_households[128];
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -473,7 +473,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Churchs->id[k] = 0;
 		h_Churchs->size[k] = 0;
 		h_Churchs->duration[k] = 0;
-        for (i=0;i<64;i++){
+        for (i=0;i<128;i++){
             h_Churchs->households[(i*xmachine_memory_Church_MAX)+k] = 0;
         }
 	}
@@ -495,7 +495,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Church_id = 0;
     Church_size = 0;
     Church_duration = 0;
-    for (i=0;i<64;i++){
+    for (i=0;i<128;i++){
         Church_households[i] = -1;
     }
 
@@ -603,7 +603,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Churchs->id[*h_xmachine_memory_Church_count] = Church_id;
 					h_Churchs->size[*h_xmachine_memory_Church_count] = Church_size;
 					h_Churchs->duration[*h_xmachine_memory_Church_count] = Church_duration;
-                    for (int k=0;k<64;k++){
+                    for (int k=0;k<128;k++){
                         h_Churchs->households[(k*xmachine_memory_Church_MAX)+(*h_xmachine_memory_Church_count)] = Church_households[k];
                     }
 					(*h_xmachine_memory_Church_count) ++;	
@@ -631,7 +631,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Church_id = 0;
                 Church_size = 0;
                 Church_duration = 0;
-                for (i=0;i<64;i++){
+                for (i=0;i<128;i++){
                     Church_households[i] = -1;
                 }
                 
@@ -735,7 +735,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Church_duration = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Church_households){
-                    readArrayInput<int>(&fpgu_strtol, buffer, Church_households, 64);    
+                    readArrayInput<int>(&fpgu_strtol, buffer, Church_households, 128);    
                 }
 				
             }

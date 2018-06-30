@@ -169,7 +169,7 @@
         <gpu:variable>
           <type>int</type>
           <name>households</name>
-          <arrayLength>64</arrayLength>
+          <arrayLength>128</arrayLength>
           <defaultValue>-1</defaultValue>
         </gpu:variable>
       </memory>

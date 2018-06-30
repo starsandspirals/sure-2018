@@ -1621,7 +1621,7 @@ __host__ unsigned int get_Church_chudefault_variable_duration(unsigned int index
  */
 __host__ int get_Church_chudefault_variable_households(unsigned int index, unsigned int element){
     unsigned int count = get_agent_Church_chudefault_count();
-    unsigned int numElements = 64;
+    unsigned int numElements = 128;
     unsigned int currentIteration = getIterationNumber();
     
     // If the index is within bounds - no need to check >= 0 due to unsigned.
@@ -1771,7 +1771,7 @@ void copy_single_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_list
  
 		gpuErrchk(cudaMemcpy(d_dst->duration, &h_agent->duration, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-	for(unsigned int i = 0; i < 64; i++){
+	for(unsigned int i = 0; i < 128; i++){
 		gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_agent->households + i, sizeof(int), cudaMemcpyHostToDevice));
     }
 
@@ -1796,7 +1796,7 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
  
 		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		for(unsigned int i = 0; i < 64; i++){
+		for(unsigned int i = 0; i < 128; i++){
 			gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_src->households + (i * xmachine_memory_Church_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
         }
 
@@ -2124,9 +2124,9 @@ xmachine_memory_Church* h_allocate_agent_Church(){
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Church));
 	// Agent variable arrays must be allocated
-    agent->households = (int*)malloc(64 * sizeof(int));
+    agent->households = (int*)malloc(128 * sizeof(int));
 	// If we have a default value, set each element correctly.
-	for(unsigned int index = 0; index < 64; index++){
+	for(unsigned int index = 0; index < 128; index++){
 		agent->households[index] = -1;
 	}
 	return agent;
@@ -2163,7 +2163,7 @@ void h_unpack_agents_Church_AoS_to_SoA(xmachine_memory_Church_list * dst, xmachi
 			 
 			dst->duration[i] = src[i]->duration;
 			 
-			for(unsigned int j = 0; j < 64; j++){
+			for(unsigned int j = 0; j < 128; j++){
 				dst->households[(j * xmachine_memory_Church_MAX) + i] = src[i]->households[j];
 			}
 			
