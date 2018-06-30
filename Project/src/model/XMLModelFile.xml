@@ -189,7 +189,7 @@
         <initialState>chudefault</initialState>
       </states>
       <gpu:type>continuous</gpu:type>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>256</gpu:bufferSize>
     </gpu:xagent>
   </xagents>
   <messages>

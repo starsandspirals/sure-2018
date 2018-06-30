@@ -27,8 +27,10 @@
 
 xmachine_memory_Person **h_agent_AoS;
 xmachine_memory_Household **h_household_AoS;
+xmachine_memory_Church **h_church_AoS;
 const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
+const unsigned int h_church_AoS_MAX = 256;
 
 const float beta0 = 2.19261;
 const float beta1 = 0.14679;
@@ -93,6 +95,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   h_nextHouseholdID = 1;
 
   h_household_AoS = h_allocate_agent_Household_array(h_household_AoS_MAX);
+
+  h_nextChurchID = 1;
+
+  h_church_AoS = h_allocate_agent_Church_array(h_church_AoS_MAX);
 
   char const *const fileName = "data.in";
   FILE *file = fopen(fileName, "r");

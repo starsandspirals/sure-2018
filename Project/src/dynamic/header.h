@@ -64,7 +64,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_Household_MAX 8192
 
 //Maximum population size of xmachine_memory_Church
-#define xmachine_memory_Church_MAX 2048 
+#define xmachine_memory_Church_MAX 256 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32 
 //Agent variable array length for xmachine_memory_Church->households
