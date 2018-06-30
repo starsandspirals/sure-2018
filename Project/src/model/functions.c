@@ -46,14 +46,17 @@ __host__ unsigned int getNextHouseholdID() {
   return old;
 }
 
-__host__ void shuffle(unsigned int *array, size_t n) {
+__host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
   if (n > 1) {
     size_t i;
     for (i = 0; i < n - 1; i++) {
       size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-      unsigned int t = array[j];
-      array[j] = array[i];
-      array[i] = t;
+      unsigned int t1 = array1[j];
+      unsigned int t2 = array2[j];
+      array1[j] = array1[i];
+      array2[j] = array2[i];
+      array1[i] = t1;
+      array2[i] = t2;
     }
   }
 }
@@ -96,6 +99,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   unsigned int sizearray[32];
   signed int count;
+  unsigned int ages[h_agent_AoS_MAX];
 
   for (unsigned int i = 0; i < 32; i++) {
     sizearray[i] = 0;
@@ -132,6 +136,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->householdsize = currentsize;
 
         sizearray[currentsize]++;
+        ages[h_person->id] = age;
 
         h_add_agent_Person_default(h_person);
 
@@ -149,7 +154,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     order[i] = i;
   }
 
-  shuffle(order, total);
+  shuffle(order, ages, total);
 
   for (unsigned int i = 1; i < 32; i++) {
     for (unsigned int ii = 0; ii < (sizearray[i] / i); ii++) {
