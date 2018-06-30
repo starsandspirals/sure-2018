@@ -356,16 +356,51 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fprintf(stdout, "Outputting some Household data to %s\n",
               outputFilename.c_str());
 
-      fprintf(fp, "ID, size, churchgoing, churchfreq\n");
+      fprintf(fp, "ID, size, churchgoing, churchfreq, adults\n");
 
       for (int index = 0; index < get_agent_Household_hhdefault_count();
            index++) {
 
-        fprintf(fp, "%u, %u, %u, %u\n",
+        fprintf(fp, "%u, %u, %u, %u, %u\n",
                 get_Household_hhdefault_variable_id(index),
                 get_Household_hhdefault_variable_size(index),
                 get_Household_hhdefault_variable_churchgoing(index),
-                get_Household_hhdefault_variable_churchfreq(index));
+                get_Household_hhdefault_variable_churchfreq(index),
+                get_Household_hhdefault_variable_adults(index));
+      }
+
+      fflush(fp);
+    } else {
+      fprintf(
+          stderr,
+          "Error: file %s could not be created for customOutputStepFunction\n",
+          outputFilename.c_str());
+    }
+
+    if (fp != nullptr && fp != stdout && fp != stderr) {
+      fclose(fp);
+      fp = nullptr;
+    }
+  }
+
+  if (iteration == 2) {
+
+    std::string outputFilename =
+        std::string(std::string(directory) + "church-output.csv");
+
+    FILE *fp = fopen(outputFilename.c_str(), "w");
+
+    if (fp != nullptr) {
+      fprintf(stdout, "Outputting some Church data to %s\n",
+              outputFilename.c_str());
+
+      fprintf(fp, "ID, size, duration\n");
+
+      for (int index = 0; index < get_agent_Church_chudefault_count();
+           index++) {
+        fprintf(fp, "%u, %u, %f\n", get_Church_chudefault_variable_id(index),
+                get_Church_chudefault_variable_size(index),
+                get_Church_chudefault_variable_duration(index));
       }
 
       fflush(fp);
