@@ -270,6 +270,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</churchfreq>\n", file);
         
+		fputs("<adults>", file);
+        sprintf(data, "%u", h_Households_hhdefault->adults[i]);
+		fputs(data, file);
+		fputs("</adults>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Church agent to xml
@@ -356,6 +361,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Household_people;
     int in_Household_churchgoing;
     int in_Household_churchfreq;
+    int in_Household_adults;
     int in_Church_id;
     int in_Church_size;
     int in_Church_duration;
@@ -388,6 +394,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int Household_people[32];
 	unsigned int Household_churchgoing;
 	unsigned int Household_churchfreq;
+	unsigned int Household_adults;
 	unsigned int Church_id;
 	unsigned int Church_size;
 	unsigned int Church_duration;
@@ -425,6 +432,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Household_people = 0;
 	in_Household_churchgoing = 0;
 	in_Household_churchfreq = 0;
+	in_Household_adults = 0;
 	in_Church_id = 0;
 	in_Church_size = 0;
 	in_Church_duration = 0;
@@ -455,6 +463,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         }
 		h_Households->churchgoing[k] = 0;
 		h_Households->churchfreq[k] = 0;
+		h_Households->adults[k] = 0;
 	}
 	
 	//set all Church values to 0
@@ -482,6 +491,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     }
     Household_churchgoing = 0;
     Household_churchfreq = 0;
+    Household_adults = 0;
     Church_id = 0;
     Church_size = 0;
     Church_duration = 0;
@@ -578,6 +588,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     }
 					h_Households->churchgoing[*h_xmachine_memory_Household_count] = Household_churchgoing;
 					h_Households->churchfreq[*h_xmachine_memory_Household_count] = Household_churchfreq;
+					h_Households->adults[*h_xmachine_memory_Household_count] = Household_adults;
 					(*h_xmachine_memory_Household_count) ++;	
 				}
 				else if(strcmp(agentname, "Church") == 0)
@@ -616,6 +627,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
                 Household_churchgoing = 0;
                 Household_churchfreq = 0;
+                Household_adults = 0;
                 Church_id = 0;
                 Church_size = 0;
                 Church_duration = 0;
@@ -643,6 +655,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/churchgoing") == 0) in_Household_churchgoing = 0;
 			if(strcmp(buffer, "churchfreq") == 0) in_Household_churchfreq = 1;
 			if(strcmp(buffer, "/churchfreq") == 0) in_Household_churchfreq = 0;
+			if(strcmp(buffer, "adults") == 0) in_Household_adults = 1;
+			if(strcmp(buffer, "/adults") == 0) in_Household_adults = 0;
 			if(strcmp(buffer, "id") == 0) in_Church_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Church_id = 0;
 			if(strcmp(buffer, "size") == 0) in_Church_size = 1;
@@ -707,6 +721,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Household_churchfreq){
                     Household_churchfreq = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Household_adults){
+                    Household_adults = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Church_id){
                     Church_id = (unsigned int) fpgu_strtoul(buffer); 

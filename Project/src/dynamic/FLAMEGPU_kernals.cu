@@ -302,7 +302,8 @@ __global__ void scatter_Household_Agents(xmachine_memory_Household_list* agents_
 	      agents_dst->people[(i*xmachine_memory_Household_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Household_MAX)+index];
 	    }        
 		agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];        
-		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
+		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];        
+		agents_dst->adults[output_index] = agents_src->adults[index];
 	}
 }
 
@@ -329,6 +330,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
 	    }
 	    agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];
 	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
+	    agents_dst->adults[output_index] = agents_src->adults[index];
     }
 }
 
@@ -340,9 +342,10 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * @param people agent variable of type int
  * @param churchgoing agent variable of type unsigned int
  * @param churchfreq agent variable of type unsigned int
+ * @param adults agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq){
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
 	
 	int index;
     
@@ -365,12 +368,13 @@ __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsi
 	agents->size[index] = size;
 	agents->churchgoing[index] = churchgoing;
 	agents->churchfreq[index] = churchfreq;
+	agents->adults[index] = adults;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq){
-    add_Household_agent<DISCRETE_2D>(agents, id, size, churchgoing, churchfreq);
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
+    add_Household_agent<DISCRETE_2D>(agents, id, size, churchgoing, churchfreq, adults);
 }
 
 /** reorder_Household_agents
@@ -393,6 +397,7 @@ __global__ void reorder_Household_agents(unsigned int* values, xmachine_memory_H
 	}
 	ordered_agents->churchgoing[index] = unordered_agents->churchgoing[old_pos];
 	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
+	ordered_agents->adults[index] = unordered_agents->adults[old_pos];
 }
 
 /** get_Household_agent_array_value
@@ -655,6 +660,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
     agent.people = &(agents->people[index]);
 	agent.churchgoing = agents->churchgoing[index];
 	agent.churchfreq = agents->churchfreq[index];
+	agent.adults = agents->adults[index];
 
 	//FLAME function call
 	int dead = !hhupdate(&agent);
@@ -668,6 +674,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 	agents->size[index] = agent.size;
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
+	agents->adults[index] = agent.adults;
 }
 
 /**

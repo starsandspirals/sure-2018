@@ -156,10 +156,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   shuffle(order, ages, total);
 
+  unsigned int adult[h_household_AoS_MAX];
+  unsigned int adultcount;
+
   for (unsigned int i = 1; i < 32; i++) {
     for (unsigned int ii = 0; ii < (sizearray[i] / i); ii++) {
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
       churchprob = 1 / (1 + exp(-beta0 - (beta1 * i)));
+      adultcount = 0;
 
       h_household->id = getNextHouseholdID();
       h_household->size = i;
@@ -167,6 +171,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       for (unsigned int iii = 0; iii < i; iii++) {
         h_household->people[iii] = order[count];
         count++;
+
+        if (ages[count] >= 15) {
+          adultcount++;
+        }
       }
 
       float random = ((float)rand() / (RAND_MAX));
@@ -200,11 +208,23 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_household->churchfreq = 0;
       }
 
+      h_household->adults = adultcount;
+      adult[h_household->id] = adultcount;
+
       h_add_agent_Household_hhdefault(h_household);
 
       h_free_agent_Household(&h_household);
     }
   }
+
+  unsigned int hhtotal = get_agent_Household_hhdefault_count();
+  unsigned int hhorder[hhtotal];
+
+  for (unsigned int i = 0; i < hhtotal; i++) {
+    hhorder[i] = i;
+  }
+
+  shuffle(hhorder, adult, hhtotal);
 
   while (fgets(line, sizeof(line), file)) {
     printf("%s", line);

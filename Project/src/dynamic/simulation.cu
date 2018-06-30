@@ -144,6 +144,7 @@ unsigned int h_Households_hhdefault_variable_size_data_iteration;
 unsigned int h_Households_hhdefault_variable_people_data_iteration;
 unsigned int h_Households_hhdefault_variable_churchgoing_data_iteration;
 unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
+unsigned int h_Households_hhdefault_variable_adults_data_iteration;
 unsigned int h_Churchs_chudefault_variable_id_data_iteration;
 unsigned int h_Churchs_chudefault_variable_size_data_iteration;
 unsigned int h_Churchs_chudefault_variable_duration_data_iteration;
@@ -310,6 +311,7 @@ void initialise(char * inputfile){
     h_Households_hhdefault_variable_people_data_iteration = 0;
     h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
     h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
+    h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_Churchs_chudefault_variable_id_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
     h_Churchs_chudefault_variable_duration_data_iteration = 0;
@@ -1453,6 +1455,45 @@ __host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int i
     }
 }
 
+/** unsigned int get_Household_hhdefault_variable_adults(unsigned int index)
+ * Gets the value of the adults variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable adults
+ */
+__host__ unsigned int get_Household_hhdefault_variable_adults(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_adults_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->adults,
+                    d_Households_hhdefault->adults,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_adults_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->adults[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access adults for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Church_chudefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1680,6 +1721,8 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
 		gpuErrchk(cudaMemcpy(d_dst->churchgoing, &h_agent->churchgoing, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->churchfreq, &h_agent->churchfreq, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->adults, &h_agent->adults, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -1708,6 +1751,8 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 		gpuErrchk(cudaMemcpy(d_dst->churchgoing, h_src->churchgoing, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->churchfreq, h_src->churchfreq, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->adults, h_src->adults, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -1993,6 +2038,8 @@ void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, 
 			dst->churchgoing[i] = src[i]->churchgoing;
 			 
 			dst->churchfreq[i] = src[i]->churchfreq;
+			 
+			dst->adults[i] = src[i]->adults;
 			
 		}
 	}
@@ -2029,6 +2076,7 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
     h_Households_hhdefault_variable_people_data_iteration = 0;
     h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
     h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
+    h_Households_hhdefault_variable_adults_data_iteration = 0;
     
 
 }
@@ -2065,6 +2113,7 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
         h_Households_hhdefault_variable_people_data_iteration = 0;
         h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
         h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
+        h_Households_hhdefault_variable_adults_data_iteration = 0;
         
 
 	}
@@ -2444,6 +2493,27 @@ unsigned int min_Household_hhdefault_churchfreq_variable(){
 unsigned int max_Household_hhdefault_churchfreq_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchfreq);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Household_hhdefault_adults_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->adults),  thrust::device_pointer_cast(d_Households_hhdefault->adults) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_adults_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->adults),  thrust::device_pointer_cast(d_Households_hhdefault->adults) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_adults_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->adults);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_adults_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->adults);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
