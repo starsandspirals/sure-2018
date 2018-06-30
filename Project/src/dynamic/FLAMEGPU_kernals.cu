@@ -507,11 +507,11 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
  * @param agents xmachine_memory_Church_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param size agent variable of type unsigned int
- * @param duration agent variable of type unsigned int
+ * @param duration agent variable of type float
  * @param households agent variable of type int
  */
 template <int AGENT_TYPE>
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration){
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration){
 	
 	int index;
     
@@ -537,7 +537,7 @@ __device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration){
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration){
     add_Church_agent<DISCRETE_2D>(agents, id, size, duration);
 }
 

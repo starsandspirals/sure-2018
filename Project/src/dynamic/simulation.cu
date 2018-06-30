@@ -1572,14 +1572,14 @@ __host__ unsigned int get_Church_chudefault_variable_size(unsigned int index){
     }
 }
 
-/** unsigned int get_Church_chudefault_variable_duration(unsigned int index)
+/** float get_Church_chudefault_variable_duration(unsigned int index)
  * Gets the value of the duration variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable duration
  */
-__host__ unsigned int get_Church_chudefault_variable_duration(unsigned int index){
+__host__ float get_Church_chudefault_variable_duration(unsigned int index){
     unsigned int count = get_agent_Church_chudefault_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -1592,7 +1592,7 @@ __host__ unsigned int get_Church_chudefault_variable_duration(unsigned int index
                 cudaMemcpy(
                     h_Churchs_chudefault->duration,
                     d_Churchs_chudefault->duration,
-                    count * sizeof(unsigned int),
+                    count * sizeof(float),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -1769,7 +1769,7 @@ void copy_single_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_list
  
 		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->duration, &h_agent->duration, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->duration, &h_agent->duration, sizeof(float), cudaMemcpyHostToDevice));
  
 	for(unsigned int i = 0; i < 128; i++){
 		gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_agent->households + i, sizeof(int), cudaMemcpyHostToDevice));
@@ -1794,7 +1794,7 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
  
 		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(float), cudaMemcpyHostToDevice));
  
 		for(unsigned int i = 0; i < 128; i++){
 			gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_src->households + (i * xmachine_memory_Church_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
@@ -2559,24 +2559,20 @@ unsigned int max_Church_chudefault_size_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Church_chudefault_duration_variable(){
+float reduce_Church_chudefault_duration_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->duration),  thrust::device_pointer_cast(d_Churchs_chudefault->duration) + h_xmachine_memory_Church_chudefault_count);
 }
 
-unsigned int count_Church_chudefault_duration_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Churchs_chudefault->duration),  thrust::device_pointer_cast(d_Churchs_chudefault->duration) + h_xmachine_memory_Church_chudefault_count, count_value);
-}
-unsigned int min_Church_chudefault_duration_variable(){
+float min_Church_chudefault_duration_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Church_chudefault_duration_variable(){
+float max_Church_chudefault_duration_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

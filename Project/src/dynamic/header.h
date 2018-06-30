@@ -148,7 +148,7 @@ struct __align__(16) xmachine_memory_Church
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
-    unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
+    float duration;    /**< X-machine memory variable duration of type float.*/
     int *households;    /**< X-machine memory variable households of type int.*/
 };
 
@@ -206,7 +206,7 @@ struct xmachine_memory_Church_list
     
     unsigned int id [xmachine_memory_Church_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int size [xmachine_memory_Church_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
-    unsigned int duration [xmachine_memory_Church_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
+    float duration [xmachine_memory_Church_MAX];    /**< X-machine memory variable list duration of type float.*/
     int households [xmachine_memory_Church_MAX*128];    /**< X-machine memory variable list households of type int.*/
 };
 
@@ -328,9 +328,9 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, unsigned int i
  * @param agents xmachine_memory_Church_list agent list
  * @param id	agent agent variable of type unsigned int
  * @param size	agent agent variable of type unsigned int
- * @param duration	agent agent variable of type unsigned int
+ * @param duration	agent agent variable of type float
  */
-__FLAME_GPU_FUNC__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, unsigned int duration);
+__FLAME_GPU_FUNC__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration);
 
 /** get_Church_agent_array_value
  *  Template function for accessing Church agent array memory variables.
@@ -708,14 +708,14 @@ __host__ unsigned int get_Church_chudefault_variable_id(unsigned int index);
  */
 __host__ unsigned int get_Church_chudefault_variable_size(unsigned int index);
 
-/** unsigned int get_Church_chudefault_variable_duration(unsigned int index)
+/** float get_Church_chudefault_variable_duration(unsigned int index)
  * Gets the value of the duration variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable duration
  */
-__host__ unsigned int get_Church_chudefault_variable_duration(unsigned int index);
+__host__ float get_Church_chudefault_variable_duration(unsigned int index);
 
 /** int get_Church_chudefault_variable_households(unsigned int index, unsigned int element)
  * Gets the element-th value of the households variable array of an Church agent in the chudefault state on the host. 
@@ -1272,31 +1272,24 @@ unsigned int min_Church_chudefault_size_variable();
  */
 unsigned int max_Church_chudefault_size_variable();
 
-/** unsigned int reduce_Church_chudefault_duration_variable();
+/** float reduce_Church_chudefault_duration_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-unsigned int reduce_Church_chudefault_duration_variable();
+float reduce_Church_chudefault_duration_variable();
 
 
 
-/** unsigned int count_Church_chudefault_duration_variable(int count_value){
- * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
- * @param count_value The unique value which should be counted
- * @return The number of unique values of the count_value found in the agent state variable list
- */
-unsigned int count_Church_chudefault_duration_variable(int count_value);
-
-/** unsigned int min_Church_chudefault_duration_variable();
+/** float min_Church_chudefault_duration_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int min_Church_chudefault_duration_variable();
-/** unsigned int max_Church_chudefault_duration_variable();
+float min_Church_chudefault_duration_variable();
+/** float max_Church_chudefault_duration_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int max_Church_chudefault_duration_variable();
+float max_Church_chudefault_duration_variable();
 
 
   

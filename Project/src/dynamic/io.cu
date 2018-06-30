@@ -293,7 +293,7 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</size>\n", file);
         
 		fputs("<duration>", file);
-        sprintf(data, "%u", h_Churchs_chudefault->duration[i]);
+        sprintf(data, "%f", h_Churchs_chudefault->duration[i]);
 		fputs(data, file);
 		fputs("</duration>\n", file);
         
@@ -397,7 +397,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Household_adults;
 	unsigned int Church_id;
 	unsigned int Church_size;
-	unsigned int Church_duration;
+	float Church_duration;
     int Church_households[128];
 
     /* Variables for environment variables */
@@ -732,7 +732,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Church_size = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Church_duration){
-                    Church_duration = (unsigned int) fpgu_strtoul(buffer); 
+                    Church_duration = (float) fgpu_atof(buffer); 
                 }
 				if(in_Church_households){
                     readArrayInput<int>(&fpgu_strtol, buffer, Church_households, 128);    

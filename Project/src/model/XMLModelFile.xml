@@ -163,7 +163,7 @@
           <name>size</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>float</type>
           <name>duration</name>
         </gpu:variable>
         <gpu:variable>
