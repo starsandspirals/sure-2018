@@ -37,8 +37,8 @@ const unsigned int k1 = 13;
 const unsigned int k2 = 35;
 const unsigned int k3 = 100;
 
-const unsigned int p1 = 0.14;
-const unsigned int p2 = 0.32;
+const float p1 = 0.14;
+const float p2 = 0.32;
 
 unsigned int h_nextID;
 unsigned int h_nextHouseholdID;
