@@ -58,6 +58,10 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
   }
 }
 
+// A function that returns the day of the week given an iteration number of
+// increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
+__host__ unsigned int dayofweek(unsigned int step) { return (step % 288) % 7; }
+
 // The function called at the beginning of the program on the CPU, to initialise
 // all agents and their corresponding variables.
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
