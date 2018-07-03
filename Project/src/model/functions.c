@@ -32,16 +32,6 @@ const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
 const unsigned int h_church_AoS_MAX = 256;
 
-const float beta0 = 2.19261;
-const float beta1 = 0.14679;
-
-const unsigned int k1 = 13;
-const unsigned int k2 = 35;
-const unsigned int k3 = 100;
-
-const float p1 = 0.14;
-const float p2 = 0.32;
-
 unsigned int h_nextID;
 unsigned int h_nextHouseholdID;
 unsigned int h_nextChurchID;
@@ -84,6 +74,26 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
   printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
   printf("Set STARTING_POPULATION = %u\n", (int)*get_STARTING_POPULATION());
+
+  float church_beta0 = *get_CHURCH_BETA0();
+  float church_beta1 = *get_CHURCH_BETA1();
+
+  float church_prob0 = *get_CHURCH_PROB0();
+  float church_prob1 = *get_CHURCH_PROB1();
+  float church_prob2 = *get_CHURCH_PROB2();
+  float church_prob3 = *get_CHURCH_PROB3();
+  float church_prob4 = *get_CHURCH_PROB4();
+  float church_prob5 = *get_CHURCH_PROB5();
+  float church_prob6 = *get_CHURCH_PROB6();
+
+  float church_p1 = *get_CHURCH_P1();
+  float church_p2 = *get_CHURCH_P2();
+
+  unsigned int church_k1 = *get_CHURCH_K1();
+  unsigned int church_k2 = *get_CHURCH_K2();
+  unsigned int church_k3 = *get_CHURCH_K3();
+
+  float church_duration = *get_CHURCH_DURATION();
 
   srand(0);
 
@@ -183,7 +193,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   for (unsigned int i = 1; i < 32; i++) {
     for (unsigned int ii = 0; ii < (sizearray[i] / i); ii++) {
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
-      churchprob = 1 / (1 + exp(-beta0 - (beta1 * i)));
+      churchprob = 1 / (1 + exp(-church_beta0 - church_beta1 * i));
       adultcount = 0;
 
       h_household->id = getNextHouseholdID();
@@ -208,19 +218,19 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       if (h_household->churchgoing) {
         random = ((float)rand() / (RAND_MAX));
-        if (random < 0.285569106) {
+        if (random < church_prob0) {
           h_household->churchfreq = 0;
-        } else if (random < 0.704268293) {
+        } else if (random < church_prob1) {
           h_household->churchfreq = 1;
-        } else if (random < 0.864329269) {
+        } else if (random < church_prob2) {
           h_household->churchfreq = 2;
-        } else if (random < 0.944613822) {
+        } else if (random < church_prob3) {
           h_household->churchfreq = 3;
-        } else if (random < 0.978658537) {
+        } else if (random < church_prob4) {
           h_household->churchfreq = 4;
-        } else if (random < 0.981707317) {
+        } else if (random < church_prob5) {
           h_household->churchfreq = 5;
-        } else if (random < 0.985772358) {
+        } else if (random < church_prob6) {
           h_household->churchfreq = 6;
         } else {
           h_household->churchfreq = 7;
@@ -258,17 +268,17 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
     float random = ((float)rand() / (RAND_MAX));
 
-    if (random < p1) {
-      h_church->size = k1;
-    } else if (random < p2) {
-      h_church->size = k2;
+    if (random < church_p1) {
+      h_church->size = church_k1;
+    } else if (random < church_p2) {
+      h_church->size = church_k2;
     } else {
-      h_church->size = k3;
+      h_church->size = church_k3;
     }
 
     random = ((float)rand() / (RAND_MAX));
 
-    if (random < 0.5) {
+    if (random < church_duration) {
       h_church->duration = 1.5;
     } else {
       h_church->duration = 3.5;

@@ -795,6 +795,21 @@ float h_env_TIME_STEP;
 float h_env_SCALE_FACTOR;
 unsigned int h_env_MAX_AGE;
 float h_env_STARTING_POPULATION;
+float h_env_CHURCH_BETA0;
+float h_env_CHURCH_BETA1;
+unsigned int h_env_CHURCH_K1;
+unsigned int h_env_CHURCH_K2;
+unsigned int h_env_CHURCH_K3;
+float h_env_CHURCH_P1;
+float h_env_CHURCH_P2;
+float h_env_CHURCH_PROB0;
+float h_env_CHURCH_PROB1;
+float h_env_CHURCH_PROB2;
+float h_env_CHURCH_PROB3;
+float h_env_CHURCH_PROB4;
+float h_env_CHURCH_PROB5;
+float h_env_CHURCH_PROB6;
+float h_env_CHURCH_DURATION;
 
 
 //constant setter
@@ -845,6 +860,201 @@ void set_STARTING_POPULATION(float* h_STARTING_POPULATION){
 //constant getter
 const float* get_STARTING_POPULATION(){
     return &h_env_STARTING_POPULATION;
+}
+
+
+
+//constant setter
+void set_CHURCH_BETA0(float* h_CHURCH_BETA0){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_BETA0, h_CHURCH_BETA0, sizeof(float)));
+    memcpy(&h_env_CHURCH_BETA0, h_CHURCH_BETA0,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_BETA0(){
+    return &h_env_CHURCH_BETA0;
+}
+
+
+
+//constant setter
+void set_CHURCH_BETA1(float* h_CHURCH_BETA1){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_BETA1, h_CHURCH_BETA1, sizeof(float)));
+    memcpy(&h_env_CHURCH_BETA1, h_CHURCH_BETA1,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_BETA1(){
+    return &h_env_CHURCH_BETA1;
+}
+
+
+
+//constant setter
+void set_CHURCH_K1(unsigned int* h_CHURCH_K1){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_K1, h_CHURCH_K1, sizeof(unsigned int)));
+    memcpy(&h_env_CHURCH_K1, h_CHURCH_K1,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_CHURCH_K1(){
+    return &h_env_CHURCH_K1;
+}
+
+
+
+//constant setter
+void set_CHURCH_K2(unsigned int* h_CHURCH_K2){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_K2, h_CHURCH_K2, sizeof(unsigned int)));
+    memcpy(&h_env_CHURCH_K2, h_CHURCH_K2,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_CHURCH_K2(){
+    return &h_env_CHURCH_K2;
+}
+
+
+
+//constant setter
+void set_CHURCH_K3(unsigned int* h_CHURCH_K3){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_K3, h_CHURCH_K3, sizeof(unsigned int)));
+    memcpy(&h_env_CHURCH_K3, h_CHURCH_K3,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_CHURCH_K3(){
+    return &h_env_CHURCH_K3;
+}
+
+
+
+//constant setter
+void set_CHURCH_P1(float* h_CHURCH_P1){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_P1, h_CHURCH_P1, sizeof(float)));
+    memcpy(&h_env_CHURCH_P1, h_CHURCH_P1,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_P1(){
+    return &h_env_CHURCH_P1;
+}
+
+
+
+//constant setter
+void set_CHURCH_P2(float* h_CHURCH_P2){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_P2, h_CHURCH_P2, sizeof(float)));
+    memcpy(&h_env_CHURCH_P2, h_CHURCH_P2,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_P2(){
+    return &h_env_CHURCH_P2;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB0(float* h_CHURCH_PROB0){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB0, h_CHURCH_PROB0, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB0, h_CHURCH_PROB0,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB0(){
+    return &h_env_CHURCH_PROB0;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB1(float* h_CHURCH_PROB1){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB1, h_CHURCH_PROB1, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB1, h_CHURCH_PROB1,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB1(){
+    return &h_env_CHURCH_PROB1;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB2(float* h_CHURCH_PROB2){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB2, h_CHURCH_PROB2, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB2, h_CHURCH_PROB2,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB2(){
+    return &h_env_CHURCH_PROB2;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB3(float* h_CHURCH_PROB3){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB3, h_CHURCH_PROB3, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB3, h_CHURCH_PROB3,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB3(){
+    return &h_env_CHURCH_PROB3;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB4(float* h_CHURCH_PROB4){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB4, h_CHURCH_PROB4, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB4, h_CHURCH_PROB4,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB4(){
+    return &h_env_CHURCH_PROB4;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB5(float* h_CHURCH_PROB5){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB5, h_CHURCH_PROB5, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB5, h_CHURCH_PROB5,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB5(){
+    return &h_env_CHURCH_PROB5;
+}
+
+
+
+//constant setter
+void set_CHURCH_PROB6(float* h_CHURCH_PROB6){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROB6, h_CHURCH_PROB6, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROB6, h_CHURCH_PROB6,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_PROB6(){
+    return &h_env_CHURCH_PROB6;
+}
+
+
+
+//constant setter
+void set_CHURCH_DURATION(float* h_CHURCH_DURATION){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_DURATION, h_CHURCH_DURATION, sizeof(float)));
+    memcpy(&h_env_CHURCH_DURATION, h_CHURCH_DURATION,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_DURATION(){
+    return &h_env_CHURCH_DURATION;
 }
 
 

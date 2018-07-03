@@ -177,6 +177,66 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_STARTING_POPULATION()));
     fputs(data, file);
     fputs("</STARTING_POPULATION>\n", file);
+    fputs("\t<CHURCH_BETA0>", file);
+    sprintf(data, "%f", (*get_CHURCH_BETA0()));
+    fputs(data, file);
+    fputs("</CHURCH_BETA0>\n", file);
+    fputs("\t<CHURCH_BETA1>", file);
+    sprintf(data, "%f", (*get_CHURCH_BETA1()));
+    fputs(data, file);
+    fputs("</CHURCH_BETA1>\n", file);
+    fputs("\t<CHURCH_K1>", file);
+    sprintf(data, "%u", (*get_CHURCH_K1()));
+    fputs(data, file);
+    fputs("</CHURCH_K1>\n", file);
+    fputs("\t<CHURCH_K2>", file);
+    sprintf(data, "%u", (*get_CHURCH_K2()));
+    fputs(data, file);
+    fputs("</CHURCH_K2>\n", file);
+    fputs("\t<CHURCH_K3>", file);
+    sprintf(data, "%u", (*get_CHURCH_K3()));
+    fputs(data, file);
+    fputs("</CHURCH_K3>\n", file);
+    fputs("\t<CHURCH_P1>", file);
+    sprintf(data, "%f", (*get_CHURCH_P1()));
+    fputs(data, file);
+    fputs("</CHURCH_P1>\n", file);
+    fputs("\t<CHURCH_P2>", file);
+    sprintf(data, "%f", (*get_CHURCH_P2()));
+    fputs(data, file);
+    fputs("</CHURCH_P2>\n", file);
+    fputs("\t<CHURCH_PROB0>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB0()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB0>\n", file);
+    fputs("\t<CHURCH_PROB1>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB1()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB1>\n", file);
+    fputs("\t<CHURCH_PROB2>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB2()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB2>\n", file);
+    fputs("\t<CHURCH_PROB3>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB3()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB3>\n", file);
+    fputs("\t<CHURCH_PROB4>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB4()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB4>\n", file);
+    fputs("\t<CHURCH_PROB5>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB5()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB5>\n", file);
+    fputs("\t<CHURCH_PROB6>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROB6()));
+    fputs(data, file);
+    fputs("</CHURCH_PROB6>\n", file);
+    fputs("\t<CHURCH_DURATION>", file);
+    sprintf(data, "%f", (*get_CHURCH_DURATION()));
+    fputs(data, file);
+    fputs("</CHURCH_DURATION>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -325,6 +385,36 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_MAX_AGE(&t_MAX_AGE);
     float t_STARTING_POPULATION = (float)30000.0;
     set_STARTING_POPULATION(&t_STARTING_POPULATION);
+    float t_CHURCH_BETA0 = (float)2.19261;
+    set_CHURCH_BETA0(&t_CHURCH_BETA0);
+    float t_CHURCH_BETA1 = (float)0.14679;
+    set_CHURCH_BETA1(&t_CHURCH_BETA1);
+    unsigned int t_CHURCH_K1 = (unsigned int)13;
+    set_CHURCH_K1(&t_CHURCH_K1);
+    unsigned int t_CHURCH_K2 = (unsigned int)35;
+    set_CHURCH_K2(&t_CHURCH_K2);
+    unsigned int t_CHURCH_K3 = (unsigned int)100;
+    set_CHURCH_K3(&t_CHURCH_K3);
+    float t_CHURCH_P1 = (float)0.14;
+    set_CHURCH_P1(&t_CHURCH_P1);
+    float t_CHURCH_P2 = (float)0.32;
+    set_CHURCH_P2(&t_CHURCH_P2);
+    float t_CHURCH_PROB0 = (float)0.285569106;
+    set_CHURCH_PROB0(&t_CHURCH_PROB0);
+    float t_CHURCH_PROB1 = (float)0.704268293;
+    set_CHURCH_PROB1(&t_CHURCH_PROB1);
+    float t_CHURCH_PROB2 = (float)0.864329269;
+    set_CHURCH_PROB2(&t_CHURCH_PROB2);
+    float t_CHURCH_PROB3 = (float)0.944613822;
+    set_CHURCH_PROB3(&t_CHURCH_PROB3);
+    float t_CHURCH_PROB4 = (float)0.978658537;
+    set_CHURCH_PROB4(&t_CHURCH_PROB4);
+    float t_CHURCH_PROB5 = (float)0.981707317;
+    set_CHURCH_PROB5(&t_CHURCH_PROB5);
+    float t_CHURCH_PROB6 = (float)0.985772358;
+    set_CHURCH_PROB6(&t_CHURCH_PROB6);
+    float t_CHURCH_DURATION = (float)0.5;
+    set_CHURCH_DURATION(&t_CHURCH_DURATION);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count)
@@ -371,6 +461,36 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_STARTING_POPULATION;
     
+    int in_env_CHURCH_BETA0;
+    
+    int in_env_CHURCH_BETA1;
+    
+    int in_env_CHURCH_K1;
+    
+    int in_env_CHURCH_K2;
+    
+    int in_env_CHURCH_K3;
+    
+    int in_env_CHURCH_P1;
+    
+    int in_env_CHURCH_P2;
+    
+    int in_env_CHURCH_PROB0;
+    
+    int in_env_CHURCH_PROB1;
+    
+    int in_env_CHURCH_PROB2;
+    
+    int in_env_CHURCH_PROB3;
+    
+    int in_env_CHURCH_PROB4;
+    
+    int in_env_CHURCH_PROB5;
+    
+    int in_env_CHURCH_PROB6;
+    
+    int in_env_CHURCH_DURATION;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
@@ -397,6 +517,21 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_SCALE_FACTOR;
     unsigned int env_MAX_AGE;
     float env_STARTING_POPULATION;
+    float env_CHURCH_BETA0;
+    float env_CHURCH_BETA1;
+    unsigned int env_CHURCH_K1;
+    unsigned int env_CHURCH_K2;
+    unsigned int env_CHURCH_K3;
+    float env_CHURCH_P1;
+    float env_CHURCH_P2;
+    float env_CHURCH_PROB0;
+    float env_CHURCH_PROB1;
+    float env_CHURCH_PROB2;
+    float env_CHURCH_PROB3;
+    float env_CHURCH_PROB4;
+    float env_CHURCH_PROB5;
+    float env_CHURCH_PROB6;
+    float env_CHURCH_DURATION;
     
 
 
@@ -432,6 +567,21 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
+    in_env_CHURCH_BETA0 = 0;
+    in_env_CHURCH_BETA1 = 0;
+    in_env_CHURCH_K1 = 0;
+    in_env_CHURCH_K2 = 0;
+    in_env_CHURCH_K3 = 0;
+    in_env_CHURCH_P1 = 0;
+    in_env_CHURCH_P2 = 0;
+    in_env_CHURCH_PROB0 = 0;
+    in_env_CHURCH_PROB1 = 0;
+    in_env_CHURCH_PROB2 = 0;
+    in_env_CHURCH_PROB3 = 0;
+    in_env_CHURCH_PROB4 = 0;
+    in_env_CHURCH_PROB5 = 0;
+    in_env_CHURCH_PROB6 = 0;
+    in_env_CHURCH_DURATION = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -494,6 +644,21 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_SCALE_FACTOR = 0;
     env_MAX_AGE = 0;
     env_STARTING_POPULATION = 0;
+    env_CHURCH_BETA0 = 0;
+    env_CHURCH_BETA1 = 0;
+    env_CHURCH_K1 = 0;
+    env_CHURCH_K2 = 0;
+    env_CHURCH_K3 = 0;
+    env_CHURCH_P1 = 0;
+    env_CHURCH_P2 = 0;
+    env_CHURCH_PROB0 = 0;
+    env_CHURCH_PROB1 = 0;
+    env_CHURCH_PROB2 = 0;
+    env_CHURCH_PROB3 = 0;
+    env_CHURCH_PROB4 = 0;
+    env_CHURCH_PROB5 = 0;
+    env_CHURCH_PROB6 = 0;
+    env_CHURCH_DURATION = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -664,6 +829,36 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/MAX_AGE") == 0) in_env_MAX_AGE = 0;
 			if(strcmp(buffer, "STARTING_POPULATION") == 0) in_env_STARTING_POPULATION = 1;
             if(strcmp(buffer, "/STARTING_POPULATION") == 0) in_env_STARTING_POPULATION = 0;
+			if(strcmp(buffer, "CHURCH_BETA0") == 0) in_env_CHURCH_BETA0 = 1;
+            if(strcmp(buffer, "/CHURCH_BETA0") == 0) in_env_CHURCH_BETA0 = 0;
+			if(strcmp(buffer, "CHURCH_BETA1") == 0) in_env_CHURCH_BETA1 = 1;
+            if(strcmp(buffer, "/CHURCH_BETA1") == 0) in_env_CHURCH_BETA1 = 0;
+			if(strcmp(buffer, "CHURCH_K1") == 0) in_env_CHURCH_K1 = 1;
+            if(strcmp(buffer, "/CHURCH_K1") == 0) in_env_CHURCH_K1 = 0;
+			if(strcmp(buffer, "CHURCH_K2") == 0) in_env_CHURCH_K2 = 1;
+            if(strcmp(buffer, "/CHURCH_K2") == 0) in_env_CHURCH_K2 = 0;
+			if(strcmp(buffer, "CHURCH_K3") == 0) in_env_CHURCH_K3 = 1;
+            if(strcmp(buffer, "/CHURCH_K3") == 0) in_env_CHURCH_K3 = 0;
+			if(strcmp(buffer, "CHURCH_P1") == 0) in_env_CHURCH_P1 = 1;
+            if(strcmp(buffer, "/CHURCH_P1") == 0) in_env_CHURCH_P1 = 0;
+			if(strcmp(buffer, "CHURCH_P2") == 0) in_env_CHURCH_P2 = 1;
+            if(strcmp(buffer, "/CHURCH_P2") == 0) in_env_CHURCH_P2 = 0;
+			if(strcmp(buffer, "CHURCH_PROB0") == 0) in_env_CHURCH_PROB0 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB0") == 0) in_env_CHURCH_PROB0 = 0;
+			if(strcmp(buffer, "CHURCH_PROB1") == 0) in_env_CHURCH_PROB1 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB1") == 0) in_env_CHURCH_PROB1 = 0;
+			if(strcmp(buffer, "CHURCH_PROB2") == 0) in_env_CHURCH_PROB2 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB2") == 0) in_env_CHURCH_PROB2 = 0;
+			if(strcmp(buffer, "CHURCH_PROB3") == 0) in_env_CHURCH_PROB3 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB3") == 0) in_env_CHURCH_PROB3 = 0;
+			if(strcmp(buffer, "CHURCH_PROB4") == 0) in_env_CHURCH_PROB4 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB4") == 0) in_env_CHURCH_PROB4 = 0;
+			if(strcmp(buffer, "CHURCH_PROB5") == 0) in_env_CHURCH_PROB5 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB5") == 0) in_env_CHURCH_PROB5 = 0;
+			if(strcmp(buffer, "CHURCH_PROB6") == 0) in_env_CHURCH_PROB6 = 1;
+            if(strcmp(buffer, "/CHURCH_PROB6") == 0) in_env_CHURCH_PROB6 = 0;
+			if(strcmp(buffer, "CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 1;
+            if(strcmp(buffer, "/CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -753,6 +948,111 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_STARTING_POPULATION = (float) fgpu_atof(buffer);
                     
                     set_STARTING_POPULATION(&env_STARTING_POPULATION);
+                  
+              }
+            if(in_env_CHURCH_BETA0){
+              
+                    env_CHURCH_BETA0 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_BETA0(&env_CHURCH_BETA0);
+                  
+              }
+            if(in_env_CHURCH_BETA1){
+              
+                    env_CHURCH_BETA1 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_BETA1(&env_CHURCH_BETA1);
+                  
+              }
+            if(in_env_CHURCH_K1){
+              
+                    env_CHURCH_K1 = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_CHURCH_K1(&env_CHURCH_K1);
+                  
+              }
+            if(in_env_CHURCH_K2){
+              
+                    env_CHURCH_K2 = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_CHURCH_K2(&env_CHURCH_K2);
+                  
+              }
+            if(in_env_CHURCH_K3){
+              
+                    env_CHURCH_K3 = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_CHURCH_K3(&env_CHURCH_K3);
+                  
+              }
+            if(in_env_CHURCH_P1){
+              
+                    env_CHURCH_P1 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_P1(&env_CHURCH_P1);
+                  
+              }
+            if(in_env_CHURCH_P2){
+              
+                    env_CHURCH_P2 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_P2(&env_CHURCH_P2);
+                  
+              }
+            if(in_env_CHURCH_PROB0){
+              
+                    env_CHURCH_PROB0 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB0(&env_CHURCH_PROB0);
+                  
+              }
+            if(in_env_CHURCH_PROB1){
+              
+                    env_CHURCH_PROB1 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB1(&env_CHURCH_PROB1);
+                  
+              }
+            if(in_env_CHURCH_PROB2){
+              
+                    env_CHURCH_PROB2 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB2(&env_CHURCH_PROB2);
+                  
+              }
+            if(in_env_CHURCH_PROB3){
+              
+                    env_CHURCH_PROB3 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB3(&env_CHURCH_PROB3);
+                  
+              }
+            if(in_env_CHURCH_PROB4){
+              
+                    env_CHURCH_PROB4 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB4(&env_CHURCH_PROB4);
+                  
+              }
+            if(in_env_CHURCH_PROB5){
+              
+                    env_CHURCH_PROB5 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB5(&env_CHURCH_PROB5);
+                  
+              }
+            if(in_env_CHURCH_PROB6){
+              
+                    env_CHURCH_PROB6 = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_PROB6(&env_CHURCH_PROB6);
+                  
+              }
+            if(in_env_CHURCH_DURATION){
+              
+                    env_CHURCH_DURATION = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_DURATION(&env_CHURCH_DURATION);
                   
               }
             

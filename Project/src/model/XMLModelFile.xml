@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <gpu:xmodel xmlns:gpu="http://www.dcs.shef.ac.uk/~paul/XMMLGPU" 
   xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
-  <name>HostAgentCreation</name>
+  <name>Project</name>
   <gpu:environment>
     <gpu:constants>
       <gpu:variable>
@@ -23,6 +23,81 @@
         <type>float</type>
         <name>STARTING_POPULATION</name>
         <defaultValue>30000.0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_BETA0</name>
+        <defaultValue>2.19261</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_BETA1</name>
+        <defaultValue>0.14679</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>CHURCH_K1</name>
+        <defaultValue>13</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>CHURCH_K2</name>
+        <defaultValue>35</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>CHURCH_K3</name>
+        <defaultValue>100</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_P1</name>
+        <defaultValue>0.14</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_P2</name>
+        <defaultValue>0.32</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB0</name>
+        <defaultValue>0.285569106</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB1</name>
+        <defaultValue>0.704268293</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB2</name>
+        <defaultValue>0.864329269</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB3</name>
+        <defaultValue>0.944613822</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB4</name>
+        <defaultValue>0.978658537</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB5</name>
+        <defaultValue>0.981707317</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_PROB6</name>
+        <defaultValue>0.985772358</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_DURATION</name>
+        <defaultValue>0.5</defaultValue>
       </gpu:variable>
     </gpu:constants>
 

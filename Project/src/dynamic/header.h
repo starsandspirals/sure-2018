@@ -1303,6 +1303,36 @@ __constant__ unsigned int MAX_AGE;
 
 __constant__ float STARTING_POPULATION;
 
+__constant__ float CHURCH_BETA0;
+
+__constant__ float CHURCH_BETA1;
+
+__constant__ unsigned int CHURCH_K1;
+
+__constant__ unsigned int CHURCH_K2;
+
+__constant__ unsigned int CHURCH_K3;
+
+__constant__ float CHURCH_P1;
+
+__constant__ float CHURCH_P2;
+
+__constant__ float CHURCH_PROB0;
+
+__constant__ float CHURCH_PROB1;
+
+__constant__ float CHURCH_PROB2;
+
+__constant__ float CHURCH_PROB3;
+
+__constant__ float CHURCH_PROB4;
+
+__constant__ float CHURCH_PROB5;
+
+__constant__ float CHURCH_PROB6;
+
+__constant__ float CHURCH_DURATION;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -1346,6 +1376,171 @@ extern const float* get_STARTING_POPULATION();
 
 
 extern float h_env_STARTING_POPULATION;
+
+/** set_CHURCH_BETA0
+ * Sets the constant variable CHURCH_BETA0 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_BETA0 value to set the variable
+ */
+extern void set_CHURCH_BETA0(float* h_CHURCH_BETA0);
+
+extern const float* get_CHURCH_BETA0();
+
+
+extern float h_env_CHURCH_BETA0;
+
+/** set_CHURCH_BETA1
+ * Sets the constant variable CHURCH_BETA1 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_BETA1 value to set the variable
+ */
+extern void set_CHURCH_BETA1(float* h_CHURCH_BETA1);
+
+extern const float* get_CHURCH_BETA1();
+
+
+extern float h_env_CHURCH_BETA1;
+
+/** set_CHURCH_K1
+ * Sets the constant variable CHURCH_K1 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_K1 value to set the variable
+ */
+extern void set_CHURCH_K1(unsigned int* h_CHURCH_K1);
+
+extern const unsigned int* get_CHURCH_K1();
+
+
+extern unsigned int h_env_CHURCH_K1;
+
+/** set_CHURCH_K2
+ * Sets the constant variable CHURCH_K2 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_K2 value to set the variable
+ */
+extern void set_CHURCH_K2(unsigned int* h_CHURCH_K2);
+
+extern const unsigned int* get_CHURCH_K2();
+
+
+extern unsigned int h_env_CHURCH_K2;
+
+/** set_CHURCH_K3
+ * Sets the constant variable CHURCH_K3 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_K3 value to set the variable
+ */
+extern void set_CHURCH_K3(unsigned int* h_CHURCH_K3);
+
+extern const unsigned int* get_CHURCH_K3();
+
+
+extern unsigned int h_env_CHURCH_K3;
+
+/** set_CHURCH_P1
+ * Sets the constant variable CHURCH_P1 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_P1 value to set the variable
+ */
+extern void set_CHURCH_P1(float* h_CHURCH_P1);
+
+extern const float* get_CHURCH_P1();
+
+
+extern float h_env_CHURCH_P1;
+
+/** set_CHURCH_P2
+ * Sets the constant variable CHURCH_P2 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_P2 value to set the variable
+ */
+extern void set_CHURCH_P2(float* h_CHURCH_P2);
+
+extern const float* get_CHURCH_P2();
+
+
+extern float h_env_CHURCH_P2;
+
+/** set_CHURCH_PROB0
+ * Sets the constant variable CHURCH_PROB0 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB0 value to set the variable
+ */
+extern void set_CHURCH_PROB0(float* h_CHURCH_PROB0);
+
+extern const float* get_CHURCH_PROB0();
+
+
+extern float h_env_CHURCH_PROB0;
+
+/** set_CHURCH_PROB1
+ * Sets the constant variable CHURCH_PROB1 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB1 value to set the variable
+ */
+extern void set_CHURCH_PROB1(float* h_CHURCH_PROB1);
+
+extern const float* get_CHURCH_PROB1();
+
+
+extern float h_env_CHURCH_PROB1;
+
+/** set_CHURCH_PROB2
+ * Sets the constant variable CHURCH_PROB2 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB2 value to set the variable
+ */
+extern void set_CHURCH_PROB2(float* h_CHURCH_PROB2);
+
+extern const float* get_CHURCH_PROB2();
+
+
+extern float h_env_CHURCH_PROB2;
+
+/** set_CHURCH_PROB3
+ * Sets the constant variable CHURCH_PROB3 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB3 value to set the variable
+ */
+extern void set_CHURCH_PROB3(float* h_CHURCH_PROB3);
+
+extern const float* get_CHURCH_PROB3();
+
+
+extern float h_env_CHURCH_PROB3;
+
+/** set_CHURCH_PROB4
+ * Sets the constant variable CHURCH_PROB4 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB4 value to set the variable
+ */
+extern void set_CHURCH_PROB4(float* h_CHURCH_PROB4);
+
+extern const float* get_CHURCH_PROB4();
+
+
+extern float h_env_CHURCH_PROB4;
+
+/** set_CHURCH_PROB5
+ * Sets the constant variable CHURCH_PROB5 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB5 value to set the variable
+ */
+extern void set_CHURCH_PROB5(float* h_CHURCH_PROB5);
+
+extern const float* get_CHURCH_PROB5();
+
+
+extern float h_env_CHURCH_PROB5;
+
+/** set_CHURCH_PROB6
+ * Sets the constant variable CHURCH_PROB6 on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROB6 value to set the variable
+ */
+extern void set_CHURCH_PROB6(float* h_CHURCH_PROB6);
+
+extern const float* get_CHURCH_PROB6();
+
+
+extern float h_env_CHURCH_PROB6;
+
+/** set_CHURCH_DURATION
+ * Sets the constant variable CHURCH_DURATION on the device which can then be used in the agent functions.
+ * @param h_CHURCH_DURATION value to set the variable
+ */
+extern void set_CHURCH_DURATION(float* h_CHURCH_DURATION);
+
+extern const float* get_CHURCH_DURATION();
+
+
+extern float h_env_CHURCH_DURATION;
 
 
 /** getMaximumBound
