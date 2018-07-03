@@ -3,6 +3,7 @@
   xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
   <name>Project</name>
   <gpu:environment>
+    <!-- Variables that can be set in the input data -->
     <gpu:constants>
       <gpu:variable>
         <type>float</type>
@@ -134,191 +135,222 @@
         <name>TRANSPORT_SIZE</name>
         <defaultValue>15</defaultValue>
       </gpu:variable>
-      </gpu:constants>
+    </gpu:constants>
 
-      <gpu:functionFiles>
-        <file>functions.c</file>
-      </gpu:functionFiles>
+    <!-- Files of C code with initialisation, step and exit functions -->
+    <gpu:functionFiles>
+      <file>functions.c</file>
+    </gpu:functionFiles>
 
-      <gpu:initFunctions>
-        <gpu:initFunction>
-          <gpu:name>initialiseHost</gpu:name>
-        </gpu:initFunction>
-        <gpu:initFunction>
-          <gpu:name>generateAgentsInit</gpu:name>
-        </gpu:initFunction>
-      </gpu:initFunctions>
+    <!-- Functions that will run at the start of the simulation -->
+    <gpu:initFunctions>
+      <gpu:initFunction>
+        <gpu:name>initialiseHost</gpu:name>
+      </gpu:initFunction>
+      <gpu:initFunction>
+        <gpu:name>generateAgentsInit</gpu:name>
+      </gpu:initFunction>
+    </gpu:initFunctions>
 
-      <gpu:exitFunctions>
-        <gpu:exitFunction>
-          <gpu:name>exitFunction</gpu:name>
-        </gpu:exitFunction>
-      </gpu:exitFunctions>
+    <!-- Functions that will run at the end of the simulation -->
+    <gpu:exitFunctions>
+      <gpu:exitFunction>
+        <gpu:name>exitFunction</gpu:name>
+      </gpu:exitFunction>
+    </gpu:exitFunctions>
 
-      <gpu:stepFunctions>
-        <gpu:stepFunction>
-          <gpu:name>generatePersonStep</gpu:name>
-        </gpu:stepFunction>
-        <gpu:stepFunction>
-          <gpu:name>customOutputStepFunction</gpu:name>
-        </gpu:stepFunction>
-      </gpu:stepFunctions>
+    <!-- Functions that will run during each iteration -->
+    <gpu:stepFunctions>
+      <gpu:stepFunction>
+        <gpu:name>generatePersonStep</gpu:name>
+      </gpu:stepFunction>
+      <gpu:stepFunction>
+        <gpu:name>customOutputStepFunction</gpu:name>
+      </gpu:stepFunction>
+    </gpu:stepFunctions>
 
-    </gpu:environment>
-    <xagents>
-      <gpu:xagent>
-        <name>Person</name>
-        <memory>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>id</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>age</name>
-            <defaultValue>0</defaultValue>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>gender</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>householdsize</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>transportuser</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>int</type>
-            <name>transportfreq</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>int</type>
-            <name>transportdur</name>
-          </gpu:variable>
-        </memory>
-        <functions>
-          <gpu:function>
-            <name>update</name>
-            <currentState>default</currentState>
-            <nextState>default</nextState>
-            <gpu:reallocate>true</gpu:reallocate>
-            <gpu:RNG>true</gpu:RNG>
-          </gpu:function>
-        </functions>
-        <states>
-          <gpu:state>
-            <name>default</name>
-          </gpu:state>
-          <gpu:state>
-            <name>s2</name>
-          </gpu:state>
-          <initialState>default</initialState>
-        </states>
-        <gpu:type>continuous</gpu:type>
-        <gpu:bufferSize>32768</gpu:bufferSize>
-      </gpu:xagent>
-      <gpu:xagent>
-        <name>Household</name>
-        <memory>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>id</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>size</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>int</type>
-            <name>people</name>
-            <arrayLength>32</arrayLength>
-            <defaultValue>-1</defaultValue>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>churchgoing</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>churchfreq</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>adults</name>
-          </gpu:variable>
-        </memory>
-        <functions>
-          <gpu:function>
-            <name>hhupdate</name>
-            <currentState>hhdefault</currentState>
-            <nextState>hhdefault</nextState>
-            <gpu:reallocate>false</gpu:reallocate>
-            <gpu:RNG>false</gpu:RNG>
-          </gpu:function>
-        </functions>
-        <states>
-          <gpu:state>
-            <name>hhdefault</name>
-          </gpu:state>
-          <initialState>hhdefault</initialState>
-        </states>
-        <gpu:type>continuous</gpu:type>
-        <gpu:bufferSize>8192</gpu:bufferSize>
-      </gpu:xagent>
-      <gpu:xagent>
-        <name>Church</name>
-        <memory>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>id</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>unsigned int</type>
-            <name>size</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>float</type>
-            <name>duration</name>
-          </gpu:variable>
-          <gpu:variable>
-            <type>int</type>
-            <name>households</name>
-            <arrayLength>128</arrayLength>
-            <defaultValue>-1</defaultValue>
-          </gpu:variable>
-        </memory>
-        <functions>
-          <gpu:function>
-            <name>chuupdate</name>
-            <currentState>chudefault</currentState>
-            <nextState>chudefault</nextState>
-            <gpu:reallocate>false</gpu:reallocate>
-            <gpu:RNG>false</gpu:RNG>
-          </gpu:function>
-        </functions>
-        <states>
-          <gpu:state>
-            <name>chudefault</name>
-          </gpu:state>
-          <initialState>chudefault</initialState>
-        </states>
-        <gpu:type>continuous</gpu:type>
-        <gpu:bufferSize>256</gpu:bufferSize>
-      </gpu:xagent>
-    </xagents>
-    <messages>
-    </messages>
-    <layers>
-      <layer>
-        <gpu:layerFunction>
+  </gpu:environment>
+  <xagents>
+
+    <!-- Types of agents, such as people and households -->
+    <gpu:xagent>
+      <name>Person</name>
+
+      <!-- The agent's memory, containing variables of various types -->
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>age</name>
+          <defaultValue>0</defaultValue>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>gender</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>householdsize</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>transportuser</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>transportfreq</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>transportdur</name>
+        </gpu:variable>
+      </memory>
+
+      <!-- Functions belonging to the agent -->
+      <functions>
+        <gpu:function>
           <name>update</name>
-        </gpu:layerFunction>
-      </layer>
-    </layers>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>true</gpu:RNG>
+        </gpu:function>
+      </functions>
 
+      <!-- States that the agent can be in during a given iteration -->
+      <states>
+        <gpu:state>
+          <name>default</name>
+        </gpu:state>
+        <gpu:state>
+          <name>s2</name>
+        </gpu:state>
+        <initialState>default</initialState>
+      </states>
 
-  </gpu:xmodel>
+      <!-- Whether the agent is continuous or discrete -->
+      <gpu:type>continuous</gpu:type>
+
+      <!-- The buffer size that should be allocated to the agent - unpredictable results if too many agents generated -->
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>Household</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>size</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>people</name>
+          <arrayLength>32</arrayLength>
+          <defaultValue>-1</defaultValue>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchgoing</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchfreq</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>adults</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>hhupdate</name>
+          <currentState>hhdefault</currentState>
+          <nextState>hhdefault</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>hhdefault</name>
+        </gpu:state>
+        <initialState>hhdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>Church</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>size</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>duration</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>households</name>
+          <arrayLength>128</arrayLength>
+          <defaultValue>-1</defaultValue>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>chuupdate</name>
+          <currentState>chudefault</currentState>
+          <nextState>chudefault</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>chudefault</name>
+        </gpu:state>
+        <initialState>chudefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>256</gpu:bufferSize>
+    </gpu:xagent>
+
+  </xagents>
+
+  <!-- Messages sent by agents which can be read by other agents -->
+  <messages>
+  </messages>
+
+  <layers>
+    <layer>
+      <gpu:layerFunction>
+        <name>update</name>
+      </gpu:layerFunction>
+    </layer>
+  </layers>
+
+</gpu:xmodel>
 
