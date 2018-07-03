@@ -794,7 +794,6 @@ PROFILE_SCOPED_RANGE("singleIteration");
 float h_env_TIME_STEP;
 float h_env_SCALE_FACTOR;
 unsigned int h_env_MAX_AGE;
-unsigned int h_env_RANDOM_AGES;
 float h_env_STARTING_POPULATION;
 
 
@@ -833,19 +832,6 @@ void set_MAX_AGE(unsigned int* h_MAX_AGE){
 //constant getter
 const unsigned int* get_MAX_AGE(){
     return &h_env_MAX_AGE;
-}
-
-
-
-//constant setter
-void set_RANDOM_AGES(unsigned int* h_RANDOM_AGES){
-    gpuErrchk(cudaMemcpyToSymbol(RANDOM_AGES, h_RANDOM_AGES, sizeof(unsigned int)));
-    memcpy(&h_env_RANDOM_AGES, h_RANDOM_AGES,sizeof(unsigned int));
-}
-
-//constant getter
-const unsigned int* get_RANDOM_AGES(){
-    return &h_env_RANDOM_AGES;
 }
 
 

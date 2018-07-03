@@ -83,7 +83,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
   printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
   printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
-  printf("Set RANDOM_AGES = %u\n", *get_RANDOM_AGES());
   printf("Set STARTING_POPULATION = %u\n", (int)*get_STARTING_POPULATION());
 
   srand(0);
