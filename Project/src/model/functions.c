@@ -115,6 +115,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   float transport_dur20 = *get_TRANSPORT_DUR20();
   float transport_dur45 = *get_TRANSPORT_DUR45();
 
+  unsigned int transport_size = *get_TRANSPORT_SIZE();
+
   srand(0);
 
   // Initialise all of the agent types with an id of 1 and allocating an array

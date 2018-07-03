@@ -828,6 +828,7 @@ float h_env_TRANSPORT_FREQ0;
 float h_env_TRANSPORT_FREQ2;
 float h_env_TRANSPORT_DUR20;
 float h_env_TRANSPORT_DUR45;
+unsigned int h_env_TRANSPORT_SIZE;
 
 
 //constant setter
@@ -1151,6 +1152,19 @@ void set_TRANSPORT_DUR45(float* h_TRANSPORT_DUR45){
 //constant getter
 const float* get_TRANSPORT_DUR45(){
     return &h_env_TRANSPORT_DUR45;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_SIZE(unsigned int* h_TRANSPORT_SIZE){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_SIZE, h_TRANSPORT_SIZE, sizeof(unsigned int)));
+    memcpy(&h_env_TRANSPORT_SIZE, h_TRANSPORT_SIZE,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_TRANSPORT_SIZE(){
+    return &h_env_TRANSPORT_SIZE;
 }
 
 

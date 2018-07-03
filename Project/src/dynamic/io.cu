@@ -261,6 +261,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_TRANSPORT_DUR45()));
     fputs(data, file);
     fputs("</TRANSPORT_DUR45>\n", file);
+    fputs("\t<TRANSPORT_SIZE>", file);
+    sprintf(data, "%u", (*get_TRANSPORT_SIZE()));
+    fputs(data, file);
+    fputs("</TRANSPORT_SIZE>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -481,6 +485,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_TRANSPORT_DUR20(&t_TRANSPORT_DUR20);
     float t_TRANSPORT_DUR45 = (float)0.8381374;
     set_TRANSPORT_DUR45(&t_TRANSPORT_DUR45);
+    unsigned int t_TRANSPORT_SIZE = (unsigned int)15;
+    set_TRANSPORT_SIZE(&t_TRANSPORT_SIZE);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count)
@@ -572,6 +578,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_TRANSPORT_DUR45;
     
+    int in_env_TRANSPORT_SIZE;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
@@ -622,6 +630,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_TRANSPORT_FREQ2;
     float env_TRANSPORT_DUR20;
     float env_TRANSPORT_DUR45;
+    unsigned int env_TRANSPORT_SIZE;
     
 
 
@@ -681,6 +690,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_TRANSPORT_FREQ2 = 0;
     in_env_TRANSPORT_DUR20 = 0;
     in_env_TRANSPORT_DUR45 = 0;
+    in_env_TRANSPORT_SIZE = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -770,6 +780,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_TRANSPORT_FREQ2 = 0;
     env_TRANSPORT_DUR20 = 0;
     env_TRANSPORT_DUR45 = 0;
+    env_TRANSPORT_SIZE = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -994,6 +1005,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/TRANSPORT_DUR20") == 0) in_env_TRANSPORT_DUR20 = 0;
 			if(strcmp(buffer, "TRANSPORT_DUR45") == 0) in_env_TRANSPORT_DUR45 = 1;
             if(strcmp(buffer, "/TRANSPORT_DUR45") == 0) in_env_TRANSPORT_DUR45 = 0;
+			if(strcmp(buffer, "TRANSPORT_SIZE") == 0) in_env_TRANSPORT_SIZE = 1;
+            if(strcmp(buffer, "/TRANSPORT_SIZE") == 0) in_env_TRANSPORT_SIZE = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -1239,6 +1252,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_TRANSPORT_DUR45 = (float) fgpu_atof(buffer);
                     
                     set_TRANSPORT_DUR45(&env_TRANSPORT_DUR45);
+                  
+              }
+            if(in_env_TRANSPORT_SIZE){
+              
+                    env_TRANSPORT_SIZE = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_TRANSPORT_SIZE(&env_TRANSPORT_SIZE);
                   
               }
             

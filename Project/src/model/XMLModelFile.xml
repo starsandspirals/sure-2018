@@ -129,6 +129,11 @@
         <name>TRANSPORT_DUR45</name>
         <defaultValue>0.8381374</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>TRANSPORT_SIZE</name>
+        <defaultValue>15</defaultValue>
+      </gpu:variable>
       </gpu:constants>
 
       <gpu:functionFiles>

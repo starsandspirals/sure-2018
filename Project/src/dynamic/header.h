@@ -1564,6 +1564,8 @@ __constant__ float TRANSPORT_DUR20;
 
 __constant__ float TRANSPORT_DUR45;
 
+__constant__ unsigned int TRANSPORT_SIZE;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -1838,6 +1840,17 @@ extern const float* get_TRANSPORT_DUR45();
 
 
 extern float h_env_TRANSPORT_DUR45;
+
+/** set_TRANSPORT_SIZE
+ * Sets the constant variable TRANSPORT_SIZE on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_SIZE value to set the variable
+ */
+extern void set_TRANSPORT_SIZE(unsigned int* h_TRANSPORT_SIZE);
+
+extern const unsigned int* get_TRANSPORT_SIZE();
+
+
+extern unsigned int h_env_TRANSPORT_SIZE;
 
 
 /** getMaximumBound
