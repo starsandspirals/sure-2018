@@ -62,6 +62,20 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
 __host__ unsigned int dayofweek(unsigned int step) { return (step % 288) % 7; }
 
+// A struct to represent a time of day, and a function that returns a time of
+// day given an iteration number of increments of 5 minutes.
+struct Time {
+  unsigned int hour;
+  unsigned int minute;
+};
+
+__host__ struct Time timeofday(unsigned int step) {
+  unsigned int hour = (step % 12) % 24;
+  unsigned int minute = (step % 12) * 5;
+  Time t = {hour, minute};
+  return t;
+}
+
 // The function called at the beginning of the program on the CPU, to initialise
 // all agents and their corresponding variables.
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
