@@ -462,8 +462,8 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
 // Function that prints out the number of agents after each iteration.
 __FLAME_GPU_STEP_FUNC__ void generatePersonStep() {
 
-  printf("Population after step function %u\n",
-         get_agent_Person_default_count());
+ // printf("Population after step function %u\n",
+ //        get_agent_Person_default_count());
 }
 
 // Function for generating output data in csv files, which runs after every
@@ -478,7 +478,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
   // If there is new information about the person agents to output, this code
   // creates a csv file and outputs data about people and their variables to
   // that file.
-  if (iteration % 5 == 0) {
+  if (iteration == 1) {
 
     std::string outputFilename =
         std::string(std::string(directory) + "person-output-" +
@@ -555,7 +555,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
 
   // Similarly, at the beginning of a run output information about churches and
   // other types of building to their own individual csv files.
-  if (iteration == 2) {
+  if (iteration == 1) {
 
     std::string outputFilename =
         std::string(std::string(directory) + "church-output.csv");
@@ -605,12 +605,13 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent,
                               RNG_rand48 *rand48) {
 
-  agent->age += TIME_STEP;
-  float random = rnd<CONTINUOUS>(rand48);
+  // agent->age += TIME_STEP;
+  // float random = rnd<CONTINUOUS>(rand48);
 
-  if (random < (agent->age * SCALE_FACTOR * TIME_STEP)) {
-    return 1;
-  }
+  // if (random < (agent->age * SCALE_FACTOR * TIME_STEP)) {
+  //   return 1;
+  // }
+
   return 0;
 }
 
