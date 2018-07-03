@@ -338,6 +338,42 @@
       <gpu:bufferSize>256</gpu:bufferSize>
     </gpu:xagent>
 
+    <gpu:xagent>
+      <name>Transport</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>duration</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>trupdate</name>
+          <currentState>trdefault</currentState>
+          <nextState>trdefault</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>trdefault</name>
+        </gpu:state>
+        <initialState>trdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:xagent>
+
   </xagents>
 
   <!-- Messages sent by agents which can be read by other agents -->

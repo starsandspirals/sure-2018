@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -141,6 +141,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying Church Agent chudefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Transports_trdefault, d_Transports_trdefault, sizeof(xmachine_memory_Transport_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying Transport Agent trdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -421,6 +427,23 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each Transport agent to xml
+	for (int i=0; i<h_xmachine_memory_Transport_trdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>Transport</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Transports_trdefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<duration>", file);
+        sprintf(data, "%u", h_Transports_trdefault->duration[i]);
+		fputs(data, file);
+		fputs("</duration>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -489,7 +512,7 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_TRANSPORT_SIZE(&t_TRANSPORT_SIZE);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -525,6 +548,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Church_size;
     int in_Church_duration;
     int in_Church_households;
+    int in_Transport_id;
+    int in_Transport_duration;
     
     /* tags for environment global variables */
     int in_env;
@@ -584,6 +609,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
 	*h_xmachine_memory_Church_count = 0;
+	*h_xmachine_memory_Transport_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
@@ -603,6 +629,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Church_size;
 	float Church_duration;
     int Church_households[128];
+	unsigned int Transport_id;
+	unsigned int Transport_duration;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -665,6 +693,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Church_size = 0;
 	in_Church_duration = 0;
 	in_Church_households = 0;
+	in_Transport_id = 0;
+	in_Transport_duration = 0;
     in_env_TIME_STEP = 0;
     in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
@@ -730,6 +760,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         }
 	}
 	
+	//set all Transport values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_Transport_MAX; k++)
+	{	
+		h_Transports->id[k] = 0;
+		h_Transports->duration[k] = 0;
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
@@ -753,6 +791,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     for (i=0;i<128;i++){
         Church_households[i] = -1;
     }
+    Transport_id = 0;
+    Transport_duration = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -887,6 +927,19 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     }
 					(*h_xmachine_memory_Church_count) ++;	
 				}
+				else if(strcmp(agentname, "Transport") == 0)
+				{
+					if (*h_xmachine_memory_Transport_count > xmachine_memory_Transport_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Transport exceeded whilst reading data\n", xmachine_memory_Transport_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Transports->id[*h_xmachine_memory_Transport_count] = Transport_id;
+					h_Transports->duration[*h_xmachine_memory_Transport_count] = Transport_duration;
+					(*h_xmachine_memory_Transport_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -916,6 +969,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 for (i=0;i<128;i++){
                     Church_households[i] = -1;
                 }
+                Transport_id = 0;
+                Transport_duration = 0;
                 
                 in_xagent = 0;
 			}
@@ -953,6 +1008,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/duration") == 0) in_Church_duration = 0;
 			if(strcmp(buffer, "households") == 0) in_Church_households = 1;
 			if(strcmp(buffer, "/households") == 0) in_Church_households = 0;
+			if(strcmp(buffer, "id") == 0) in_Transport_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Transport_id = 0;
+			if(strcmp(buffer, "duration") == 0) in_Transport_duration = 1;
+			if(strcmp(buffer, "/duration") == 0) in_Transport_duration = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -1075,6 +1134,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Church_households){
                     readArrayInput<int>(&fpgu_strtol, buffer, Church_households, 128);    
+                }
+				if(in_Transport_id){
+                    Transport_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Transport_duration){
+                    Transport_duration = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }

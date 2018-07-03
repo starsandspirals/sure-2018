@@ -55,6 +55,10 @@ cudaGraphicsResource_t Church_chudefault_cgr;
 GLuint Church_chudefault_tbo;
 GLuint Church_chudefault_displacementTex;
 
+cudaGraphicsResource_t Transport_trdefault_cgr;
+GLuint Transport_trdefault_tbo;
+GLuint Transport_trdefault_displacementTex;
+
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -238,6 +242,21 @@ __global__ void output_Church_agent_to_VBO(xmachine_memory_Church_list* agents, 
     vbo[index].w = 1.0;
 }
 
+__global__ void output_Transport_agent_to_VBO(xmachine_memory_Transport_list* agents, glm::vec4* vbo, glm::vec3 centralise){
+
+	//global thread index
+	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+
+	vbo[index].x = 0.0;
+	vbo[index].y = 0.0;
+	vbo[index].z = 0.0;
+	
+    vbo[index].x = 0.0;
+    vbo[index].y = 0.0;
+    vbo[index].z = 0.0;
+    vbo[index].w = 1.0;
+}
+
 
 void initVisualisation()
 {
@@ -278,6 +297,8 @@ void initVisualisation()
 	createTBO(&Household_hhdefault_cgr, &Household_hhdefault_tbo, &Household_hhdefault_displacementTex, xmachine_memory_Household_MAX * sizeof( glm::vec4));
 	
 	createTBO(&Church_chudefault_cgr, &Church_chudefault_tbo, &Church_chudefault_displacementTex, xmachine_memory_Church_MAX * sizeof( glm::vec4));
+	
+	createTBO(&Transport_trdefault_cgr, &Transport_trdefault_tbo, &Transport_trdefault_displacementTex, xmachine_memory_Transport_MAX * sizeof( glm::vec4));
 	
 
 	//set shader uniforms
@@ -403,6 +424,27 @@ void runCuda()
 		gpuErrchkLaunch();
 		// unmap buffer object
         gpuErrchk(cudaGraphicsUnmapResources(1, &Church_chudefault_cgr));
+	}
+	
+	if (get_agent_Transport_trdefault_count() > 0)
+	{
+		// map OpenGL buffer object for writing from CUDA
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &Transport_trdefault_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Transport_trdefault_cgr));
+		//cuda block size
+		tile_size = (int) ceil((float)get_agent_Transport_trdefault_count()/threads_per_tile);
+		grid = dim3(tile_size, 1, 1);
+		threads = dim3(threads_per_tile, 1, 1);
+        
+        //continuous variables  
+        centralise = getMaximumBounds() + getMinimumBounds();
+        centralise /= 2;
+        
+		output_Transport_agent_to_VBO<<< grid, threads>>>(get_device_Transport_trdefault_agents(), dptr, centralise);
+		gpuErrchkLaunch();
+		// unmap buffer object
+        gpuErrchk(cudaGraphicsUnmapResources(1, &Transport_trdefault_cgr));
 	}
 	
 }
@@ -761,6 +803,29 @@ void display()
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	
+	//Draw Transport Agents in trdefault state
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, Transport_trdefault_displacementTex);
+	//loop
+	for (int i=0; i< get_agent_Transport_trdefault_count(); i++){
+		glVertexAttrib1f(vs_mapIndex, (float)i);
+		
+		//draw using vertex and attribute data on the gpu (fast)
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereVerts);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereNormals);
+		glNormalPointer(GL_FLOAT, 0, 0);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, SPHERE_SLICES * (SPHERE_STACKS+1));
+
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	
 
 	//CUDA stop timing
 	cudaEventRecord(stop);
@@ -809,6 +874,8 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		deleteTBO( &Household_hhdefault_cgr, &Household_hhdefault_tbo);
 		
 		deleteTBO( &Church_chudefault_cgr, &Church_chudefault_tbo);
+		
+		deleteTBO( &Transport_trdefault_cgr, &Transport_trdefault_tbo);
 		
 		cudaEventDestroy(start);
 		cudaEventDestroy(stop);
