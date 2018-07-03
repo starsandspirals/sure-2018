@@ -173,7 +173,10 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->age[output_index] = agents_src->age[index];        
 		agents_dst->gender[output_index] = agents_src->gender[index];        
-		agents_dst->householdsize[output_index] = agents_src->householdsize[index];
+		agents_dst->householdsize[output_index] = agents_src->householdsize[index];        
+		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
+		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
+		agents_dst->transportdur[output_index] = agents_src->transportdur[index];
 	}
 }
 
@@ -197,6 +200,9 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->age[output_index] = agents_src->age[index];
 	    agents_dst->gender[output_index] = agents_src->gender[index];
 	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
+	    agents_dst->transportuser[output_index] = agents_src->transportuser[index];
+	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
+	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
     }
 }
 
@@ -207,9 +213,12 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param age agent variable of type unsigned int
  * @param gender agent variable of type unsigned int
  * @param householdsize agent variable of type unsigned int
+ * @param transportuser agent variable of type unsigned int
+ * @param transportfreq agent variable of type int
+ * @param transportdur agent variable of type int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur){
 	
 	int index;
     
@@ -232,12 +241,15 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->age[index] = age;
 	agents->gender[index] = gender;
 	agents->householdsize[index] = householdsize;
+	agents->transportuser[index] = transportuser;
+	agents->transportfreq[index] = transportfreq;
+	agents->transportdur[index] = transportdur;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize){
-    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur){
+    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize, transportuser, transportfreq, transportdur);
 }
 
 /** reorder_Person_agents
@@ -257,6 +269,9 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
 	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
 	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
+	ordered_agents->transportuser[index] = unordered_agents->transportuser[old_pos];
+	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
+	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -622,6 +637,9 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
+	agent.transportuser = agents->transportuser[index];
+	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -635,6 +653,9 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
 	agents->householdsize[index] = agent.householdsize;
+	agents->transportuser[index] = agent.transportuser;
+	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
 }
 
 /**

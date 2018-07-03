@@ -288,6 +288,21 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</householdsize>\n", file);
         
+		fputs("<transportuser>", file);
+        sprintf(data, "%u", h_Persons_default->transportuser[i]);
+		fputs(data, file);
+		fputs("</transportuser>\n", file);
+        
+		fputs("<transportfreq>", file);
+        sprintf(data, "%d", h_Persons_default->transportfreq[i]);
+		fputs(data, file);
+		fputs("</transportfreq>\n", file);
+        
+		fputs("<transportdur>", file);
+        sprintf(data, "%d", h_Persons_default->transportdur[i]);
+		fputs(data, file);
+		fputs("</transportdur>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -314,6 +329,21 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->householdsize[i]);
 		fputs(data, file);
 		fputs("</householdsize>\n", file);
+        
+		fputs("<transportuser>", file);
+        sprintf(data, "%u", h_Persons_s2->transportuser[i]);
+		fputs(data, file);
+		fputs("</transportuser>\n", file);
+        
+		fputs("<transportfreq>", file);
+        sprintf(data, "%d", h_Persons_s2->transportfreq[i]);
+		fputs(data, file);
+		fputs("</transportfreq>\n", file);
+        
+		fputs("<transportdur>", file);
+        sprintf(data, "%d", h_Persons_s2->transportdur[i]);
+		fputs(data, file);
+		fputs("</transportdur>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -476,6 +506,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
+    int in_Person_transportuser;
+    int in_Person_transportfreq;
+    int in_Person_transportdur;
     int in_Household_id;
     int in_Household_size;
     int in_Household_people;
@@ -549,6 +582,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
+	unsigned int Person_transportuser;
+	int Person_transportfreq;
+	int Person_transportdur;
 	unsigned int Household_id;
 	unsigned int Household_size;
     int Household_people[32];
@@ -607,6 +643,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
+	in_Person_transportuser = 0;
+	in_Person_transportfreq = 0;
+	in_Person_transportdur = 0;
 	in_Household_id = 0;
 	in_Household_size = 0;
 	in_Household_people = 0;
@@ -650,6 +689,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->age[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
+		h_Persons->transportuser[k] = 0;
+		h_Persons->transportfreq[k] = 0;
+		h_Persons->transportdur[k] = 0;
 	}
 	
 	//set all Household values to 0
@@ -684,6 +726,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
+    Person_transportuser = 0;
+    Person_transportfreq = 0;
+    Person_transportdur = 0;
     Household_id = 0;
     Household_size = 0;
     for (i=0;i<32;i++){
@@ -790,6 +835,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
+					h_Persons->transportuser[*h_xmachine_memory_Person_count] = Person_transportuser;
+					h_Persons->transportfreq[*h_xmachine_memory_Person_count] = Person_transportfreq;
+					h_Persons->transportdur[*h_xmachine_memory_Person_count] = Person_transportdur;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "Household") == 0)
@@ -840,6 +888,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
+                Person_transportuser = 0;
+                Person_transportfreq = 0;
+                Person_transportdur = 0;
                 Household_id = 0;
                 Household_size = 0;
                 for (i=0;i<32;i++){
@@ -865,6 +916,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/gender") == 0) in_Person_gender = 0;
 			if(strcmp(buffer, "householdsize") == 0) in_Person_householdsize = 1;
 			if(strcmp(buffer, "/householdsize") == 0) in_Person_householdsize = 0;
+			if(strcmp(buffer, "transportuser") == 0) in_Person_transportuser = 1;
+			if(strcmp(buffer, "/transportuser") == 0) in_Person_transportuser = 0;
+			if(strcmp(buffer, "transportfreq") == 0) in_Person_transportfreq = 1;
+			if(strcmp(buffer, "/transportfreq") == 0) in_Person_transportfreq = 0;
+			if(strcmp(buffer, "transportdur") == 0) in_Person_transportdur = 1;
+			if(strcmp(buffer, "/transportdur") == 0) in_Person_transportdur = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Household_id = 0;
 			if(strcmp(buffer, "size") == 0) in_Household_size = 1;
@@ -966,6 +1023,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_householdsize){
                     Person_householdsize = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_transportuser){
+                    Person_transportuser = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_transportfreq){
+                    Person_transportfreq = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_transportdur){
+                    Person_transportdur = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Household_id){
                     Household_id = (unsigned int) fpgu_strtoul(buffer); 

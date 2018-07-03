@@ -97,7 +97,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   float transport_beta0 = *get_TRANSPORT_BETA0();
   float transport_beta1 = *get_TRANSPORT_BETA1();
-  
+
   float transport_freq0 = *get_TRANSPORT_FREQ0();
   float transport_freq2 = *get_TRANSPORT_FREQ2();
 
@@ -166,6 +166,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       for (unsigned int iii = 0; iii < rounded; iii++) {
 
+        float random = ((float)rand() / (RAND_MAX));
+
         xmachine_memory_Person *h_person = h_allocate_agent_Person();
 
         age = (rand() % (maxage - minage)) + minage;
@@ -174,6 +176,39 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->age = age;
         h_person->gender = gender;
         h_person->householdsize = currentsize;
+
+        float useprob = 1 + exp(-transport_beta0 - transport_beta1 * age);
+
+        if (random < useprob) {
+          h_person->transportuser = 1;
+        } else {
+          h_person->transportuser = 0;
+        }
+
+        if (h_person->transportuser) {
+          random = ((float)rand() / (RAND_MAX));
+
+          if (random < transport_freq0) {
+            h_person->transportfreq = 0;
+          } else if (random < transport_freq2) {
+            h_person->transportfreq = 2;
+          } else {
+            h_person->transportfreq = 4;
+          }
+
+          random = ((float)rand() / (RAND_MAX));
+
+          if (random < transport_dur20) {
+            h_person->transportdur = 20;
+          } else if (random < transport_dur45) {
+            h_person->transportdur = 45;
+          } else {
+            h_person->transportdur = 60;
+          }
+        } else {
+          h_person->transportfreq = -1;
+          h_person->transportdur = -1;
+        }
 
         sizearray[currentsize]++;
         ages[h_person->id] = age;
