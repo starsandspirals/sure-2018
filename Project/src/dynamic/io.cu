@@ -237,6 +237,30 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_CHURCH_DURATION()));
     fputs(data, file);
     fputs("</CHURCH_DURATION>\n", file);
+    fputs("\t<TRANSPORT_BETA0>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_BETA0()));
+    fputs(data, file);
+    fputs("</TRANSPORT_BETA0>\n", file);
+    fputs("\t<TRANSPORT_BETA1>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_BETA1()));
+    fputs(data, file);
+    fputs("</TRANSPORT_BETA1>\n", file);
+    fputs("\t<TRANSPORT_FREQ0>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_FREQ0()));
+    fputs(data, file);
+    fputs("</TRANSPORT_FREQ0>\n", file);
+    fputs("\t<TRANSPORT_FREQ2>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_FREQ2()));
+    fputs(data, file);
+    fputs("</TRANSPORT_FREQ2>\n", file);
+    fputs("\t<TRANSPORT_DUR20>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_DUR20()));
+    fputs(data, file);
+    fputs("</TRANSPORT_DUR20>\n", file);
+    fputs("\t<TRANSPORT_DUR45>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_DUR45()));
+    fputs(data, file);
+    fputs("</TRANSPORT_DUR45>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -415,6 +439,18 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_CHURCH_PROB6(&t_CHURCH_PROB6);
     float t_CHURCH_DURATION = (float)0.5;
     set_CHURCH_DURATION(&t_CHURCH_DURATION);
+    float t_TRANSPORT_BETA0 = (float)1.682127;
+    set_TRANSPORT_BETA0(&t_TRANSPORT_BETA0);
+    float t_TRANSPORT_BETA1 = (float)-0.007739;
+    set_TRANSPORT_BETA1(&t_TRANSPORT_BETA1);
+    float t_TRANSPORT_FREQ0 = (float)0.4337998;
+    set_TRANSPORT_FREQ0(&t_TRANSPORT_FREQ0);
+    float t_TRANSPORT_FREQ2 = (float)0.8439182;
+    set_TRANSPORT_FREQ2(&t_TRANSPORT_FREQ2);
+    float t_TRANSPORT_DUR20 = (float)0.5011086;
+    set_TRANSPORT_DUR20(&t_TRANSPORT_DUR20);
+    float t_TRANSPORT_DUR45 = (float)0.8381374;
+    set_TRANSPORT_DUR45(&t_TRANSPORT_DUR45);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count)
@@ -491,6 +527,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_CHURCH_DURATION;
     
+    int in_env_TRANSPORT_BETA0;
+    
+    int in_env_TRANSPORT_BETA1;
+    
+    int in_env_TRANSPORT_FREQ0;
+    
+    int in_env_TRANSPORT_FREQ2;
+    
+    int in_env_TRANSPORT_DUR20;
+    
+    int in_env_TRANSPORT_DUR45;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
@@ -532,6 +580,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_CHURCH_PROB5;
     float env_CHURCH_PROB6;
     float env_CHURCH_DURATION;
+    float env_TRANSPORT_BETA0;
+    float env_TRANSPORT_BETA1;
+    float env_TRANSPORT_FREQ0;
+    float env_TRANSPORT_FREQ2;
+    float env_TRANSPORT_DUR20;
+    float env_TRANSPORT_DUR45;
     
 
 
@@ -582,6 +636,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_CHURCH_PROB5 = 0;
     in_env_CHURCH_PROB6 = 0;
     in_env_CHURCH_DURATION = 0;
+    in_env_TRANSPORT_BETA0 = 0;
+    in_env_TRANSPORT_BETA1 = 0;
+    in_env_TRANSPORT_FREQ0 = 0;
+    in_env_TRANSPORT_FREQ2 = 0;
+    in_env_TRANSPORT_DUR20 = 0;
+    in_env_TRANSPORT_DUR45 = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -659,6 +719,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_CHURCH_PROB5 = 0;
     env_CHURCH_PROB6 = 0;
     env_CHURCH_DURATION = 0;
+    env_TRANSPORT_BETA0 = 0;
+    env_TRANSPORT_BETA1 = 0;
+    env_TRANSPORT_FREQ0 = 0;
+    env_TRANSPORT_FREQ2 = 0;
+    env_TRANSPORT_DUR20 = 0;
+    env_TRANSPORT_DUR45 = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -859,6 +925,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/CHURCH_PROB6") == 0) in_env_CHURCH_PROB6 = 0;
 			if(strcmp(buffer, "CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 1;
             if(strcmp(buffer, "/CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 0;
+			if(strcmp(buffer, "TRANSPORT_BETA0") == 0) in_env_TRANSPORT_BETA0 = 1;
+            if(strcmp(buffer, "/TRANSPORT_BETA0") == 0) in_env_TRANSPORT_BETA0 = 0;
+			if(strcmp(buffer, "TRANSPORT_BETA1") == 0) in_env_TRANSPORT_BETA1 = 1;
+            if(strcmp(buffer, "/TRANSPORT_BETA1") == 0) in_env_TRANSPORT_BETA1 = 0;
+			if(strcmp(buffer, "TRANSPORT_FREQ0") == 0) in_env_TRANSPORT_FREQ0 = 1;
+            if(strcmp(buffer, "/TRANSPORT_FREQ0") == 0) in_env_TRANSPORT_FREQ0 = 0;
+			if(strcmp(buffer, "TRANSPORT_FREQ2") == 0) in_env_TRANSPORT_FREQ2 = 1;
+            if(strcmp(buffer, "/TRANSPORT_FREQ2") == 0) in_env_TRANSPORT_FREQ2 = 0;
+			if(strcmp(buffer, "TRANSPORT_DUR20") == 0) in_env_TRANSPORT_DUR20 = 1;
+            if(strcmp(buffer, "/TRANSPORT_DUR20") == 0) in_env_TRANSPORT_DUR20 = 0;
+			if(strcmp(buffer, "TRANSPORT_DUR45") == 0) in_env_TRANSPORT_DUR45 = 1;
+            if(strcmp(buffer, "/TRANSPORT_DUR45") == 0) in_env_TRANSPORT_DUR45 = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -1053,6 +1131,48 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_CHURCH_DURATION = (float) fgpu_atof(buffer);
                     
                     set_CHURCH_DURATION(&env_CHURCH_DURATION);
+                  
+              }
+            if(in_env_TRANSPORT_BETA0){
+              
+                    env_TRANSPORT_BETA0 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_BETA0(&env_TRANSPORT_BETA0);
+                  
+              }
+            if(in_env_TRANSPORT_BETA1){
+              
+                    env_TRANSPORT_BETA1 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_BETA1(&env_TRANSPORT_BETA1);
+                  
+              }
+            if(in_env_TRANSPORT_FREQ0){
+              
+                    env_TRANSPORT_FREQ0 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_FREQ0(&env_TRANSPORT_FREQ0);
+                  
+              }
+            if(in_env_TRANSPORT_FREQ2){
+              
+                    env_TRANSPORT_FREQ2 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_FREQ2(&env_TRANSPORT_FREQ2);
+                  
+              }
+            if(in_env_TRANSPORT_DUR20){
+              
+                    env_TRANSPORT_DUR20 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_DUR20(&env_TRANSPORT_DUR20);
+                  
+              }
+            if(in_env_TRANSPORT_DUR45){
+              
+                    env_TRANSPORT_DUR45 = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_DUR45(&env_TRANSPORT_DUR45);
                   
               }
             

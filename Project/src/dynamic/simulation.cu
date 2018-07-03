@@ -810,6 +810,12 @@ float h_env_CHURCH_PROB4;
 float h_env_CHURCH_PROB5;
 float h_env_CHURCH_PROB6;
 float h_env_CHURCH_DURATION;
+float h_env_TRANSPORT_BETA0;
+float h_env_TRANSPORT_BETA1;
+float h_env_TRANSPORT_FREQ0;
+float h_env_TRANSPORT_FREQ2;
+float h_env_TRANSPORT_DUR20;
+float h_env_TRANSPORT_DUR45;
 
 
 //constant setter
@@ -1055,6 +1061,84 @@ void set_CHURCH_DURATION(float* h_CHURCH_DURATION){
 //constant getter
 const float* get_CHURCH_DURATION(){
     return &h_env_CHURCH_DURATION;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_BETA0(float* h_TRANSPORT_BETA0){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_BETA0, h_TRANSPORT_BETA0, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_BETA0, h_TRANSPORT_BETA0,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_BETA0(){
+    return &h_env_TRANSPORT_BETA0;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_BETA1(float* h_TRANSPORT_BETA1){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_BETA1, h_TRANSPORT_BETA1, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_BETA1, h_TRANSPORT_BETA1,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_BETA1(){
+    return &h_env_TRANSPORT_BETA1;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_FREQ0(float* h_TRANSPORT_FREQ0){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_FREQ0, h_TRANSPORT_FREQ0, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_FREQ0, h_TRANSPORT_FREQ0,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_FREQ0(){
+    return &h_env_TRANSPORT_FREQ0;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_FREQ2(float* h_TRANSPORT_FREQ2){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_FREQ2, h_TRANSPORT_FREQ2, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_FREQ2, h_TRANSPORT_FREQ2,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_FREQ2(){
+    return &h_env_TRANSPORT_FREQ2;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_DUR20(float* h_TRANSPORT_DUR20){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_DUR20, h_TRANSPORT_DUR20, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_DUR20, h_TRANSPORT_DUR20,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_DUR20(){
+    return &h_env_TRANSPORT_DUR20;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_DUR45(float* h_TRANSPORT_DUR45){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_DUR45, h_TRANSPORT_DUR45, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_DUR45, h_TRANSPORT_DUR45,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_DUR45(){
+    return &h_env_TRANSPORT_DUR45;
 }
 
 

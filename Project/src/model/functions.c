@@ -95,6 +95,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   float church_duration = *get_CHURCH_DURATION();
 
+  float transport_beta0 = *get_TRANSPORT_BETA0();
+  float transport_beta1 = *get_TRANSPORT_BETA1();
+  
+  float transport_freq0 = *get_TRANSPORT_FREQ0();
+  float transport_freq2 = *get_TRANSPORT_FREQ2();
+
+  float transport_dur20 = *get_TRANSPORT_DUR20();
+  float transport_dur45 = *get_TRANSPORT_DUR45();
+
   srand(0);
 
   h_nextID = 1;

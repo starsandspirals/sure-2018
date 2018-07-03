@@ -1333,6 +1333,18 @@ __constant__ float CHURCH_PROB6;
 
 __constant__ float CHURCH_DURATION;
 
+__constant__ float TRANSPORT_BETA0;
+
+__constant__ float TRANSPORT_BETA1;
+
+__constant__ float TRANSPORT_FREQ0;
+
+__constant__ float TRANSPORT_FREQ2;
+
+__constant__ float TRANSPORT_DUR20;
+
+__constant__ float TRANSPORT_DUR45;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -1541,6 +1553,72 @@ extern const float* get_CHURCH_DURATION();
 
 
 extern float h_env_CHURCH_DURATION;
+
+/** set_TRANSPORT_BETA0
+ * Sets the constant variable TRANSPORT_BETA0 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_BETA0 value to set the variable
+ */
+extern void set_TRANSPORT_BETA0(float* h_TRANSPORT_BETA0);
+
+extern const float* get_TRANSPORT_BETA0();
+
+
+extern float h_env_TRANSPORT_BETA0;
+
+/** set_TRANSPORT_BETA1
+ * Sets the constant variable TRANSPORT_BETA1 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_BETA1 value to set the variable
+ */
+extern void set_TRANSPORT_BETA1(float* h_TRANSPORT_BETA1);
+
+extern const float* get_TRANSPORT_BETA1();
+
+
+extern float h_env_TRANSPORT_BETA1;
+
+/** set_TRANSPORT_FREQ0
+ * Sets the constant variable TRANSPORT_FREQ0 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_FREQ0 value to set the variable
+ */
+extern void set_TRANSPORT_FREQ0(float* h_TRANSPORT_FREQ0);
+
+extern const float* get_TRANSPORT_FREQ0();
+
+
+extern float h_env_TRANSPORT_FREQ0;
+
+/** set_TRANSPORT_FREQ2
+ * Sets the constant variable TRANSPORT_FREQ2 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_FREQ2 value to set the variable
+ */
+extern void set_TRANSPORT_FREQ2(float* h_TRANSPORT_FREQ2);
+
+extern const float* get_TRANSPORT_FREQ2();
+
+
+extern float h_env_TRANSPORT_FREQ2;
+
+/** set_TRANSPORT_DUR20
+ * Sets the constant variable TRANSPORT_DUR20 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_DUR20 value to set the variable
+ */
+extern void set_TRANSPORT_DUR20(float* h_TRANSPORT_DUR20);
+
+extern const float* get_TRANSPORT_DUR20();
+
+
+extern float h_env_TRANSPORT_DUR20;
+
+/** set_TRANSPORT_DUR45
+ * Sets the constant variable TRANSPORT_DUR45 on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_DUR45 value to set the variable
+ */
+extern void set_TRANSPORT_DUR45(float* h_TRANSPORT_DUR45);
+
+extern const float* get_TRANSPORT_DUR45();
+
+
+extern float h_env_TRANSPORT_DUR45;
 
 
 /** getMaximumBound
