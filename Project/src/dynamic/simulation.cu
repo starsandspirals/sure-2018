@@ -174,6 +174,22 @@ unsigned int h_Transports_trdefault_variable_duration_data_iteration;
 
 /* Message Memory */
 
+/* household_membership Message variables */
+xmachine_message_household_membership_list* h_household_memberships;         /**< Pointer to message list on host*/
+xmachine_message_household_membership_list* d_household_memberships;         /**< Pointer to message list on device*/
+xmachine_message_household_membership_list* d_household_memberships_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_household_membership_count;         /**< message list counter*/
+int h_message_household_membership_output_type;   /**< message output type (single or optional)*/
+
+/* church_membership Message variables */
+xmachine_message_church_membership_list* h_church_memberships;         /**< Pointer to message list on host*/
+xmachine_message_church_membership_list* d_church_memberships;         /**< Pointer to message list on device*/
+xmachine_message_church_membership_list* d_church_memberships_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_church_membership_count;         /**< message list counter*/
+int h_message_church_membership_output_type;   /**< message output type (single or optional)*/
+
   
 /* CUDA Streams for function layers */
 cudaStream_t stream1;
@@ -371,6 +387,10 @@ void initialise(char * inputfile){
 	h_Transports_trdefault = (xmachine_memory_Transport_list*)malloc(xmachine_Transport_SoA_size);
 
 	/* Message memory allocation (CPU) */
+	int message_household_membership_SoA_size = sizeof(xmachine_message_household_membership_list);
+	h_household_memberships = (xmachine_message_household_membership_list*)malloc(message_household_membership_SoA_size);
+	int message_church_membership_SoA_size = sizeof(xmachine_message_church_membership_list);
+	h_church_memberships = (xmachine_message_church_membership_list*)malloc(message_church_membership_SoA_size);
 
 	//Exit if agent or message buffer sizes are to small for function outputs
     PROFILE_POP_RANGE(); //"allocate host"
@@ -429,7 +449,17 @@ void initialise(char * inputfile){
 	/* trdefault memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Transports_trdefault, xmachine_Transport_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Transports_trdefault, h_Transports_trdefault, xmachine_Transport_SoA_size, cudaMemcpyHostToDevice));
-    	
+    
+	/* household_membership Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_household_memberships, message_household_membership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_household_memberships_swap, message_household_membership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_household_memberships, h_household_memberships, message_household_membership_SoA_size, cudaMemcpyHostToDevice));
+	
+	/* church_membership Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_church_memberships, message_church_membership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_church_memberships_swap, message_church_membership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_church_memberships, h_church_memberships, message_church_membership_SoA_size, cudaMemcpyHostToDevice));
+		
     PROFILE_POP_RANGE(); // "allocate device"
 
     /* Calculate and allocate CUB temporary memory for exclusive scans */
@@ -774,6 +804,16 @@ void cleanup(){
 
 	/* Message data free */
 	
+	/* household_membership Message variables */
+	free( h_household_memberships);
+	gpuErrchk(cudaFree(d_household_memberships));
+	gpuErrchk(cudaFree(d_household_memberships_swap));
+	
+	/* church_membership Message variables */
+	free( h_church_memberships);
+	gpuErrchk(cudaFree(d_church_memberships));
+	gpuErrchk(cudaFree(d_church_memberships_swap));
+	
 
     /* Free temporary CUB memory */
     
@@ -820,6 +860,14 @@ PROFILE_SCOPED_RANGE("singleIteration");
     g_iterationNumber++;
 
 	/* set all non partitioned and spatial partitioned message counts to 0*/
+	h_message_household_membership_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_household_membership_count, &h_message_household_membership_count, sizeof(int)));
+	
+	h_message_church_membership_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_church_membership_count, &h_message_church_membership_count, sizeof(int)));
+	
 
 	/* Call agent functions in order iterating through the layer functions */
 	

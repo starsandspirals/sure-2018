@@ -77,9 +77,17 @@ typedef glm::dvec4 dvec4;
   
   
 /* Message population size definitions */
+//Maximum population size of xmachine_mmessage_household_membership
+#define xmachine_message_household_membership_MAX 32768
+
+//Maximum population size of xmachine_mmessage_church_membership
+#define xmachine_message_church_membership_MAX 8192
+
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
 
+#define xmachine_message_household_membership_partitioningNone
+#define xmachine_message_church_membership_partitioningNone
 
 /* Spatial partitioning grid size definitions */
   
@@ -172,6 +180,32 @@ struct __align__(16) xmachine_memory_Transport
 
 /* Message structures */
 
+/** struct xmachine_message_household_membership
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_household_membership
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int household_id;        /**< Message variable household_id of type unsigned int.*/  
+    unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/
+};
+
+/** struct xmachine_message_church_membership
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_church_membership
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int church_id;        /**< Message variable church_id of type unsigned int.*/  
+    unsigned int household_id;        /**< Message variable household_id of type unsigned int.*/
+};
+
 
 
 /* Agent lists. Structure of Array (SoA) for memory coalescing on GPU */
@@ -247,6 +281,36 @@ struct xmachine_memory_Transport_list
 
 /* Message lists. Structure of Array (SoA) for memory coalescing on GPU */
 
+/** struct xmachine_message_household_membership_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_household_membership_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_household_membership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_household_membership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int household_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list household_id of type unsigned int.*/
+    unsigned int person_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
+    
+};
+
+/** struct xmachine_message_church_membership_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_church_membership_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_church_membership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_church_membership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int church_id [xmachine_message_church_membership_MAX];    /**< Message memory variable list church_id of type unsigned int.*/
+    unsigned int household_id [xmachine_message_church_membership_MAX];    /**< Message memory variable list household_id of type unsigned int.*/
+    
+};
+
 
 
 /* Spatially Partitioned Message boundary Matrices */
@@ -316,6 +380,62 @@ __FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent);
  
  */
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) household_membership message implemented in FLAMEGPU_Kernels */
+
+/** add_household_membership_message
+ * Function for all types of message partitioning
+ * Adds a new household_membership agent to the xmachine_memory_household_membership_list list using a linear mapping
+ * @param agents	xmachine_memory_household_membership_list agent list
+ * @param household_id	message variable of type unsigned int
+ * @param person_id	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_household_membership_message(xmachine_message_household_membership_list* household_membership_messages, unsigned int household_id, unsigned int person_id);
+ 
+/** get_first_household_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param household_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_household_membership * get_first_household_membership_message(xmachine_message_household_membership_list* household_membership_messages);
+
+/** get_next_household_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param household_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_household_membership * get_next_household_membership_message(xmachine_message_household_membership* current, xmachine_message_household_membership_list* household_membership_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) church_membership message implemented in FLAMEGPU_Kernels */
+
+/** add_church_membership_message
+ * Function for all types of message partitioning
+ * Adds a new church_membership agent to the xmachine_memory_church_membership_list list using a linear mapping
+ * @param agents	xmachine_memory_church_membership_list agent list
+ * @param church_id	message variable of type unsigned int
+ * @param household_id	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_church_membership_message(xmachine_message_church_membership_list* church_membership_messages, unsigned int church_id, unsigned int household_id);
+ 
+/** get_first_church_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param church_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_church_membership * get_first_church_membership_message(xmachine_message_church_membership_list* church_membership_messages);
+
+/** get_next_church_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param church_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membership_message(xmachine_message_church_membership* current, xmachine_message_church_membership_list* church_membership_messages);
   
   
   

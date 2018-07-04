@@ -48,6 +48,16 @@ __constant__ int d_xmachine_memory_Transport_trdefault_count;
 
 /* Message constants */
 
+/* household_membership Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_household_membership_count;         /**< message list counter*/
+__constant__ int d_message_household_membership_output_type;   /**< message output type (single or optional)*/
+
+/* church_membership Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_church_membership_count;         /**< message list counter*/
+__constant__ int d_message_church_membership_output_type;   /**< message output type (single or optional)*/
+
 	
     
 //include each function file
@@ -55,6 +65,8 @@ __constant__ int d_xmachine_memory_Transport_trdefault_count;
 #include "functions.c"
     
 /* Texture bindings */
+
+
     
 #define WRAP(x,m) (((x)<m)?(x):(x%m)) /**< Simple wrap */
 #define sWRAP(x,m) (((x)<m)?(((x)<0)?(m+(x)):(x)):(m-(x))) /**<signed integer wrap (no modulus) for negatives where 2m > |x| > m */
@@ -726,6 +738,308 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created household_membership message functions */
+
+
+/** add_household_membership_message
+ * Add non partitioned or spatially partitioned household_membership message
+ * @param messages xmachine_message_household_membership_list message list to add too
+ * @param household_id agent variable of type unsigned int
+ * @param person_id agent variable of type unsigned int
+ */
+__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_household_membership_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_household_membership_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_household_membership_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_household_membership Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->household_id[index] = household_id;
+	messages->person_id[index] = person_id;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned household_membership message (for optional messages)
+ * @param messages scatter_optional_household_membership_messages Sparse xmachine_message_household_membership_list message list
+ * @param message_swap temp xmachine_message_household_membership_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_household_membership_messages(xmachine_message_household_membership_list* messages, xmachine_message_household_membership_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_household_membership_count;
+
+		//AoS - xmachine_message_household_membership Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->household_id[output_index] = messages_swap->household_id[index];
+		messages->person_id[output_index] = messages_swap->person_id[index];				
+	}
+}
+
+/** reset_household_membership_swaps
+ * Reset non partitioned or spatially partitioned household_membership message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_household_membership_swaps(xmachine_message_household_membership_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_household_membership* get_first_household_membership_message(xmachine_message_household_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_household_membership_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_household_membership Coalesced memory read
+	xmachine_message_household_membership temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.household_id = messages->household_id[index];
+	temp_message.person_id = messages->person_id[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_membership));
+	xmachine_message_household_membership* sm_message = ((xmachine_message_household_membership*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_household_membership*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_household_membership* get_next_household_membership_message(xmachine_message_household_membership* message, xmachine_message_household_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_household_membership_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_household_membership_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_household_membership Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_household_membership temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.household_id = messages->household_id[index];
+		temp_message.person_id = messages->person_id[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_membership));
+		xmachine_message_household_membership* sm_message = ((xmachine_message_household_membership*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_household_membership));
+	return ((xmachine_message_household_membership*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created church_membership message functions */
+
+
+/** add_church_membership_message
+ * Add non partitioned or spatially partitioned church_membership message
+ * @param messages xmachine_message_church_membership_list message list to add too
+ * @param church_id agent variable of type unsigned int
+ * @param household_id agent variable of type unsigned int
+ */
+__device__ void add_church_membership_message(xmachine_message_church_membership_list* messages, unsigned int church_id, unsigned int household_id){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_church_membership_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_church_membership_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_church_membership_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_church_membership Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->church_id[index] = church_id;
+	messages->household_id[index] = household_id;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned church_membership message (for optional messages)
+ * @param messages scatter_optional_church_membership_messages Sparse xmachine_message_church_membership_list message list
+ * @param message_swap temp xmachine_message_church_membership_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_church_membership_messages(xmachine_message_church_membership_list* messages, xmachine_message_church_membership_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_church_membership_count;
+
+		//AoS - xmachine_message_church_membership Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->church_id[output_index] = messages_swap->church_id[index];
+		messages->household_id[output_index] = messages_swap->household_id[index];				
+	}
+}
+
+/** reset_church_membership_swaps
+ * Reset non partitioned or spatially partitioned church_membership message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_church_membership_swaps(xmachine_message_church_membership_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_church_membership* get_first_church_membership_message(xmachine_message_church_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_church_membership_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_church_membership Coalesced memory read
+	xmachine_message_church_membership temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.church_id = messages->church_id[index];
+	temp_message.household_id = messages->household_id[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_church_membership));
+	xmachine_message_church_membership* sm_message = ((xmachine_message_church_membership*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_church_membership*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_church_membership* get_next_church_membership_message(xmachine_message_church_membership* message, xmachine_message_church_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_church_membership_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_church_membership_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_church_membership Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_church_membership temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.church_id = messages->church_id[index];
+		temp_message.household_id = messages->household_id[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_church_membership));
+		xmachine_message_church_membership* sm_message = ((xmachine_message_church_membership*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_church_membership));
+	return ((xmachine_message_church_membership*)&message_share[message_index]);
 }
 
 

@@ -602,7 +602,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
 
 // The update functions for each agent type, which are involved in deciding
 // where a person is at a given time.
-__FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent,
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                               RNG_rand48 *rand48) {
 
   // agent->age += TIME_STEP;
@@ -615,10 +615,10 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *agent,
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *agent) { return 0; }
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) { return 0; }
 
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *agent) { return 0; }
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) { return 0; }
 
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *agent) { return 0; }
+__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) { return 0; }
 
 #endif
