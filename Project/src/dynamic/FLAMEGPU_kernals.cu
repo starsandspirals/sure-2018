@@ -29,6 +29,8 @@ __constant__ int d_xmachine_memory_Person_count;
 
 __constant__ int d_xmachine_memory_Household_count;
 
+__constant__ int d_xmachine_memory_HouseholdMembership_count;
+
 __constant__ int d_xmachine_memory_Church_count;
 
 __constant__ int d_xmachine_memory_Transport_count;
@@ -40,6 +42,8 @@ __constant__ int d_xmachine_memory_Person_default_count;
 __constant__ int d_xmachine_memory_Person_s2_count;
 
 __constant__ int d_xmachine_memory_Household_hhdefault_count;
+
+__constant__ int d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
 
 __constant__ int d_xmachine_memory_Church_chudefault_count;
 
@@ -192,7 +196,8 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->householdsize[output_index] = agents_src->householdsize[index];        
 		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
 		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
-		agents_dst->transportdur[output_index] = agents_src->transportdur[index];
+		agents_dst->transportdur[output_index] = agents_src->transportdur[index];        
+		agents_dst->household[output_index] = agents_src->household[index];
 	}
 }
 
@@ -219,6 +224,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->transportuser[output_index] = agents_src->transportuser[index];
 	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
 	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
+	    agents_dst->household[output_index] = agents_src->household[index];
     }
 }
 
@@ -232,9 +238,10 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param transportuser agent variable of type unsigned int
  * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type int
+ * @param household agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household){
 	
 	int index;
     
@@ -260,12 +267,13 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->transportuser[index] = transportuser;
 	agents->transportfreq[index] = transportfreq;
 	agents->transportdur[index] = transportdur;
+	agents->household[index] = household;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur){
-    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize, transportuser, transportfreq, transportdur);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household){
+    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize, transportuser, transportfreq, transportdur, household);
 }
 
 /** reorder_Person_agents
@@ -288,6 +296,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->transportuser[index] = unordered_agents->transportuser[old_pos];
 	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
 	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
+	ordered_agents->household[index] = unordered_agents->household[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -460,6 +469,122 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, uint index, T 
 	if(array != nullptr){
 	    array[index*xmachine_memory_Household_MAX] = value;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created HouseholdMembership agent functions */
+
+/** reset_HouseholdMembership_scan_input
+ * HouseholdMembership agent reset scan input function
+ * @param agents The xmachine_memory_HouseholdMembership_list agent list
+ */
+__global__ void reset_HouseholdMembership_scan_input(xmachine_memory_HouseholdMembership_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_HouseholdMembership_Agents
+ * HouseholdMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_HouseholdMembership_list agent list destination
+ * @param agents_src xmachine_memory_HouseholdMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_HouseholdMembership_Agents(xmachine_memory_HouseholdMembership_list* agents_dst, xmachine_memory_HouseholdMembership_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->household_id[output_index] = agents_src->household_id[index];        
+		agents_dst->person_id[output_index] = agents_src->person_id[index];
+	}
+}
+
+/** append_HouseholdMembership_Agents
+ * HouseholdMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_HouseholdMembership_list agent list destination
+ * @param agents_src xmachine_memory_HouseholdMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_HouseholdMembership_Agents(xmachine_memory_HouseholdMembership_list* agents_dst, xmachine_memory_HouseholdMembership_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->household_id[output_index] = agents_src->household_id[index];
+	    agents_dst->person_id[output_index] = agents_src->person_id[index];
+    }
+}
+
+/** add_HouseholdMembership_agent
+ * Continuous HouseholdMembership agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_HouseholdMembership_list to add agents to 
+ * @param household_id agent variable of type unsigned int
+ * @param person_id agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->household_id[index] = household_id;
+	agents->person_id[index] = person_id;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id){
+    add_HouseholdMembership_agent<DISCRETE_2D>(agents, household_id, person_id);
+}
+
+/** reorder_HouseholdMembership_agents
+ * Continuous HouseholdMembership agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_HouseholdMembership_agents(unsigned int* values, xmachine_memory_HouseholdMembership_list* unordered_agents, xmachine_memory_HouseholdMembership_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->household_id[index] = unordered_agents->household_id[old_pos];
+	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1074,6 +1199,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.transportuser = agents->transportuser[index];
 	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
+	agent.household = agents->household[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -1090,6 +1216,66 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->transportuser[index] = agent.transportuser;
 	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
+	agents->household[index] = agent.household;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_message_household_membership_list* household_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_init Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.transportuser = agents->transportuser[index];
+	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.household = agents->household[index];
+	} else {
+	
+	agent.id = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.transportuser = 0;
+	agent.transportfreq = 0;
+	agent.transportdur = 0;
+	agent.household = 0;
+	}
+
+	//FLAME function call
+	int dead = !init(&agent, household_membership_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_init Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->transportuser[index] = agent.transportuser;
+	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
+	agents->household[index] = agent.household;
+	}
 }
 
 /**
@@ -1130,6 +1316,39 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->adults[index] = agent.adults;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents, xmachine_message_household_membership_list* household_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_HouseholdMembership_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_hhinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_HouseholdMembership agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.household_id = agents->household_id[index];
+	agent.person_id = agents->person_id[index];
+
+	//FLAME function call
+	int dead = !hhinit(&agent, household_membership_messages	);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_hhinit Coalesced memory write (ignore arrays)
+	agents->household_id[index] = agent.household_id;
+	agents->person_id[index] = agent.person_id;
 }
 
 /**

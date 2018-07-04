@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -135,6 +135,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying Household Agent hhdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_HouseholdMemberships_hhmembershipdefault, d_HouseholdMemberships_hhmembershipdefault, sizeof(xmachine_memory_HouseholdMembership_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying HouseholdMembership Agent hhmembershipdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	cudaStatus = cudaMemcpy( h_Churchs_chudefault, d_Churchs_chudefault, sizeof(xmachine_memory_Church_list), cudaMemcpyDeviceToHost);
@@ -309,6 +315,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</transportdur>\n", file);
         
+		fputs("<household>", file);
+        sprintf(data, "%u", h_Persons_default->household[i]);
+		fputs(data, file);
+		fputs("</household>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -351,6 +362,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</transportdur>\n", file);
         
+		fputs("<household>", file);
+        sprintf(data, "%u", h_Persons_s2->household[i]);
+		fputs(data, file);
+		fputs("</household>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Household agent to xml
@@ -390,6 +406,23 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Households_hhdefault->adults[i]);
 		fputs(data, file);
 		fputs("</adults>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
+	//Write each HouseholdMembership agent to xml
+	for (int i=0; i<h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>HouseholdMembership</name>\n", file);
+        
+		fputs("<household_id>", file);
+        sprintf(data, "%u", h_HouseholdMemberships_hhmembershipdefault->household_id[i]);
+		fputs(data, file);
+		fputs("</household_id>\n", file);
+        
+		fputs("<person_id>", file);
+        sprintf(data, "%u", h_HouseholdMemberships_hhmembershipdefault->person_id[i]);
+		fputs(data, file);
+		fputs("</person_id>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -506,7 +539,7 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_TRANSPORT_SIZE(&t_TRANSPORT_SIZE);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -532,12 +565,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_transportuser;
     int in_Person_transportfreq;
     int in_Person_transportdur;
+    int in_Person_household;
     int in_Household_id;
     int in_Household_size;
     int in_Household_people;
     int in_Household_churchgoing;
     int in_Household_churchfreq;
     int in_Household_adults;
+    int in_HouseholdMembership_household_id;
+    int in_HouseholdMembership_person_id;
     int in_Church_id;
     int in_Church_size;
     int in_Church_duration;
@@ -600,6 +636,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
+	*h_xmachine_memory_HouseholdMembership_count = 0;
 	*h_xmachine_memory_Church_count = 0;
 	*h_xmachine_memory_Transport_count = 0;
 	
@@ -611,12 +648,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_transportuser;
 	int Person_transportfreq;
 	int Person_transportdur;
+	unsigned int Person_household;
 	unsigned int Household_id;
 	unsigned int Household_size;
     int Household_people[32];
 	unsigned int Household_churchgoing;
 	unsigned int Household_churchfreq;
 	unsigned int Household_adults;
+	unsigned int HouseholdMembership_household_id;
+	unsigned int HouseholdMembership_person_id;
 	unsigned int Church_id;
 	unsigned int Church_size;
 	float Church_duration;
@@ -674,12 +714,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_transportuser = 0;
 	in_Person_transportfreq = 0;
 	in_Person_transportdur = 0;
+	in_Person_household = 0;
 	in_Household_id = 0;
 	in_Household_size = 0;
 	in_Household_people = 0;
 	in_Household_churchgoing = 0;
 	in_Household_churchfreq = 0;
 	in_Household_adults = 0;
+	in_HouseholdMembership_household_id = 0;
+	in_HouseholdMembership_person_id = 0;
 	in_Church_id = 0;
 	in_Church_size = 0;
 	in_Church_duration = 0;
@@ -722,6 +765,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->transportuser[k] = 0;
 		h_Persons->transportfreq[k] = 0;
 		h_Persons->transportdur[k] = 0;
+		h_Persons->household[k] = 0;
 	}
 	
 	//set all Household values to 0
@@ -736,6 +780,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Households->churchgoing[k] = 0;
 		h_Households->churchfreq[k] = 0;
 		h_Households->adults[k] = 0;
+	}
+	
+	//set all HouseholdMembership values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_HouseholdMembership_MAX; k++)
+	{	
+		h_HouseholdMemberships->household_id[k] = 0;
+		h_HouseholdMemberships->person_id[k] = 0;
 	}
 	
 	//set all Church values to 0
@@ -767,6 +819,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_transportuser = 0;
     Person_transportfreq = 0;
     Person_transportdur = 0;
+    Person_household = 0;
     Household_id = 0;
     Household_size = 0;
     for (i=0;i<32;i++){
@@ -775,6 +828,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Household_churchgoing = 0;
     Household_churchfreq = 0;
     Household_adults = 0;
+    HouseholdMembership_household_id = 0;
+    HouseholdMembership_person_id = 0;
     Church_id = 0;
     Church_size = 0;
     Church_duration = 0;
@@ -878,6 +933,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->transportuser[*h_xmachine_memory_Person_count] = Person_transportuser;
 					h_Persons->transportfreq[*h_xmachine_memory_Person_count] = Person_transportfreq;
 					h_Persons->transportdur[*h_xmachine_memory_Person_count] = Person_transportdur;
+					h_Persons->household[*h_xmachine_memory_Person_count] = Person_household;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "Household") == 0)
@@ -898,6 +954,19 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Households->churchfreq[*h_xmachine_memory_Household_count] = Household_churchfreq;
 					h_Households->adults[*h_xmachine_memory_Household_count] = Household_adults;
 					(*h_xmachine_memory_Household_count) ++;	
+				}
+				else if(strcmp(agentname, "HouseholdMembership") == 0)
+				{
+					if (*h_xmachine_memory_HouseholdMembership_count > xmachine_memory_HouseholdMembership_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent HouseholdMembership exceeded whilst reading data\n", xmachine_memory_HouseholdMembership_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_HouseholdMemberships->household_id[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_household_id;
+					h_HouseholdMemberships->person_id[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_person_id;
+					(*h_xmachine_memory_HouseholdMembership_count) ++;	
 				}
 				else if(strcmp(agentname, "Church") == 0)
 				{
@@ -944,6 +1013,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_transportuser = 0;
                 Person_transportfreq = 0;
                 Person_transportdur = 0;
+                Person_household = 0;
                 Household_id = 0;
                 Household_size = 0;
                 for (i=0;i<32;i++){
@@ -952,6 +1022,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Household_churchgoing = 0;
                 Household_churchfreq = 0;
                 Household_adults = 0;
+                HouseholdMembership_household_id = 0;
+                HouseholdMembership_person_id = 0;
                 Church_id = 0;
                 Church_size = 0;
                 Church_duration = 0;
@@ -977,6 +1049,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/transportfreq") == 0) in_Person_transportfreq = 0;
 			if(strcmp(buffer, "transportdur") == 0) in_Person_transportdur = 1;
 			if(strcmp(buffer, "/transportdur") == 0) in_Person_transportdur = 0;
+			if(strcmp(buffer, "household") == 0) in_Person_household = 1;
+			if(strcmp(buffer, "/household") == 0) in_Person_household = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Household_id = 0;
 			if(strcmp(buffer, "size") == 0) in_Household_size = 1;
@@ -989,6 +1063,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/churchfreq") == 0) in_Household_churchfreq = 0;
 			if(strcmp(buffer, "adults") == 0) in_Household_adults = 1;
 			if(strcmp(buffer, "/adults") == 0) in_Household_adults = 0;
+			if(strcmp(buffer, "household_id") == 0) in_HouseholdMembership_household_id = 1;
+			if(strcmp(buffer, "/household_id") == 0) in_HouseholdMembership_household_id = 0;
+			if(strcmp(buffer, "person_id") == 0) in_HouseholdMembership_person_id = 1;
+			if(strcmp(buffer, "/person_id") == 0) in_HouseholdMembership_person_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Church_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Church_id = 0;
 			if(strcmp(buffer, "size") == 0) in_Church_size = 1;
@@ -1092,6 +1170,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				if(in_Person_transportdur){
                     Person_transportdur = (int) fpgu_strtol(buffer); 
                 }
+				if(in_Person_household){
+                    Person_household = (unsigned int) fpgu_strtoul(buffer); 
+                }
 				if(in_Household_id){
                     Household_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
@@ -1109,6 +1190,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Household_adults){
                     Household_adults = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_HouseholdMembership_household_id){
+                    HouseholdMembership_household_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_HouseholdMembership_person_id){
+                    HouseholdMembership_person_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Church_id){
                     Church_id = (unsigned int) fpgu_strtoul(buffer); 

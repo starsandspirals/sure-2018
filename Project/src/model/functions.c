@@ -324,12 +324,20 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       // Allocate individual people to the household until it is full, keeping
       // track of how many of them are adults.
       for (unsigned int k = 0; k < i; k++) {
+        xmachine_memory_HouseholdMembership *h_hhmembership =
+            h_allocate_agent_HouseholdMembership();
+        h_hhmembership->household_id = h_household->id;
+        h_hhmembership->person_id = order[count];
         h_household->people[k] = order[count];
         count++;
 
         if (ages[count] >= 15) {
           adultcount++;
         }
+
+        h_add_agent_HouseholdMembership_hhmembershipdefault(h_hhmembership);
+
+        h_free_agent_HouseholdMembership(&h_hhmembership);
       }
 
       // Decide if the household is a churchgoing household, based on given
@@ -461,8 +469,8 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
 // Function that prints out the number of agents after each iteration.
 __FLAME_GPU_STEP_FUNC__ void generatePersonStep() {
 
- // printf("Population after step function %u\n",
- //        get_agent_Person_default_count());
+  // printf("Population after step function %u\n",
+  //        get_agent_Person_default_count());
 }
 
 // Function for generating output data in csv files, which runs after every
@@ -489,13 +497,14 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fprintf(stdout, "Outputting some Person data to %s\n",
               outputFilename.c_str());
 
-      fprintf(fp, "ID, gender, age\n");
+      fprintf(fp, "ID, gender, age, household\n");
 
-      for (int index = 0; index < get_agent_Person_default_count(); index++) {
+      for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-        fprintf(fp, "%u, %u, %u\n", get_Person_default_variable_id(index),
-                get_Person_default_variable_gender(index),
-                get_Person_default_variable_age(index));
+        fprintf(fp, "%u, %u, %u, %u\n", get_Person_s2_variable_id(index),
+                get_Person_s2_variable_gender(index),
+                get_Person_s2_variable_age(index),
+                get_Person_s2_variable_household(index));
       }
 
       fflush(fp);
@@ -595,8 +604,7 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
 
   h_free_agent_Person_array(&h_agent_AoS, h_agent_AoS_MAX);
 
-  printf("Population for exit function: %u\n",
-         get_agent_Person_default_count());
+  printf("Population for exit function: %u\n", get_agent_Person_s2_count());
 }
 
 // The update functions for each agent type, which are involved in deciding
@@ -614,10 +622,42 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) { return 0; }
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) {
+  return 0;
+}
 
 __FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) { return 0; }
 
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) { return 0; }
+__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int hhinit(
+    xmachine_memory_HouseholdMembership *hhmembership,
+    xmachine_message_household_membership_list *household_membership_messages) {
+
+  add_household_membership_message(household_membership_messages,
+                                   hhmembership->household_id,
+                                   hhmembership->person_id);
+  return 1;
+}
+
+__FLAME_GPU_FUNC__ int init(
+    xmachine_memory_Person *person,
+    xmachine_message_household_membership_list *household_membership_messages) {
+  xmachine_message_household_membership *household_membership_message =
+      get_first_household_membership_message(household_membership_messages);
+  unsigned int personid = person->id;
+
+  while (household_membership_message) {
+    if (household_membership_message->person_id == personid) {
+      person->household = household_membership_message->household_id;
+    }
+    household_membership_message = get_next_household_membership_message(
+        household_membership_message, household_membership_messages);
+  }
+
+  return 0;
+}
 
 #endif

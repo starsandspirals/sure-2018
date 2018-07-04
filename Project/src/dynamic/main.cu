@@ -36,7 +36,7 @@ char inputfile[100];          /**< Input path char buffer*/
 char outputpath[1000];         /**< Output path char buffer*/
 
 // Define the default value indicating if XML output should be produced or not.
-#define OUTPUT_TO_XML 0
+#define OUTPUT_TO_XML 1
 
 #define HELP_OPTION_SHORT "-h"
 #define HELP_OPTION_LONG "--help"
@@ -362,14 +362,14 @@ void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 		singleIteration();
 		// Save the iteration data to disk
 		if((i+1) % outputFrequency == 0){
-			saveIterationData(outputpath, i+1, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count(),get_host_Transport_trdefault_agents(), get_device_Transport_trdefault_agents(), get_agent_Transport_trdefault_count());
+			saveIterationData(outputpath, i+1, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_HouseholdMembership_hhmembershipdefault_agents(), get_device_HouseholdMembership_hhmembershipdefault_agents(), get_agent_HouseholdMembership_hhmembershipdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count(),get_host_Transport_trdefault_agents(), get_device_Transport_trdefault_agents(), get_agent_Transport_trdefault_count());
 			printf("Iteration %i Saved to XML\n", i+1);
 		}
 	}
 
 	// If we did not yet output the final iteration, output the final iteration.
 	if(iterations % outputFrequency != 0){
-		saveIterationData(outputpath, iterations, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count(),get_host_Transport_trdefault_agents(), get_device_Transport_trdefault_agents(), get_agent_Transport_trdefault_count());
+		saveIterationData(outputpath, iterations, get_host_Person_default_agents(), get_device_Person_default_agents(), get_agent_Person_default_count(),get_host_Person_s2_agents(), get_device_Person_s2_agents(), get_agent_Person_s2_count(),get_host_Household_hhdefault_agents(), get_device_Household_hhdefault_agents(), get_agent_Household_hhdefault_count(),get_host_HouseholdMembership_hhmembershipdefault_agents(), get_device_HouseholdMembership_hhmembershipdefault_agents(), get_agent_HouseholdMembership_hhmembershipdefault_count(),get_host_Church_chudefault_agents(), get_device_Church_chudefault_agents(), get_agent_Church_chudefault_count(),get_host_Transport_trdefault_agents(), get_device_Transport_trdefault_agents(), get_agent_Transport_trdefault_count());
 		printf("Iteration %i Saved to XML\n", iterations);
 	}
 

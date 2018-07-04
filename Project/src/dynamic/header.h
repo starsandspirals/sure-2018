@@ -63,6 +63,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_memory_Household
 #define xmachine_memory_Household_MAX 8192
 
+//Maximum population size of xmachine_memory_HouseholdMembership
+#define xmachine_memory_HouseholdMembership_MAX 32768
+
 //Maximum population size of xmachine_memory_Church
 #define xmachine_memory_Church_MAX 256
 
@@ -138,6 +141,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int transportuser;    /**< X-machine memory variable transportuser of type unsigned int.*/
     int transportfreq;    /**< X-machine memory variable transportfreq of type int.*/
     int transportdur;    /**< X-machine memory variable transportdur of type int.*/
+    unsigned int household;    /**< X-machine memory variable household of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household
@@ -152,6 +156,16 @@ struct __align__(16) xmachine_memory_Household
     unsigned int churchgoing;    /**< X-machine memory variable churchgoing of type unsigned int.*/
     unsigned int churchfreq;    /**< X-machine memory variable churchfreq of type unsigned int.*/
     unsigned int adults;    /**< X-machine memory variable adults of type unsigned int.*/
+};
+
+/** struct xmachine_memory_HouseholdMembership
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_HouseholdMembership
+{
+    unsigned int household_id;    /**< X-machine memory variable household_id of type unsigned int.*/
+    unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Church
@@ -227,6 +241,7 @@ struct xmachine_memory_Person_list
     unsigned int transportuser [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportuser of type unsigned int.*/
     int transportfreq [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportfreq of type int.*/
     int transportdur [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportdur of type int.*/
+    unsigned int household [xmachine_memory_Person_MAX];    /**< X-machine memory variable list household of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household_list
@@ -245,6 +260,20 @@ struct xmachine_memory_Household_list
     unsigned int churchgoing [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchgoing of type unsigned int.*/
     unsigned int churchfreq [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchfreq of type unsigned int.*/
     unsigned int adults [xmachine_memory_Household_MAX];    /**< X-machine memory variable list adults of type unsigned int.*/
+};
+
+/** struct xmachine_memory_HouseholdMembership_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_HouseholdMembership_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_HouseholdMembership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_HouseholdMembership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int household_id [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list household_id of type unsigned int.*/
+    unsigned int person_id [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Church_list
@@ -361,11 +390,25 @@ __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, RNG_rand48* rand48);
 
 /**
+ * init FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param household_membership_messages  household_membership_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_household_membership_message and get_next_household_membership_message functions.
+ */
+__FLAME_GPU_FUNC__ int init(xmachine_memory_Person* agent, xmachine_message_household_membership_list* household_membership_messages);
+
+/**
  * hhupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Household. This represents a single agent instance and can be modified directly.
  
  */
 __FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent);
+
+/**
+ * hhinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_HouseholdMembership. This represents a single agent instance and can be modified directly.
+ * @param household_membership_messages Pointer to output message list of type xmachine_message_household_membership_list. Must be passed as an argument to the add_household_membership_message function ??.
+ */
+__FLAME_GPU_FUNC__ int hhinit(xmachine_memory_HouseholdMembership* agent, xmachine_message_household_membership_list* household_membership_messages);
 
 /**
  * chuupdate FLAMEGPU Agent Function
@@ -451,8 +494,9 @@ __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membersh
  * @param transportuser	agent agent variable of type unsigned int
  * @param transportfreq	agent agent variable of type int
  * @param transportdur	agent agent variable of type int
+ * @param household	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household);
 
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -485,6 +529,14 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, unsigned int i
 
 
   
+
+/** add_HouseholdMembership_agent
+ * Adds a new continuous valued HouseholdMembership agent to the xmachine_memory_HouseholdMembership_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_HouseholdMembership_list agent list
+ * @param household_id	agent agent variable of type unsigned int
+ * @param person_id	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id);
 
 /** add_Church_agent
  * Adds a new continuous valued Church agent to the xmachine_memory_Church_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -558,6 +610,9 @@ extern void singleIteration();
  * @param h_Households Pointer to agent list on the host
  * @param d_Households Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Household_count Pointer to agent counter
+ * @param h_HouseholdMemberships Pointer to agent list on the host
+ * @param d_HouseholdMemberships Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_HouseholdMembership_count Pointer to agent counter
  * @param h_Churchs Pointer to agent list on the host
  * @param d_Churchs Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Church_count Pointer to agent counter
@@ -565,7 +620,7 @@ extern void singleIteration();
  * @param d_Transports Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Transport_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count);
 
 
 /** readInitialStates
@@ -575,12 +630,14 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_Person_count Pointer to agent counter
  * @param h_Households Pointer to agent list on the host
  * @param h_xmachine_memory_Household_count Pointer to agent counter
+ * @param h_HouseholdMemberships Pointer to agent list on the host
+ * @param h_xmachine_memory_HouseholdMembership_count Pointer to agent counter
  * @param h_Churchs Pointer to agent list on the host
  * @param h_xmachine_memory_Church_count Pointer to agent counter
  * @param h_Transports Pointer to agent list on the host
  * @param h_xmachine_memory_Transport_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -694,6 +751,46 @@ extern xmachine_memory_Household_list* get_host_Household_hhdefault_agents();
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_Households_hhdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Household_list* agents));
+
+
+    
+/** get_agent_HouseholdMembership_MAX_count
+ * Gets the max agent count for the HouseholdMembership agent type 
+ * @return		the maximum HouseholdMembership agent count
+ */
+extern int get_agent_HouseholdMembership_MAX_count();
+
+
+
+/** get_agent_HouseholdMembership_hhmembershipdefault_count
+ * Gets the agent count for the HouseholdMembership agent type in state hhmembershipdefault
+ * @return		the current HouseholdMembership agent count in state hhmembershipdefault
+ */
+extern int get_agent_HouseholdMembership_hhmembershipdefault_count();
+
+/** reset_hhmembershipdefault_count
+ * Resets the agent count of the HouseholdMembership in state hhmembershipdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_HouseholdMembership_hhmembershipdefault_count();
+
+/** get_device_HouseholdMembership_hhmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_HouseholdMembership_list on the GPU device
+ * @return		a xmachine_memory_HouseholdMembership_list on the GPU device
+ */
+extern xmachine_memory_HouseholdMembership_list* get_device_HouseholdMembership_hhmembershipdefault_agents();
+
+/** get_host_HouseholdMembership_hhmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_HouseholdMembership_list on the CPU host
+ * @return		a xmachine_memory_HouseholdMembership_list on the CPU host
+ */
+extern xmachine_memory_HouseholdMembership_list* get_host_HouseholdMembership_hhmembershipdefault_agents();
+
+
+/** sort_HouseholdMemberships_hhmembershipdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_HouseholdMemberships_hhmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_HouseholdMembership_list* agents));
 
 
     
@@ -842,6 +939,15 @@ __host__ int get_Person_default_variable_transportfreq(unsigned int index);
  */
 __host__ int get_Person_default_variable_transportdur(unsigned int index);
 
+/** unsigned int get_Person_default_variable_household(unsigned int index)
+ * Gets the value of the household variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household
+ */
+__host__ unsigned int get_Person_default_variable_household(unsigned int index);
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -905,6 +1011,15 @@ __host__ int get_Person_s2_variable_transportfreq(unsigned int index);
  */
 __host__ int get_Person_s2_variable_transportdur(unsigned int index);
 
+/** unsigned int get_Person_s2_variable_household(unsigned int index)
+ * Gets the value of the household variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household
+ */
+__host__ unsigned int get_Person_s2_variable_household(unsigned int index);
+
 /** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -959,6 +1074,24 @@ __host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int i
  * @return value of agent variable adults
  */
 __host__ unsigned int get_Household_hhdefault_variable_adults(unsigned int index);
+
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_id(unsigned int index)
+ * Gets the value of the household_id variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household_id
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_id(unsigned int index);
+
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_person_id(unsigned int index);
 
 /** unsigned int get_Church_chudefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Church agent in the chudefault state on the host. 
@@ -1118,6 +1251,47 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsigned int count);
+
+/** h_allocate_agent_HouseholdMembership
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated HouseholdMembership struct.
+ */
+xmachine_memory_HouseholdMembership* h_allocate_agent_HouseholdMembership();
+/** h_free_agent_HouseholdMembership
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_HouseholdMembership(xmachine_memory_HouseholdMembership** agent);
+/** h_allocate_agent_HouseholdMembership_array
+ * Utility function to allocate an array of structs for  HouseholdMembership agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_HouseholdMembership** h_allocate_agent_HouseholdMembership_array(unsigned int count);
+/** h_free_agent_HouseholdMembership_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_HouseholdMembership_array(xmachine_memory_HouseholdMembership*** agents, unsigned int count);
+
+
+/** h_add_agent_HouseholdMembership_hhmembershipdefault
+ * Host function to add a single agent of type HouseholdMembership to the hhmembershipdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_HouseholdMembership_hhmembershipdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_HouseholdMembership_hhmembershipdefault(xmachine_memory_HouseholdMembership* agent);
+
+/** h_add_agents_HouseholdMembership_hhmembershipdefault(
+ * Host function to add multiple agents of type HouseholdMembership to the hhmembershipdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of HouseholdMembership agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_HouseholdMembership_hhmembershipdefault(xmachine_memory_HouseholdMembership** agents, unsigned int count);
 
 /** h_allocate_agent_Church
  * Utility function to allocate and initialise an agent struct on the host.
@@ -1393,6 +1567,32 @@ int min_Person_default_transportdur_variable();
  */
 int max_Person_default_transportdur_variable();
 
+/** unsigned int reduce_Person_default_household_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_household_variable();
+
+
+
+/** unsigned int count_Person_default_household_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_household_variable(int count_value);
+
+/** unsigned int min_Person_default_household_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_household_variable();
+/** unsigned int max_Person_default_household_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_household_variable();
+
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -1575,6 +1775,32 @@ int min_Person_s2_transportdur_variable();
  */
 int max_Person_s2_transportdur_variable();
 
+/** unsigned int reduce_Person_s2_household_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_household_variable();
+
+
+
+/** unsigned int count_Person_s2_household_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_household_variable(int count_value);
+
+/** unsigned int min_Person_s2_household_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_household_variable();
+/** unsigned int max_Person_s2_household_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_household_variable();
+
 /** unsigned int reduce_Household_hhdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -1704,6 +1930,58 @@ unsigned int min_Household_hhdefault_adults_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Household_hhdefault_adults_variable();
+
+/** unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_id_variable();
+
+
+
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(int count_value);
+
+/** unsigned int min_HouseholdMembership_hhmembershipdefault_household_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_HouseholdMembership_hhmembershipdefault_household_id_variable();
+/** unsigned int max_HouseholdMembership_hhmembershipdefault_household_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_HouseholdMembership_hhmembershipdefault_household_id_variable();
+
+/** unsigned int reduce_HouseholdMembership_hhmembershipdefault_person_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_person_id_variable();
+
+
+
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(int count_value);
+
+/** unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable();
+/** unsigned int max_HouseholdMembership_hhmembershipdefault_person_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_HouseholdMembership_hhmembershipdefault_person_id_variable();
 
 /** unsigned int reduce_Church_chudefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

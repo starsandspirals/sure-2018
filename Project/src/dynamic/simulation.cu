@@ -114,6 +114,19 @@ xmachine_memory_Household_list* h_Households_hhdefault;      /**< Pointer to age
 xmachine_memory_Household_list* d_Households_hhdefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Household_hhdefault_count;   /**< Agent population size counter */ 
 
+/* HouseholdMembership Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_HouseholdMembership_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_HouseholdMembership_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_HouseholdMembership_values;  /**< Agent sort identifiers value */
+
+/* HouseholdMembership state variables */
+xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;   /**< Agent population size counter */ 
+
 /* Church Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
 xmachine_memory_Church_list* d_Churchs;      /**< Pointer to agent list (population) on the device*/
 xmachine_memory_Church_list* d_Churchs_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
@@ -151,6 +164,7 @@ unsigned int h_Persons_default_variable_householdsize_data_iteration;
 unsigned int h_Persons_default_variable_transportuser_data_iteration;
 unsigned int h_Persons_default_variable_transportfreq_data_iteration;
 unsigned int h_Persons_default_variable_transportdur_data_iteration;
+unsigned int h_Persons_default_variable_household_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
 unsigned int h_Persons_s2_variable_gender_data_iteration;
@@ -158,12 +172,15 @@ unsigned int h_Persons_s2_variable_householdsize_data_iteration;
 unsigned int h_Persons_s2_variable_transportuser_data_iteration;
 unsigned int h_Persons_s2_variable_transportfreq_data_iteration;
 unsigned int h_Persons_s2_variable_transportdur_data_iteration;
+unsigned int h_Persons_s2_variable_household_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_size_data_iteration;
 unsigned int h_Households_hhdefault_variable_people_data_iteration;
 unsigned int h_Households_hhdefault_variable_churchgoing_data_iteration;
 unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
 unsigned int h_Households_hhdefault_variable_adults_data_iteration;
+unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration;
+unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_Churchs_chudefault_variable_id_data_iteration;
 unsigned int h_Churchs_chudefault_variable_size_data_iteration;
 unsigned int h_Churchs_chudefault_variable_duration_data_iteration;
@@ -202,6 +219,9 @@ size_t temp_scan_storage_bytes_Person;
 void * d_temp_scan_storage_Household;
 size_t temp_scan_storage_bytes_Household;
 
+void * d_temp_scan_storage_HouseholdMembership;
+size_t temp_scan_storage_bytes_HouseholdMembership;
+
 void * d_temp_scan_storage_Church;
 size_t temp_scan_storage_bytes_Church;
 
@@ -236,10 +256,20 @@ int scan_last_included;      /**< Indicates if last sum value is included in the
  */
 void Person_update(cudaStream_t &stream);
 
+/** Person_init
+ * Agent function prototype for init function of Person agent
+ */
+void Person_init(cudaStream_t &stream);
+
 /** Household_hhupdate
  * Agent function prototype for hhupdate function of Household agent
  */
 void Household_hhupdate(cudaStream_t &stream);
+
+/** HouseholdMembership_hhinit
+ * Agent function prototype for hhinit function of HouseholdMembership agent
+ */
+void HouseholdMembership_hhinit(cudaStream_t &stream);
 
 /** Church_chuupdate
  * Agent function prototype for chuupdate function of Church agent
@@ -350,6 +380,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_transportuser_data_iteration = 0;
     h_Persons_default_variable_transportfreq_data_iteration = 0;
     h_Persons_default_variable_transportdur_data_iteration = 0;
+    h_Persons_default_variable_household_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
@@ -357,12 +388,15 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_transportuser_data_iteration = 0;
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
     h_Persons_s2_variable_transportdur_data_iteration = 0;
+    h_Persons_s2_variable_household_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
     h_Households_hhdefault_variable_people_data_iteration = 0;
     h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
     h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
     h_Households_hhdefault_variable_adults_data_iteration = 0;
+    h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
+    h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
     h_Churchs_chudefault_variable_id_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
     h_Churchs_chudefault_variable_duration_data_iteration = 0;
@@ -381,6 +415,8 @@ void initialise(char * inputfile){
 	h_Persons_s2 = (xmachine_memory_Person_list*)malloc(xmachine_Person_SoA_size);
 	int xmachine_Household_SoA_size = sizeof(xmachine_memory_Household_list);
 	h_Households_hhdefault = (xmachine_memory_Household_list*)malloc(xmachine_Household_SoA_size);
+	int xmachine_HouseholdMembership_SoA_size = sizeof(xmachine_memory_HouseholdMembership_list);
+	h_HouseholdMemberships_hhmembershipdefault = (xmachine_memory_HouseholdMembership_list*)malloc(xmachine_HouseholdMembership_SoA_size);
 	int xmachine_Church_SoA_size = sizeof(xmachine_memory_Church_list);
 	h_Churchs_chudefault = (xmachine_memory_Church_list*)malloc(xmachine_Church_SoA_size);
 	int xmachine_Transport_SoA_size = sizeof(xmachine_memory_Transport_list);
@@ -397,7 +433,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -427,6 +463,17 @@ void initialise(char * inputfile){
 	/* hhdefault memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Households_hhdefault, xmachine_Household_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Households_hhdefault, h_Households_hhdefault, xmachine_Household_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* HouseholdMembership Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_HouseholdMemberships, xmachine_HouseholdMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_HouseholdMemberships_swap, xmachine_HouseholdMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_HouseholdMemberships_new, xmachine_HouseholdMembership_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_HouseholdMembership_keys, xmachine_memory_HouseholdMembership_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_HouseholdMembership_values, xmachine_memory_HouseholdMembership_MAX* sizeof(uint)));
+	/* hhmembershipdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_HouseholdMemberships_hhmembershipdefault, xmachine_HouseholdMembership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_HouseholdMemberships_hhmembershipdefault, h_HouseholdMemberships_hhmembershipdefault, xmachine_HouseholdMembership_SoA_size, cudaMemcpyHostToDevice));
     
 	/* Church Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Churchs, xmachine_Church_SoA_size));
@@ -485,6 +532,17 @@ void initialise(char * inputfile){
         xmachine_memory_Household_MAX
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Household, temp_scan_storage_bytes_Household));
+    
+    d_temp_scan_storage_HouseholdMembership = nullptr;
+    temp_scan_storage_bytes_HouseholdMembership = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_HouseholdMembership, 
+        temp_scan_storage_bytes_HouseholdMembership, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_HouseholdMembership_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_HouseholdMembership, temp_scan_storage_bytes_HouseholdMembership));
     
     d_temp_scan_storage_Church = nullptr;
     temp_scan_storage_bytes_Church = 0;
@@ -594,6 +652,8 @@ void initialise(char * inputfile){
 	
 		printf("Init agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
 	
+		printf("Init agent_HouseholdMembership_hhmembershipdefault_count: %u\n",get_agent_HouseholdMembership_hhmembershipdefault_count());
+	
 		printf("Init agent_Church_chudefault_count: %u\n",get_agent_Church_chudefault_count());
 	
 		printf("Init agent_Transport_trdefault_count: %u\n",get_agent_Transport_trdefault_count());
@@ -684,6 +744,34 @@ void sort_Households_hhdefault(void (*generate_key_value_pairs)(unsigned int* ke
 	xmachine_memory_Household_list* d_Households_temp = d_Households_hhdefault;
 	d_Households_hhdefault = d_Households_swap;
 	d_Households_swap = d_Households_temp;	
+}
+
+void sort_HouseholdMemberships_hhmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_HouseholdMembership_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_HouseholdMembership_keys, d_xmachine_memory_HouseholdMembership_values, d_HouseholdMemberships_hhmembershipdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_HouseholdMembership_keys),  thrust::device_pointer_cast(d_xmachine_memory_HouseholdMembership_keys) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_HouseholdMembership_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_HouseholdMembership_agents, no_sm, h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_HouseholdMembership_agents<<<gridSize, blockSize>>>(d_xmachine_memory_HouseholdMembership_values, d_HouseholdMemberships_hhmembershipdefault, d_HouseholdMemberships_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_temp = d_HouseholdMemberships_hhmembershipdefault;
+	d_HouseholdMemberships_hhmembershipdefault = d_HouseholdMemberships_swap;
+	d_HouseholdMemberships_swap = d_HouseholdMemberships_temp;	
 }
 
 void sort_Churchs_chudefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Church_list* agents))
@@ -785,6 +873,14 @@ void cleanup(){
 	free( h_Households_hhdefault);
 	gpuErrchk(cudaFree(d_Households_hhdefault));
 	
+	/* HouseholdMembership Agent variables */
+	gpuErrchk(cudaFree(d_HouseholdMemberships));
+	gpuErrchk(cudaFree(d_HouseholdMemberships_swap));
+	gpuErrchk(cudaFree(d_HouseholdMemberships_new));
+	
+	free( h_HouseholdMemberships_hhmembershipdefault);
+	gpuErrchk(cudaFree(d_HouseholdMemberships_hhmembershipdefault));
+	
 	/* Church Agent variables */
 	gpuErrchk(cudaFree(d_Churchs));
 	gpuErrchk(cudaFree(d_Churchs_swap));
@@ -824,6 +920,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_Household));
     d_temp_scan_storage_Household = nullptr;
     temp_scan_storage_bytes_Household = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_HouseholdMembership));
+    d_temp_scan_storage_HouseholdMembership = nullptr;
+    temp_scan_storage_bytes_HouseholdMembership = 0;
     
     gpuErrchk(cudaFree(d_temp_scan_storage_Church));
     d_temp_scan_storage_Church = nullptr;
@@ -877,14 +977,31 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("Person_update");
-	Person_update(stream1);
+    PROFILE_PUSH_RANGE("HouseholdMembership_hhinit");
+	HouseholdMembership_hhinit(stream1);
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_update = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: HouseholdMembership_hhinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 2*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_init");
+	Person_init(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_init = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
@@ -926,6 +1043,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_Person_s2_count: %u\n",get_agent_Person_s2_count());
 	
 		printf("agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
+	
+		printf("agent_HouseholdMembership_hhmembershipdefault_count: %u\n",get_agent_HouseholdMembership_hhmembershipdefault_count());
 	
 		printf("agent_Church_chudefault_count: %u\n",get_agent_Church_chudefault_count());
 	
@@ -1354,6 +1473,26 @@ xmachine_memory_Household_list* get_host_Household_hhdefault_agents(){
 }
 
     
+int get_agent_HouseholdMembership_MAX_count(){
+    return xmachine_memory_HouseholdMembership_MAX;
+}
+
+
+int get_agent_HouseholdMembership_hhmembershipdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
+	
+}
+
+xmachine_memory_HouseholdMembership_list* get_device_HouseholdMembership_hhmembershipdefault_agents(){
+	return d_HouseholdMemberships_hhmembershipdefault;
+}
+
+xmachine_memory_HouseholdMembership_list* get_host_HouseholdMembership_hhmembershipdefault_agents(){
+	return h_HouseholdMemberships_hhmembershipdefault;
+}
+
+    
 int get_agent_Church_MAX_count(){
     return xmachine_memory_Church_MAX;
 }
@@ -1670,6 +1809,45 @@ __host__ int get_Person_default_variable_transportdur(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_household(unsigned int index)
+ * Gets the value of the household variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household
+ */
+__host__ unsigned int get_Person_default_variable_household(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_household_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->household,
+                    d_Persons_default->household,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_household_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->household[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access household for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1943,6 +2121,45 @@ __host__ int get_Person_s2_variable_transportdur(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_s2_variable_household(unsigned int index)
+ * Gets the value of the household variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household
+ */
+__host__ unsigned int get_Person_s2_variable_household(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_household_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->household,
+                    d_Persons_s2->household,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_household_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->household[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access household for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2175,6 +2392,84 @@ __host__ unsigned int get_Household_hhdefault_variable_adults(unsigned int index
 
     } else {
         fprintf(stderr, "Warning: Attempting to access adults for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_id(unsigned int index)
+ * Gets the value of the household_id variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household_id
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_id(unsigned int index){
+    unsigned int count = get_agent_HouseholdMembership_hhmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_HouseholdMemberships_hhmembershipdefault->household_id,
+                    d_HouseholdMemberships_hhmembershipdefault->household_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_HouseholdMemberships_hhmembershipdefault->household_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access household_id for the %u th member of HouseholdMembership_hhmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_person_id(unsigned int index){
+    unsigned int count = get_agent_HouseholdMembership_hhmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_HouseholdMemberships_hhmembershipdefault->person_id,
+                    d_HouseholdMemberships_hhmembershipdefault->person_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_HouseholdMemberships_hhmembershipdefault->person_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access person_id for the %u th member of HouseholdMembership_hhmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2446,6 +2741,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, &h_agent->transportfreq, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household, &h_agent->household, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -2475,6 +2772,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, h_src->transportfreq, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household, h_src->household, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -2530,6 +2829,40 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 		gpuErrchk(cudaMemcpy(d_dst->churchfreq, h_src->churchfreq, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->adults, h_src->adults, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_HouseholdMembership_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_HouseholdMembership_hostToDevice(xmachine_memory_HouseholdMembership_list * d_dst, xmachine_memory_HouseholdMembership * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household_id, &h_agent->household_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_HouseholdMembership_hostToDevice(xmachine_memory_HouseholdMembership_list * d_dst, xmachine_memory_HouseholdMembership_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->household_id, h_src->household_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -2661,6 +2994,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->transportfreq[i] = src[i]->transportfreq;
 			 
 			dst->transportdur[i] = src[i]->transportdur;
+			 
+			dst->household[i] = src[i]->household;
 			
 		}
 	}
@@ -2699,6 +3034,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_transportuser_data_iteration = 0;
     h_Persons_default_variable_transportfreq_data_iteration = 0;
     h_Persons_default_variable_transportdur_data_iteration = 0;
+    h_Persons_default_variable_household_data_iteration = 0;
     
 
 }
@@ -2737,6 +3073,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_transportuser_data_iteration = 0;
         h_Persons_default_variable_transportfreq_data_iteration = 0;
         h_Persons_default_variable_transportdur_data_iteration = 0;
+        h_Persons_default_variable_household_data_iteration = 0;
         
 
 	}
@@ -2775,6 +3112,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_transportuser_data_iteration = 0;
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
     h_Persons_s2_variable_transportdur_data_iteration = 0;
+    h_Persons_s2_variable_household_data_iteration = 0;
     
 
 }
@@ -2813,6 +3151,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_transportuser_data_iteration = 0;
         h_Persons_s2_variable_transportfreq_data_iteration = 0;
         h_Persons_s2_variable_transportdur_data_iteration = 0;
+        h_Persons_s2_variable_household_data_iteration = 0;
         
 
 	}
@@ -2943,6 +3282,111 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
         h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
         h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
         h_Households_hhdefault_variable_adults_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_HouseholdMembership* h_allocate_agent_HouseholdMembership(){
+	xmachine_memory_HouseholdMembership* agent = (xmachine_memory_HouseholdMembership*)malloc(sizeof(xmachine_memory_HouseholdMembership));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_HouseholdMembership));
+
+	return agent;
+}
+void h_free_agent_HouseholdMembership(xmachine_memory_HouseholdMembership** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_HouseholdMembership** h_allocate_agent_HouseholdMembership_array(unsigned int count){
+	xmachine_memory_HouseholdMembership ** agents = (xmachine_memory_HouseholdMembership**)malloc(count * sizeof(xmachine_memory_HouseholdMembership*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_HouseholdMembership();
+	}
+	return agents;
+}
+void h_free_agent_HouseholdMembership_array(xmachine_memory_HouseholdMembership*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_HouseholdMembership(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_HouseholdMembership_AoS_to_SoA(xmachine_memory_HouseholdMembership_list * dst, xmachine_memory_HouseholdMembership** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->household_id[i] = src[i]->household_id;
+			 
+			dst->person_id[i] = src[i]->person_id;
+			
+		}
+	}
+}
+
+
+void h_add_agent_HouseholdMembership_hhmembershipdefault(xmachine_memory_HouseholdMembership* agent){
+	if (h_xmachine_memory_HouseholdMembership_count + 1 > xmachine_memory_HouseholdMembership_MAX){
+		printf("Error: Buffer size of HouseholdMembership agents in state hhmembershipdefault will be exceeded by h_add_agent_HouseholdMembership_hhmembershipdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_HouseholdMembership_hostToDevice(d_HouseholdMemberships_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_HouseholdMembership_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_HouseholdMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_HouseholdMemberships_hhmembershipdefault, d_HouseholdMemberships_new, h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
+    h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
+    
+
+}
+void h_add_agents_HouseholdMembership_hhmembershipdefault(xmachine_memory_HouseholdMembership** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_HouseholdMembership_count + count > xmachine_memory_HouseholdMembership_MAX){
+			printf("Error: Buffer size of HouseholdMembership agents in state hhmembershipdefault will be exceeded by h_add_agents_HouseholdMembership_hhmembershipdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_HouseholdMembership_AoS_to_SoA(h_HouseholdMemberships_hhmembershipdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_HouseholdMembership_hostToDevice(d_HouseholdMemberships_new, h_HouseholdMemberships_hhmembershipdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_HouseholdMembership_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_HouseholdMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_HouseholdMemberships_hhmembershipdefault, d_HouseholdMemberships_new, h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
+        h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
         
 
 	}
@@ -3325,6 +3769,27 @@ int max_Person_default_transportdur_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_household_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->household),  thrust::device_pointer_cast(d_Persons_default->household) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_household_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->household),  thrust::device_pointer_cast(d_Persons_default->household) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_household_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->household);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_household_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->household);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -3472,6 +3937,27 @@ int max_Person_s2_transportdur_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_s2_household_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->household),  thrust::device_pointer_cast(d_Persons_s2->household) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_household_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->household),  thrust::device_pointer_cast(d_Persons_s2->household) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_household_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->household);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_household_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->household);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Household_hhdefault_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->id),  thrust::device_pointer_cast(d_Households_hhdefault->id) + h_xmachine_memory_Household_hhdefault_count);
@@ -3575,6 +4061,48 @@ unsigned int max_Household_hhdefault_adults_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->adults);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count);
+}
+
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, count_value);
+}
+unsigned int min_HouseholdMembership_hhmembershipdefault_household_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_HouseholdMembership_hhmembershipdefault_household_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_person_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count);
+}
+
+unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, count_value);
+}
+unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_HouseholdMembership_hhmembershipdefault_person_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
 unsigned int reduce_Church_chudefault_id_variable(){
@@ -3709,7 +4237,7 @@ void Person_update(cudaStream_t &stream){
 	
 	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
 	
-	if (h_xmachine_memory_Person_default_count == 0)
+	if (h_xmachine_memory_Person_s2_count == 0)
 	{
 		return;
 	}
@@ -3717,22 +4245,22 @@ void Person_update(cudaStream_t &stream){
 	
 	//SET SM size to 0 and save state list size for occupancy calculations
 	sm_size = SM_START;
-	state_list_size = h_xmachine_memory_Person_default_count;
+	state_list_size = h_xmachine_memory_Person_s2_count;
 
 	
 
 	//******************************** AGENT FUNCTION CONDITION *********************
 	//THERE IS NOT A FUNCTION CONDITION
 	//currentState maps to working list
-	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
-	d_Persons = d_Persons_default;
-	d_Persons_default = Persons_default_temp;
+	xmachine_memory_Person_list* Persons_s2_temp = d_Persons;
+	d_Persons = d_Persons_s2;
+	d_Persons_s2 = Persons_s2_temp;
 	//set working count to current state count
-	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_s2_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
 	//set current state count to 0
-	h_xmachine_memory_Person_default_count = 0;
-	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	h_xmachine_memory_Person_s2_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
 	
  
 
@@ -3799,20 +4327,129 @@ void Person_update(cudaStream_t &stream){
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
     
 	//check the working agents wont exceed the buffer size in the new state list
-	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
-		printf("Error: Buffer size of update agents in state default will be exceeded moving working agents to next state in function update\n");
+	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of update agents in state s2 will be exceeded moving working agents to next state in function update\n");
       exit(EXIT_FAILURE);
       }
       
   //append agents to next state list
   cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Person_Agents, no_sm, state_list_size);
   gridSize = (state_list_size + blockSize - 1) / blockSize;
-  append_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_default, d_Persons, h_xmachine_memory_Person_default_count, h_xmachine_memory_Person_count);
+  append_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_s2, d_Persons, h_xmachine_memory_Person_s2_count, h_xmachine_memory_Person_count);
   gpuErrchkLaunch();
         
 	//update new state agent size
-	h_xmachine_memory_Person_default_count += h_xmachine_memory_Person_count;
+	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_init_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_household_membership));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_init
+ * Agent function prototype for init function of Person agent
+ */
+void Person_init(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_default_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_default_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
+	d_Persons = d_Persons_default;
+	d_Persons_default = Persons_default_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_default_count = 0;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_init, Person_init_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_init_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (init)
+	//Reallocate   : false
+	//Input        : household_membership
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_init<<<g, b, sm_size, stream>>>(d_Persons, d_household_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of init agents in state s2 will be exceeded moving working agents to next state in function init\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Person_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_s2, d_Persons, h_xmachine_memory_Person_s2_count, h_xmachine_memory_Person_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
 	
 	
 }
@@ -3912,6 +4549,159 @@ void Household_hhupdate(cudaStream_t &stream){
 	//update new state agent size
 	h_xmachine_memory_Household_hhdefault_count += h_xmachine_memory_Household_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int HouseholdMembership_hhinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** HouseholdMembership_hhinit
+ * Agent function prototype for hhinit function of HouseholdMembership agent
+ */
+void HouseholdMembership_hhinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_HouseholdMembership_list* HouseholdMemberships_hhmembershipdefault_temp = d_HouseholdMemberships;
+	d_HouseholdMemberships = d_HouseholdMemberships_hhmembershipdefault;
+	d_HouseholdMemberships_hhmembershipdefault = HouseholdMemberships_hhmembershipdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_HouseholdMembership_count = h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_HouseholdMembership_count, &h_xmachine_memory_HouseholdMembership_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_household_membership_count + h_xmachine_memory_HouseholdMembership_count > xmachine_message_household_membership_MAX){
+		printf("Error: Buffer size of household_membership message will be exceeded in function hhinit\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_hhinit, HouseholdMembership_hhinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = HouseholdMembership_hhinit_sm_size(blockSize);
+	
+	
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_household_membership_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_household_membership_output_type, &h_message_household_membership_output_type, sizeof(int)));
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_HouseholdMembership_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_HouseholdMembership_scan_input<<<gridSize, blockSize, 0, stream>>>(d_HouseholdMemberships);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (hhinit)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : household_membership
+	//Agent Output : 
+	GPUFLAME_hhinit<<<g, b, sm_size, stream>>>(d_HouseholdMemberships, d_household_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_household_membership_count += h_xmachine_memory_HouseholdMembership_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_household_membership_count, &h_message_household_membership_count, sizeof(int)));	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_HouseholdMembership, 
+        temp_scan_storage_bytes_HouseholdMembership, 
+        d_HouseholdMemberships->_scan_input,
+        d_HouseholdMemberships->_position,
+        h_xmachine_memory_HouseholdMembership_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_HouseholdMembership_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_HouseholdMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_HouseholdMemberships_swap, d_HouseholdMemberships, 0, h_xmachine_memory_HouseholdMembership_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_HouseholdMembership_list* hhinit_HouseholdMemberships_temp = d_HouseholdMemberships;
+	d_HouseholdMemberships = d_HouseholdMemberships_swap;
+	d_HouseholdMemberships_swap = hhinit_HouseholdMemberships_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_HouseholdMemberships_swap->_position[h_xmachine_memory_HouseholdMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_HouseholdMemberships_swap->_scan_input[h_xmachine_memory_HouseholdMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_HouseholdMembership_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_HouseholdMembership_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_HouseholdMembership_count, &h_xmachine_memory_HouseholdMembership_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count+h_xmachine_memory_HouseholdMembership_count > xmachine_memory_HouseholdMembership_MAX){
+		printf("Error: Buffer size of hhinit agents in state hhmembershipdefault will be exceeded moving working agents to next state in function hhinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_HouseholdMembership_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_HouseholdMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_HouseholdMemberships_hhmembershipdefault, d_HouseholdMemberships, h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_xmachine_memory_HouseholdMembership_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count += h_xmachine_memory_HouseholdMembership_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, sizeof(int)));	
 	
 	
 }
@@ -4129,6 +4919,11 @@ extern void reset_Person_s2_count()
 extern void reset_Household_hhdefault_count()
 {
     h_xmachine_memory_Household_hhdefault_count = 0;
+}
+ 
+extern void reset_HouseholdMembership_hhmembershipdefault_count()
+{
+    h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count = 0;
 }
  
 extern void reset_Church_chudefault_count()
