@@ -89,7 +89,6 @@ __host__ struct Time timeofday(unsigned int step) {
 // all agents and their corresponding variables.
 __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   printf("Set TIME_STEP = %f\n", *get_TIME_STEP());
-  printf("Set SCALE_FACTOR = %f\n", *get_SCALE_FACTOR());
   printf("Set MAX_AGE = %u\n", *get_MAX_AGE());
   printf("Set STARTING_POPULATION = %u\n", (int)*get_STARTING_POPULATION());
 

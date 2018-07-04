@@ -171,10 +171,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_TIME_STEP()));
     fputs(data, file);
     fputs("</TIME_STEP>\n", file);
-    fputs("\t<SCALE_FACTOR>", file);
-    sprintf(data, "%f", (*get_SCALE_FACTOR()));
-    fputs(data, file);
-    fputs("</SCALE_FACTOR>\n", file);
     fputs("\t<MAX_AGE>", file);
     sprintf(data, "%u", (*get_MAX_AGE()));
     fputs(data, file);
@@ -460,8 +456,6 @@ PROFILE_SCOPED_RANGE("initEnvVars");
 
     float t_TIME_STEP = (float)1.0;
     set_TIME_STEP(&t_TIME_STEP);
-    float t_SCALE_FACTOR = (float)0.01;
-    set_SCALE_FACTOR(&t_SCALE_FACTOR);
     unsigned int t_MAX_AGE = (unsigned int)100;
     set_MAX_AGE(&t_MAX_AGE);
     float t_STARTING_POPULATION = (float)30000.0;
@@ -555,8 +549,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_env;
     int in_env_TIME_STEP;
     
-    int in_env_SCALE_FACTOR;
-    
     int in_env_MAX_AGE;
     
     int in_env_STARTING_POPULATION;
@@ -634,7 +626,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 
     /* Variables for environment variables */
     float env_TIME_STEP;
-    float env_SCALE_FACTOR;
     unsigned int env_MAX_AGE;
     float env_STARTING_POPULATION;
     float env_CHURCH_BETA0;
@@ -696,7 +687,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Transport_id = 0;
 	in_Transport_duration = 0;
     in_env_TIME_STEP = 0;
-    in_env_SCALE_FACTOR = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
     in_env_CHURCH_BETA0 = 0;
@@ -796,7 +786,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
-    env_SCALE_FACTOR = 0;
     env_MAX_AGE = 0;
     env_STARTING_POPULATION = 0;
     env_CHURCH_BETA0 = 0;
@@ -1016,8 +1005,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
             if(strcmp(buffer, "/TIME_STEP") == 0) in_env_TIME_STEP = 0;
-			if(strcmp(buffer, "SCALE_FACTOR") == 0) in_env_SCALE_FACTOR = 1;
-            if(strcmp(buffer, "/SCALE_FACTOR") == 0) in_env_SCALE_FACTOR = 0;
 			if(strcmp(buffer, "MAX_AGE") == 0) in_env_MAX_AGE = 1;
             if(strcmp(buffer, "/MAX_AGE") == 0) in_env_MAX_AGE = 0;
 			if(strcmp(buffer, "STARTING_POPULATION") == 0) in_env_STARTING_POPULATION = 1;
@@ -1149,13 +1136,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_TIME_STEP = (float) fgpu_atof(buffer);
                     
                     set_TIME_STEP(&env_TIME_STEP);
-                  
-              }
-            if(in_env_SCALE_FACTOR){
-              
-                    env_SCALE_FACTOR = (float) fgpu_atof(buffer);
-                    
-                    set_SCALE_FACTOR(&env_SCALE_FACTOR);
                   
               }
             if(in_env_MAX_AGE){

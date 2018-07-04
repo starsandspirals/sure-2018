@@ -945,7 +945,6 @@ PROFILE_SCOPED_RANGE("singleIteration");
 
 //host constant declaration
 float h_env_TIME_STEP;
-float h_env_SCALE_FACTOR;
 unsigned int h_env_MAX_AGE;
 float h_env_STARTING_POPULATION;
 float h_env_CHURCH_BETA0;
@@ -981,19 +980,6 @@ void set_TIME_STEP(float* h_TIME_STEP){
 //constant getter
 const float* get_TIME_STEP(){
     return &h_env_TIME_STEP;
-}
-
-
-
-//constant setter
-void set_SCALE_FACTOR(float* h_SCALE_FACTOR){
-    gpuErrchk(cudaMemcpyToSymbol(SCALE_FACTOR, h_SCALE_FACTOR, sizeof(float)));
-    memcpy(&h_env_SCALE_FACTOR, h_SCALE_FACTOR,sizeof(float));
-}
-
-//constant getter
-const float* get_SCALE_FACTOR(){
-    return &h_env_SCALE_FACTOR;
 }
 
 

@@ -1834,8 +1834,6 @@ unsigned int max_Transport_trdefault_duration_variable();
 
 __constant__ float TIME_STEP;
 
-__constant__ float SCALE_FACTOR;
-
 __constant__ unsigned int MAX_AGE;
 
 __constant__ float STARTING_POPULATION;
@@ -1894,17 +1892,6 @@ extern const float* get_TIME_STEP();
 
 
 extern float h_env_TIME_STEP;
-
-/** set_SCALE_FACTOR
- * Sets the constant variable SCALE_FACTOR on the device which can then be used in the agent functions.
- * @param h_SCALE_FACTOR value to set the variable
- */
-extern void set_SCALE_FACTOR(float* h_SCALE_FACTOR);
-
-extern const float* get_SCALE_FACTOR();
-
-
-extern float h_env_SCALE_FACTOR;
 
 /** set_MAX_AGE
  * Sets the constant variable MAX_AGE on the device which can then be used in the agent functions.
