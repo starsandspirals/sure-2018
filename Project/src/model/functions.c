@@ -437,10 +437,19 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     count = 0;
 
     while (capacity < h_church->size && hhposition < hhtotal) {
+      xmachine_memory_ChurchMembership *h_chumembership =
+          h_allocate_agent_ChurchMembership();
+      h_chumembership->church_id = h_church->id;
+      h_chumembership->household_id = hhorder[hhposition];
+
       h_church->households[count] = hhorder[hhposition];
       count++;
       capacity += adult[hhposition];
       hhposition++;
+
+      h_add_agent_ChurchMembership_chumembershipdefault(h_chumembership);
+
+      h_free_agent_ChurchMembership(&h_chumembership);
     }
 
     // Generate the church agent and free it from memory on the host.
@@ -497,14 +506,15 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
       fprintf(stdout, "Outputting some Person data to %s\n",
               outputFilename.c_str());
 
-      fprintf(fp, "ID, gender, age, household\n");
+      fprintf(fp, "ID, gender, age, household, church\n");
 
       for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-        fprintf(fp, "%u, %u, %u, %u\n", get_Person_s2_variable_id(index),
+        fprintf(fp, "%u, %u, %u, %u, %u\n", get_Person_s2_variable_id(index),
                 get_Person_s2_variable_gender(index),
                 get_Person_s2_variable_age(index),
-                get_Person_s2_variable_household(index));
+                get_Person_s2_variable_household(index),
+                get_Person_s2_variable_church(index));
       }
 
       fflush(fp);
@@ -632,13 +642,36 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
   return 0;
 }
 
+__FLAME_GPU_FUNC__ int
+chuinit(xmachine_memory_ChurchMembership *chumembership,
+        xmachine_message_church_membership_list *church_membership_messages) {
+  add_church_membership_message(church_membership_messages,
+                                chumembership->church_id,
+                                chumembership->household_id);
+  return 1;
+}
+
 __FLAME_GPU_FUNC__ int hhinit(
     xmachine_memory_HouseholdMembership *hhmembership,
+    xmachine_message_church_membership_list *church_membership_messages,
     xmachine_message_household_membership_list *household_membership_messages) {
+
+  xmachine_message_church_membership *church_membership_message =
+      get_first_church_membership_message(church_membership_messages);
+  unsigned int householdid = hhmembership->household_id;
+  unsigned int churchid = 0;
+
+  while (church_membership_message) {
+    if (church_membership_message->household_id == householdid) {
+      churchid = church_membership_message->church_id;
+    }
+    church_membership_message = get_next_church_membership_message(
+        church_membership_message, church_membership_messages);
+  }
 
   add_household_membership_message(household_membership_messages,
                                    hhmembership->household_id,
-                                   hhmembership->person_id);
+                                   hhmembership->person_id, churchid);
   return 1;
 }
 
@@ -652,6 +685,7 @@ __FLAME_GPU_FUNC__ int init(
   while (household_membership_message) {
     if (household_membership_message->person_id == personid) {
       person->household = household_membership_message->household_id;
+      person->church = household_membership_message->church_id;
     }
     household_membership_message = get_next_household_membership_message(
         household_membership_message, household_membership_messages);

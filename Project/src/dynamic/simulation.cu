@@ -140,6 +140,19 @@ xmachine_memory_Church_list* h_Churchs_chudefault;      /**< Pointer to agent li
 xmachine_memory_Church_list* d_Churchs_chudefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Church_chudefault_count;   /**< Agent population size counter */ 
 
+/* ChurchMembership Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_ChurchMembership_list* d_ChurchMemberships;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_ChurchMembership_list* d_ChurchMemberships_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_ChurchMembership_list* d_ChurchMemberships_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_ChurchMembership_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_ChurchMembership_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_ChurchMembership_values;  /**< Agent sort identifiers value */
+
+/* ChurchMembership state variables */
+xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_ChurchMembership_chumembershipdefault_count;   /**< Agent population size counter */ 
+
 /* Transport Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
 xmachine_memory_Transport_list* d_Transports;      /**< Pointer to agent list (population) on the device*/
 xmachine_memory_Transport_list* d_Transports_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
@@ -165,6 +178,7 @@ unsigned int h_Persons_default_variable_transportuser_data_iteration;
 unsigned int h_Persons_default_variable_transportfreq_data_iteration;
 unsigned int h_Persons_default_variable_transportdur_data_iteration;
 unsigned int h_Persons_default_variable_household_data_iteration;
+unsigned int h_Persons_default_variable_church_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
 unsigned int h_Persons_s2_variable_gender_data_iteration;
@@ -173,6 +187,7 @@ unsigned int h_Persons_s2_variable_transportuser_data_iteration;
 unsigned int h_Persons_s2_variable_transportfreq_data_iteration;
 unsigned int h_Persons_s2_variable_transportdur_data_iteration;
 unsigned int h_Persons_s2_variable_household_data_iteration;
+unsigned int h_Persons_s2_variable_church_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_size_data_iteration;
 unsigned int h_Households_hhdefault_variable_people_data_iteration;
@@ -185,6 +200,8 @@ unsigned int h_Churchs_chudefault_variable_id_data_iteration;
 unsigned int h_Churchs_chudefault_variable_size_data_iteration;
 unsigned int h_Churchs_chudefault_variable_duration_data_iteration;
 unsigned int h_Churchs_chudefault_variable_households_data_iteration;
+unsigned int h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration;
+unsigned int h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration;
 unsigned int h_Transports_trdefault_variable_id_data_iteration;
 unsigned int h_Transports_trdefault_variable_duration_data_iteration;
 
@@ -224,6 +241,9 @@ size_t temp_scan_storage_bytes_HouseholdMembership;
 
 void * d_temp_scan_storage_Church;
 size_t temp_scan_storage_bytes_Church;
+
+void * d_temp_scan_storage_ChurchMembership;
+size_t temp_scan_storage_bytes_ChurchMembership;
 
 void * d_temp_scan_storage_Transport;
 size_t temp_scan_storage_bytes_Transport;
@@ -275,6 +295,11 @@ void HouseholdMembership_hhinit(cudaStream_t &stream);
  * Agent function prototype for chuupdate function of Church agent
  */
 void Church_chuupdate(cudaStream_t &stream);
+
+/** ChurchMembership_chuinit
+ * Agent function prototype for chuinit function of ChurchMembership agent
+ */
+void ChurchMembership_chuinit(cudaStream_t &stream);
 
 /** Transport_trupdate
  * Agent function prototype for trupdate function of Transport agent
@@ -381,6 +406,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_transportfreq_data_iteration = 0;
     h_Persons_default_variable_transportdur_data_iteration = 0;
     h_Persons_default_variable_household_data_iteration = 0;
+    h_Persons_default_variable_church_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
@@ -389,6 +415,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
     h_Persons_s2_variable_transportdur_data_iteration = 0;
     h_Persons_s2_variable_household_data_iteration = 0;
+    h_Persons_s2_variable_church_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
     h_Households_hhdefault_variable_people_data_iteration = 0;
@@ -401,6 +428,8 @@ void initialise(char * inputfile){
     h_Churchs_chudefault_variable_size_data_iteration = 0;
     h_Churchs_chudefault_variable_duration_data_iteration = 0;
     h_Churchs_chudefault_variable_households_data_iteration = 0;
+    h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = 0;
+    h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = 0;
     h_Transports_trdefault_variable_id_data_iteration = 0;
     h_Transports_trdefault_variable_duration_data_iteration = 0;
     
@@ -419,6 +448,8 @@ void initialise(char * inputfile){
 	h_HouseholdMemberships_hhmembershipdefault = (xmachine_memory_HouseholdMembership_list*)malloc(xmachine_HouseholdMembership_SoA_size);
 	int xmachine_Church_SoA_size = sizeof(xmachine_memory_Church_list);
 	h_Churchs_chudefault = (xmachine_memory_Church_list*)malloc(xmachine_Church_SoA_size);
+	int xmachine_ChurchMembership_SoA_size = sizeof(xmachine_memory_ChurchMembership_list);
+	h_ChurchMemberships_chumembershipdefault = (xmachine_memory_ChurchMembership_list*)malloc(xmachine_ChurchMembership_SoA_size);
 	int xmachine_Transport_SoA_size = sizeof(xmachine_memory_Transport_list);
 	h_Transports_trdefault = (xmachine_memory_Transport_list*)malloc(xmachine_Transport_SoA_size);
 
@@ -433,7 +464,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -485,6 +516,17 @@ void initialise(char * inputfile){
 	/* chudefault memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Churchs_chudefault, xmachine_Church_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Churchs_chudefault, h_Churchs_chudefault, xmachine_Church_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* ChurchMembership Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_ChurchMemberships, xmachine_ChurchMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_ChurchMemberships_swap, xmachine_ChurchMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_ChurchMemberships_new, xmachine_ChurchMembership_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_ChurchMembership_keys, xmachine_memory_ChurchMembership_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_ChurchMembership_values, xmachine_memory_ChurchMembership_MAX* sizeof(uint)));
+	/* chumembershipdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_ChurchMemberships_chumembershipdefault, xmachine_ChurchMembership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_ChurchMemberships_chumembershipdefault, h_ChurchMemberships_chumembershipdefault, xmachine_ChurchMembership_SoA_size, cudaMemcpyHostToDevice));
     
 	/* Transport Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Transports, xmachine_Transport_SoA_size));
@@ -554,6 +596,17 @@ void initialise(char * inputfile){
         xmachine_memory_Church_MAX
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Church, temp_scan_storage_bytes_Church));
+    
+    d_temp_scan_storage_ChurchMembership = nullptr;
+    temp_scan_storage_bytes_ChurchMembership = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_ChurchMembership, 
+        temp_scan_storage_bytes_ChurchMembership, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_ChurchMembership_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_ChurchMembership, temp_scan_storage_bytes_ChurchMembership));
     
     d_temp_scan_storage_Transport = nullptr;
     temp_scan_storage_bytes_Transport = 0;
@@ -655,6 +708,8 @@ void initialise(char * inputfile){
 		printf("Init agent_HouseholdMembership_hhmembershipdefault_count: %u\n",get_agent_HouseholdMembership_hhmembershipdefault_count());
 	
 		printf("Init agent_Church_chudefault_count: %u\n",get_agent_Church_chudefault_count());
+	
+		printf("Init agent_ChurchMembership_chumembershipdefault_count: %u\n",get_agent_ChurchMembership_chumembershipdefault_count());
 	
 		printf("Init agent_Transport_trdefault_count: %u\n",get_agent_Transport_trdefault_count());
 	
@@ -802,6 +857,34 @@ void sort_Churchs_chudefault(void (*generate_key_value_pairs)(unsigned int* keys
 	d_Churchs_swap = d_Churchs_temp;	
 }
 
+void sort_ChurchMemberships_chumembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_ChurchMembership_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_ChurchMembership_chumembershipdefault_count); 
+	gridSize = (h_xmachine_memory_ChurchMembership_chumembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_ChurchMembership_keys, d_xmachine_memory_ChurchMembership_values, d_ChurchMemberships_chumembershipdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_ChurchMembership_keys),  thrust::device_pointer_cast(d_xmachine_memory_ChurchMembership_keys) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_ChurchMembership_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_ChurchMembership_agents, no_sm, h_xmachine_memory_ChurchMembership_chumembershipdefault_count); 
+	gridSize = (h_xmachine_memory_ChurchMembership_chumembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_ChurchMembership_agents<<<gridSize, blockSize>>>(d_xmachine_memory_ChurchMembership_values, d_ChurchMemberships_chumembershipdefault, d_ChurchMemberships_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_ChurchMembership_list* d_ChurchMemberships_temp = d_ChurchMemberships_chumembershipdefault;
+	d_ChurchMemberships_chumembershipdefault = d_ChurchMemberships_swap;
+	d_ChurchMemberships_swap = d_ChurchMemberships_temp;	
+}
+
 void sort_Transports_trdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Transport_list* agents))
 {
 	int blockSize;
@@ -889,6 +972,14 @@ void cleanup(){
 	free( h_Churchs_chudefault);
 	gpuErrchk(cudaFree(d_Churchs_chudefault));
 	
+	/* ChurchMembership Agent variables */
+	gpuErrchk(cudaFree(d_ChurchMemberships));
+	gpuErrchk(cudaFree(d_ChurchMemberships_swap));
+	gpuErrchk(cudaFree(d_ChurchMemberships_new));
+	
+	free( h_ChurchMemberships_chumembershipdefault);
+	gpuErrchk(cudaFree(d_ChurchMemberships_chumembershipdefault));
+	
 	/* Transport Agent variables */
 	gpuErrchk(cudaFree(d_Transports));
 	gpuErrchk(cudaFree(d_Transports_swap));
@@ -928,6 +1019,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_Church));
     d_temp_scan_storage_Church = nullptr;
     temp_scan_storage_bytes_Church = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_ChurchMembership));
+    d_temp_scan_storage_ChurchMembership = nullptr;
+    temp_scan_storage_bytes_ChurchMembership = 0;
     
     gpuErrchk(cudaFree(d_temp_scan_storage_Transport));
     d_temp_scan_storage_Transport = nullptr;
@@ -977,6 +1072,23 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("ChurchMembership_chuinit");
+	ChurchMembership_chuinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: ChurchMembership_chuinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 2*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("HouseholdMembership_hhinit");
 	HouseholdMembership_hhinit(stream1);
     PROFILE_POP_RANGE();
@@ -988,7 +1100,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 2*/
+	/* Layer 3*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1047,6 +1159,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_HouseholdMembership_hhmembershipdefault_count: %u\n",get_agent_HouseholdMembership_hhmembershipdefault_count());
 	
 		printf("agent_Church_chudefault_count: %u\n",get_agent_Church_chudefault_count());
+	
+		printf("agent_ChurchMembership_chumembershipdefault_count: %u\n",get_agent_ChurchMembership_chumembershipdefault_count());
 	
 		printf("agent_Transport_trdefault_count: %u\n",get_agent_Transport_trdefault_count());
 	
@@ -1513,6 +1627,26 @@ xmachine_memory_Church_list* get_host_Church_chudefault_agents(){
 }
 
     
+int get_agent_ChurchMembership_MAX_count(){
+    return xmachine_memory_ChurchMembership_MAX;
+}
+
+
+int get_agent_ChurchMembership_chumembershipdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_ChurchMembership_chumembershipdefault_count;
+	
+}
+
+xmachine_memory_ChurchMembership_list* get_device_ChurchMembership_chumembershipdefault_agents(){
+	return d_ChurchMemberships_chumembershipdefault;
+}
+
+xmachine_memory_ChurchMembership_list* get_host_ChurchMembership_chumembershipdefault_agents(){
+	return h_ChurchMemberships_chumembershipdefault;
+}
+
+    
 int get_agent_Transport_MAX_count(){
     return xmachine_memory_Transport_MAX;
 }
@@ -1848,6 +1982,45 @@ __host__ unsigned int get_Person_default_variable_household(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_church(unsigned int index)
+ * Gets the value of the church variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable church
+ */
+__host__ unsigned int get_Person_default_variable_church(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_church_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->church,
+                    d_Persons_default->church,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_church_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->church[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access church for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2154,6 +2327,45 @@ __host__ unsigned int get_Person_s2_variable_household(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access household for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_church(unsigned int index)
+ * Gets the value of the church variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable church
+ */
+__host__ unsigned int get_Person_s2_variable_church(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_church_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->church,
+                    d_Persons_s2->church,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_church_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->church[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access church for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2636,6 +2848,84 @@ __host__ int get_Church_chudefault_variable_households(unsigned int index, unsig
     }
 }
 
+/** unsigned int get_ChurchMembership_chumembershipdefault_variable_church_id(unsigned int index)
+ * Gets the value of the church_id variable of an ChurchMembership agent in the chumembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable church_id
+ */
+__host__ unsigned int get_ChurchMembership_chumembershipdefault_variable_church_id(unsigned int index){
+    unsigned int count = get_agent_ChurchMembership_chumembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_ChurchMemberships_chumembershipdefault->church_id,
+                    d_ChurchMemberships_chumembershipdefault->church_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_ChurchMemberships_chumembershipdefault->church_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access church_id for the %u th member of ChurchMembership_chumembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_ChurchMembership_chumembershipdefault_variable_household_id(unsigned int index)
+ * Gets the value of the household_id variable of an ChurchMembership agent in the chumembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household_id
+ */
+__host__ unsigned int get_ChurchMembership_chumembershipdefault_variable_household_id(unsigned int index){
+    unsigned int count = get_agent_ChurchMembership_chumembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_ChurchMemberships_chumembershipdefault->household_id,
+                    d_ChurchMemberships_chumembershipdefault->household_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_ChurchMemberships_chumembershipdefault->household_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access household_id for the %u th member of ChurchMembership_chumembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Transport_trdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Transport agent in the trdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2743,6 +3033,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->household, &h_agent->household, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->church, &h_agent->church, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -2774,6 +3066,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->household, h_src->household, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->church, h_src->church, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -2915,6 +3209,40 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
 }
 
 
+/* copy_single_xmachine_memory_ChurchMembership_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_ChurchMembership_hostToDevice(xmachine_memory_ChurchMembership_list * d_dst, xmachine_memory_ChurchMembership * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->church_id, &h_agent->church_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household_id, &h_agent->household_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_ChurchMembership_hostToDevice(xmachine_memory_ChurchMembership_list * d_dst, xmachine_memory_ChurchMembership_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->church_id, h_src->church_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household_id, h_src->household_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
 /* copy_single_xmachine_memory_Transport_hostToDevice
  * Private function to copy a host agent struct into a device SoA agent list.
  * @param d_dst destination agent state list
@@ -2996,6 +3324,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->transportdur[i] = src[i]->transportdur;
 			 
 			dst->household[i] = src[i]->household;
+			 
+			dst->church[i] = src[i]->church;
 			
 		}
 	}
@@ -3035,6 +3365,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_transportfreq_data_iteration = 0;
     h_Persons_default_variable_transportdur_data_iteration = 0;
     h_Persons_default_variable_household_data_iteration = 0;
+    h_Persons_default_variable_church_data_iteration = 0;
     
 
 }
@@ -3074,6 +3405,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_transportfreq_data_iteration = 0;
         h_Persons_default_variable_transportdur_data_iteration = 0;
         h_Persons_default_variable_household_data_iteration = 0;
+        h_Persons_default_variable_church_data_iteration = 0;
         
 
 	}
@@ -3113,6 +3445,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
     h_Persons_s2_variable_transportdur_data_iteration = 0;
     h_Persons_s2_variable_household_data_iteration = 0;
+    h_Persons_s2_variable_church_data_iteration = 0;
     
 
 }
@@ -3152,6 +3485,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_transportfreq_data_iteration = 0;
         h_Persons_s2_variable_transportdur_data_iteration = 0;
         h_Persons_s2_variable_household_data_iteration = 0;
+        h_Persons_s2_variable_church_data_iteration = 0;
         
 
 	}
@@ -3514,6 +3848,111 @@ void h_add_agents_Church_chudefault(xmachine_memory_Church** agents, unsigned in
 	}
 }
 
+xmachine_memory_ChurchMembership* h_allocate_agent_ChurchMembership(){
+	xmachine_memory_ChurchMembership* agent = (xmachine_memory_ChurchMembership*)malloc(sizeof(xmachine_memory_ChurchMembership));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_ChurchMembership));
+
+	return agent;
+}
+void h_free_agent_ChurchMembership(xmachine_memory_ChurchMembership** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_ChurchMembership** h_allocate_agent_ChurchMembership_array(unsigned int count){
+	xmachine_memory_ChurchMembership ** agents = (xmachine_memory_ChurchMembership**)malloc(count * sizeof(xmachine_memory_ChurchMembership*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_ChurchMembership();
+	}
+	return agents;
+}
+void h_free_agent_ChurchMembership_array(xmachine_memory_ChurchMembership*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_ChurchMembership(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_ChurchMembership_AoS_to_SoA(xmachine_memory_ChurchMembership_list * dst, xmachine_memory_ChurchMembership** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->church_id[i] = src[i]->church_id;
+			 
+			dst->household_id[i] = src[i]->household_id;
+			
+		}
+	}
+}
+
+
+void h_add_agent_ChurchMembership_chumembershipdefault(xmachine_memory_ChurchMembership* agent){
+	if (h_xmachine_memory_ChurchMembership_count + 1 > xmachine_memory_ChurchMembership_MAX){
+		printf("Error: Buffer size of ChurchMembership agents in state chumembershipdefault will be exceeded by h_add_agent_ChurchMembership_chumembershipdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_ChurchMembership_hostToDevice(d_ChurchMemberships_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_ChurchMembership_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_ChurchMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_ChurchMemberships_chumembershipdefault, d_ChurchMemberships_new, h_xmachine_memory_ChurchMembership_chumembershipdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_ChurchMembership_chumembershipdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_ChurchMembership_chumembershipdefault_count, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = 0;
+    h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = 0;
+    
+
+}
+void h_add_agents_ChurchMembership_chumembershipdefault(xmachine_memory_ChurchMembership** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_ChurchMembership_count + count > xmachine_memory_ChurchMembership_MAX){
+			printf("Error: Buffer size of ChurchMembership agents in state chumembershipdefault will be exceeded by h_add_agents_ChurchMembership_chumembershipdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_ChurchMembership_AoS_to_SoA(h_ChurchMemberships_chumembershipdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_ChurchMembership_hostToDevice(d_ChurchMemberships_new, h_ChurchMemberships_chumembershipdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_ChurchMembership_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_ChurchMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_ChurchMemberships_chumembershipdefault, d_ChurchMemberships_new, h_xmachine_memory_ChurchMembership_chumembershipdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_ChurchMembership_chumembershipdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_ChurchMembership_chumembershipdefault_count, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = 0;
+        h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = 0;
+        
+
+	}
+}
+
 xmachine_memory_Transport* h_allocate_agent_Transport(){
 	xmachine_memory_Transport* agent = (xmachine_memory_Transport*)malloc(sizeof(xmachine_memory_Transport));
 	// Memset the whole agent strcuture
@@ -3790,6 +4229,27 @@ unsigned int max_Person_default_household_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_church_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->church),  thrust::device_pointer_cast(d_Persons_default->church) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_church_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->church),  thrust::device_pointer_cast(d_Persons_default->church) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_church_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->church);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_church_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->church);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -3955,6 +4415,27 @@ unsigned int min_Person_s2_household_variable(){
 unsigned int max_Person_s2_household_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->household);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Person_s2_church_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->church),  thrust::device_pointer_cast(d_Persons_s2->church) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_church_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->church),  thrust::device_pointer_cast(d_Persons_s2->church) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_church_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->church);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_church_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->church);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -4162,6 +4643,48 @@ float max_Church_chudefault_duration_variable(){
     //max in default stream
     thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_ChurchMembership_chumembershipdefault_church_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id),  thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count);
+}
+
+unsigned int count_ChurchMembership_chumembershipdefault_church_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id),  thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count, count_value);
+}
+unsigned int min_ChurchMembership_chumembershipdefault_church_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_ChurchMembership_chumembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_ChurchMembership_chumembershipdefault_church_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_ChurchMembership_chumembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_ChurchMembership_chumembershipdefault_household_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id),  thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count);
+}
+
+unsigned int count_ChurchMembership_chumembershipdefault_household_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id),  thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count, count_value);
+}
+unsigned int min_ChurchMembership_chumembershipdefault_household_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_ChurchMembership_chumembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_ChurchMembership_chumembershipdefault_household_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->household_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_ChurchMembership_chumembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
 unsigned int reduce_Transport_trdefault_id_variable(){
@@ -4560,7 +5083,12 @@ void Household_hhupdate(cudaStream_t &stream){
 int HouseholdMembership_hhinit_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
-  
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_church_membership));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
 	return sm_size;
 }
 
@@ -4627,6 +5155,8 @@ void HouseholdMembership_hhinit(cudaStream_t &stream){
 	
 	
 	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
 	//Set the message_type for non partitioned and spatially partitioned message outputs
 	h_message_household_membership_output_type = single_message;
@@ -4641,12 +5171,14 @@ void HouseholdMembership_hhinit(cudaStream_t &stream){
 	
 	//MAIN XMACHINE FUNCTION CALL (hhinit)
 	//Reallocate   : true
-	//Input        : 
+	//Input        : church_membership
 	//Output       : household_membership
 	//Agent Output : 
-	GPUFLAME_hhinit<<<g, b, sm_size, stream>>>(d_HouseholdMemberships, d_household_memberships);
+	GPUFLAME_hhinit<<<g, b, sm_size, stream>>>(d_HouseholdMemberships, d_church_memberships, d_household_memberships);
 	gpuErrchkLaunch();
 	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
 	
@@ -4809,6 +5341,159 @@ void Church_chuupdate(cudaStream_t &stream){
 
 	
 /* Shared memory size calculator for agent function */
+int ChurchMembership_chuinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** ChurchMembership_chuinit
+ * Agent function prototype for chuinit function of ChurchMembership agent
+ */
+void ChurchMembership_chuinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_ChurchMembership_chumembershipdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_ChurchMembership_chumembershipdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_ChurchMembership_list* ChurchMemberships_chumembershipdefault_temp = d_ChurchMemberships;
+	d_ChurchMemberships = d_ChurchMemberships_chumembershipdefault;
+	d_ChurchMemberships_chumembershipdefault = ChurchMemberships_chumembershipdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_ChurchMembership_count = h_xmachine_memory_ChurchMembership_chumembershipdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_ChurchMembership_count, &h_xmachine_memory_ChurchMembership_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_ChurchMembership_chumembershipdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_ChurchMembership_chumembershipdefault_count, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_church_membership_count + h_xmachine_memory_ChurchMembership_count > xmachine_message_church_membership_MAX){
+		printf("Error: Buffer size of church_membership message will be exceeded in function chuinit\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_chuinit, ChurchMembership_chuinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = ChurchMembership_chuinit_sm_size(blockSize);
+	
+	
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_church_membership_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_church_membership_output_type, &h_message_church_membership_output_type, sizeof(int)));
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_ChurchMembership_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_ChurchMembership_scan_input<<<gridSize, blockSize, 0, stream>>>(d_ChurchMemberships);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (chuinit)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : church_membership
+	//Agent Output : 
+	GPUFLAME_chuinit<<<g, b, sm_size, stream>>>(d_ChurchMemberships, d_church_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_church_membership_count += h_xmachine_memory_ChurchMembership_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_church_membership_count, &h_message_church_membership_count, sizeof(int)));	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_ChurchMembership, 
+        temp_scan_storage_bytes_ChurchMembership, 
+        d_ChurchMemberships->_scan_input,
+        d_ChurchMemberships->_position,
+        h_xmachine_memory_ChurchMembership_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_ChurchMembership_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_ChurchMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_ChurchMemberships_swap, d_ChurchMemberships, 0, h_xmachine_memory_ChurchMembership_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_ChurchMembership_list* chuinit_ChurchMemberships_temp = d_ChurchMemberships;
+	d_ChurchMemberships = d_ChurchMemberships_swap;
+	d_ChurchMemberships_swap = chuinit_ChurchMemberships_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_ChurchMemberships_swap->_position[h_xmachine_memory_ChurchMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_ChurchMemberships_swap->_scan_input[h_xmachine_memory_ChurchMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_ChurchMembership_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_ChurchMembership_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_ChurchMembership_count, &h_xmachine_memory_ChurchMembership_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_ChurchMembership_chumembershipdefault_count+h_xmachine_memory_ChurchMembership_count > xmachine_memory_ChurchMembership_MAX){
+		printf("Error: Buffer size of chuinit agents in state chumembershipdefault will be exceeded moving working agents to next state in function chuinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_ChurchMembership_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_ChurchMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_ChurchMemberships_chumembershipdefault, d_ChurchMemberships, h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_xmachine_memory_ChurchMembership_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_ChurchMembership_chumembershipdefault_count += h_xmachine_memory_ChurchMembership_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_ChurchMembership_chumembershipdefault_count, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
 int Transport_trupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
@@ -4929,6 +5614,11 @@ extern void reset_HouseholdMembership_hhmembershipdefault_count()
 extern void reset_Church_chudefault_count()
 {
     h_xmachine_memory_Church_chudefault_count = 0;
+}
+ 
+extern void reset_ChurchMembership_chumembershipdefault_count()
+{
+    h_xmachine_memory_ChurchMembership_chumembershipdefault_count = 0;
 }
  
 extern void reset_Transport_trdefault_count()

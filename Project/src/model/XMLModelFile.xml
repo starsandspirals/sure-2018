@@ -206,6 +206,10 @@
           <type>unsigned int</type>
           <name>household</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>church</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
@@ -322,6 +326,11 @@
           <name>hhinit</name>
           <currentState>hhmembershipdefault</currentState>
           <nextState>hhmembershipdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>church_membership</messageName>
+            </gpu:input>
+          </inputs>
           <outputs>
             <gpu:output>
               <messageName>household_membership</messageName>
@@ -392,6 +401,48 @@
     </gpu:xagent>
 
     <gpu:xagent>
+      <name>ChurchMembership</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>church_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>household_id</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>chuinit</name>
+          <currentState>chumembershipdefault</currentState>
+          <nextState>chumembershipdefault</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>church_membership</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>chumembershipdefault</name>
+        </gpu:state>
+        <initialState>chumembershipdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
       <name>Transport</name>
 
       <memory>
@@ -444,6 +495,10 @@
         <type>unsigned int</type>
         <name>person_id</name>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>church_id</name>
+      </gpu:variable>
     </variables>
     <gpu:partitioningNone/>
     <gpu:bufferSize>32768</gpu:bufferSize>
@@ -469,6 +524,13 @@
   </messages>
 
   <layers>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>chuinit</name>
+      </gpu:layerFunction>
+    </layer>
+
     <layer>
       <gpu:layerFunction>
         <name>hhinit</name>

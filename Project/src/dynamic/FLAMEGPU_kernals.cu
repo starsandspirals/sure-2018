@@ -33,6 +33,8 @@ __constant__ int d_xmachine_memory_HouseholdMembership_count;
 
 __constant__ int d_xmachine_memory_Church_count;
 
+__constant__ int d_xmachine_memory_ChurchMembership_count;
+
 __constant__ int d_xmachine_memory_Transport_count;
 
 /* Agent state count constants */
@@ -46,6 +48,8 @@ __constant__ int d_xmachine_memory_Household_hhdefault_count;
 __constant__ int d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
 
 __constant__ int d_xmachine_memory_Church_chudefault_count;
+
+__constant__ int d_xmachine_memory_ChurchMembership_chumembershipdefault_count;
 
 __constant__ int d_xmachine_memory_Transport_trdefault_count;
 
@@ -197,7 +201,8 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
 		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
 		agents_dst->transportdur[output_index] = agents_src->transportdur[index];        
-		agents_dst->household[output_index] = agents_src->household[index];
+		agents_dst->household[output_index] = agents_src->household[index];        
+		agents_dst->church[output_index] = agents_src->church[index];
 	}
 }
 
@@ -225,6 +230,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
 	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
 	    agents_dst->household[output_index] = agents_src->household[index];
+	    agents_dst->church[output_index] = agents_src->church[index];
     }
 }
 
@@ -239,9 +245,10 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type int
  * @param household agent variable of type unsigned int
+ * @param church agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
 	
 	int index;
     
@@ -268,12 +275,13 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->transportfreq[index] = transportfreq;
 	agents->transportdur[index] = transportdur;
 	agents->household[index] = household;
+	agents->church[index] = church;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household){
-    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize, transportuser, transportfreq, transportdur, household);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
+    add_Person_agent<DISCRETE_2D>(agents, id, age, gender, householdsize, transportuser, transportfreq, transportdur, household, church);
 }
 
 /** reorder_Person_agents
@@ -297,6 +305,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
 	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
 	ordered_agents->household[index] = unordered_agents->household[old_pos];
+	ordered_agents->church[index] = unordered_agents->church[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -750,6 +759,122 @@ __FLAME_GPU_FUNC__ void set_Church_agent_array_value(T *array, uint index, T val
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created ChurchMembership agent functions */
+
+/** reset_ChurchMembership_scan_input
+ * ChurchMembership agent reset scan input function
+ * @param agents The xmachine_memory_ChurchMembership_list agent list
+ */
+__global__ void reset_ChurchMembership_scan_input(xmachine_memory_ChurchMembership_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_ChurchMembership_Agents
+ * ChurchMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_ChurchMembership_list agent list destination
+ * @param agents_src xmachine_memory_ChurchMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_ChurchMembership_Agents(xmachine_memory_ChurchMembership_list* agents_dst, xmachine_memory_ChurchMembership_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->church_id[output_index] = agents_src->church_id[index];        
+		agents_dst->household_id[output_index] = agents_src->household_id[index];
+	}
+}
+
+/** append_ChurchMembership_Agents
+ * ChurchMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_ChurchMembership_list agent list destination
+ * @param agents_src xmachine_memory_ChurchMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_ChurchMembership_Agents(xmachine_memory_ChurchMembership_list* agents_dst, xmachine_memory_ChurchMembership_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->church_id[output_index] = agents_src->church_id[index];
+	    agents_dst->household_id[output_index] = agents_src->household_id[index];
+    }
+}
+
+/** add_ChurchMembership_agent
+ * Continuous ChurchMembership agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_ChurchMembership_list to add agents to 
+ * @param church_id agent variable of type unsigned int
+ * @param household_id agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_ChurchMembership_agent(xmachine_memory_ChurchMembership_list* agents, unsigned int church_id, unsigned int household_id){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->church_id[index] = church_id;
+	agents->household_id[index] = household_id;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_ChurchMembership_agent(xmachine_memory_ChurchMembership_list* agents, unsigned int church_id, unsigned int household_id){
+    add_ChurchMembership_agent<DISCRETE_2D>(agents, church_id, household_id);
+}
+
+/** reorder_ChurchMembership_agents
+ * Continuous ChurchMembership agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_ChurchMembership_agents(unsigned int* values, xmachine_memory_ChurchMembership_list* unordered_agents, xmachine_memory_ChurchMembership_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->church_id[index] = unordered_agents->church_id[old_pos];
+	ordered_agents->household_id[index] = unordered_agents->household_id[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dyanamically created Transport agent functions */
 
 /** reset_Transport_scan_input
@@ -874,8 +999,9 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
  * @param messages xmachine_message_household_membership_list message list to add too
  * @param household_id agent variable of type unsigned int
  * @param person_id agent variable of type unsigned int
+ * @param church_id agent variable of type unsigned int
  */
-__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id){
+__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id, unsigned int church_id){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_household_membership_count;
@@ -897,6 +1023,7 @@ __device__ void add_household_membership_message(xmachine_message_household_memb
 	messages->_position[index] = _position;
 	messages->household_id[index] = household_id;
 	messages->person_id[index] = person_id;
+	messages->church_id[index] = church_id;
 
 }
 
@@ -918,7 +1045,8 @@ __global__ void scatter_optional_household_membership_messages(xmachine_message_
 		//AoS - xmachine_message_household_membership Un-Coalesced scattered memory write
 		messages->_position[output_index] = output_index;
 		messages->household_id[output_index] = messages_swap->household_id[index];
-		messages->person_id[output_index] = messages_swap->person_id[index];				
+		messages->person_id[output_index] = messages_swap->person_id[index];
+		messages->church_id[output_index] = messages_swap->church_id[index];				
 	}
 }
 
@@ -960,6 +1088,7 @@ __device__ xmachine_message_household_membership* get_first_household_membership
 	temp_message._position = messages->_position[index];
 	temp_message.household_id = messages->household_id[index];
 	temp_message.person_id = messages->person_id[index];
+	temp_message.church_id = messages->church_id[index];
 
 	//AoS to shared memory
 	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_membership));
@@ -1003,6 +1132,7 @@ __device__ xmachine_message_household_membership* get_next_household_membership_
 		temp_message._position = messages->_position[index];
 		temp_message.household_id = messages->household_id[index];
 		temp_message.person_id = messages->person_id[index];
+		temp_message.church_id = messages->church_id[index];
 
 		//AoS to shared memory
 		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_membership));
@@ -1200,6 +1330,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.household = agents->household[index];
+	agent.church = agents->church[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -1217,6 +1348,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
 }
 
 /**
@@ -1244,6 +1376,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.household = agents->household[index];
+	agent.church = agents->church[index];
 	} else {
 	
 	agent.id = 0;
@@ -1254,6 +1387,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.household = 0;
+	agent.church = 0;
 	}
 
 	//FLAME function call
@@ -1275,6 +1409,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
 	}
 }
 
@@ -1321,34 +1456,42 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 /**
  *
  */
-__global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents, xmachine_message_household_membership_list* household_membership_messages){
+__global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents, xmachine_message_church_membership_list* church_membership_messages, xmachine_message_household_membership_list* household_membership_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
-    //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_HouseholdMembership_count)
-        return;
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
 	//SoA to AoS - xmachine_memory_hhinit Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_HouseholdMembership agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_HouseholdMembership_count){
     
-    // Thread bounds already checked, but the agent function will still execute. load default values?
-	
 	agent.household_id = agents->household_id[index];
 	agent.person_id = agents->person_id[index];
+	} else {
+	
+	agent.household_id = 0;
+	agent.person_id = 0;
+	}
 
 	//FLAME function call
-	int dead = !hhinit(&agent, household_membership_messages	);
+	int dead = !hhinit(&agent, church_membership_messages, household_membership_messages	);
 	
 
-	//continuous agent: set reallocation flag
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_HouseholdMembership_count){
+    //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
 	//AoS to SoA - xmachine_memory_hhinit Coalesced memory write (ignore arrays)
 	agents->household_id[index] = agent.household_id;
 	agents->person_id[index] = agent.person_id;
+	}
 }
 
 /**
@@ -1385,6 +1528,39 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
 	agents->id[index] = agent.id;
 	agents->size[index] = agent.size;
 	agents->duration[index] = agent.duration;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_chuinit(xmachine_memory_ChurchMembership_list* agents, xmachine_message_church_membership_list* church_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_ChurchMembership_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_chuinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_ChurchMembership agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.church_id = agents->church_id[index];
+	agent.household_id = agents->household_id[index];
+
+	//FLAME function call
+	int dead = !chuinit(&agent, church_membership_messages	);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_chuinit Coalesced memory write (ignore arrays)
+	agents->church_id[index] = agent.church_id;
+	agents->household_id[index] = agent.household_id;
 }
 
 /**
