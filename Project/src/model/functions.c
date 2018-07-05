@@ -382,6 +382,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       h_household->adults = adultcount;
       adult[h_household->id] = adultcount;
 
+      h_household->step = 0;
       h_add_agent_Household_hhdefault(h_household);
 
       h_free_agent_Household(&h_household);
@@ -449,6 +450,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       capacity += adult[hhposition];
       hhposition++;
 
+      h_church->step = 0;
       h_add_agent_ChurchMembership_chumembershipdefault(h_chumembership);
 
       h_free_agent_ChurchMembership(&h_chumembership);
@@ -637,12 +639,17 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 }
 
 __FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) {
+  household->step++;
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) { return 0; }
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) {
+  church->step++;
+  return 0;
+}
 
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
+  transport->step++;
   return 0;
 }
 

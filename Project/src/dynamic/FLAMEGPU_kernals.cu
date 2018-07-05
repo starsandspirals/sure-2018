@@ -248,10 +248,10 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type int
  * @param household agent variable of type unsigned int
- * @param church agent variable of type int
+ * @param church agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, int church){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
 	
 	int index;
     
@@ -284,7 +284,7 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, int church){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
     add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, transportuser, transportfreq, transportdur, household, church);
 }
 
@@ -351,6 +351,7 @@ __global__ void scatter_Household_Agents(xmachine_memory_Household_list* agents_
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->step[output_index] = agents_src->step[index];        
 		agents_dst->size[output_index] = agents_src->size[index];
 	    for (int i=0; i<32; i++){
 	      agents_dst->people[(i*xmachine_memory_Household_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Household_MAX)+index];
@@ -378,6 +379,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
 	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->step[output_index] = agents_src->step[index];
 	    agents_dst->size[output_index] = agents_src->size[index];
 	    for (int i=0; i<32; i++){
 	      agents_dst->people[(i*xmachine_memory_Household_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Household_MAX)+index];
@@ -392,6 +394,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * Continuous Household agent add agent function writes agent data to agent swap
  * @param agents xmachine_memory_Household_list to add agents to 
  * @param id agent variable of type unsigned int
+ * @param step agent variable of type unsigned int
  * @param size agent variable of type unsigned int
  * @param people agent variable of type int
  * @param churchgoing agent variable of type unsigned int
@@ -399,7 +402,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * @param adults agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
 	
 	int index;
     
@@ -419,6 +422,7 @@ __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsi
 
 	//write data to new buffer
 	agents->id[index] = id;
+	agents->step[index] = step;
 	agents->size[index] = size;
 	agents->churchgoing[index] = churchgoing;
 	agents->churchfreq[index] = churchfreq;
@@ -427,8 +431,8 @@ __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsi
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
-    add_Household_agent<DISCRETE_2D>(agents, id, size, churchgoing, churchfreq, adults);
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults){
+    add_Household_agent<DISCRETE_2D>(agents, id, step, size, churchgoing, churchfreq, adults);
 }
 
 /** reorder_Household_agents
@@ -445,6 +449,7 @@ __global__ void reorder_Household_agents(unsigned int* values, xmachine_memory_H
 
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->step[index] = unordered_agents->step[old_pos];
 	ordered_agents->size[index] = unordered_agents->size[old_pos];
 	for (int i=0; i<32; i++){
 	  ordered_agents->people[(i*xmachine_memory_Household_MAX)+index] = unordered_agents->people[(i*xmachine_memory_Household_MAX)+old_pos];
@@ -644,6 +649,7 @@ __global__ void scatter_Church_Agents(xmachine_memory_Church_list* agents_dst, x
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->step[output_index] = agents_src->step[index];        
 		agents_dst->size[output_index] = agents_src->size[index];        
 		agents_dst->duration[output_index] = agents_src->duration[index];
 	    for (int i=0; i<128; i++){
@@ -669,6 +675,7 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
 	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->step[output_index] = agents_src->step[index];
 	    agents_dst->size[output_index] = agents_src->size[index];
 	    agents_dst->duration[output_index] = agents_src->duration[index];
 	    for (int i=0; i<128; i++){
@@ -681,12 +688,13 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
  * Continuous Church agent add agent function writes agent data to agent swap
  * @param agents xmachine_memory_Church_list to add agents to 
  * @param id agent variable of type unsigned int
+ * @param step agent variable of type unsigned int
  * @param size agent variable of type unsigned int
  * @param duration agent variable of type float
  * @param households agent variable of type int
  */
 template <int AGENT_TYPE>
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration){
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration){
 	
 	int index;
     
@@ -706,14 +714,15 @@ __device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned i
 
 	//write data to new buffer
 	agents->id[index] = id;
+	agents->step[index] = step;
 	agents->size[index] = size;
 	agents->duration[index] = duration;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration){
-    add_Church_agent<DISCRETE_2D>(agents, id, size, duration);
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration){
+    add_Church_agent<DISCRETE_2D>(agents, id, step, size, duration);
 }
 
 /** reorder_Church_agents
@@ -730,6 +739,7 @@ __global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Chur
 
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->step[index] = unordered_agents->step[old_pos];
 	ordered_agents->size[index] = unordered_agents->size[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
 	for (int i=0; i<128; i++){
@@ -922,6 +932,7 @@ __global__ void scatter_Transport_Agents(xmachine_memory_Transport_list* agents_
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->step[output_index] = agents_src->step[index];        
 		agents_dst->duration[output_index] = agents_src->duration[index];
 	}
 }
@@ -943,6 +954,7 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
 	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->step[output_index] = agents_src->step[index];
 	    agents_dst->duration[output_index] = agents_src->duration[index];
     }
 }
@@ -951,10 +963,11 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
  * Continuous Transport agent add agent function writes agent data to agent swap
  * @param agents xmachine_memory_Transport_list to add agents to 
  * @param id agent variable of type unsigned int
+ * @param step agent variable of type unsigned int
  * @param duration agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int duration){
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration){
 	
 	int index;
     
@@ -974,13 +987,14 @@ __device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsi
 
 	//write data to new buffer
 	agents->id[index] = id;
+	agents->step[index] = step;
 	agents->duration[index] = duration;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int duration){
-    add_Transport_agent<DISCRETE_2D>(agents, id, duration);
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration){
+    add_Transport_agent<DISCRETE_2D>(agents, id, step, duration);
 }
 
 /** reorder_Transport_agents
@@ -997,6 +1011,7 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
 
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->step[index] = unordered_agents->step[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
 }
 
@@ -1009,9 +1024,9 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
  * @param messages xmachine_message_household_membership_list message list to add too
  * @param household_id agent variable of type unsigned int
  * @param person_id agent variable of type unsigned int
- * @param church_id agent variable of type int
+ * @param church_id agent variable of type unsigned int
  */
-__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id, int church_id){
+__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id, unsigned int church_id){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_household_membership_count;
@@ -1447,6 +1462,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
     // Thread bounds already checked, but the agent function will still execute. load default values?
 	
 	agent.id = agents->id[index];
+	agent.step = agents->step[index];
 	agent.size = agents->size[index];
     agent.people = &(agents->people[index]);
 	agent.churchgoing = agents->churchgoing[index];
@@ -1462,6 +1478,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 
 	//AoS to SoA - xmachine_memory_hhupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
 	agents->size[index] = agent.size;
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
@@ -1531,6 +1548,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
     // Thread bounds already checked, but the agent function will still execute. load default values?
 	
 	agent.id = agents->id[index];
+	agent.step = agents->step[index];
 	agent.size = agents->size[index];
 	agent.duration = agents->duration[index];
     agent.households = &(agents->households[index]);
@@ -1544,6 +1562,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
 
 	//AoS to SoA - xmachine_memory_chuupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
 	agents->size[index] = agent.size;
 	agents->duration[index] = agent.duration;
 }
@@ -1600,6 +1619,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents){
     // Thread bounds already checked, but the agent function will still execute. load default values?
 	
 	agent.id = agents->id[index];
+	agent.step = agents->step[index];
 	agent.duration = agents->duration[index];
 
 	//FLAME function call
@@ -1611,6 +1631,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents){
 
 	//AoS to SoA - xmachine_memory_trupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
 	agents->duration[index] = agent.duration;
 }
 

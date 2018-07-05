@@ -146,7 +146,7 @@ struct __align__(16) xmachine_memory_Person
     int transportfreq;    /**< X-machine memory variable transportfreq of type int.*/
     int transportdur;    /**< X-machine memory variable transportdur of type int.*/
     unsigned int household;    /**< X-machine memory variable household of type unsigned int.*/
-    int church;    /**< X-machine memory variable church of type int.*/
+    unsigned int church;    /**< X-machine memory variable church of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household
@@ -156,6 +156,7 @@ struct __align__(16) xmachine_memory_Person
 struct __align__(16) xmachine_memory_Household
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
     unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
     int *people;    /**< X-machine memory variable people of type int.*/
     unsigned int churchgoing;    /**< X-machine memory variable churchgoing of type unsigned int.*/
@@ -181,6 +182,7 @@ struct __align__(16) xmachine_memory_HouseholdMembership
 struct __align__(16) xmachine_memory_Church
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
     unsigned int size;    /**< X-machine memory variable size of type unsigned int.*/
     float duration;    /**< X-machine memory variable duration of type float.*/
     int *households;    /**< X-machine memory variable households of type int.*/
@@ -203,6 +205,7 @@ struct __align__(16) xmachine_memory_ChurchMembership
 struct __align__(16) xmachine_memory_Transport
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
     unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
 };
 
@@ -221,7 +224,7 @@ struct __align__(16) xmachine_message_household_membership
       
     unsigned int household_id;        /**< Message variable household_id of type unsigned int.*/  
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
-    int church_id;        /**< Message variable church_id of type int.*/
+    unsigned int church_id;        /**< Message variable church_id of type unsigned int.*/
 };
 
 /** struct xmachine_message_church_membership
@@ -260,7 +263,7 @@ struct xmachine_memory_Person_list
     int transportfreq [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportfreq of type int.*/
     int transportdur [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportdur of type int.*/
     unsigned int household [xmachine_memory_Person_MAX];    /**< X-machine memory variable list household of type unsigned int.*/
-    int church [xmachine_memory_Person_MAX];    /**< X-machine memory variable list church of type int.*/
+    unsigned int church [xmachine_memory_Person_MAX];    /**< X-machine memory variable list church of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household_list
@@ -274,6 +277,7 @@ struct xmachine_memory_Household_list
     int _scan_input [xmachine_memory_Household_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int id [xmachine_memory_Household_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Household_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
     unsigned int size [xmachine_memory_Household_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
     int people [xmachine_memory_Household_MAX*32];    /**< X-machine memory variable list people of type int.*/
     unsigned int churchgoing [xmachine_memory_Household_MAX];    /**< X-machine memory variable list churchgoing of type unsigned int.*/
@@ -307,6 +311,7 @@ struct xmachine_memory_Church_list
     int _scan_input [xmachine_memory_Church_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int id [xmachine_memory_Church_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Church_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
     unsigned int size [xmachine_memory_Church_MAX];    /**< X-machine memory variable list size of type unsigned int.*/
     float duration [xmachine_memory_Church_MAX];    /**< X-machine memory variable list duration of type float.*/
     int households [xmachine_memory_Church_MAX*128];    /**< X-machine memory variable list households of type int.*/
@@ -337,6 +342,7 @@ struct xmachine_memory_Transport_list
     int _scan_input [xmachine_memory_Transport_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int id [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
     unsigned int duration [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
 };
 
@@ -356,7 +362,7 @@ struct xmachine_message_household_membership_list
     
     unsigned int household_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list household_id of type unsigned int.*/
     unsigned int person_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
-    int church_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list church_id of type int.*/
+    unsigned int church_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list church_id of type unsigned int.*/
     
 };
 
@@ -475,10 +481,10 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
  * @param agents	xmachine_memory_household_membership_list agent list
  * @param household_id	message variable of type unsigned int
  * @param person_id	message variable of type unsigned int
- * @param church_id	message variable of type int
+ * @param church_id	message variable of type unsigned int
  */
  
- __FLAME_GPU_FUNC__ void add_household_membership_message(xmachine_message_household_membership_list* household_membership_messages, unsigned int household_id, unsigned int person_id, int church_id);
+ __FLAME_GPU_FUNC__ void add_household_membership_message(xmachine_message_household_membership_list* household_membership_messages, unsigned int household_id, unsigned int person_id, unsigned int church_id);
  
 /** get_first_household_membership_message
  * Get first message function for non partitioned (brute force) messages
@@ -539,20 +545,21 @@ __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membersh
  * @param transportfreq	agent agent variable of type int
  * @param transportdur	agent agent variable of type int
  * @param household	agent agent variable of type unsigned int
- * @param church	agent agent variable of type int
+ * @param church	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, int church);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church);
 
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Household_list agent list
  * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
  * @param size	agent agent variable of type unsigned int
  * @param churchgoing	agent agent variable of type unsigned int
  * @param churchfreq	agent agent variable of type unsigned int
  * @param adults	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults);
+__FLAME_GPU_FUNC__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults);
 
 /** get_Household_agent_array_value
  *  Template function for accessing Household agent array memory variables.
@@ -588,10 +595,11 @@ __FLAME_GPU_FUNC__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdM
  * Adds a new continuous valued Church agent to the xmachine_memory_Church_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Church_list agent list
  * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
  * @param size	agent agent variable of type unsigned int
  * @param duration	agent agent variable of type float
  */
-__FLAME_GPU_FUNC__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int size, float duration);
+__FLAME_GPU_FUNC__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration);
 
 /** get_Church_agent_array_value
  *  Template function for accessing Church agent array memory variables.
@@ -626,9 +634,10 @@ __FLAME_GPU_FUNC__ void add_ChurchMembership_agent(xmachine_memory_ChurchMembers
  * Adds a new continuous valued Transport agent to the xmachine_memory_Transport_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Transport_list agent list
  * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
  * @param duration	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int duration);
+__FLAME_GPU_FUNC__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration);
 
 
   
@@ -1056,14 +1065,14 @@ __host__ int get_Person_default_variable_transportdur(unsigned int index);
  */
 __host__ unsigned int get_Person_default_variable_household(unsigned int index);
 
-/** int get_Person_default_variable_church(unsigned int index)
+/** unsigned int get_Person_default_variable_church(unsigned int index)
  * Gets the value of the church variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable church
  */
-__host__ int get_Person_default_variable_church(unsigned int index);
+__host__ unsigned int get_Person_default_variable_church(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
@@ -1146,14 +1155,14 @@ __host__ int get_Person_s2_variable_transportdur(unsigned int index);
  */
 __host__ unsigned int get_Person_s2_variable_household(unsigned int index);
 
-/** int get_Person_s2_variable_church(unsigned int index)
+/** unsigned int get_Person_s2_variable_church(unsigned int index)
  * Gets the value of the church variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable church
  */
-__host__ int get_Person_s2_variable_church(unsigned int index);
+__host__ unsigned int get_Person_s2_variable_church(unsigned int index);
 
 /** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
@@ -1163,6 +1172,15 @@ __host__ int get_Person_s2_variable_church(unsigned int index);
  * @return value of agent variable id
  */
 __host__ unsigned int get_Household_hhdefault_variable_id(unsigned int index);
+
+/** unsigned int get_Household_hhdefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Household_hhdefault_variable_step(unsigned int index);
 
 /** unsigned int get_Household_hhdefault_variable_size(unsigned int index)
  * Gets the value of the size variable of an Household agent in the hhdefault state on the host. 
@@ -1246,6 +1264,15 @@ __host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_churc
  */
 __host__ unsigned int get_Church_chudefault_variable_id(unsigned int index);
 
+/** unsigned int get_Church_chudefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Church_chudefault_variable_step(unsigned int index);
+
 /** unsigned int get_Church_chudefault_variable_size(unsigned int index)
  * Gets the value of the size variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1300,6 +1327,15 @@ __host__ unsigned int get_ChurchMembership_chumembershipdefault_variable_househo
  * @return value of agent variable id
  */
 __host__ unsigned int get_Transport_trdefault_variable_id(unsigned int index);
+
+/** unsigned int get_Transport_trdefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Transport agent in the trdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Transport_trdefault_variable_step(unsigned int index);
 
 /** unsigned int get_Transport_trdefault_variable_duration(unsigned int index)
  * Gets the value of the duration variable of an Transport agent in the trdefault state on the host. 
@@ -1822,31 +1858,31 @@ unsigned int min_Person_default_household_variable();
  */
 unsigned int max_Person_default_household_variable();
 
-/** int reduce_Person_default_church_variable();
+/** unsigned int reduce_Person_default_church_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-int reduce_Person_default_church_variable();
+unsigned int reduce_Person_default_church_variable();
 
 
 
-/** int count_Person_default_church_variable(int count_value){
+/** unsigned int count_Person_default_church_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-int count_Person_default_church_variable(int count_value);
+unsigned int count_Person_default_church_variable(int count_value);
 
-/** int min_Person_default_church_variable();
+/** unsigned int min_Person_default_church_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int min_Person_default_church_variable();
-/** int max_Person_default_church_variable();
+unsigned int min_Person_default_church_variable();
+/** unsigned int max_Person_default_church_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int max_Person_default_church_variable();
+unsigned int max_Person_default_church_variable();
 
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -2082,31 +2118,31 @@ unsigned int min_Person_s2_household_variable();
  */
 unsigned int max_Person_s2_household_variable();
 
-/** int reduce_Person_s2_church_variable();
+/** unsigned int reduce_Person_s2_church_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-int reduce_Person_s2_church_variable();
+unsigned int reduce_Person_s2_church_variable();
 
 
 
-/** int count_Person_s2_church_variable(int count_value){
+/** unsigned int count_Person_s2_church_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-int count_Person_s2_church_variable(int count_value);
+unsigned int count_Person_s2_church_variable(int count_value);
 
-/** int min_Person_s2_church_variable();
+/** unsigned int min_Person_s2_church_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int min_Person_s2_church_variable();
-/** int max_Person_s2_church_variable();
+unsigned int min_Person_s2_church_variable();
+/** unsigned int max_Person_s2_church_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int max_Person_s2_church_variable();
+unsigned int max_Person_s2_church_variable();
 
 /** unsigned int reduce_Household_hhdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -2133,6 +2169,32 @@ unsigned int min_Household_hhdefault_id_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Household_hhdefault_id_variable();
+
+/** unsigned int reduce_Household_hhdefault_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Household_hhdefault_step_variable();
+
+
+
+/** unsigned int count_Household_hhdefault_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Household_hhdefault_step_variable(int count_value);
+
+/** unsigned int min_Household_hhdefault_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Household_hhdefault_step_variable();
+/** unsigned int max_Household_hhdefault_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Household_hhdefault_step_variable();
 
 /** unsigned int reduce_Household_hhdefault_size_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -2342,6 +2404,32 @@ unsigned int min_Church_chudefault_id_variable();
  */
 unsigned int max_Church_chudefault_id_variable();
 
+/** unsigned int reduce_Church_chudefault_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Church_chudefault_step_variable();
+
+
+
+/** unsigned int count_Church_chudefault_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Church_chudefault_step_variable(int count_value);
+
+/** unsigned int min_Church_chudefault_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Church_chudefault_step_variable();
+/** unsigned int max_Church_chudefault_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Church_chudefault_step_variable();
+
 /** unsigned int reduce_Church_chudefault_size_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -2464,6 +2552,32 @@ unsigned int min_Transport_trdefault_id_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Transport_trdefault_id_variable();
+
+/** unsigned int reduce_Transport_trdefault_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Transport_trdefault_step_variable();
+
+
+
+/** unsigned int count_Transport_trdefault_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Transport_trdefault_step_variable(int count_value);
+
+/** unsigned int min_Transport_trdefault_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Transport_trdefault_step_variable();
+/** unsigned int max_Transport_trdefault_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Transport_trdefault_step_variable();
 
 /** unsigned int reduce_Transport_trdefault_duration_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

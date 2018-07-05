@@ -211,7 +211,7 @@
           <name>household</name>
         </gpu:variable>
         <gpu:variable>
-          <type>int</type>
+          <type>unsigned int</type>
           <name>church</name>
         </gpu:variable>
       </memory>
@@ -264,6 +264,10 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>step</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
@@ -372,6 +376,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>step</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>size</name>
         </gpu:variable>
         <gpu:variable>
@@ -460,6 +468,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>step</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>duration</name>
         </gpu:variable>
       </memory>
@@ -504,7 +516,7 @@
         <name>person_id</name>
       </gpu:variable>
       <gpu:variable>
-        <type>int</type>
+        <type>unsigned int</type>
         <name>church_id</name>
       </gpu:variable>
     </variables>
