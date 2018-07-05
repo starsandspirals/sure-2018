@@ -278,6 +278,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         ages[h_person->id] = age;
 
         // Generate the agent and free them from memory on the host.
+        h_person->step = 0;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -628,6 +629,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   // if (random < (agent->age * SCALE_FACTOR * TIME_STEP)) {
   //   return 1;
   // }
+
+  person->step++;
 
   return 0;
 }

@@ -291,6 +291,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</id>\n", file);
         
+		fputs("<step>", file);
+        sprintf(data, "%u", h_Persons_default->step[i]);
+		fputs(data, file);
+		fputs("</step>\n", file);
+        
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_default->age[i]);
 		fputs(data, file);
@@ -342,6 +347,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->id[i]);
 		fputs(data, file);
 		fputs("</id>\n", file);
+        
+		fputs("<step>", file);
+        sprintf(data, "%u", h_Persons_s2->step[i]);
+		fputs(data, file);
+		fputs("</step>\n", file);
         
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_s2->age[i]);
@@ -592,6 +602,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int reading, i;
 	int in_tag, in_itno, in_xagent, in_name;
     int in_Person_id;
+    int in_Person_step;
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
@@ -679,6 +690,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
+	unsigned int Person_step;
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
@@ -748,6 +760,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_xagent = 0;
 	in_name = 0;
 	in_Person_id = 0;
+	in_Person_step = 0;
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
@@ -802,6 +815,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
 	{	
 		h_Persons->id[k] = 0;
+		h_Persons->step[k] = 0;
 		h_Persons->age[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
@@ -865,6 +879,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 
 	/* Default variables for memory */
     Person_id = 0;
+    Person_step = 0;
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
@@ -982,6 +997,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					}
                     
 					h_Persons->id[*h_xmachine_memory_Person_count] = Person_id;
+					h_Persons->step[*h_xmachine_memory_Person_count] = Person_step;
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
@@ -1076,6 +1092,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 
 				/* Reset xagent variables */
                 Person_id = 0;
+                Person_step = 0;
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
@@ -1109,6 +1126,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			}
 			if(strcmp(buffer, "id") == 0) in_Person_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Person_id = 0;
+			if(strcmp(buffer, "step") == 0) in_Person_step = 1;
+			if(strcmp(buffer, "/step") == 0) in_Person_step = 0;
 			if(strcmp(buffer, "age") == 0) in_Person_age = 1;
 			if(strcmp(buffer, "/age") == 0) in_Person_age = 0;
 			if(strcmp(buffer, "gender") == 0) in_Person_gender = 1;
@@ -1229,6 +1248,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			{
 				if(in_Person_id){
                     Person_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_step){
+                    Person_step = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Person_age){
                     Person_age = (unsigned int) fpgu_strtoul(buffer); 

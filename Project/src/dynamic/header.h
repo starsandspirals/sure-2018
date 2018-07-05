@@ -138,6 +138,7 @@ enum AGENT_TYPE{
 struct __align__(16) xmachine_memory_Person
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     unsigned int gender;    /**< X-machine memory variable gender of type unsigned int.*/
     unsigned int householdsize;    /**< X-machine memory variable householdsize of type unsigned int.*/
@@ -250,6 +251,7 @@ struct xmachine_memory_Person_list
     int _scan_input [xmachine_memory_Person_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int id [xmachine_memory_Person_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Person_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
     unsigned int age [xmachine_memory_Person_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     unsigned int gender [xmachine_memory_Person_MAX];    /**< X-machine memory variable list gender of type unsigned int.*/
     unsigned int householdsize [xmachine_memory_Person_MAX];    /**< X-machine memory variable list householdsize of type unsigned int.*/
@@ -527,6 +529,7 @@ __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membersh
  * Adds a new continuous valued Person agent to the xmachine_memory_Person_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Person_list agent list
  * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
  * @param age	agent agent variable of type unsigned int
  * @param gender	agent agent variable of type unsigned int
  * @param householdsize	agent agent variable of type unsigned int
@@ -536,7 +539,7 @@ __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membersh
  * @param household	agent agent variable of type unsigned int
  * @param church	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church);
 
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -978,6 +981,15 @@ void sort_Transports_trdefault(void (*generate_key_value_pairs)(unsigned int* ke
  */
 __host__ unsigned int get_Person_default_variable_id(unsigned int index);
 
+/** unsigned int get_Person_default_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Person_default_variable_step(unsigned int index);
+
 /** unsigned int get_Person_default_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1058,6 +1070,15 @@ __host__ unsigned int get_Person_default_variable_church(unsigned int index);
  * @return value of agent variable id
  */
 __host__ unsigned int get_Person_s2_variable_id(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Person_s2_variable_step(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the s2 state on the host. 
@@ -1581,6 +1602,32 @@ unsigned int min_Person_default_id_variable();
  */
 unsigned int max_Person_default_id_variable();
 
+/** unsigned int reduce_Person_default_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_step_variable();
+
+
+
+/** unsigned int count_Person_default_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_step_variable(int count_value);
+
+/** unsigned int min_Person_default_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_step_variable();
+/** unsigned int max_Person_default_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_step_variable();
+
 /** unsigned int reduce_Person_default_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -1814,6 +1861,32 @@ unsigned int min_Person_s2_id_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_id_variable();
+
+/** unsigned int reduce_Person_s2_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_step_variable();
+
+
+
+/** unsigned int count_Person_s2_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_step_variable(int count_value);
+
+/** unsigned int min_Person_s2_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_step_variable();
+/** unsigned int max_Person_s2_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_step_variable();
 
 /** unsigned int reduce_Person_s2_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
