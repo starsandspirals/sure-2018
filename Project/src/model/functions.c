@@ -633,23 +633,23 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   //   return 1;
   // }
 
-  person->step++;
+  person->step += TIME_STEP;
 
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) {
-  household->step++;
+  household->step += TIME_STEP;
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) {
-  church->step++;
+  church->step += TIME_STEP;
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
-  transport->step++;
+  transport->step += TIME_STEP;
   return 0;
 }
 
