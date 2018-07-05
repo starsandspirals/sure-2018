@@ -211,7 +211,7 @@
           <name>household</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>int</type>
           <name>church</name>
         </gpu:variable>
       </memory>
@@ -322,6 +322,10 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchgoing</name>
         </gpu:variable>
       </memory>
 
@@ -500,7 +504,7 @@
         <name>person_id</name>
       </gpu:variable>
       <gpu:variable>
-        <type>unsigned int</type>
+        <type>int</type>
         <name>church_id</name>
       </gpu:variable>
     </variables>

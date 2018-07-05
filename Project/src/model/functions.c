@@ -322,6 +322,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       h_household->id = getNextHouseholdID();
       h_household->size = i;
 
+      // Decide if the household is a churchgoing household, based on given
+      // input probabilities.
+      float random = ((float)rand() / (RAND_MAX));
+
+      if (random < churchprob) {
+        h_household->churchgoing = 1;
+      } else {
+        h_household->churchgoing = 0;
+      }
+
       // Allocate individual people to the household until it is full, keeping
       // track of how many of them are adults.
       for (unsigned int k = 0; k < i; k++) {
@@ -329,6 +339,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
             h_allocate_agent_HouseholdMembership();
         h_hhmembership->household_id = h_household->id;
         h_hhmembership->person_id = order[count];
+        h_hhmembership->churchgoing = h_household->churchgoing;
         h_household->people[k] = order[count];
         count++;
 
@@ -339,16 +350,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_add_agent_HouseholdMembership_hhmembershipdefault(h_hhmembership);
 
         h_free_agent_HouseholdMembership(&h_hhmembership);
-      }
-
-      // Decide if the household is a churchgoing household, based on given
-      // input probabilities.
-      float random = ((float)rand() / (RAND_MAX));
-
-      if (random < churchprob) {
-        h_household->churchgoing = 1;
-      } else {
-        h_household->churchgoing = 0;
       }
 
       // If the household is churchgoing, decide how frequently they go based on
@@ -511,7 +512,7 @@ __FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
 
       for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-        fprintf(fp, "%u, %u, %u, %u, %u\n", get_Person_s2_variable_id(index),
+        fprintf(fp, "%u, %u, %u, %u, %i\n", get_Person_s2_variable_id(index),
                 get_Person_s2_variable_gender(index),
                 get_Person_s2_variable_age(index),
                 get_Person_s2_variable_household(index),
@@ -659,19 +660,19 @@ __FLAME_GPU_FUNC__ int hhinit(
     xmachine_message_church_membership_list *church_membership_messages,
     xmachine_message_household_membership_list *household_membership_messages) {
 
+  int churchid = -1;
   xmachine_message_church_membership *church_membership_message =
       get_first_church_membership_message(church_membership_messages);
   unsigned int householdid = hhmembership->household_id;
-  unsigned int churchid = 0;
 
   while (church_membership_message) {
-    if (church_membership_message->household_id == householdid) {
-      churchid = church_membership_message->church_id;
+    if (church_membership_message->household_id == householdid &&
+        hhmembership->churchgoing) {
+      churchid = (int)church_membership_message->church_id;
     }
     church_membership_message = get_next_church_membership_message(
         church_membership_message, church_membership_messages);
   }
-
   add_household_membership_message(household_membership_messages,
                                    hhmembership->household_id,
                                    hhmembership->person_id, churchid);
