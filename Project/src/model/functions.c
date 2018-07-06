@@ -670,7 +670,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       locationid = person->household;
     }
   } else {
-    if (person->location == 1 && (float)(person->step - person->startstep) >= person->churchdur) {
+    if (person->location == 1 && (float)(person->step - person->startstep) >= person->churchdur * 12) {
        person->busy = 0;
        person->location = 0;
        locationid = person->household;
