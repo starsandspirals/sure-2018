@@ -675,9 +675,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
-    } else if (person->location == 1) {
-      person->locationid = person->church;
-    }
+    } 
   }
 
   add_location_message(location_messages, person->id, person->location,
