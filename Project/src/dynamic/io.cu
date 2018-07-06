@@ -311,6 +311,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</householdsize>\n", file);
         
+		fputs("<churchfreq>", file);
+        sprintf(data, "%u", h_Persons_default->churchfreq[i]);
+		fputs(data, file);
+		fputs("</churchfreq>\n", file);
+        
+		fputs("<churchdur>", file);
+        sprintf(data, "%u", h_Persons_default->churchdur[i]);
+		fputs(data, file);
+		fputs("</churchdur>\n", file);
+        
 		fputs("<transportuser>", file);
         sprintf(data, "%u", h_Persons_default->transportuser[i]);
 		fputs(data, file);
@@ -335,6 +345,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_default->church[i]);
 		fputs(data, file);
 		fputs("</church>\n", file);
+        
+		fputs("<busy>", file);
+        sprintf(data, "%u", h_Persons_default->busy[i]);
+		fputs(data, file);
+		fputs("</busy>\n", file);
+        
+		fputs("<startstep>", file);
+        sprintf(data, "%u", h_Persons_default->startstep[i]);
+		fputs(data, file);
+		fputs("</startstep>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -368,6 +388,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</householdsize>\n", file);
         
+		fputs("<churchfreq>", file);
+        sprintf(data, "%u", h_Persons_s2->churchfreq[i]);
+		fputs(data, file);
+		fputs("</churchfreq>\n", file);
+        
+		fputs("<churchdur>", file);
+        sprintf(data, "%u", h_Persons_s2->churchdur[i]);
+		fputs(data, file);
+		fputs("</churchdur>\n", file);
+        
 		fputs("<transportuser>", file);
         sprintf(data, "%u", h_Persons_s2->transportuser[i]);
 		fputs(data, file);
@@ -392,6 +422,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->church[i]);
 		fputs(data, file);
 		fputs("</church>\n", file);
+        
+		fputs("<busy>", file);
+        sprintf(data, "%u", h_Persons_s2->busy[i]);
+		fputs(data, file);
+		fputs("</busy>\n", file);
+        
+		fputs("<startstep>", file);
+        sprintf(data, "%u", h_Persons_s2->startstep[i]);
+		fputs(data, file);
+		fputs("</startstep>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -626,11 +666,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
+    int in_Person_churchfreq;
+    int in_Person_churchdur;
     int in_Person_transportuser;
     int in_Person_transportfreq;
     int in_Person_transportdur;
     int in_Person_household;
     int in_Person_church;
+    int in_Person_busy;
+    int in_Person_startstep;
     int in_Household_id;
     int in_Household_step;
     int in_Household_size;
@@ -718,11 +762,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
+	unsigned int Person_churchfreq;
+	unsigned int Person_churchdur;
 	unsigned int Person_transportuser;
 	int Person_transportfreq;
 	int Person_transportdur;
 	unsigned int Person_household;
 	unsigned int Person_church;
+	unsigned int Person_busy;
+	unsigned int Person_startstep;
 	unsigned int Household_id;
 	unsigned int Household_step;
 	unsigned int Household_size;
@@ -792,11 +840,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
+	in_Person_churchfreq = 0;
+	in_Person_churchdur = 0;
 	in_Person_transportuser = 0;
 	in_Person_transportfreq = 0;
 	in_Person_transportdur = 0;
 	in_Person_household = 0;
 	in_Person_church = 0;
+	in_Person_busy = 0;
+	in_Person_startstep = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
 	in_Household_size = 0;
@@ -851,11 +903,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->age[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
+		h_Persons->churchfreq[k] = 0;
+		h_Persons->churchdur[k] = 0;
 		h_Persons->transportuser[k] = 0;
 		h_Persons->transportfreq[k] = 0;
 		h_Persons->transportdur[k] = 0;
 		h_Persons->household[k] = 0;
 		h_Persons->church[k] = 0;
+		h_Persons->busy[k] = 0;
+		h_Persons->startstep[k] = 0;
 	}
 	
 	//set all Household values to 0
@@ -919,11 +975,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
+    Person_churchfreq = 0;
+    Person_churchdur = 0;
     Person_transportuser = 0;
     Person_transportfreq = 0;
     Person_transportdur = 0;
     Person_household = 0;
     Person_church = 0;
+    Person_busy = 0;
+    Person_startstep = 0;
     Household_id = 0;
     Household_step = 0;
     Household_size = 0;
@@ -1041,11 +1101,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
+					h_Persons->churchfreq[*h_xmachine_memory_Person_count] = Person_churchfreq;
+					h_Persons->churchdur[*h_xmachine_memory_Person_count] = Person_churchdur;
 					h_Persons->transportuser[*h_xmachine_memory_Person_count] = Person_transportuser;
 					h_Persons->transportfreq[*h_xmachine_memory_Person_count] = Person_transportfreq;
 					h_Persons->transportdur[*h_xmachine_memory_Person_count] = Person_transportdur;
 					h_Persons->household[*h_xmachine_memory_Person_count] = Person_household;
 					h_Persons->church[*h_xmachine_memory_Person_count] = Person_church;
+					h_Persons->busy[*h_xmachine_memory_Person_count] = Person_busy;
+					h_Persons->startstep[*h_xmachine_memory_Person_count] = Person_startstep;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "Household") == 0)
@@ -1140,11 +1204,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
+                Person_churchfreq = 0;
+                Person_churchdur = 0;
                 Person_transportuser = 0;
                 Person_transportfreq = 0;
                 Person_transportdur = 0;
                 Person_household = 0;
                 Person_church = 0;
+                Person_busy = 0;
+                Person_startstep = 0;
                 Household_id = 0;
                 Household_step = 0;
                 Household_size = 0;
@@ -1182,6 +1250,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/gender") == 0) in_Person_gender = 0;
 			if(strcmp(buffer, "householdsize") == 0) in_Person_householdsize = 1;
 			if(strcmp(buffer, "/householdsize") == 0) in_Person_householdsize = 0;
+			if(strcmp(buffer, "churchfreq") == 0) in_Person_churchfreq = 1;
+			if(strcmp(buffer, "/churchfreq") == 0) in_Person_churchfreq = 0;
+			if(strcmp(buffer, "churchdur") == 0) in_Person_churchdur = 1;
+			if(strcmp(buffer, "/churchdur") == 0) in_Person_churchdur = 0;
 			if(strcmp(buffer, "transportuser") == 0) in_Person_transportuser = 1;
 			if(strcmp(buffer, "/transportuser") == 0) in_Person_transportuser = 0;
 			if(strcmp(buffer, "transportfreq") == 0) in_Person_transportfreq = 1;
@@ -1192,6 +1264,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/household") == 0) in_Person_household = 0;
 			if(strcmp(buffer, "church") == 0) in_Person_church = 1;
 			if(strcmp(buffer, "/church") == 0) in_Person_church = 0;
+			if(strcmp(buffer, "busy") == 0) in_Person_busy = 1;
+			if(strcmp(buffer, "/busy") == 0) in_Person_busy = 0;
+			if(strcmp(buffer, "startstep") == 0) in_Person_startstep = 1;
+			if(strcmp(buffer, "/startstep") == 0) in_Person_startstep = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Household_id = 0;
 			if(strcmp(buffer, "step") == 0) in_Household_step = 1;
@@ -1317,6 +1393,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				if(in_Person_householdsize){
                     Person_householdsize = (unsigned int) fpgu_strtoul(buffer); 
                 }
+				if(in_Person_churchfreq){
+                    Person_churchfreq = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_churchdur){
+                    Person_churchdur = (unsigned int) fpgu_strtoul(buffer); 
+                }
 				if(in_Person_transportuser){
                     Person_transportuser = (unsigned int) fpgu_strtoul(buffer); 
                 }
@@ -1331,6 +1413,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_church){
                     Person_church = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_busy){
+                    Person_busy = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_startstep){
+                    Person_startstep = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Household_id){
                     Household_id = (unsigned int) fpgu_strtoul(buffer); 

@@ -66,6 +66,11 @@ __constant__ int d_message_household_membership_output_type;   /**< message outp
 __constant__ int d_message_church_membership_count;         /**< message list counter*/
 __constant__ int d_message_church_membership_output_type;   /**< message output type (single or optional)*/
 
+/* location Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_location_count;         /**< message list counter*/
+__constant__ int d_message_location_output_type;   /**< message output type (single or optional)*/
+
 	
     
 //include each function file
@@ -73,6 +78,7 @@ __constant__ int d_message_church_membership_output_type;   /**< message output 
 #include "functions.c"
     
 /* Texture bindings */
+
 
 
     
@@ -199,11 +205,15 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->age[output_index] = agents_src->age[index];        
 		agents_dst->gender[output_index] = agents_src->gender[index];        
 		agents_dst->householdsize[output_index] = agents_src->householdsize[index];        
+		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];        
+		agents_dst->churchdur[output_index] = agents_src->churchdur[index];        
 		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
 		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
 		agents_dst->transportdur[output_index] = agents_src->transportdur[index];        
 		agents_dst->household[output_index] = agents_src->household[index];        
-		agents_dst->church[output_index] = agents_src->church[index];
+		agents_dst->church[output_index] = agents_src->church[index];        
+		agents_dst->busy[output_index] = agents_src->busy[index];        
+		agents_dst->startstep[output_index] = agents_src->startstep[index];
 	}
 }
 
@@ -228,11 +238,15 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->age[output_index] = agents_src->age[index];
 	    agents_dst->gender[output_index] = agents_src->gender[index];
 	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
+	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
+	    agents_dst->churchdur[output_index] = agents_src->churchdur[index];
 	    agents_dst->transportuser[output_index] = agents_src->transportuser[index];
 	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
 	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
 	    agents_dst->household[output_index] = agents_src->household[index];
 	    agents_dst->church[output_index] = agents_src->church[index];
+	    agents_dst->busy[output_index] = agents_src->busy[index];
+	    agents_dst->startstep[output_index] = agents_src->startstep[index];
     }
 }
 
@@ -244,14 +258,18 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param age agent variable of type unsigned int
  * @param gender agent variable of type unsigned int
  * @param householdsize agent variable of type unsigned int
+ * @param churchfreq agent variable of type unsigned int
+ * @param churchdur agent variable of type unsigned int
  * @param transportuser agent variable of type unsigned int
  * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type int
  * @param household agent variable of type unsigned int
  * @param church agent variable of type unsigned int
+ * @param busy agent variable of type unsigned int
+ * @param startstep agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, unsigned int churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church, unsigned int busy, unsigned int startstep){
 	
 	int index;
     
@@ -275,17 +293,21 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->age[index] = age;
 	agents->gender[index] = gender;
 	agents->householdsize[index] = householdsize;
+	agents->churchfreq[index] = churchfreq;
+	agents->churchdur[index] = churchdur;
 	agents->transportuser[index] = transportuser;
 	agents->transportfreq[index] = transportfreq;
 	agents->transportdur[index] = transportdur;
 	agents->household[index] = household;
 	agents->church[index] = church;
+	agents->busy[index] = busy;
+	agents->startstep[index] = startstep;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, transportuser, transportfreq, transportdur, household, church);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, unsigned int churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church, unsigned int busy, unsigned int startstep){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, household, church, busy, startstep);
 }
 
 /** reorder_Person_agents
@@ -306,11 +328,15 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
 	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
 	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
+	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
+	ordered_agents->churchdur[index] = unordered_agents->churchdur[old_pos];
 	ordered_agents->transportuser[index] = unordered_agents->transportuser[old_pos];
 	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
 	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
 	ordered_agents->household[index] = unordered_agents->household[old_pos];
 	ordered_agents->church[index] = unordered_agents->church[old_pos];
+	ordered_agents->busy[index] = unordered_agents->busy[old_pos];
+	ordered_agents->startstep[index] = unordered_agents->startstep[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1322,6 +1348,177 @@ __device__ xmachine_message_church_membership* get_next_church_membership_messag
 	return ((xmachine_message_church_membership*)&message_share[message_index]);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created location message functions */
+
+
+/** add_location_message
+ * Add non partitioned or spatially partitioned location message
+ * @param messages xmachine_message_location_list message list to add too
+ * @param person_id agent variable of type unsigned int
+ * @param location_type agent variable of type unsigned int
+ * @param location_id agent variable of type unsigned int
+ * @param day agent variable of type unsigned int
+ * @param hour agent variable of type unsigned int
+ * @param minute agent variable of type unsigned int
+ */
+__device__ void add_location_message(xmachine_message_location_list* messages, unsigned int person_id, unsigned int location_type, unsigned int location_id, unsigned int day, unsigned int hour, unsigned int minute){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_location_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_location_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_location_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_location Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->person_id[index] = person_id;
+	messages->location_type[index] = location_type;
+	messages->location_id[index] = location_id;
+	messages->day[index] = day;
+	messages->hour[index] = hour;
+	messages->minute[index] = minute;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned location message (for optional messages)
+ * @param messages scatter_optional_location_messages Sparse xmachine_message_location_list message list
+ * @param message_swap temp xmachine_message_location_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_location_messages(xmachine_message_location_list* messages, xmachine_message_location_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_location_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->person_id[output_index] = messages_swap->person_id[index];
+		messages->location_type[output_index] = messages_swap->location_type[index];
+		messages->location_id[output_index] = messages_swap->location_id[index];
+		messages->day[output_index] = messages_swap->day[index];
+		messages->hour[output_index] = messages_swap->hour[index];
+		messages->minute[output_index] = messages_swap->minute[index];				
+	}
+}
+
+/** reset_location_swaps
+ * Reset non partitioned or spatially partitioned location message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_location_swaps(xmachine_message_location_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_location* get_first_location_message(xmachine_message_location_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_location_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_location Coalesced memory read
+	xmachine_message_location temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.person_id = messages->person_id[index];
+	temp_message.location_type = messages->location_type[index];
+	temp_message.location_id = messages->location_id[index];
+	temp_message.day = messages->day[index];
+	temp_message.hour = messages->hour[index];
+	temp_message.minute = messages->minute[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_location));
+	xmachine_message_location* sm_message = ((xmachine_message_location*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_location*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_location* get_next_location_message(xmachine_message_location* message, xmachine_message_location_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_location_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_location_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_location Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_location temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.person_id = messages->person_id[index];
+		temp_message.location_type = messages->location_type[index];
+		temp_message.location_id = messages->location_id[index];
+		temp_message.day = messages->day[index];
+		temp_message.hour = messages->hour[index];
+		temp_message.minute = messages->minute[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_location));
+		xmachine_message_location* sm_message = ((xmachine_message_location*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_location));
+	return ((xmachine_message_location*)&message_share[message_index]);
+}
+
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1352,11 +1549,15 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
 	agent.transportuser = agents->transportuser[index];
 	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
 
 	//FLAME function call
 	int dead = !update(&agent, rand48);
@@ -1371,11 +1572,15 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
 	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
 	agents->transportuser[index] = agent.transportuser;
 	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
 }
 
 /**
@@ -1400,11 +1605,15 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
 	agent.transportuser = agents->transportuser[index];
 	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
 	} else {
 	
 	agent.id = 0;
@@ -1412,11 +1621,15 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.age = 0;
 	agent.gender = 0;
 	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
 	agent.transportuser = 0;
 	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.household = 0;
 	agent.church = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
 	}
 
 	//FLAME function call
@@ -1435,11 +1648,15 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
 	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
 	agents->transportuser[index] = agent.transportuser;
 	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
 	}
 }
 
