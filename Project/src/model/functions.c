@@ -8,6 +8,7 @@
 #include <string.h>
 #include <vector>
 
+
 // Allocate blocks of memory for each type of agent, and defining a constant
 // for the maximum number of each that should be generated.
 xmachine_memory_Person **h_agent_AoS;
@@ -69,7 +70,7 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
 
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
-__host__ unsigned int dayofweek(unsigned int step) { return (step % 288) % 7; }
+__device__ unsigned int dayofweek(unsigned int step) { return (step % 288) % 7; }
 
 // A struct to represent a time of day, and a function that returns a time of
 // day given an iteration number of increments of 5 minutes.
@@ -78,11 +79,16 @@ struct Time {
   unsigned int minute;
 };
 
-__host__ struct Time timeofday(unsigned int step) {
+__device__ struct Time timeofday(unsigned int step) {
   unsigned int hour = (step % 12) % 24;
   unsigned int minute = (step % 12) * 5;
   Time t = {hour, minute};
   return t;
+}
+
+__device__ float device_exp(float x) {
+  float y = exp(x);
+  return y;
 }
 
 // The function called at the beginning of the program on the CPU, to initialise
@@ -233,6 +239,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->age = age;
         h_person->gender = gender;
         h_person->householdsize = currentsize;
+        h_person->busy = 0;
 
         // Decide whether the person is a transport user based on given input
         // probabilities.
@@ -626,14 +633,53 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
 // The update functions for each agent type, which are involved in deciding
 // where a person is at a given time.
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
+                              xmachine_message_location_list *location_messages,
                               RNG_rand48 *rand48) {
 
-  // agent->age += TIME_STEP;
-  // float random = rnd<CONTINUOUS>(rand48);
+ // float random = rnd<CONTINUOUS>(rand48);
 
-  // if (random < (agent->age * SCALE_FACTOR * TIME_STEP)) {
-  //   return 1;
-  // }
+  unsigned int day = dayofweek(person->step);
+  struct Time t = timeofday(person->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  unsigned int locationid;
+
+  if (person->busy == 0) {
+    if (hour == 14 && minute == 0 && person->church != -1) {
+      if (person->churchfreq == 0) {
+        float random = rnd<CONTINUOUS>(rand48);
+        float prob = 1 - device_exp(-6/365);
+
+        if (random < prob) {
+          person->startstep = person->step;
+          person->busy = 1;
+          person->location = 1;
+          locationid = person->church;
+        } else {
+          person->location = 0;
+          locationid = person->household;
+        }
+      } else if (person->churchfreq > day) {
+        person->startstep = person->step;
+        person->busy = 1;
+        person->location = 1;
+        locationid = person->church;
+      }
+    } else {
+      person->location = 0;
+      locationid = person->household;
+    }
+  } else {
+    if (person->location == 1 && (float)(person->step - person->startstep) >= person->churchdur) {
+       person->busy = 0;
+       person->location = 0;
+       locationid = person->household;
+    } else if (person->location == 1) {
+      locationid = person->church;
+    }
+  }
+
+  add_location_message(location_messages, person->id, person->location, locationid, day, hour, minute);
 
   person->step += TIME_STEP;
 

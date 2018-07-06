@@ -213,7 +213,8 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->household[output_index] = agents_src->household[index];        
 		agents_dst->church[output_index] = agents_src->church[index];        
 		agents_dst->busy[output_index] = agents_src->busy[index];        
-		agents_dst->startstep[output_index] = agents_src->startstep[index];
+		agents_dst->startstep[output_index] = agents_src->startstep[index];        
+		agents_dst->location[output_index] = agents_src->location[index];
 	}
 }
 
@@ -247,6 +248,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->church[output_index] = agents_src->church[index];
 	    agents_dst->busy[output_index] = agents_src->busy[index];
 	    agents_dst->startstep[output_index] = agents_src->startstep[index];
+	    agents_dst->location[output_index] = agents_src->location[index];
     }
 }
 
@@ -264,12 +266,13 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type int
  * @param household agent variable of type unsigned int
- * @param church agent variable of type unsigned int
+ * @param church agent variable of type int
  * @param busy agent variable of type unsigned int
  * @param startstep agent variable of type unsigned int
+ * @param location agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church, unsigned int busy, unsigned int startstep){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, int church, unsigned int busy, unsigned int startstep, unsigned int location){
 	
 	int index;
     
@@ -302,12 +305,13 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->church[index] = church;
 	agents->busy[index] = busy;
 	agents->startstep[index] = startstep;
+	agents->location[index] = location;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, unsigned int church, unsigned int busy, unsigned int startstep){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, household, church, busy, startstep);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int household, int church, unsigned int busy, unsigned int startstep, unsigned int location){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, household, church, busy, startstep, location);
 }
 
 /** reorder_Person_agents
@@ -337,6 +341,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->church[index] = unordered_agents->church[old_pos];
 	ordered_agents->busy[index] = unordered_agents->busy[old_pos];
 	ordered_agents->startstep[index] = unordered_agents->startstep[old_pos];
+	ordered_agents->location[index] = unordered_agents->location[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1554,7 +1559,7 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 /**
  *
  */
-__global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48* rand48){
+__global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_message_location_list* location_messages, RNG_rand48* rand48){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -1583,9 +1588,10 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.church = agents->church[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
 
 	//FLAME function call
-	int dead = !update(&agent, rand48);
+	int dead = !update(&agent, location_messages	, rand48);
 	
 
 	//continuous agent: set reallocation flag
@@ -1606,6 +1612,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->church[index] = agent.church;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
 }
 
 /**
@@ -1639,6 +1646,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.church = agents->church[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
 	} else {
 	
 	agent.id = 0;
@@ -1655,6 +1663,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.church = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
+	agent.location = 0;
 	}
 
 	//FLAME function call
@@ -1682,6 +1691,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agents->church[index] = agent.church;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
 	}
 }
 

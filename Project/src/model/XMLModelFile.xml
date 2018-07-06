@@ -219,7 +219,7 @@
           <name>household</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>int</type>
           <name>church</name>
         </gpu:variable>
         <gpu:variable>
@@ -230,6 +230,10 @@
           <type>unsigned int</type>
           <name>startstep</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>location</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
@@ -238,6 +242,12 @@
           <name>update</name>
           <currentState>s2</currentState>
           <nextState>s2</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>location</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>true</gpu:reallocate>
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
