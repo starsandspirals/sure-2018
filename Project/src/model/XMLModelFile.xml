@@ -199,7 +199,7 @@
           <name>churchfreq</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>float</type>
           <name>churchdur</name>
         </gpu:variable>
         <gpu:variable>
@@ -347,6 +347,10 @@
           <type>unsigned int</type>
           <name>churchgoing</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchfreq</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -444,6 +448,10 @@
           <type>unsigned int</type>
           <name>household_id</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>churchdur</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -535,6 +543,14 @@
         <type>unsigned int</type>
         <name>church_id</name>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>churchfreq</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>churchdur</name>
+      </gpu:variable>
     </variables>
     <gpu:partitioningNone/>
     <gpu:bufferSize>32768</gpu:bufferSize>
@@ -551,6 +567,10 @@
       <gpu:variable>
         <type>unsigned int</type>
         <name>household_id</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>churchdur</name>
       </gpu:variable>
     </variables>
     <gpu:partitioningNone/>

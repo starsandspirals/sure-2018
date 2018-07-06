@@ -332,26 +332,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_household->churchgoing = 0;
       }
 
-      // Allocate individual people to the household until it is full, keeping
-      // track of how many of them are adults.
-      for (unsigned int k = 0; k < i; k++) {
-        xmachine_memory_HouseholdMembership *h_hhmembership =
-            h_allocate_agent_HouseholdMembership();
-        h_hhmembership->household_id = h_household->id;
-        h_hhmembership->person_id = order[count];
-        h_hhmembership->churchgoing = h_household->churchgoing;
-        h_household->people[k] = order[count];
-        count++;
-
-        if (ages[count] >= 15) {
-          adultcount++;
-        }
-
-        h_add_agent_HouseholdMembership_hhmembershipdefault(h_hhmembership);
-
-        h_free_agent_HouseholdMembership(&h_hhmembership);
-      }
-
       // If the household is churchgoing, decide how frequently they go based on
       // input probabilities; if not, set this variable to a dummy value.
       if (h_household->churchgoing) {
@@ -375,6 +355,27 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         }
       } else {
         h_household->churchfreq = 0;
+      }
+
+      // Allocate individual people to the household until it is full, keeping
+      // track of how many of them are adults.
+      for (unsigned int k = 0; k < i; k++) {
+        xmachine_memory_HouseholdMembership *h_hhmembership =
+            h_allocate_agent_HouseholdMembership();
+        h_hhmembership->household_id = h_household->id;
+        h_hhmembership->person_id = order[count];
+        h_hhmembership->churchgoing = h_household->churchgoing;
+        h_hhmembership->churchfreq = h_household->churchfreq;
+        h_household->people[k] = order[count];
+        count++;
+
+        if (ages[count] >= 15) {
+          adultcount++;
+        }
+
+        h_add_agent_HouseholdMembership_hhmembershipdefault(h_hhmembership);
+
+        h_free_agent_HouseholdMembership(&h_hhmembership);
       }
 
       // Set the variable for how many adults belong in the household, generate
@@ -444,6 +445,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           h_allocate_agent_ChurchMembership();
       h_chumembership->church_id = h_church->id;
       h_chumembership->household_id = hhorder[hhposition];
+      h_chumembership->churchdur = h_church->duration;
 
       h_church->households[count] = hhorder[hhposition];
       count++;
@@ -656,9 +658,9 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
 __FLAME_GPU_FUNC__ int
 chuinit(xmachine_memory_ChurchMembership *chumembership,
         xmachine_message_church_membership_list *church_membership_messages) {
-  add_church_membership_message(church_membership_messages,
-                                chumembership->church_id,
-                                chumembership->household_id);
+  add_church_membership_message(
+      church_membership_messages, chumembership->church_id,
+      chumembership->household_id, chumembership->churchdur);
   return 1;
 }
 
@@ -668,6 +670,7 @@ __FLAME_GPU_FUNC__ int hhinit(
     xmachine_message_household_membership_list *household_membership_messages) {
 
   int churchid = -1;
+  float churchdur = 0;
   xmachine_message_church_membership *church_membership_message =
       get_first_church_membership_message(church_membership_messages);
   unsigned int householdid = hhmembership->household_id;
@@ -676,13 +679,14 @@ __FLAME_GPU_FUNC__ int hhinit(
     if (church_membership_message->household_id == householdid &&
         hhmembership->churchgoing) {
       churchid = (int)church_membership_message->church_id;
+      churchdur = church_membership_message->churchdur;
     }
     church_membership_message = get_next_church_membership_message(
         church_membership_message, church_membership_messages);
   }
-  add_household_membership_message(household_membership_messages,
-                                   hhmembership->household_id,
-                                   hhmembership->person_id, churchid);
+  add_household_membership_message(
+      household_membership_messages, hhmembership->household_id,
+      hhmembership->person_id, churchid, hhmembership->churchfreq, churchdur);
   return 1;
 }
 
@@ -697,6 +701,8 @@ __FLAME_GPU_FUNC__ int init(
     if (household_membership_message->person_id == personid) {
       person->household = household_membership_message->household_id;
       person->church = household_membership_message->church_id;
+      person->churchfreq = household_membership_message->churchfreq;
+      person->churchdur = household_membership_message->churchdur;
     }
     household_membership_message = get_next_household_membership_message(
         household_membership_message, household_membership_messages);
