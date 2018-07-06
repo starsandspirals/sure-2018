@@ -8,7 +8,6 @@
 #include <string.h>
 #include <vector>
 
-
 // Allocate blocks of memory for each type of agent, and defining a constant
 // for the maximum number of each that should be generated.
 xmachine_memory_Person **h_agent_AoS;
@@ -70,7 +69,9 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
 
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
-__device__ unsigned int dayofweek(unsigned int step) { return (step % 288) % 7; }
+__device__ unsigned int dayofweek(unsigned int step) {
+  return (step % 288) % 7;
+}
 
 // A struct to represent a time of day, and a function that returns a time of
 // day given an iteration number of increments of 5 minutes.
@@ -636,50 +637,51 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                               xmachine_message_location_list *location_messages,
                               RNG_rand48 *rand48) {
 
- // float random = rnd<CONTINUOUS>(rand48);
+  // float random = rnd<CONTINUOUS>(rand48);
 
   unsigned int day = dayofweek(person->step);
   struct Time t = timeofday(person->step);
   unsigned int hour = t.hour;
   unsigned int minute = t.minute;
-  unsigned int locationid;
 
   if (person->busy == 0) {
     if (hour == 14 && minute == 0 && person->church != -1) {
       if (person->churchfreq == 0) {
         float random = rnd<CONTINUOUS>(rand48);
-        float prob = 1 - device_exp(-6/365);
+        float prob = 1 - device_exp(-6 / 365);
 
         if (random < prob) {
           person->startstep = person->step;
           person->busy = 1;
           person->location = 1;
-          locationid = person->church;
+          person->locationid = person->church;
         } else {
           person->location = 0;
-          locationid = person->household;
+          person->locationid = person->household;
         }
       } else if (person->churchfreq > day) {
         person->startstep = person->step;
         person->busy = 1;
         person->location = 1;
-        locationid = person->church;
+        person->locationid = person->church;
       }
     } else {
       person->location = 0;
-      locationid = person->household;
+      person->locationid = person->household;
     }
   } else {
-    if (person->location == 1 && (float)(person->step - person->startstep) >= person->churchdur * 12) {
-       person->busy = 0;
-       person->location = 0;
-       locationid = person->household;
+    if (person->location == 1 &&
+        (float)(person->step - person->startstep) >= person->churchdur * 12) {
+      person->busy = 0;
+      person->location = 0;
+      person->locationid = person->household;
     } else if (person->location == 1) {
-      locationid = person->church;
+      person->locationid = person->church;
     }
   }
 
-  add_location_message(location_messages, person->id, person->location, locationid, day, hour, minute);
+  add_location_message(location_messages, person->id, person->location,
+                       person->locationid, day, hour, minute);
 
   person->step += TIME_STEP;
 

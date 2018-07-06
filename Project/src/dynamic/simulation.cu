@@ -185,6 +185,7 @@ unsigned int h_Persons_default_variable_church_data_iteration;
 unsigned int h_Persons_default_variable_busy_data_iteration;
 unsigned int h_Persons_default_variable_startstep_data_iteration;
 unsigned int h_Persons_default_variable_location_data_iteration;
+unsigned int h_Persons_default_variable_locationid_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
@@ -200,6 +201,7 @@ unsigned int h_Persons_s2_variable_church_data_iteration;
 unsigned int h_Persons_s2_variable_busy_data_iteration;
 unsigned int h_Persons_s2_variable_startstep_data_iteration;
 unsigned int h_Persons_s2_variable_location_data_iteration;
+unsigned int h_Persons_s2_variable_locationid_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
 unsigned int h_Households_hhdefault_variable_size_data_iteration;
@@ -439,6 +441,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
+    h_Persons_default_variable_locationid_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
@@ -454,6 +457,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
+    h_Persons_s2_variable_locationid_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
@@ -2315,6 +2319,45 @@ __host__ unsigned int get_Person_default_variable_location(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_locationid(unsigned int index)
+ * Gets the value of the locationid variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable locationid
+ */
+__host__ unsigned int get_Person_default_variable_locationid(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_locationid_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->locationid,
+                    d_Persons_default->locationid,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_locationid_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->locationid[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access locationid for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2894,6 +2937,45 @@ __host__ unsigned int get_Person_s2_variable_location(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access location for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_locationid(unsigned int index)
+ * Gets the value of the locationid variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable locationid
+ */
+__host__ unsigned int get_Person_s2_variable_locationid(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_locationid_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->locationid,
+                    d_Persons_s2->locationid,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_locationid_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->locationid[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access locationid for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3809,6 +3891,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->startstep, &h_agent->startstep, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->location, &h_agent->location, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->locationid, &h_agent->locationid, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -3854,6 +3938,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->startstep, h_src->startstep, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->location, h_src->location, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->locationid, h_src->locationid, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -4148,6 +4234,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->startstep[i] = src[i]->startstep;
 			 
 			dst->location[i] = src[i]->location;
+			 
+			dst->locationid[i] = src[i]->locationid;
 			
 		}
 	}
@@ -4194,6 +4282,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
+    h_Persons_default_variable_locationid_data_iteration = 0;
     
 
 }
@@ -4240,6 +4329,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_busy_data_iteration = 0;
         h_Persons_default_variable_startstep_data_iteration = 0;
         h_Persons_default_variable_location_data_iteration = 0;
+        h_Persons_default_variable_locationid_data_iteration = 0;
         
 
 	}
@@ -4286,6 +4376,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
+    h_Persons_s2_variable_locationid_data_iteration = 0;
     
 
 }
@@ -4332,6 +4423,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_busy_data_iteration = 0;
         h_Persons_s2_variable_startstep_data_iteration = 0;
         h_Persons_s2_variable_location_data_iteration = 0;
+        h_Persons_s2_variable_locationid_data_iteration = 0;
         
 
 	}
@@ -5242,6 +5334,27 @@ unsigned int max_Person_default_location_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_locationid_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->locationid),  thrust::device_pointer_cast(d_Persons_default->locationid) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_locationid_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->locationid),  thrust::device_pointer_cast(d_Persons_default->locationid) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_locationid_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->locationid);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_locationid_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->locationid);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -5550,6 +5663,27 @@ unsigned int min_Person_s2_location_variable(){
 unsigned int max_Person_s2_location_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->location);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Person_s2_locationid_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->locationid),  thrust::device_pointer_cast(d_Persons_s2->locationid) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_locationid_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->locationid),  thrust::device_pointer_cast(d_Persons_s2->locationid) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_locationid_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->locationid);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_locationid_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->locationid);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

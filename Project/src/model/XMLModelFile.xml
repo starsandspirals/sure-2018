@@ -234,6 +234,10 @@
           <type>unsigned int</type>
           <name>location</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
