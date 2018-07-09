@@ -395,6 +395,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_hhmembership->person_id = order[count];
         h_hhmembership->churchgoing = h_household->churchgoing;
         h_hhmembership->churchfreq = h_household->churchfreq;
+        h_hhmembership->household_size = h_household->size;
         h_household->people[k] = order[count];
         count++;
 
@@ -763,7 +764,9 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
-    } else if (person->location == 2 && (float)(person->step - person->startstep) >= person->transportdur * 5) {
+    } else if (person->location == 2 &&
+               (float)(person->step - person->startstep) >=
+                   person->transportdur * 5) {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
@@ -833,7 +836,8 @@ __FLAME_GPU_FUNC__ int hhinit(
   }
   add_household_membership_message(
       household_membership_messages, hhmembership->household_id,
-      hhmembership->person_id, churchid, hhmembership->churchfreq, churchdur);
+      hhmembership->person_id, hhmembership->household_size, churchid,
+      hhmembership->churchfreq, churchdur);
   return 1;
 }
 
@@ -865,6 +869,7 @@ __FLAME_GPU_FUNC__ int personhhinit(
   while (household_membership_message) {
     if (household_membership_message->person_id == personid) {
       person->household = household_membership_message->household_id;
+      person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;
       person->churchfreq = household_membership_message->churchfreq;
       person->churchdur = household_membership_message->churchdur;

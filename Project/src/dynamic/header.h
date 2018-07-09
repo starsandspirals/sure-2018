@@ -194,6 +194,7 @@ struct __align__(16) xmachine_memory_HouseholdMembership
 {
     unsigned int household_id;    /**< X-machine memory variable household_id of type unsigned int.*/
     unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
+    unsigned int household_size;    /**< X-machine memory variable household_size of type unsigned int.*/
     unsigned int churchgoing;    /**< X-machine memory variable churchgoing of type unsigned int.*/
     unsigned int churchfreq;    /**< X-machine memory variable churchfreq of type unsigned int.*/
 };
@@ -261,6 +262,7 @@ struct __align__(16) xmachine_message_household_membership
       
     unsigned int household_id;        /**< Message variable household_id of type unsigned int.*/  
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
+    unsigned int household_size;        /**< Message variable household_size of type unsigned int.*/  
     unsigned int church_id;        /**< Message variable church_id of type unsigned int.*/  
     unsigned int churchfreq;        /**< Message variable churchfreq of type unsigned int.*/  
     float churchdur;        /**< Message variable churchdur of type float.*/
@@ -377,6 +379,7 @@ struct xmachine_memory_HouseholdMembership_list
     
     unsigned int household_id [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list household_id of type unsigned int.*/
     unsigned int person_id [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
+    unsigned int household_size [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list household_size of type unsigned int.*/
     unsigned int churchgoing [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list churchgoing of type unsigned int.*/
     unsigned int churchfreq [xmachine_memory_HouseholdMembership_MAX];    /**< X-machine memory variable list churchfreq of type unsigned int.*/
 };
@@ -461,6 +464,7 @@ struct xmachine_message_household_membership_list
     
     unsigned int household_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list household_id of type unsigned int.*/
     unsigned int person_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
+    unsigned int household_size [xmachine_message_household_membership_MAX];    /**< Message memory variable list household_size of type unsigned int.*/
     unsigned int church_id [xmachine_message_household_membership_MAX];    /**< Message memory variable list church_id of type unsigned int.*/
     unsigned int churchfreq [xmachine_message_household_membership_MAX];    /**< Message memory variable list churchfreq of type unsigned int.*/
     float churchdur [xmachine_message_household_membership_MAX];    /**< Message memory variable list churchdur of type float.*/
@@ -632,12 +636,13 @@ __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachi
  * @param agents	xmachine_memory_household_membership_list agent list
  * @param household_id	message variable of type unsigned int
  * @param person_id	message variable of type unsigned int
+ * @param household_size	message variable of type unsigned int
  * @param church_id	message variable of type unsigned int
  * @param churchfreq	message variable of type unsigned int
  * @param churchdur	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_household_membership_message(xmachine_message_household_membership_list* household_membership_messages, unsigned int household_id, unsigned int person_id, unsigned int church_id, unsigned int churchfreq, float churchdur);
+ __FLAME_GPU_FUNC__ void add_household_membership_message(xmachine_message_household_membership_list* household_membership_messages, unsigned int household_id, unsigned int person_id, unsigned int household_size, unsigned int church_id, unsigned int churchfreq, float churchdur);
  
 /** get_first_household_membership_message
  * Get first message function for non partitioned (brute force) messages
@@ -811,10 +816,11 @@ __FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, unsigned int i
  * @param agents xmachine_memory_HouseholdMembership_list agent list
  * @param household_id	agent agent variable of type unsigned int
  * @param person_id	agent agent variable of type unsigned int
+ * @param household_size	agent agent variable of type unsigned int
  * @param churchgoing	agent agent variable of type unsigned int
  * @param churchfreq	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int churchgoing, unsigned int churchfreq);
+__FLAME_GPU_FUNC__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int household_size, unsigned int churchgoing, unsigned int churchfreq);
 
 /** add_Church_agent
  * Adds a new continuous valued Church agent to the xmachine_memory_Church_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1709,6 +1715,15 @@ __host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_house
  * @return value of agent variable person_id
  */
 __host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_person_id(unsigned int index);
+
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_size(unsigned int index)
+ * Gets the value of the household_size variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household_size
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_size(unsigned int index);
 
 /** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_churchgoing(unsigned int index)
  * Gets the value of the churchgoing variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
@@ -3374,6 +3389,32 @@ unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_HouseholdMembership_hhmembershipdefault_person_id_variable();
+
+/** unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_size_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_size_variable();
+
+
+
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(int count_value);
+
+/** unsigned int min_HouseholdMembership_hhmembershipdefault_household_size_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_HouseholdMembership_hhmembershipdefault_household_size_variable();
+/** unsigned int max_HouseholdMembership_hhmembershipdefault_household_size_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_HouseholdMembership_hhmembershipdefault_household_size_variable();
 
 /** unsigned int reduce_HouseholdMembership_hhmembershipdefault_churchgoing_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

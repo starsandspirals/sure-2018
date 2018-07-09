@@ -230,6 +230,7 @@ unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
 unsigned int h_Households_hhdefault_variable_adults_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration;
+unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration;
 unsigned int h_Churchs_chudefault_variable_id_data_iteration;
@@ -518,6 +519,7 @@ void initialise(char * inputfile){
     h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
+    h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration = 0;
     h_Churchs_chudefault_variable_id_data_iteration = 0;
@@ -3765,6 +3767,45 @@ __host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_perso
     }
 }
 
+/** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_size(unsigned int index)
+ * Gets the value of the household_size variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable household_size
+ */
+__host__ unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_size(unsigned int index){
+    unsigned int count = get_agent_HouseholdMembership_hhmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_HouseholdMemberships_hhmembershipdefault->household_size,
+                    d_HouseholdMemberships_hhmembershipdefault->household_size,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_HouseholdMemberships_hhmembershipdefault->household_size[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access household_size for the %u th member of HouseholdMembership_hhmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_churchgoing(unsigned int index)
  * Gets the value of the churchgoing variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -4654,6 +4695,8 @@ void copy_single_xmachine_memory_HouseholdMembership_hostToDevice(xmachine_memor
  
 		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
+		gpuErrchk(cudaMemcpy(d_dst->household_size, &h_agent->household_size, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
 		gpuErrchk(cudaMemcpy(d_dst->churchgoing, &h_agent->churchgoing, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->churchfreq, &h_agent->churchfreq, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -4676,6 +4719,8 @@ void copy_partial_xmachine_memory_HouseholdMembership_hostToDevice(xmachine_memo
 		gpuErrchk(cudaMemcpy(d_dst->household_id, h_src->household_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->household_size, h_src->household_size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->churchgoing, h_src->churchgoing, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -5306,6 +5351,8 @@ void h_unpack_agents_HouseholdMembership_AoS_to_SoA(xmachine_memory_HouseholdMem
 			 
 			dst->person_id[i] = src[i]->person_id;
 			 
+			dst->household_size[i] = src[i]->household_size;
+			 
 			dst->churchgoing[i] = src[i]->churchgoing;
 			 
 			dst->churchfreq[i] = src[i]->churchfreq;
@@ -5342,6 +5389,7 @@ void h_add_agent_HouseholdMembership_hhmembershipdefault(xmachine_memory_Househo
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
+    h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration = 0;
     
@@ -5377,6 +5425,7 @@ void h_add_agents_HouseholdMembership_hhmembershipdefault(xmachine_memory_Househ
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
         h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
+        h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration = 0;
         h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration = 0;
         h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration = 0;
         
@@ -6812,6 +6861,27 @@ unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable(){
 unsigned int max_HouseholdMembership_hhmembershipdefault_person_id_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->person_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_size_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count);
+}
+
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, count_value);
+}
+unsigned int min_HouseholdMembership_hhmembershipdefault_household_size_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_HouseholdMembership_hhmembershipdefault_household_size_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_size);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

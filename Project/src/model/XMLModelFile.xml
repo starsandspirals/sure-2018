@@ -383,6 +383,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>household_size</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>churchgoing</name>
         </gpu:variable>
         <gpu:variable>
@@ -632,6 +636,10 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>household_size</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>

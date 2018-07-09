@@ -551,6 +551,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</person_id>\n", file);
         
+		fputs("<household_size>", file);
+        sprintf(data, "%u", h_HouseholdMemberships_hhmembershipdefault->household_size[i]);
+		fputs(data, file);
+		fputs("</household_size>\n", file);
+        
 		fputs("<churchgoing>", file);
         sprintf(data, "%u", h_HouseholdMemberships_hhmembershipdefault->churchgoing[i]);
 		fputs(data, file);
@@ -790,6 +795,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Household_adults;
     int in_HouseholdMembership_household_id;
     int in_HouseholdMembership_person_id;
+    int in_HouseholdMembership_household_size;
     int in_HouseholdMembership_churchgoing;
     int in_HouseholdMembership_churchfreq;
     int in_Church_id;
@@ -899,6 +905,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Household_adults;
 	unsigned int HouseholdMembership_household_id;
 	unsigned int HouseholdMembership_person_id;
+	unsigned int HouseholdMembership_household_size;
 	unsigned int HouseholdMembership_churchgoing;
 	unsigned int HouseholdMembership_churchfreq;
 	unsigned int Church_id;
@@ -989,6 +996,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Household_adults = 0;
 	in_HouseholdMembership_household_id = 0;
 	in_HouseholdMembership_person_id = 0;
+	in_HouseholdMembership_household_size = 0;
 	in_HouseholdMembership_churchgoing = 0;
 	in_HouseholdMembership_churchfreq = 0;
 	in_Church_id = 0;
@@ -1078,6 +1086,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	{	
 		h_HouseholdMemberships->household_id[k] = 0;
 		h_HouseholdMemberships->person_id[k] = 0;
+		h_HouseholdMemberships->household_size[k] = 0;
 		h_HouseholdMemberships->churchgoing[k] = 0;
 		h_HouseholdMemberships->churchfreq[k] = 0;
 	}
@@ -1158,6 +1167,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Household_adults = 0;
     HouseholdMembership_household_id = 0;
     HouseholdMembership_person_id = 0;
+    HouseholdMembership_household_size = 0;
     HouseholdMembership_churchgoing = 0;
     HouseholdMembership_churchfreq = 0;
     Church_id = 0;
@@ -1320,6 +1330,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     
 					h_HouseholdMemberships->household_id[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_household_id;
 					h_HouseholdMemberships->person_id[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_person_id;
+					h_HouseholdMemberships->household_size[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_household_size;
 					h_HouseholdMemberships->churchgoing[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_churchgoing;
 					h_HouseholdMemberships->churchfreq[*h_xmachine_memory_HouseholdMembership_count] = HouseholdMembership_churchfreq;
 					(*h_xmachine_memory_HouseholdMembership_count) ++;	
@@ -1426,6 +1437,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Household_adults = 0;
                 HouseholdMembership_household_id = 0;
                 HouseholdMembership_person_id = 0;
+                HouseholdMembership_household_size = 0;
                 HouseholdMembership_churchgoing = 0;
                 HouseholdMembership_churchfreq = 0;
                 Church_id = 0;
@@ -1507,6 +1519,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/household_id") == 0) in_HouseholdMembership_household_id = 0;
 			if(strcmp(buffer, "person_id") == 0) in_HouseholdMembership_person_id = 1;
 			if(strcmp(buffer, "/person_id") == 0) in_HouseholdMembership_person_id = 0;
+			if(strcmp(buffer, "household_size") == 0) in_HouseholdMembership_household_size = 1;
+			if(strcmp(buffer, "/household_size") == 0) in_HouseholdMembership_household_size = 0;
 			if(strcmp(buffer, "churchgoing") == 0) in_HouseholdMembership_churchgoing = 1;
 			if(strcmp(buffer, "/churchgoing") == 0) in_HouseholdMembership_churchgoing = 0;
 			if(strcmp(buffer, "churchfreq") == 0) in_HouseholdMembership_churchfreq = 1;
@@ -1696,6 +1710,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_HouseholdMembership_person_id){
                     HouseholdMembership_person_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_HouseholdMembership_household_size){
+                    HouseholdMembership_household_size = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_HouseholdMembership_churchgoing){
                     HouseholdMembership_churchgoing = (unsigned int) fpgu_strtoul(buffer); 

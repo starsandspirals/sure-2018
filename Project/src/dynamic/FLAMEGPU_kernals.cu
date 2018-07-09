@@ -590,6 +590,7 @@ __global__ void scatter_HouseholdMembership_Agents(xmachine_memory_HouseholdMemb
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->household_id[output_index] = agents_src->household_id[index];        
 		agents_dst->person_id[output_index] = agents_src->person_id[index];        
+		agents_dst->household_size[output_index] = agents_src->household_size[index];        
 		agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];        
 		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
 	}
@@ -613,6 +614,7 @@ __global__ void append_HouseholdMembership_Agents(xmachine_memory_HouseholdMembe
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->household_id[output_index] = agents_src->household_id[index];
 	    agents_dst->person_id[output_index] = agents_src->person_id[index];
+	    agents_dst->household_size[output_index] = agents_src->household_size[index];
 	    agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];
 	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
     }
@@ -623,11 +625,12 @@ __global__ void append_HouseholdMembership_Agents(xmachine_memory_HouseholdMembe
  * @param agents xmachine_memory_HouseholdMembership_list to add agents to 
  * @param household_id agent variable of type unsigned int
  * @param person_id agent variable of type unsigned int
+ * @param household_size agent variable of type unsigned int
  * @param churchgoing agent variable of type unsigned int
  * @param churchfreq agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int churchgoing, unsigned int churchfreq){
+__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int household_size, unsigned int churchgoing, unsigned int churchfreq){
 	
 	int index;
     
@@ -648,14 +651,15 @@ __device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembershi
 	//write data to new buffer
 	agents->household_id[index] = household_id;
 	agents->person_id[index] = person_id;
+	agents->household_size[index] = household_size;
 	agents->churchgoing[index] = churchgoing;
 	agents->churchfreq[index] = churchfreq;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int churchgoing, unsigned int churchfreq){
-    add_HouseholdMembership_agent<DISCRETE_2D>(agents, household_id, person_id, churchgoing, churchfreq);
+__device__ void add_HouseholdMembership_agent(xmachine_memory_HouseholdMembership_list* agents, unsigned int household_id, unsigned int person_id, unsigned int household_size, unsigned int churchgoing, unsigned int churchfreq){
+    add_HouseholdMembership_agent<DISCRETE_2D>(agents, household_id, person_id, household_size, churchgoing, churchfreq);
 }
 
 /** reorder_HouseholdMembership_agents
@@ -673,6 +677,7 @@ __global__ void reorder_HouseholdMembership_agents(unsigned int* values, xmachin
 	//reorder agent data
 	ordered_agents->household_id[index] = unordered_agents->household_id[old_pos];
 	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
+	ordered_agents->household_size[index] = unordered_agents->household_size[old_pos];
 	ordered_agents->churchgoing[index] = unordered_agents->churchgoing[old_pos];
 	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
 }
@@ -1262,11 +1267,12 @@ __global__ void reorder_TransportMembership_agents(unsigned int* values, xmachin
  * @param messages xmachine_message_household_membership_list message list to add too
  * @param household_id agent variable of type unsigned int
  * @param person_id agent variable of type unsigned int
+ * @param household_size agent variable of type unsigned int
  * @param church_id agent variable of type unsigned int
  * @param churchfreq agent variable of type unsigned int
  * @param churchdur agent variable of type float
  */
-__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id, unsigned int church_id, unsigned int churchfreq, float churchdur){
+__device__ void add_household_membership_message(xmachine_message_household_membership_list* messages, unsigned int household_id, unsigned int person_id, unsigned int household_size, unsigned int church_id, unsigned int churchfreq, float churchdur){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_household_membership_count;
@@ -1288,6 +1294,7 @@ __device__ void add_household_membership_message(xmachine_message_household_memb
 	messages->_position[index] = _position;
 	messages->household_id[index] = household_id;
 	messages->person_id[index] = person_id;
+	messages->household_size[index] = household_size;
 	messages->church_id[index] = church_id;
 	messages->churchfreq[index] = churchfreq;
 	messages->churchdur[index] = churchdur;
@@ -1313,6 +1320,7 @@ __global__ void scatter_optional_household_membership_messages(xmachine_message_
 		messages->_position[output_index] = output_index;
 		messages->household_id[output_index] = messages_swap->household_id[index];
 		messages->person_id[output_index] = messages_swap->person_id[index];
+		messages->household_size[output_index] = messages_swap->household_size[index];
 		messages->church_id[output_index] = messages_swap->church_id[index];
 		messages->churchfreq[output_index] = messages_swap->churchfreq[index];
 		messages->churchdur[output_index] = messages_swap->churchdur[index];				
@@ -1357,6 +1365,7 @@ __device__ xmachine_message_household_membership* get_first_household_membership
 	temp_message._position = messages->_position[index];
 	temp_message.household_id = messages->household_id[index];
 	temp_message.person_id = messages->person_id[index];
+	temp_message.household_size = messages->household_size[index];
 	temp_message.church_id = messages->church_id[index];
 	temp_message.churchfreq = messages->churchfreq[index];
 	temp_message.churchdur = messages->churchdur[index];
@@ -1403,6 +1412,7 @@ __device__ xmachine_message_household_membership* get_next_household_membership_
 		temp_message._position = messages->_position[index];
 		temp_message.household_id = messages->household_id[index];
 		temp_message.person_id = messages->person_id[index];
+		temp_message.household_size = messages->household_size[index];
 		temp_message.church_id = messages->church_id[index];
 		temp_message.churchfreq = messages->churchfreq[index];
 		temp_message.churchdur = messages->churchdur[index];
@@ -2221,12 +2231,14 @@ __global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents
     
 	agent.household_id = agents->household_id[index];
 	agent.person_id = agents->person_id[index];
+	agent.household_size = agents->household_size[index];
 	agent.churchgoing = agents->churchgoing[index];
 	agent.churchfreq = agents->churchfreq[index];
 	} else {
 	
 	agent.household_id = 0;
 	agent.person_id = 0;
+	agent.household_size = 0;
 	agent.churchgoing = 0;
 	agent.churchfreq = 0;
 	}
@@ -2244,6 +2256,7 @@ __global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents
 	//AoS to SoA - xmachine_memory_hhinit Coalesced memory write (ignore arrays)
 	agents->household_id[index] = agent.household_id;
 	agents->person_id[index] = agent.person_id;
+	agents->household_size[index] = agent.household_size;
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
 	}
