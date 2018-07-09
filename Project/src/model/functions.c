@@ -183,6 +183,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   signed int count;
   unsigned int ages[h_agent_AoS_MAX];
 
+  unsigned int daycount = 0;
+  unsigned int transport[h_agent_AoS_MAX];
+  unsigned int days[h_agent_AoS_MAX];
+
   for (unsigned int i = 0; i < 32; i++) {
     sizearray[i] = 0;
   }
@@ -263,13 +267,29 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           } else if (random < transport_freq2) {
             h_person->transportfreq = 2;
             h_person->transportday1 = (rand() % 5) + 1;
+
+            transport[daycount] = h_person->id;
+            days[daycount] = h_person->transportday1;
+
+            daycount++;
           } else {
             h_person->transportfreq = 4;
             h_person->transportday1 = (rand() % 5) + 1;
             h_person->transportday2 = h_person->transportday1;
+
             while (h_person->transportday2 == h_person->transportday1) {
               h_person->transportday2 = (rand() % 5) + 1;
             }
+
+            transport[daycount] = h_person->id;
+            days[daycount] = h_person->transportday1;
+
+            daycount++;
+
+            transport[daycount] = h_person->id;
+            days[daycount] = h_person->transportday2;
+
+            daycount++;
           }
 
           random = ((float)rand() / (RAND_MAX));
@@ -299,6 +319,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       }
     }
   }
+
+  shuffle(transport, days, h_agent_AoS_MAX);
 
   // Set a counter for our current position in the array of person ids, to keep
   // track as we generate households.
@@ -477,6 +499,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
     h_free_agent_Church(&h_church);
   }
+
+
 
   while (fgets(line, sizeof(line), file)) {
     printf("%s", line);
