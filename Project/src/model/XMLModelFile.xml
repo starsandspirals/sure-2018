@@ -211,6 +211,10 @@
           <name>transportfreq</name>
         </gpu:variable>
         <gpu:variable>
+          <type>int</type>
+          <name>transportdur</name>
+        </gpu:variable>
+        <gpu:variable>
           <type>unsigned int</type>
           <name>transportday1</name>
         </gpu:variable>
@@ -225,6 +229,10 @@
         <gpu:variable>
           <type>int</type>
           <name>church</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>transport</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
@@ -260,12 +268,24 @@
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
         <gpu:function>
-          <name>init</name>
+          <name>personhhinit</name>
           <currentState>default</currentState>
           <nextState>s2</nextState>
           <inputs>
             <gpu:input>
               <messageName>household_membership</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>persontrinit</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>transport_membership</messageName>
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
@@ -601,113 +621,119 @@
   <!-- Messages sent by agents which can be read by other agents -->
   <messages>
 
-  <gpu:message>
-    <name>household_membership</name>
-    <description>A message declaring that a person is a member of a household</description>
-    <variables>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>household_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>person_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>church_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>churchfreq</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>float</type>
-        <name>churchdur</name>
-      </gpu:variable>
-    </variables>
-    <gpu:partitioningNone/>
-    <gpu:bufferSize>32768</gpu:bufferSize>
-  </gpu:message>
+    <gpu:message>
+      <name>household_membership</name>
+      <description>A message declaring that a person is a member of a household</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>household_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>church_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchfreq</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>churchdur</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
 
-  <gpu:message>
-    <name>church_membership</name>
-    <description>A message declaring that a household is a member of a church</description>
-    <variables>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>church_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>household_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>float</type>
-        <name>churchdur</name>
-      </gpu:variable>
-    </variables>
-    <gpu:partitioningNone/>
-    <gpu:bufferSize>8192</gpu:bufferSize>
-  </gpu:message>
+    <gpu:message>
+      <name>church_membership</name>
+      <description>A message declaring that a household is a member of a church</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>church_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>household_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>churchdur</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:message>
 
-  <gpu:message>
-    <name>transport_membership</name>
-    <description>A message declaring that a person uses a transport</description>
-    <variables>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>person_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>transport_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>duration</name>
-      </gpu:variable>
-    </variables>
-    <gpu:partitioningNone/>
-    <gpu:bufferSize>32768</gpu:bufferSize>
-  </gpu:message>
+    <gpu:message>
+      <name>transport_membership</name>
+      <description>A message declaring that a person uses a transport</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>transport_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>duration</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
 
-  <gpu:message>
-    <name>location</name>
-    <description>A message declaring that a person is in a given location at a given time</description>
-    <variables>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>person_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>location_type</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>location_id</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>day</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>hour</name>
-      </gpu:variable>
-      <gpu:variable>
-        <type>unsigned int</type>
-        <name>minute</name>
-      </gpu:variable>
-    </variables>
-    <gpu:partitioningNone/>
-    <gpu:bufferSize>32768</gpu:bufferSize>
-  </gpu:message>
+    <gpu:message>
+      <name>location</name>
+      <description>A message declaring that a person is in a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>location_type</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>location_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>day</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>hour</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>minute</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
 
   </messages>
 
   <layers>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>trinit</name>
+      </gpu:layerFunction>
+    </layer>
 
     <layer>
       <gpu:layerFunction>
@@ -723,7 +749,13 @@
 
     <layer>
       <gpu:layerFunction>
-        <name>init</name>
+        <name>personhhinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>persontrinit</name>
       </gpu:layerFunction>
     </layer>
   </layers>

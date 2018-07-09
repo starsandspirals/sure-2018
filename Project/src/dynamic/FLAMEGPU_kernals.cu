@@ -219,10 +219,12 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->churchdur[output_index] = agents_src->churchdur[index];        
 		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
 		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
+		agents_dst->transportdur[output_index] = agents_src->transportdur[index];        
 		agents_dst->transportday1[output_index] = agents_src->transportday1[index];        
 		agents_dst->transportday2[output_index] = agents_src->transportday2[index];        
 		agents_dst->household[output_index] = agents_src->household[index];        
 		agents_dst->church[output_index] = agents_src->church[index];        
+		agents_dst->transport[output_index] = agents_src->transport[index];        
 		agents_dst->busy[output_index] = agents_src->busy[index];        
 		agents_dst->startstep[output_index] = agents_src->startstep[index];        
 		agents_dst->location[output_index] = agents_src->location[index];        
@@ -255,10 +257,12 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->churchdur[output_index] = agents_src->churchdur[index];
 	    agents_dst->transportuser[output_index] = agents_src->transportuser[index];
 	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
+	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
 	    agents_dst->transportday1[output_index] = agents_src->transportday1[index];
 	    agents_dst->transportday2[output_index] = agents_src->transportday2[index];
 	    agents_dst->household[output_index] = agents_src->household[index];
 	    agents_dst->church[output_index] = agents_src->church[index];
+	    agents_dst->transport[output_index] = agents_src->transport[index];
 	    agents_dst->busy[output_index] = agents_src->busy[index];
 	    agents_dst->startstep[output_index] = agents_src->startstep[index];
 	    agents_dst->location[output_index] = agents_src->location[index];
@@ -278,17 +282,19 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param churchdur agent variable of type float
  * @param transportuser agent variable of type unsigned int
  * @param transportfreq agent variable of type int
+ * @param transportdur agent variable of type int
  * @param transportday1 agent variable of type unsigned int
  * @param transportday2 agent variable of type unsigned int
  * @param household agent variable of type unsigned int
  * @param church agent variable of type int
+ * @param transport agent variable of type int
  * @param busy agent variable of type unsigned int
  * @param startstep agent variable of type unsigned int
  * @param location agent variable of type unsigned int
  * @param locationid agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportday1, unsigned int transportday2, unsigned int household, int church, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int transportday1, unsigned int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
 	
 	int index;
     
@@ -316,10 +322,12 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->churchdur[index] = churchdur;
 	agents->transportuser[index] = transportuser;
 	agents->transportfreq[index] = transportfreq;
+	agents->transportdur[index] = transportdur;
 	agents->transportday1[index] = transportday1;
 	agents->transportday2[index] = transportday2;
 	agents->household[index] = household;
 	agents->church[index] = church;
+	agents->transport[index] = transport;
 	agents->busy[index] = busy;
 	agents->startstep[index] = startstep;
 	agents->location[index] = location;
@@ -328,8 +336,8 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportday1, unsigned int transportday2, unsigned int household, int church, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportday1, transportday2, household, church, busy, startstep, location, locationid);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, unsigned int transportday1, unsigned int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid);
 }
 
 /** reorder_Person_agents
@@ -354,10 +362,12 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->churchdur[index] = unordered_agents->churchdur[old_pos];
 	ordered_agents->transportuser[index] = unordered_agents->transportuser[old_pos];
 	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
+	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
 	ordered_agents->transportday1[index] = unordered_agents->transportday1[old_pos];
 	ordered_agents->transportday2[index] = unordered_agents->transportday2[old_pos];
 	ordered_agents->household[index] = unordered_agents->household[old_pos];
 	ordered_agents->church[index] = unordered_agents->church[old_pos];
+	ordered_agents->transport[index] = unordered_agents->transport[old_pos];
 	ordered_agents->busy[index] = unordered_agents->busy[old_pos];
 	ordered_agents->startstep[index] = unordered_agents->startstep[old_pos];
 	ordered_agents->location[index] = unordered_agents->location[old_pos];
@@ -1926,10 +1936,12 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.churchdur = agents->churchdur[index];
 	agent.transportuser = agents->transportuser[index];
 	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -1952,10 +1964,12 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->churchdur[index] = agent.churchdur;
 	agents->transportuser[index] = agent.transportuser;
 	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -1965,7 +1979,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 /**
  *
  */
-__global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_message_household_membership_list* household_membership_messages){
+__global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmachine_message_household_membership_list* household_membership_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -1974,7 +1988,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
     //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
-	//SoA to AoS - xmachine_memory_init Coalesced memory read (arrays point to first item for agent index)
+	//SoA to AoS - xmachine_memory_personhhinit Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Person agent;
     //No partitioned input may launch more threads than required - only load agent data within bounds. 
     if (index < d_xmachine_memory_Person_count){
@@ -1988,10 +2002,12 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.churchdur = agents->churchdur[index];
 	agent.transportuser = agents->transportuser[index];
 	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -2007,10 +2023,12 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agent.churchdur = 0;
 	agent.transportuser = 0;
 	agent.transportfreq = 0;
+	agent.transportdur = 0;
 	agent.transportday1 = 0;
 	agent.transportday2 = 0;
 	agent.household = 0;
 	agent.church = 0;
+	agent.transport = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
 	agent.location = 0;
@@ -2018,7 +2036,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	}
 
 	//FLAME function call
-	int dead = !init(&agent, household_membership_messages);
+	int dead = !personhhinit(&agent, household_membership_messages);
 	
 
 	
@@ -2027,7 +2045,7 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
     //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
-	//AoS to SoA - xmachine_memory_init Coalesced memory write (ignore arrays)
+	//AoS to SoA - xmachine_memory_personhhinit Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
 	agents->age[index] = agent.age;
@@ -2037,10 +2055,104 @@ __global__ void GPUFLAME_init(xmachine_memory_Person_list* agents, xmachine_mess
 	agents->churchdur[index] = agent.churchdur;
 	agents->transportuser[index] = agent.transportuser;
 	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmachine_message_transport_membership_list* transport_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_persontrinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportuser = agents->transportuser[index];
+	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportuser = 0;
+	agent.transportfreq = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	}
+
+	//FLAME function call
+	int dead = !persontrinit(&agent, transport_membership_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_persontrinit Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportuser[index] = agent.transportuser;
+	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;

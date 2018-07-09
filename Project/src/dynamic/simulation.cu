@@ -192,10 +192,12 @@ unsigned int h_Persons_default_variable_churchfreq_data_iteration;
 unsigned int h_Persons_default_variable_churchdur_data_iteration;
 unsigned int h_Persons_default_variable_transportuser_data_iteration;
 unsigned int h_Persons_default_variable_transportfreq_data_iteration;
+unsigned int h_Persons_default_variable_transportdur_data_iteration;
 unsigned int h_Persons_default_variable_transportday1_data_iteration;
 unsigned int h_Persons_default_variable_transportday2_data_iteration;
 unsigned int h_Persons_default_variable_household_data_iteration;
 unsigned int h_Persons_default_variable_church_data_iteration;
+unsigned int h_Persons_default_variable_transport_data_iteration;
 unsigned int h_Persons_default_variable_busy_data_iteration;
 unsigned int h_Persons_default_variable_startstep_data_iteration;
 unsigned int h_Persons_default_variable_location_data_iteration;
@@ -209,10 +211,12 @@ unsigned int h_Persons_s2_variable_churchfreq_data_iteration;
 unsigned int h_Persons_s2_variable_churchdur_data_iteration;
 unsigned int h_Persons_s2_variable_transportuser_data_iteration;
 unsigned int h_Persons_s2_variable_transportfreq_data_iteration;
+unsigned int h_Persons_s2_variable_transportdur_data_iteration;
 unsigned int h_Persons_s2_variable_transportday1_data_iteration;
 unsigned int h_Persons_s2_variable_transportday2_data_iteration;
 unsigned int h_Persons_s2_variable_household_data_iteration;
 unsigned int h_Persons_s2_variable_church_data_iteration;
+unsigned int h_Persons_s2_variable_transport_data_iteration;
 unsigned int h_Persons_s2_variable_busy_data_iteration;
 unsigned int h_Persons_s2_variable_startstep_data_iteration;
 unsigned int h_Persons_s2_variable_location_data_iteration;
@@ -335,10 +339,15 @@ int scan_last_included;      /**< Indicates if last sum value is included in the
  */
 void Person_update(cudaStream_t &stream);
 
-/** Person_init
- * Agent function prototype for init function of Person agent
+/** Person_personhhinit
+ * Agent function prototype for personhhinit function of Person agent
  */
-void Person_init(cudaStream_t &stream);
+void Person_personhhinit(cudaStream_t &stream);
+
+/** Person_persontrinit
+ * Agent function prototype for persontrinit function of Person agent
+ */
+void Person_persontrinit(cudaStream_t &stream);
 
 /** Household_hhupdate
  * Agent function prototype for hhupdate function of Household agent
@@ -471,10 +480,12 @@ void initialise(char * inputfile){
     h_Persons_default_variable_churchdur_data_iteration = 0;
     h_Persons_default_variable_transportuser_data_iteration = 0;
     h_Persons_default_variable_transportfreq_data_iteration = 0;
+    h_Persons_default_variable_transportdur_data_iteration = 0;
     h_Persons_default_variable_transportday1_data_iteration = 0;
     h_Persons_default_variable_transportday2_data_iteration = 0;
     h_Persons_default_variable_household_data_iteration = 0;
     h_Persons_default_variable_church_data_iteration = 0;
+    h_Persons_default_variable_transport_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -488,10 +499,12 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_churchdur_data_iteration = 0;
     h_Persons_s2_variable_transportuser_data_iteration = 0;
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
+    h_Persons_s2_variable_transportdur_data_iteration = 0;
     h_Persons_s2_variable_transportday1_data_iteration = 0;
     h_Persons_s2_variable_transportday2_data_iteration = 0;
     h_Persons_s2_variable_household_data_iteration = 0;
     h_Persons_s2_variable_church_data_iteration = 0;
+    h_Persons_s2_variable_transport_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -1261,6 +1274,23 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("TransportMembership_trinit");
+	TransportMembership_trinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: TransportMembership_trinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 2*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("ChurchMembership_chuinit");
 	ChurchMembership_chuinit(stream1);
     PROFILE_POP_RANGE();
@@ -1272,7 +1302,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 2*/
+	/* Layer 3*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1289,20 +1319,37 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 3*/
+	/* Layer 4*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("Person_init");
-	Person_init(stream1);
+    PROFILE_PUSH_RANGE("Person_personhhinit");
+	Person_personhhinit(stream1);
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_init = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: Person_personhhinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 5*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_persontrinit");
+	Person_persontrinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_persontrinit = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
@@ -2232,6 +2279,45 @@ __host__ int get_Person_default_variable_transportfreq(unsigned int index){
     }
 }
 
+/** int get_Person_default_variable_transportdur(unsigned int index)
+ * Gets the value of the transportdur variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable transportdur
+ */
+__host__ int get_Person_default_variable_transportdur(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_transportdur_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->transportdur,
+                    d_Persons_default->transportdur,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_transportdur_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->transportdur[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access transportdur for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_default_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2382,6 +2468,45 @@ __host__ int get_Person_default_variable_church(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access church for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_default_variable_transport(unsigned int index)
+ * Gets the value of the transport variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable transport
+ */
+__host__ int get_Person_default_variable_transport(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_transport_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->transport,
+                    d_Persons_default->transport,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_transport_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->transport[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access transport for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2895,6 +3020,45 @@ __host__ int get_Person_s2_variable_transportfreq(unsigned int index){
     }
 }
 
+/** int get_Person_s2_variable_transportdur(unsigned int index)
+ * Gets the value of the transportdur variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable transportdur
+ */
+__host__ int get_Person_s2_variable_transportdur(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_transportdur_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->transportdur,
+                    d_Persons_s2->transportdur,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_transportdur_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->transportdur[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access transportdur for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -3045,6 +3209,45 @@ __host__ int get_Person_s2_variable_church(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access church for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_s2_variable_transport(unsigned int index)
+ * Gets the value of the transport variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable transport
+ */
+__host__ int get_Person_s2_variable_transport(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_transport_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->transport,
+                    d_Persons_s2->transport,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_transport_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->transport[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access transport for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -4304,6 +4507,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, &h_agent->transportfreq, sizeof(int), cudaMemcpyHostToDevice));
  
+		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(int), cudaMemcpyHostToDevice));
+ 
 		gpuErrchk(cudaMemcpy(d_dst->transportday1, &h_agent->transportday1, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportday2, &h_agent->transportday2, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -4311,6 +4516,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->household, &h_agent->household, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->church, &h_agent->church, sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->transport, &h_agent->transport, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->busy, &h_agent->busy, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -4353,6 +4560,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
  
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, h_src->transportfreq, count * sizeof(int), cudaMemcpyHostToDevice));
  
+		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
 		gpuErrchk(cudaMemcpy(d_dst->transportday1, h_src->transportday1, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportday2, h_src->transportday2, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -4360,6 +4569,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->household, h_src->household, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->church, h_src->church, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->transport, h_src->transport, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->busy, h_src->busy, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -4702,6 +4913,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			 
 			dst->transportfreq[i] = src[i]->transportfreq;
 			 
+			dst->transportdur[i] = src[i]->transportdur;
+			 
 			dst->transportday1[i] = src[i]->transportday1;
 			 
 			dst->transportday2[i] = src[i]->transportday2;
@@ -4709,6 +4922,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->household[i] = src[i]->household;
 			 
 			dst->church[i] = src[i]->church;
+			 
+			dst->transport[i] = src[i]->transport;
 			 
 			dst->busy[i] = src[i]->busy;
 			 
@@ -4757,10 +4972,12 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_churchdur_data_iteration = 0;
     h_Persons_default_variable_transportuser_data_iteration = 0;
     h_Persons_default_variable_transportfreq_data_iteration = 0;
+    h_Persons_default_variable_transportdur_data_iteration = 0;
     h_Persons_default_variable_transportday1_data_iteration = 0;
     h_Persons_default_variable_transportday2_data_iteration = 0;
     h_Persons_default_variable_household_data_iteration = 0;
     h_Persons_default_variable_church_data_iteration = 0;
+    h_Persons_default_variable_transport_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -4805,10 +5022,12 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_churchdur_data_iteration = 0;
         h_Persons_default_variable_transportuser_data_iteration = 0;
         h_Persons_default_variable_transportfreq_data_iteration = 0;
+        h_Persons_default_variable_transportdur_data_iteration = 0;
         h_Persons_default_variable_transportday1_data_iteration = 0;
         h_Persons_default_variable_transportday2_data_iteration = 0;
         h_Persons_default_variable_household_data_iteration = 0;
         h_Persons_default_variable_church_data_iteration = 0;
+        h_Persons_default_variable_transport_data_iteration = 0;
         h_Persons_default_variable_busy_data_iteration = 0;
         h_Persons_default_variable_startstep_data_iteration = 0;
         h_Persons_default_variable_location_data_iteration = 0;
@@ -4853,10 +5072,12 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_churchdur_data_iteration = 0;
     h_Persons_s2_variable_transportuser_data_iteration = 0;
     h_Persons_s2_variable_transportfreq_data_iteration = 0;
+    h_Persons_s2_variable_transportdur_data_iteration = 0;
     h_Persons_s2_variable_transportday1_data_iteration = 0;
     h_Persons_s2_variable_transportday2_data_iteration = 0;
     h_Persons_s2_variable_household_data_iteration = 0;
     h_Persons_s2_variable_church_data_iteration = 0;
+    h_Persons_s2_variable_transport_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -4901,10 +5122,12 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_churchdur_data_iteration = 0;
         h_Persons_s2_variable_transportuser_data_iteration = 0;
         h_Persons_s2_variable_transportfreq_data_iteration = 0;
+        h_Persons_s2_variable_transportdur_data_iteration = 0;
         h_Persons_s2_variable_transportday1_data_iteration = 0;
         h_Persons_s2_variable_transportday2_data_iteration = 0;
         h_Persons_s2_variable_household_data_iteration = 0;
         h_Persons_s2_variable_church_data_iteration = 0;
+        h_Persons_s2_variable_transport_data_iteration = 0;
         h_Persons_s2_variable_busy_data_iteration = 0;
         h_Persons_s2_variable_startstep_data_iteration = 0;
         h_Persons_s2_variable_location_data_iteration = 0;
@@ -5819,6 +6042,27 @@ int max_Person_default_transportfreq_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+int reduce_Person_default_transportdur_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transportdur),  thrust::device_pointer_cast(d_Persons_default->transportdur) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_transportdur_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->transportdur),  thrust::device_pointer_cast(d_Persons_default->transportdur) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_transportdur_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_transportdur_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_default_transportday1_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transportday1),  thrust::device_pointer_cast(d_Persons_default->transportday1) + h_xmachine_memory_Person_default_count);
@@ -5900,6 +6144,27 @@ int min_Person_default_church_variable(){
 int max_Person_default_church_variable(){
     //max in default stream
     thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->church);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_default_transport_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transport),  thrust::device_pointer_cast(d_Persons_default->transport) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_transport_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->transport),  thrust::device_pointer_cast(d_Persons_default->transport) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_transport_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transport);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_transport_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transport);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -6172,6 +6437,27 @@ int max_Person_s2_transportfreq_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+int reduce_Person_s2_transportdur_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transportdur),  thrust::device_pointer_cast(d_Persons_s2->transportdur) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_transportdur_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->transportdur),  thrust::device_pointer_cast(d_Persons_s2->transportdur) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_transportdur_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_transportdur_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_transportday1_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transportday1),  thrust::device_pointer_cast(d_Persons_s2->transportday1) + h_xmachine_memory_Person_s2_count);
@@ -6253,6 +6539,27 @@ int min_Person_s2_church_variable(){
 int max_Person_s2_church_variable(){
     //max in default stream
     thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->church);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_s2_transport_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transport),  thrust::device_pointer_cast(d_Persons_s2->transport) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_transport_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->transport),  thrust::device_pointer_cast(d_Persons_s2->transport) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_transport_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transport);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_transport_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transport);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -6997,7 +7304,7 @@ void Person_update(cudaStream_t &stream){
 
 	
 /* Shared memory size calculator for agent function */
-int Person_init_sm_size(int blockSize){
+int Person_personhhinit_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
   //Continuous agent and message input has no partitioning
@@ -7009,10 +7316,10 @@ int Person_init_sm_size(int blockSize){
 	return sm_size;
 }
 
-/** Person_init
- * Agent function prototype for init function of Person agent
+/** Person_personhhinit
+ * Agent function prototype for personhhinit function of Person agent
  */
-void Person_init(cudaStream_t &stream){
+void Person_personhhinit(cudaStream_t &stream){
 
     int sm_size;
     int blockSize;
@@ -7057,24 +7364,24 @@ void Person_init(cudaStream_t &stream){
 	
 	
 	//calculate the grid block size for main agent function
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_init, Person_init_sm_size, state_list_size);
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_personhhinit, Person_personhhinit_sm_size, state_list_size);
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = blockSize;
 	g.x = gridSize;
 	
-	sm_size = Person_init_sm_size(blockSize);
+	sm_size = Person_personhhinit_sm_size(blockSize);
 	
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
 	
-	//MAIN XMACHINE FUNCTION CALL (init)
+	//MAIN XMACHINE FUNCTION CALL (personhhinit)
 	//Reallocate   : false
 	//Input        : household_membership
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_init<<<g, b, sm_size, stream>>>(d_Persons, d_household_memberships);
+	GPUFLAME_personhhinit<<<g, b, sm_size, stream>>>(d_Persons, d_household_memberships);
 	gpuErrchkLaunch();
 	
 	
@@ -7085,7 +7392,7 @@ void Person_init(cudaStream_t &stream){
     
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
-		printf("Error: Buffer size of init agents in state s2 will be exceeded moving working agents to next state in function init\n");
+		printf("Error: Buffer size of personhhinit agents in state s2 will be exceeded moving working agents to next state in function personhhinit\n");
       exit(EXIT_FAILURE);
       }
       
@@ -7098,6 +7405,114 @@ void Person_init(cudaStream_t &stream){
 	//update new state agent size
 	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_persontrinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_transport_membership));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_persontrinit
+ * Agent function prototype for persontrinit function of Person agent
+ */
+void Person_persontrinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_default_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_default_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
+	d_Persons = d_Persons_default;
+	d_Persons_default = Persons_default_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_default_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_persontrinit, Person_persontrinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_persontrinit_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (persontrinit)
+	//Reallocate   : false
+	//Input        : transport_membership
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_persontrinit<<<g, b, sm_size, stream>>>(d_Persons, d_transport_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of persontrinit agents in state default will be exceeded moving working agents to next state in function persontrinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Persons_default_temp = d_Persons;
+  d_Persons = d_Persons_default;
+  d_Persons_default = Persons_default_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_default_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
 	
 	
 }

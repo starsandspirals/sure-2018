@@ -293,6 +293,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           }
         } else {
           h_person->transportfreq = -1;
+          h_person->transport = -1;
         }
 
         // Update the arrays of information with this person's household size
@@ -778,6 +779,9 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
 __FLAME_GPU_FUNC__ int trinit(
     xmachine_memory_TransportMembership *trmembership,
     xmachine_message_transport_membership_list *transport_membership_messages) {
+  add_transport_membership_message(
+      transport_membership_messages, trmembership->person_id,
+      trmembership->transport_id, trmembership->duration);
   return 1;
 }
 
@@ -816,7 +820,25 @@ __FLAME_GPU_FUNC__ int hhinit(
   return 1;
 }
 
-__FLAME_GPU_FUNC__ int init(
+__FLAME_GPU_FUNC__ int persontrinit(
+    xmachine_memory_Person *person,
+    xmachine_message_transport_membership_list *transport_membership_messages) {
+  unsigned int personid = person->id;
+  xmachine_message_transport_membership *transport_membership_message =
+      get_first_transport_membership_message(transport_membership_messages);
+
+  while (transport_membership_message) {
+    if (transport_membership_message->person_id == personid) {
+      person->transport = transport_membership_message->transport_id;
+      person->transportdur = transport_membership_message->duration;
+    }
+    transport_membership_message = get_next_transport_membership_message(
+        transport_membership_message, transport_membership_messages);
+  }
+
+  return 0;
+}
+__FLAME_GPU_FUNC__ int personhhinit(
     xmachine_memory_Person *person,
     xmachine_message_household_membership_list *household_membership_messages) {
   xmachine_message_household_membership *household_membership_message =
@@ -833,7 +855,6 @@ __FLAME_GPU_FUNC__ int init(
     household_membership_message = get_next_household_membership_message(
         household_membership_message, household_membership_messages);
   }
-
   return 0;
 }
 
