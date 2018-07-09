@@ -70,7 +70,7 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
 __device__ unsigned int dayofweek(unsigned int step) {
-  return (step % 288) % 7;
+  return (step % 2016) / 288;
 }
 
 // A struct to represent a time of day, and a function that returns a time of
@@ -248,7 +248,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         // Decide whether the person is a transport user based on given input
         // probabilities.
-        float useprob = 1 + exp(-transport_beta0 - transport_beta1 * age);
+        float useprob = 1 + exp(-transport_beta0 - (transport_beta1 * age));
 
         if (random < useprob) {
           h_person->transportuser = 1;
@@ -670,7 +670,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->location = 1;
         person->locationid = person->church;
       }
-    } else if (day == person->transportday1 || day == person->transportday2) {
+    } else if (person->transport != -1 && (day == person->transportday1 || day == person->transportday2)) {
       if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
         person->startstep = person->step;
         person->busy = 1;
