@@ -183,9 +183,15 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
-          <name>time</name>
-          <arrayLength>16</arrayLength>
-          <defaultValue>0</defaultValue>
+          <name>householdtime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>churchtime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>transporttime</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
@@ -270,7 +276,7 @@
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
-          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
         <gpu:function>
@@ -770,6 +776,12 @@
     <layer>
       <gpu:layerFunction>
         <name>persontrinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>update</name>
       </gpu:layerFunction>
     </layer>
   </layers>

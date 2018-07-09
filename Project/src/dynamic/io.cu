@@ -302,13 +302,20 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</step>\n", file);
         
-		fputs("<time>", file);
-        for (int j=0;j<16;j++){
-            fprintf(file, "%u", h_Persons_default->time[(j*xmachine_memory_Person_MAX)+i]);
-            if(j!=(16-1))
-                fprintf(file, ",");
-        }
-		fputs("</time>\n", file);
+		fputs("<householdtime>", file);
+        sprintf(data, "%u", h_Persons_default->householdtime[i]);
+		fputs(data, file);
+		fputs("</householdtime>\n", file);
+        
+		fputs("<churchtime>", file);
+        sprintf(data, "%u", h_Persons_default->churchtime[i]);
+		fputs(data, file);
+		fputs("</churchtime>\n", file);
+        
+		fputs("<transporttime>", file);
+        sprintf(data, "%u", h_Persons_default->transporttime[i]);
+		fputs(data, file);
+		fputs("</transporttime>\n", file);
         
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_default->age[i]);
@@ -412,13 +419,20 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</step>\n", file);
         
-		fputs("<time>", file);
-        for (int j=0;j<16;j++){
-            fprintf(file, "%u", h_Persons_s2->time[(j*xmachine_memory_Person_MAX)+i]);
-            if(j!=(16-1))
-                fprintf(file, ",");
-        }
-		fputs("</time>\n", file);
+		fputs("<householdtime>", file);
+        sprintf(data, "%u", h_Persons_s2->householdtime[i]);
+		fputs(data, file);
+		fputs("</householdtime>\n", file);
+        
+		fputs("<churchtime>", file);
+        sprintf(data, "%u", h_Persons_s2->churchtime[i]);
+		fputs(data, file);
+		fputs("</churchtime>\n", file);
+        
+		fputs("<transporttime>", file);
+        sprintf(data, "%u", h_Persons_s2->transporttime[i]);
+		fputs(data, file);
+		fputs("</transporttime>\n", file);
         
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_s2->age[i]);
@@ -785,7 +799,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int in_tag, in_itno, in_xagent, in_name;
     int in_Person_id;
     int in_Person_step;
-    int in_Person_time;
+    int in_Person_householdtime;
+    int in_Person_churchtime;
+    int in_Person_transporttime;
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
@@ -896,7 +912,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	/* Variables for initial state data */
 	unsigned int Person_id;
 	unsigned int Person_step;
-    unsigned int Person_time[16];
+	unsigned int Person_householdtime;
+	unsigned int Person_churchtime;
+	unsigned int Person_transporttime;
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
@@ -988,7 +1006,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_name = 0;
 	in_Person_id = 0;
 	in_Person_step = 0;
-	in_Person_time = 0;
+	in_Person_householdtime = 0;
+	in_Person_churchtime = 0;
+	in_Person_transporttime = 0;
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
@@ -1065,9 +1085,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	{	
 		h_Persons->id[k] = 0;
 		h_Persons->step[k] = 0;
-        for (i=0;i<16;i++){
-            h_Persons->time[(i*xmachine_memory_Person_MAX)+k] = 0;
-        }
+		h_Persons->householdtime[k] = 0;
+		h_Persons->churchtime[k] = 0;
+		h_Persons->transporttime[k] = 0;
 		h_Persons->age[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
@@ -1161,9 +1181,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	/* Default variables for memory */
     Person_id = 0;
     Person_step = 0;
-    for (i=0;i<16;i++){
-        Person_time[i] = 0;
-    }
+    Person_householdtime = 0;
+    Person_churchtime = 0;
+    Person_transporttime = 0;
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
@@ -1305,9 +1325,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     
 					h_Persons->id[*h_xmachine_memory_Person_count] = Person_id;
 					h_Persons->step[*h_xmachine_memory_Person_count] = Person_step;
-                    for (int k=0;k<16;k++){
-                        h_Persons->time[(k*xmachine_memory_Person_MAX)+(*h_xmachine_memory_Person_count)] = Person_time[k];
-                    }
+					h_Persons->householdtime[*h_xmachine_memory_Person_count] = Person_householdtime;
+					h_Persons->churchtime[*h_xmachine_memory_Person_count] = Person_churchtime;
+					h_Persons->transporttime[*h_xmachine_memory_Person_count] = Person_transporttime;
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
@@ -1437,9 +1457,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				/* Reset xagent variables */
                 Person_id = 0;
                 Person_step = 0;
-                for (i=0;i<16;i++){
-                    Person_time[i] = 0;
-                }
+                Person_householdtime = 0;
+                Person_churchtime = 0;
+                Person_transporttime = 0;
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
@@ -1498,8 +1518,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/id") == 0) in_Person_id = 0;
 			if(strcmp(buffer, "step") == 0) in_Person_step = 1;
 			if(strcmp(buffer, "/step") == 0) in_Person_step = 0;
-			if(strcmp(buffer, "time") == 0) in_Person_time = 1;
-			if(strcmp(buffer, "/time") == 0) in_Person_time = 0;
+			if(strcmp(buffer, "householdtime") == 0) in_Person_householdtime = 1;
+			if(strcmp(buffer, "/householdtime") == 0) in_Person_householdtime = 0;
+			if(strcmp(buffer, "churchtime") == 0) in_Person_churchtime = 1;
+			if(strcmp(buffer, "/churchtime") == 0) in_Person_churchtime = 0;
+			if(strcmp(buffer, "transporttime") == 0) in_Person_transporttime = 1;
+			if(strcmp(buffer, "/transporttime") == 0) in_Person_transporttime = 0;
 			if(strcmp(buffer, "age") == 0) in_Person_age = 1;
 			if(strcmp(buffer, "/age") == 0) in_Person_age = 0;
 			if(strcmp(buffer, "gender") == 0) in_Person_gender = 1;
@@ -1666,8 +1690,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				if(in_Person_step){
                     Person_step = (unsigned int) fpgu_strtoul(buffer); 
                 }
-				if(in_Person_time){
-                    readArrayInput<unsigned int>(&fpgu_strtoul, buffer, Person_time, 16);    
+				if(in_Person_householdtime){
+                    Person_householdtime = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_churchtime){
+                    Person_churchtime = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_transporttime){
+                    Person_transporttime = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Person_age){
                     Person_age = (unsigned int) fpgu_strtoul(buffer); 

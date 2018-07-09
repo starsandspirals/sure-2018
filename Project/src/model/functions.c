@@ -81,7 +81,7 @@ struct Time {
 };
 
 __device__ struct Time timeofday(unsigned int step) {
-  unsigned int hour = (step % 12) % 24;
+  unsigned int hour = (step % 288) / 12;
   unsigned int minute = (step % 12) * 5;
   Time t = {hour, minute};
   return t;
@@ -306,6 +306,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         // Generate the agent and free them from memory on the host.
         h_person->step = 0;
+        h_person->householdtime = 0;
+        h_person->churchtime = 0;
+        h_person->transporttime = 0;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -605,9 +608,9 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
               get_Person_s2_variable_householdsize(index),
-              get_Person_s2_variable_time(index, 0),
-              get_Person_s2_variable_time(index, 1),
-              get_Person_s2_variable_time(index, 2));
+              get_Person_s2_variable_householdtime(index),
+              get_Person_s2_variable_churchtime(index),
+              get_Person_s2_variable_transporttime(index));
     }
 
     fflush(fp);
@@ -667,16 +670,16 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->location = 1;
         person->locationid = person->church;
       }
-    } else {
-      person->location = 0;
-      person->locationid = person->household;
-    }
-  } else if (day == person->transportday1 || day == person->transportday2) {
-    if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
-      person->startstep = person->step;
-      person->busy = 1;
-      person->location = 2;
-      person->locationid = person->transport;
+    } else if (day == person->transportday1 || day == person->transportday2) {
+      if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
+        person->startstep = person->step;
+        person->busy = 1;
+        person->location = 2;
+        person->locationid = person->transport;
+      } else {
+        person->location = 0;
+        person->locationid = person->household;
+      }
     } else {
       person->location = 0;
       person->locationid = person->household;
@@ -689,18 +692,25 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->locationid = person->household;
     } else if (person->location == 2 &&
                (float)(person->step - person->startstep) >=
-                   person->transportdur * 5) {
+                   person->transportdur / 5) {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
     }
   }
 
+  person->step += TIME_STEP;
+
+  if (person->location == 0) {
+    person->householdtime += 5;
+  } else if (person->location == 1) {
+    person->churchtime += 5;
+  } else if (person->location == 2) {
+    person->transporttime += 5;
+  }
+
   add_location_message(location_messages, person->id, person->location,
                        person->locationid, day, hour, minute);
-
-  person->step += TIME_STEP;
-  person->time[person->location] += 5;
 
   return 0;
 }
