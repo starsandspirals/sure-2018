@@ -211,7 +211,10 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
-		agents_dst->step[output_index] = agents_src->step[index];        
+		agents_dst->step[output_index] = agents_src->step[index];
+	    for (int i=0; i<16; i++){
+	      agents_dst->time[(i*xmachine_memory_Person_MAX)+output_index] = agents_src->time[(i*xmachine_memory_Person_MAX)+index];
+	    }        
 		agents_dst->age[output_index] = agents_src->age[index];        
 		agents_dst->gender[output_index] = agents_src->gender[index];        
 		agents_dst->householdsize[output_index] = agents_src->householdsize[index];        
@@ -250,6 +253,9 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->step[output_index] = agents_src->step[index];
+	    for (int i=0; i<16; i++){
+	      agents_dst->time[(i*xmachine_memory_Person_MAX)+output_index] = agents_src->time[(i*xmachine_memory_Person_MAX)+index];
+	    }
 	    agents_dst->age[output_index] = agents_src->age[index];
 	    agents_dst->gender[output_index] = agents_src->gender[index];
 	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
@@ -275,6 +281,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param agents xmachine_memory_Person_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param step agent variable of type unsigned int
+ * @param time agent variable of type unsigned int
  * @param age agent variable of type unsigned int
  * @param gender agent variable of type unsigned int
  * @param householdsize agent variable of type unsigned int
@@ -355,6 +362,9 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->step[index] = unordered_agents->step[old_pos];
+	for (int i=0; i<16; i++){
+	  ordered_agents->time[(i*xmachine_memory_Person_MAX)+index] = unordered_agents->time[(i*xmachine_memory_Person_MAX)+old_pos];
+	}
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
 	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
 	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
@@ -372,6 +382,37 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->startstep[index] = unordered_agents->startstep[old_pos];
 	ordered_agents->location[index] = unordered_agents->location[old_pos];
 	ordered_agents->locationid[index] = unordered_agents->locationid[old_pos];
+}
+
+/** get_Person_agent_array_value
+ *  Template function for accessing Person agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @return return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ T get_Person_agent_array_value(T *array, uint index){
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    return array[index*xmachine_memory_Person_MAX];
+    } else {
+    	// Return the default value for this data type 
+	    return 0;
+    }
+}
+
+/** set_Person_agent_array_value
+ *  Template function for setting Person agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @param return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ void set_Person_agent_array_value(T *array, uint index, T value){
+	// Null check for out of bounds agents (brute force communication. )
+	if(array != nullptr){
+	    array[index*xmachine_memory_Person_MAX] = value;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1939,6 +1980,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
+    agent.time = &(agents->time[index]);
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
@@ -2005,6 +2047,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
     
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
+    agent.time = &(agents->time[index]);
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
@@ -2026,6 +2069,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	
 	agent.id = 0;
 	agent.step = 0;
+    agent.time = nullptr;
 	agent.age = 0;
 	agent.gender = 0;
 	agent.householdsize = 0;
@@ -2097,6 +2141,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
     
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
+    agent.time = &(agents->time[index]);
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
 	agent.householdsize = agents->householdsize[index];
@@ -2118,6 +2163,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	
 	agent.id = 0;
 	agent.step = 0;
+    agent.time = nullptr;
 	agent.age = 0;
 	agent.gender = 0;
 	agent.householdsize = 0;

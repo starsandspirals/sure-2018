@@ -696,6 +696,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                        person->locationid, day, hour, minute);
 
   person->step += TIME_STEP;
+  person->time[person->location] += 5;
 
   return 0;
 }

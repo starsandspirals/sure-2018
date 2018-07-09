@@ -185,6 +185,7 @@ int h_xmachine_memory_TransportMembership_trmembershipdefault_count;   /**< Agen
  */
 unsigned int h_Persons_default_variable_id_data_iteration;
 unsigned int h_Persons_default_variable_step_data_iteration;
+unsigned int h_Persons_default_variable_time_data_iteration;
 unsigned int h_Persons_default_variable_age_data_iteration;
 unsigned int h_Persons_default_variable_gender_data_iteration;
 unsigned int h_Persons_default_variable_householdsize_data_iteration;
@@ -204,6 +205,7 @@ unsigned int h_Persons_default_variable_location_data_iteration;
 unsigned int h_Persons_default_variable_locationid_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
+unsigned int h_Persons_s2_variable_time_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
 unsigned int h_Persons_s2_variable_gender_data_iteration;
 unsigned int h_Persons_s2_variable_householdsize_data_iteration;
@@ -474,6 +476,7 @@ void initialise(char * inputfile){
     // Initialise variables for tracking which iterations' data is accessible on the host.
     h_Persons_default_variable_id_data_iteration = 0;
     h_Persons_default_variable_step_data_iteration = 0;
+    h_Persons_default_variable_time_data_iteration = 0;
     h_Persons_default_variable_age_data_iteration = 0;
     h_Persons_default_variable_gender_data_iteration = 0;
     h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -493,6 +496,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_locationid_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
+    h_Persons_s2_variable_time_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
     h_Persons_s2_variable_householdsize_data_iteration = 0;
@@ -2010,6 +2014,49 @@ __host__ unsigned int get_Person_default_variable_step(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_time(unsigned int index, unsigned int element)
+ * Gets the element-th value of the time variable array of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable time
+ */
+__host__ unsigned int get_Person_default_variable_time(unsigned int index, unsigned int element){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int numElements = 16;
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count && element < numElements ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_time_data_iteration != currentIteration){
+            
+            for(unsigned int e = 0; e < numElements; e++){
+                gpuErrchk(
+                    cudaMemcpy(
+                        h_Persons_default->time + (e * xmachine_memory_Person_MAX),
+                        d_Persons_default->time + (e * xmachine_memory_Person_MAX), 
+                        count * sizeof(unsigned int), 
+                        cudaMemcpyDeviceToHost
+                    )
+                );
+                // Update some global value indicating what data is currently present in that host array.
+                h_Persons_default_variable_time_data_iteration = currentIteration;
+            }
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->time[index + (element * xmachine_memory_Person_MAX)];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access the %u-th element of time for the %u th member of Person_default. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_default_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2745,6 +2792,49 @@ __host__ unsigned int get_Person_s2_variable_step(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access step for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_time(unsigned int index, unsigned int element)
+ * Gets the element-th value of the time variable array of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable time
+ */
+__host__ unsigned int get_Person_s2_variable_time(unsigned int index, unsigned int element){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int numElements = 16;
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count && element < numElements ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_time_data_iteration != currentIteration){
+            
+            for(unsigned int e = 0; e < numElements; e++){
+                gpuErrchk(
+                    cudaMemcpy(
+                        h_Persons_s2->time + (e * xmachine_memory_Person_MAX),
+                        d_Persons_s2->time + (e * xmachine_memory_Person_MAX), 
+                        count * sizeof(unsigned int), 
+                        cudaMemcpyDeviceToHost
+                    )
+                );
+                // Update some global value indicating what data is currently present in that host array.
+                h_Persons_s2_variable_time_data_iteration = currentIteration;
+            }
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->time[index + (element * xmachine_memory_Person_MAX)];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access the %u-th element of time for the %u th member of Person_s2. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -4536,6 +4626,10 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
+	for(unsigned int i = 0; i < 16; i++){
+		gpuErrchk(cudaMemcpy(d_dst->time + (i * xmachine_memory_Person_MAX), h_agent->time + i, sizeof(unsigned int), cudaMemcpyHostToDevice));
+    }
+ 
 		gpuErrchk(cudaMemcpy(d_dst->age, &h_agent->age, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->gender, &h_agent->gender, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -4588,6 +4682,11 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		for(unsigned int i = 0; i < 16; i++){
+			gpuErrchk(cudaMemcpy(d_dst->time + (i * xmachine_memory_Person_MAX), h_src->time + (i * xmachine_memory_Person_MAX), count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+        }
+
  
 		gpuErrchk(cudaMemcpy(d_dst->age, h_src->age, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -4913,12 +5012,19 @@ xmachine_memory_Person* h_allocate_agent_Person(){
 	xmachine_memory_Person* agent = (xmachine_memory_Person*)malloc(sizeof(xmachine_memory_Person));
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Person));
-
+	// Agent variable arrays must be allocated
+    agent->time = (unsigned int*)malloc(16 * sizeof(unsigned int));
+	// If we have a default value, set each element correctly.
+	for(unsigned int index = 0; index < 16; index++){
+		agent->time[index] = 0;
+	}
     agent->age = 0;
 
 	return agent;
 }
 void h_free_agent_Person(xmachine_memory_Person** agent){
+
+    free((*agent)->time);
  
 	free((*agent));
 	(*agent) = NULL;
@@ -4945,6 +5051,10 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->id[i] = src[i]->id;
 			 
 			dst->step[i] = src[i]->step;
+			 
+			for(unsigned int j = 0; j < 16; j++){
+				dst->time[(j * xmachine_memory_Person_MAX) + i] = src[i]->time[j];
+			}
 			 
 			dst->age[i] = src[i]->age;
 			 
@@ -5012,6 +5122,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Persons_default_variable_id_data_iteration = 0;
     h_Persons_default_variable_step_data_iteration = 0;
+    h_Persons_default_variable_time_data_iteration = 0;
     h_Persons_default_variable_age_data_iteration = 0;
     h_Persons_default_variable_gender_data_iteration = 0;
     h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -5062,6 +5173,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Persons_default_variable_id_data_iteration = 0;
         h_Persons_default_variable_step_data_iteration = 0;
+        h_Persons_default_variable_time_data_iteration = 0;
         h_Persons_default_variable_age_data_iteration = 0;
         h_Persons_default_variable_gender_data_iteration = 0;
         h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -5112,6 +5224,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
+    h_Persons_s2_variable_time_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
     h_Persons_s2_variable_householdsize_data_iteration = 0;
@@ -5162,6 +5275,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Persons_s2_variable_id_data_iteration = 0;
         h_Persons_s2_variable_step_data_iteration = 0;
+        h_Persons_s2_variable_time_data_iteration = 0;
         h_Persons_s2_variable_age_data_iteration = 0;
         h_Persons_s2_variable_gender_data_iteration = 0;
         h_Persons_s2_variable_householdsize_data_iteration = 0;

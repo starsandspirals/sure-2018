@@ -183,6 +183,12 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>time</name>
+          <arrayLength>16</arrayLength>
+          <defaultValue>0</defaultValue>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>age</name>
           <defaultValue>0</defaultValue>
         </gpu:variable>

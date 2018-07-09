@@ -77,6 +77,8 @@ typedef glm::dvec4 dvec4;
 
 //Maximum population size of xmachine_memory_TransportMembership
 #define xmachine_memory_TransportMembership_MAX 32768 
+//Agent variable array length for xmachine_memory_Person->time
+#define xmachine_memory_Person_time_LENGTH 16 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32 
 //Agent variable array length for xmachine_memory_Church->households
@@ -152,6 +154,7 @@ struct __align__(16) xmachine_memory_Person
 {
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
+    unsigned int *time;    /**< X-machine memory variable time of type unsigned int.*/
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     unsigned int gender;    /**< X-machine memory variable gender of type unsigned int.*/
     unsigned int householdsize;    /**< X-machine memory variable householdsize of type unsigned int.*/
@@ -329,6 +332,7 @@ struct xmachine_memory_Person_list
     
     unsigned int id [xmachine_memory_Person_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int step [xmachine_memory_Person_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
+    unsigned int time [xmachine_memory_Person_MAX*16];    /**< X-machine memory variable list time of type unsigned int.*/
     unsigned int age [xmachine_memory_Person_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     unsigned int gender [xmachine_memory_Person_MAX];    /**< X-machine memory variable list gender of type unsigned int.*/
     unsigned int householdsize [xmachine_memory_Person_MAX];    /**< X-machine memory variable list householdsize of type unsigned int.*/
@@ -777,6 +781,27 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param locationid	agent agent variable of type unsigned int
  */
 __FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid);
+
+/** get_Person_agent_array_value
+ *  Template function for accessing Person agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @return return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ T get_Person_agent_array_value(T *array, unsigned int index);
+
+/** set_Person_agent_array_value
+ *  Template function for setting Person agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @param return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ void set_Person_agent_array_value(T *array, unsigned int index, T value);
+
+
+  
 
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1310,6 +1335,16 @@ __host__ unsigned int get_Person_default_variable_id(unsigned int index);
  */
 __host__ unsigned int get_Person_default_variable_step(unsigned int index);
 
+/** unsigned int get_Person_default_variable_time(unsigned int index, unsigned int element)
+ * Gets the element-th value of the time variable array of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable time
+ */
+__host__ unsigned int get_Person_default_variable_time(unsigned int index, unsigned int element);
+
 /** unsigned int get_Person_default_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1480,6 +1515,16 @@ __host__ unsigned int get_Person_s2_variable_id(unsigned int index);
  * @return value of agent variable step
  */
 __host__ unsigned int get_Person_s2_variable_step(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_time(unsigned int index, unsigned int element)
+ * Gets the element-th value of the time variable array of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable time
+ */
+__host__ unsigned int get_Person_s2_variable_time(unsigned int index, unsigned int element);
 
 /** unsigned int get_Person_s2_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the s2 state on the host. 
