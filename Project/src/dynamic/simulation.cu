@@ -2318,14 +2318,14 @@ __host__ int get_Person_default_variable_transportdur(unsigned int index){
     }
 }
 
-/** unsigned int get_Person_default_variable_transportday1(unsigned int index)
+/** int get_Person_default_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportday1
  */
-__host__ unsigned int get_Person_default_variable_transportday1(unsigned int index){
+__host__ int get_Person_default_variable_transportday1(unsigned int index){
     unsigned int count = get_agent_Person_default_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -2338,7 +2338,7 @@ __host__ unsigned int get_Person_default_variable_transportday1(unsigned int ind
                 cudaMemcpy(
                     h_Persons_default->transportday1,
                     d_Persons_default->transportday1,
-                    count * sizeof(unsigned int),
+                    count * sizeof(int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -2357,14 +2357,14 @@ __host__ unsigned int get_Person_default_variable_transportday1(unsigned int ind
     }
 }
 
-/** unsigned int get_Person_default_variable_transportday2(unsigned int index)
+/** int get_Person_default_variable_transportday2(unsigned int index)
  * Gets the value of the transportday2 variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportday2
  */
-__host__ unsigned int get_Person_default_variable_transportday2(unsigned int index){
+__host__ int get_Person_default_variable_transportday2(unsigned int index){
     unsigned int count = get_agent_Person_default_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -2377,7 +2377,7 @@ __host__ unsigned int get_Person_default_variable_transportday2(unsigned int ind
                 cudaMemcpy(
                     h_Persons_default->transportday2,
                     d_Persons_default->transportday2,
-                    count * sizeof(unsigned int),
+                    count * sizeof(int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -3059,14 +3059,14 @@ __host__ int get_Person_s2_variable_transportdur(unsigned int index){
     }
 }
 
-/** unsigned int get_Person_s2_variable_transportday1(unsigned int index)
+/** int get_Person_s2_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportday1
  */
-__host__ unsigned int get_Person_s2_variable_transportday1(unsigned int index){
+__host__ int get_Person_s2_variable_transportday1(unsigned int index){
     unsigned int count = get_agent_Person_s2_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -3079,7 +3079,7 @@ __host__ unsigned int get_Person_s2_variable_transportday1(unsigned int index){
                 cudaMemcpy(
                     h_Persons_s2->transportday1,
                     d_Persons_s2->transportday1,
-                    count * sizeof(unsigned int),
+                    count * sizeof(int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -3098,14 +3098,14 @@ __host__ unsigned int get_Person_s2_variable_transportday1(unsigned int index){
     }
 }
 
-/** unsigned int get_Person_s2_variable_transportday2(unsigned int index)
+/** int get_Person_s2_variable_transportday2(unsigned int index)
  * Gets the value of the transportday2 variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportday2
  */
-__host__ unsigned int get_Person_s2_variable_transportday2(unsigned int index){
+__host__ int get_Person_s2_variable_transportday2(unsigned int index){
     unsigned int count = get_agent_Person_s2_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -3118,7 +3118,7 @@ __host__ unsigned int get_Person_s2_variable_transportday2(unsigned int index){
                 cudaMemcpy(
                     h_Persons_s2->transportday2,
                     d_Persons_s2->transportday2,
-                    count * sizeof(unsigned int),
+                    count * sizeof(int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -4509,9 +4509,9 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportday1, &h_agent->transportday1, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportday1, &h_agent->transportday1, sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportday2, &h_agent->transportday2, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportday2, &h_agent->transportday2, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->household, &h_agent->household, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -4562,9 +4562,9 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
  
 		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportday1, h_src->transportday1, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportday1, h_src->transportday1, count * sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportday2, h_src->transportday2, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportday2, h_src->transportday2, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->household, h_src->household, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -6063,45 +6063,45 @@ int max_Person_default_transportdur_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Person_default_transportday1_variable(){
+int reduce_Person_default_transportday1_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transportday1),  thrust::device_pointer_cast(d_Persons_default->transportday1) + h_xmachine_memory_Person_default_count);
 }
 
-unsigned int count_Person_default_transportday1_variable(int count_value){
+int count_Person_default_transportday1_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->transportday1),  thrust::device_pointer_cast(d_Persons_default->transportday1) + h_xmachine_memory_Person_default_count, count_value);
 }
-unsigned int min_Person_default_transportday1_variable(){
+int min_Person_default_transportday1_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday1);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday1);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Person_default_transportday1_variable(){
+int max_Person_default_transportday1_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday1);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday1);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Person_default_transportday2_variable(){
+int reduce_Person_default_transportday2_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transportday2),  thrust::device_pointer_cast(d_Persons_default->transportday2) + h_xmachine_memory_Person_default_count);
 }
 
-unsigned int count_Person_default_transportday2_variable(int count_value){
+int count_Person_default_transportday2_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->transportday2),  thrust::device_pointer_cast(d_Persons_default->transportday2) + h_xmachine_memory_Person_default_count, count_value);
 }
-unsigned int min_Person_default_transportday2_variable(){
+int min_Person_default_transportday2_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday2);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday2);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Person_default_transportday2_variable(){
+int max_Person_default_transportday2_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday2);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportday2);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -6458,45 +6458,45 @@ int max_Person_s2_transportdur_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Person_s2_transportday1_variable(){
+int reduce_Person_s2_transportday1_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transportday1),  thrust::device_pointer_cast(d_Persons_s2->transportday1) + h_xmachine_memory_Person_s2_count);
 }
 
-unsigned int count_Person_s2_transportday1_variable(int count_value){
+int count_Person_s2_transportday1_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->transportday1),  thrust::device_pointer_cast(d_Persons_s2->transportday1) + h_xmachine_memory_Person_s2_count, count_value);
 }
-unsigned int min_Person_s2_transportday1_variable(){
+int min_Person_s2_transportday1_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday1);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday1);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Person_s2_transportday1_variable(){
+int max_Person_s2_transportday1_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday1);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday1);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Person_s2_transportday2_variable(){
+int reduce_Person_s2_transportday2_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transportday2),  thrust::device_pointer_cast(d_Persons_s2->transportday2) + h_xmachine_memory_Person_s2_count);
 }
 
-unsigned int count_Person_s2_transportday2_variable(int count_value){
+int count_Person_s2_transportday2_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->transportday2),  thrust::device_pointer_cast(d_Persons_s2->transportday2) + h_xmachine_memory_Person_s2_count, count_value);
 }
-unsigned int min_Person_s2_transportday2_variable(){
+int min_Person_s2_transportday2_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday2);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday2);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_Person_s2_transportday2_variable(){
+int max_Person_s2_transportday2_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday2);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportday2);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

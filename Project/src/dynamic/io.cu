@@ -343,12 +343,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</transportdur>\n", file);
         
 		fputs("<transportday1>", file);
-        sprintf(data, "%u", h_Persons_default->transportday1[i]);
+        sprintf(data, "%d", h_Persons_default->transportday1[i]);
 		fputs(data, file);
 		fputs("</transportday1>\n", file);
         
 		fputs("<transportday2>", file);
-        sprintf(data, "%u", h_Persons_default->transportday2[i]);
+        sprintf(data, "%d", h_Persons_default->transportday2[i]);
 		fputs(data, file);
 		fputs("</transportday2>\n", file);
         
@@ -445,12 +445,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</transportdur>\n", file);
         
 		fputs("<transportday1>", file);
-        sprintf(data, "%u", h_Persons_s2->transportday1[i]);
+        sprintf(data, "%d", h_Persons_s2->transportday1[i]);
 		fputs(data, file);
 		fputs("</transportday1>\n", file);
         
 		fputs("<transportday2>", file);
-        sprintf(data, "%u", h_Persons_s2->transportday2[i]);
+        sprintf(data, "%d", h_Persons_s2->transportday2[i]);
 		fputs(data, file);
 		fputs("</transportday2>\n", file);
         
@@ -881,8 +881,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_transportuser;
 	int Person_transportfreq;
 	int Person_transportdur;
-	unsigned int Person_transportday1;
-	unsigned int Person_transportday2;
+	int Person_transportday1;
+	int Person_transportday2;
 	unsigned int Person_household;
 	int Person_church;
 	int Person_transport;
@@ -1644,10 +1644,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Person_transportdur = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_transportday1){
-                    Person_transportday1 = (unsigned int) fpgu_strtoul(buffer); 
+                    Person_transportday1 = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_transportday2){
-                    Person_transportday2 = (unsigned int) fpgu_strtoul(buffer); 
+                    Person_transportday2 = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_household){
                     Person_household = (unsigned int) fpgu_strtoul(buffer); 

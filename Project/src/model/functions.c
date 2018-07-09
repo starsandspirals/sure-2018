@@ -267,6 +267,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           } else if (random < transport_freq2) {
             h_person->transportfreq = 2;
             h_person->transportday1 = (rand() % 5) + 1;
+            h_person->transportday2 = -1;
 
             transport[daycount] = h_person->id;
             days[daycount] = h_person->transportday1;
@@ -294,6 +295,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         } else {
           h_person->transportfreq = -1;
           h_person->transport = -1;
+          h_person->transportday1 = -1;
+          h_person->transportday2 = -1;
         }
 
         // Update the arrays of information with this person's household size
@@ -744,9 +747,23 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->location = 0;
       person->locationid = person->household;
     }
+  } else if (day == person->transportday1 || day == person->transportday2) {
+    if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
+      person->startstep = person->step;
+      person->busy = 1;
+      person->location = 2;
+      person->locationid = person->transport;
+    } else {
+      person->location = 0;
+      person->locationid = person->household;
+    }
   } else {
     if (person->location == 1 &&
         (float)(person->step - person->startstep) >= person->churchdur * 12) {
+      person->busy = 0;
+      person->location = 0;
+      person->locationid = person->household;
+    } else if (person->location == 2 && (float)(person->step - person->startstep) >= person->transportdur * 5) {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
