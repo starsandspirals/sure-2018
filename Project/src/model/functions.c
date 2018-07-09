@@ -262,8 +262,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
             h_person->transportfreq = 0;
           } else if (random < transport_freq2) {
             h_person->transportfreq = 2;
+            h_person->transportday1 = (rand() % 5) + 1;
           } else {
             h_person->transportfreq = 4;
+            h_person->transportday1 = (rand() % 5) + 1;
+            h_person->transportday2 = h_person->transportday1;
+            while (h_person->transportday2 == h_person->transportday1) {
+              h_person->transportday2 = (rand() % 5) + 1;
+            }
           }
 
           random = ((float)rand() / (RAND_MAX));

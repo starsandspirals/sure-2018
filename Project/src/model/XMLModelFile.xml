@@ -216,6 +216,14 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>transportday1</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>transportday2</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>household</name>
         </gpu:variable>
         <gpu:variable>
