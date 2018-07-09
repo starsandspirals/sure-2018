@@ -488,19 +488,63 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       capacity += adult[hhposition];
       hhposition++;
 
-      h_church->step = 0;
       h_add_agent_ChurchMembership_chumembershipdefault(h_chumembership);
 
       h_free_agent_ChurchMembership(&h_chumembership);
     }
 
     // Generate the church agent and free it from memory on the host.
+    h_church->step = 0;
     h_add_agent_Church_chudefault(h_church);
 
     h_free_agent_Church(&h_church);
   }
 
+  for (unsigned int i = 0; i < 5; i++) {
 
+    unsigned int currentday = 0;
+    unsigned int currentpeople[h_agent_AoS_MAX];
+
+    for (unsigned int j = 0; j < h_agent_AoS_MAX; j++) {
+      if (days[j] == i) {
+        currentpeople[currentday] = transport[j];
+        currentday++;
+      }
+    }
+
+    unsigned int countdone = 0;
+    unsigned int capacity;
+
+    while (countdone < currentday) {
+      xmachine_memory_Transport *h_transport = h_allocate_agent_Transport();
+      capacity = 0;
+
+      h_transport->id = getNextTransportID();
+      h_transport->day = i;
+
+      while (capacity < transport_size && countdone < currentday) {
+
+        h_transport->people[capacity] = currentpeople[countdone];
+
+        xmachine_memory_TransportMembership *h_trmembership =
+            h_allocate_agent_TransportMembership();
+        h_trmembership->person_id = currentpeople[countdone];
+        h_trmembership->transport_id = h_transport->id;
+
+        h_add_agent_TransportMembership_trmembershipdefault(h_trmembership);
+
+        h_free_agent_TransportMembership(&h_trmembership);
+
+        capacity++;
+        countdone++;
+      }
+
+      h_transport->step = 0;
+      h_add_agent_Transport_trdefault(h_transport);
+
+      h_free_agent_Transport(&h_transport);
+    }
+  }
 
   while (fgets(line, sizeof(line), file)) {
     printf("%s", line);
@@ -678,7 +722,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
     if (hour == 14 && minute == 0 && person->church != -1) {
       if (person->churchfreq == 0) {
         float random = rnd<CONTINUOUS>(rand48);
-        float prob = 1 - device_exp(-6 / 365);
+        float prob = 1 - device_exp(-6.0 / 365);
 
         if (random < prob) {
           person->startstep = person->step;
@@ -705,7 +749,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
-    } 
+    }
   }
 
   add_location_message(location_messages, person->id, person->location,
@@ -729,6 +773,12 @@ __FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) {
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
   transport->step += TIME_STEP;
   return 0;
+}
+
+__FLAME_GPU_FUNC__ int trinit(
+    xmachine_memory_TransportMembership *trmembership,
+    xmachine_message_transport_membership_list *transport_membership_messages) {
+  return 1;
 }
 
 __FLAME_GPU_FUNC__ int

@@ -520,6 +520,16 @@
           <type>unsigned int</type>
           <name>duration</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>day</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>people</name>
+          <arrayLength>16</arrayLength>
+          <defaultValue>-1</defaultValue>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -542,6 +552,52 @@
       <gpu:type>continuous</gpu:type>
 
       <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>TransportMembership</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>transport_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>duration</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>trinit</name>
+          <currentState>trmembershipdefault</currentState>
+          <nextState>trmembershipdefault</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>transport_membership</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>trmembershipdefault</name>
+        </gpu:state>
+        <initialState>trmembershipdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>32768</gpu:bufferSize>
     </gpu:xagent>
 
   </xagents>
@@ -597,6 +653,27 @@
     </variables>
     <gpu:partitioningNone/>
     <gpu:bufferSize>8192</gpu:bufferSize>
+  </gpu:message>
+
+  <gpu:message>
+    <name>transport_membership</name>
+    <description>A message declaring that a person uses a transport</description>
+    <variables>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>person_id</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>transport_id</name>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>duration</name>
+      </gpu:variable>
+    </variables>
+    <gpu:partitioningNone/>
+    <gpu:bufferSize>32768</gpu:bufferSize>
   </gpu:message>
 
   <gpu:message>

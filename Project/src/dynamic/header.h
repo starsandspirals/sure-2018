@@ -73,11 +73,16 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_ChurchMembership_MAX 8192
 
 //Maximum population size of xmachine_memory_Transport
-#define xmachine_memory_Transport_MAX 2048 
+#define xmachine_memory_Transport_MAX 2048
+
+//Maximum population size of xmachine_memory_TransportMembership
+#define xmachine_memory_TransportMembership_MAX 32768 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32 
 //Agent variable array length for xmachine_memory_Church->households
-#define xmachine_memory_Church_households_LENGTH 128
+#define xmachine_memory_Church_households_LENGTH 128 
+//Agent variable array length for xmachine_memory_Transport->people
+#define xmachine_memory_Transport_people_LENGTH 16
 
 
   
@@ -89,6 +94,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_mmessage_church_membership
 #define xmachine_message_church_membership_MAX 8192
 
+//Maximum population size of xmachine_mmessage_transport_membership
+#define xmachine_message_transport_membership_MAX 32768
+
 //Maximum population size of xmachine_mmessage_location
 #define xmachine_message_location_MAX 32768
 
@@ -97,6 +105,7 @@ typedef glm::dvec4 dvec4;
 
 #define xmachine_message_household_membership_partitioningNone
 #define xmachine_message_church_membership_partitioningNone
+#define xmachine_message_transport_membership_partitioningNone
 #define xmachine_message_location_partitioningNone
 
 /* Spatial partitioning grid size definitions */
@@ -221,6 +230,19 @@ struct __align__(16) xmachine_memory_Transport
     unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
     unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
     unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
+    unsigned int day;    /**< X-machine memory variable day of type unsigned int.*/
+    int *people;    /**< X-machine memory variable people of type int.*/
+};
+
+/** struct xmachine_memory_TransportMembership
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_TransportMembership
+{
+    unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
+    unsigned int transport_id;    /**< X-machine memory variable transport_id of type unsigned int.*/
+    unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
 };
 
 
@@ -255,6 +277,20 @@ struct __align__(16) xmachine_message_church_membership
     unsigned int church_id;        /**< Message variable church_id of type unsigned int.*/  
     unsigned int household_id;        /**< Message variable household_id of type unsigned int.*/  
     float churchdur;        /**< Message variable churchdur of type float.*/
+};
+
+/** struct xmachine_message_transport_membership
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_transport_membership
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
+    unsigned int transport_id;        /**< Message variable transport_id of type unsigned int.*/  
+    unsigned int duration;        /**< Message variable duration of type unsigned int.*/
 };
 
 /** struct xmachine_message_location
@@ -388,6 +424,23 @@ struct xmachine_memory_Transport_list
     unsigned int id [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
     unsigned int step [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
     unsigned int duration [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
+    unsigned int day [xmachine_memory_Transport_MAX];    /**< X-machine memory variable list day of type unsigned int.*/
+    int people [xmachine_memory_Transport_MAX*16];    /**< X-machine memory variable list people of type int.*/
+};
+
+/** struct xmachine_memory_TransportMembership_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_TransportMembership_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_TransportMembership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_TransportMembership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
+    unsigned int transport_id [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list transport_id of type unsigned int.*/
+    unsigned int duration [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
 };
 
 
@@ -425,6 +478,22 @@ struct xmachine_message_church_membership_list
     unsigned int church_id [xmachine_message_church_membership_MAX];    /**< Message memory variable list church_id of type unsigned int.*/
     unsigned int household_id [xmachine_message_church_membership_MAX];    /**< Message memory variable list household_id of type unsigned int.*/
     float churchdur [xmachine_message_church_membership_MAX];    /**< Message memory variable list churchdur of type float.*/
+    
+};
+
+/** struct xmachine_message_transport_membership_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_transport_membership_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_transport_membership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_transport_membership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_message_transport_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
+    unsigned int transport_id [xmachine_message_transport_membership_MAX];    /**< Message memory variable list transport_id of type unsigned int.*/
+    unsigned int duration [xmachine_message_transport_membership_MAX];    /**< Message memory variable list duration of type unsigned int.*/
     
 };
 
@@ -538,6 +607,13 @@ __FLAME_GPU_FUNC__ int chuinit(xmachine_memory_ChurchMembership* agent, xmachine
  */
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
 
+/**
+ * trinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_TransportMembership. This represents a single agent instance and can be modified directly.
+ * @param transport_membership_messages Pointer to output message list of type xmachine_message_transport_membership_list. Must be passed as an argument to the add_transport_membership_message function ??.
+ */
+__FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachine_message_transport_membership_list* transport_membership_messages);
+
   
 /* Message Function Prototypes for Brute force (No Partitioning) household_membership message implemented in FLAMEGPU_Kernels */
 
@@ -597,6 +673,35 @@ __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_first_church_members
  * @return        returns the first message from the message list (offset depending on agent block)
  */
 __FLAME_GPU_FUNC__ xmachine_message_church_membership * get_next_church_membership_message(xmachine_message_church_membership* current, xmachine_message_church_membership_list* church_membership_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) transport_membership message implemented in FLAMEGPU_Kernels */
+
+/** add_transport_membership_message
+ * Function for all types of message partitioning
+ * Adds a new transport_membership agent to the xmachine_memory_transport_membership_list list using a linear mapping
+ * @param agents	xmachine_memory_transport_membership_list agent list
+ * @param person_id	message variable of type unsigned int
+ * @param transport_id	message variable of type unsigned int
+ * @param duration	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_transport_membership_message(xmachine_message_transport_membership_list* transport_membership_messages, unsigned int person_id, unsigned int transport_id, unsigned int duration);
+ 
+/** get_first_transport_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param transport_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_first_transport_membership_message(xmachine_message_transport_membership_list* transport_membership_messages);
+
+/** get_next_transport_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param transport_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_membership_message(xmachine_message_transport_membership* current, xmachine_message_transport_membership_list* transport_membership_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) location message implemented in FLAMEGPU_Kernels */
@@ -747,8 +852,39 @@ __FLAME_GPU_FUNC__ void add_ChurchMembership_agent(xmachine_memory_ChurchMembers
  * @param id	agent agent variable of type unsigned int
  * @param step	agent agent variable of type unsigned int
  * @param duration	agent agent variable of type unsigned int
+ * @param day	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration);
+__FLAME_GPU_FUNC__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day);
+
+/** get_Transport_agent_array_value
+ *  Template function for accessing Transport agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @return return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ T get_Transport_agent_array_value(T *array, unsigned int index);
+
+/** set_Transport_agent_array_value
+ *  Template function for setting Transport agent array memory variables.
+ *  @param array Agent memory array
+ *  @param index to lookup
+ *  @param return value
+ */
+template<typename T>
+__FLAME_GPU_FUNC__ void set_Transport_agent_array_value(T *array, unsigned int index, T value);
+
+
+  
+
+/** add_TransportMembership_agent
+ * Adds a new continuous valued TransportMembership agent to the xmachine_memory_TransportMembership_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_TransportMembership_list agent list
+ * @param person_id	agent agent variable of type unsigned int
+ * @param transport_id	agent agent variable of type unsigned int
+ * @param duration	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, unsigned int person_id, unsigned int transport_id, unsigned int duration);
 
 
   
@@ -796,8 +932,11 @@ extern void singleIteration();
  * @param h_Transports Pointer to agent list on the host
  * @param d_Transports Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Transport_count Pointer to agent counter
+ * @param h_TransportMemberships Pointer to agent list on the host
+ * @param d_TransportMemberships Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count);
 
 
 /** readInitialStates
@@ -815,8 +954,10 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_ChurchMembership_count Pointer to agent counter
  * @param h_Transports Pointer to agent list on the host
  * @param h_xmachine_memory_Transport_count Pointer to agent counter
+ * @param h_TransportMemberships Pointer to agent list on the host
+ * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -1090,6 +1231,46 @@ extern xmachine_memory_Transport_list* get_host_Transport_trdefault_agents();
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_Transports_trdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Transport_list* agents));
+
+
+    
+/** get_agent_TransportMembership_MAX_count
+ * Gets the max agent count for the TransportMembership agent type 
+ * @return		the maximum TransportMembership agent count
+ */
+extern int get_agent_TransportMembership_MAX_count();
+
+
+
+/** get_agent_TransportMembership_trmembershipdefault_count
+ * Gets the agent count for the TransportMembership agent type in state trmembershipdefault
+ * @return		the current TransportMembership agent count in state trmembershipdefault
+ */
+extern int get_agent_TransportMembership_trmembershipdefault_count();
+
+/** reset_trmembershipdefault_count
+ * Resets the agent count of the TransportMembership in state trmembershipdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_TransportMembership_trmembershipdefault_count();
+
+/** get_device_TransportMembership_trmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_TransportMembership_list on the GPU device
+ * @return		a xmachine_memory_TransportMembership_list on the GPU device
+ */
+extern xmachine_memory_TransportMembership_list* get_device_TransportMembership_trmembershipdefault_agents();
+
+/** get_host_TransportMembership_trmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_TransportMembership_list on the CPU host
+ * @return		a xmachine_memory_TransportMembership_list on the CPU host
+ */
+extern xmachine_memory_TransportMembership_list* get_host_TransportMembership_trmembershipdefault_agents();
+
+
+/** sort_TransportMemberships_trmembershipdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_TransportMemberships_trmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_TransportMembership_list* agents));
 
 
 
@@ -1619,6 +1800,52 @@ __host__ unsigned int get_Transport_trdefault_variable_step(unsigned int index);
  */
 __host__ unsigned int get_Transport_trdefault_variable_duration(unsigned int index);
 
+/** unsigned int get_Transport_trdefault_variable_day(unsigned int index)
+ * Gets the value of the day variable of an Transport agent in the trdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable day
+ */
+__host__ unsigned int get_Transport_trdefault_variable_day(unsigned int index);
+
+/** int get_Transport_trdefault_variable_people(unsigned int index, unsigned int element)
+ * Gets the element-th value of the people variable array of an Transport agent in the trdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @param element the element index within the variable array
+ * @return element-th value of agent variable people
+ */
+__host__ int get_Transport_trdefault_variable_people(unsigned int index, unsigned int element);
+
+/** unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an TransportMembership agent in the trmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index);
+
+/** unsigned int get_TransportMembership_trmembershipdefault_variable_transport_id(unsigned int index)
+ * Gets the value of the transport_id variable of an TransportMembership agent in the trmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable transport_id
+ */
+__host__ unsigned int get_TransportMembership_trmembershipdefault_variable_transport_id(unsigned int index);
+
+/** unsigned int get_TransportMembership_trmembershipdefault_variable_duration(unsigned int index)
+ * Gets the value of the duration variable of an TransportMembership agent in the trmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable duration
+ */
+__host__ unsigned int get_TransportMembership_trmembershipdefault_variable_duration(unsigned int index);
+
 
 
 
@@ -1886,6 +2113,47 @@ void h_add_agent_Transport_trdefault(xmachine_memory_Transport* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Transport_trdefault(xmachine_memory_Transport** agents, unsigned int count);
+
+/** h_allocate_agent_TransportMembership
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated TransportMembership struct.
+ */
+xmachine_memory_TransportMembership* h_allocate_agent_TransportMembership();
+/** h_free_agent_TransportMembership
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_TransportMembership(xmachine_memory_TransportMembership** agent);
+/** h_allocate_agent_TransportMembership_array
+ * Utility function to allocate an array of structs for  TransportMembership agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_TransportMembership** h_allocate_agent_TransportMembership_array(unsigned int count);
+/** h_free_agent_TransportMembership_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_TransportMembership_array(xmachine_memory_TransportMembership*** agents, unsigned int count);
+
+
+/** h_add_agent_TransportMembership_trmembershipdefault
+ * Host function to add a single agent of type TransportMembership to the trmembershipdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_TransportMembership_trmembershipdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_TransportMembership_trmembershipdefault(xmachine_memory_TransportMembership* agent);
+
+/** h_add_agents_TransportMembership_trmembershipdefault(
+ * Host function to add multiple agents of type TransportMembership to the trmembershipdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of TransportMembership agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_TransportMembership_trmembershipdefault(xmachine_memory_TransportMembership** agents, unsigned int count);
 
   
   
@@ -3324,6 +3592,110 @@ unsigned int min_Transport_trdefault_duration_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Transport_trdefault_duration_variable();
+
+/** unsigned int reduce_Transport_trdefault_day_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Transport_trdefault_day_variable();
+
+
+
+/** unsigned int count_Transport_trdefault_day_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Transport_trdefault_day_variable(int count_value);
+
+/** unsigned int min_Transport_trdefault_day_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Transport_trdefault_day_variable();
+/** unsigned int max_Transport_trdefault_day_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Transport_trdefault_day_variable();
+
+/** unsigned int reduce_TransportMembership_trmembershipdefault_person_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_TransportMembership_trmembershipdefault_person_id_variable();
+
+
+
+/** unsigned int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value);
+
+/** unsigned int min_TransportMembership_trmembershipdefault_person_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_TransportMembership_trmembershipdefault_person_id_variable();
+/** unsigned int max_TransportMembership_trmembershipdefault_person_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_TransportMembership_trmembershipdefault_person_id_variable();
+
+/** unsigned int reduce_TransportMembership_trmembershipdefault_transport_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_TransportMembership_trmembershipdefault_transport_id_variable();
+
+
+
+/** unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(int count_value);
+
+/** unsigned int min_TransportMembership_trmembershipdefault_transport_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_TransportMembership_trmembershipdefault_transport_id_variable();
+/** unsigned int max_TransportMembership_trmembershipdefault_transport_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_TransportMembership_trmembershipdefault_transport_id_variable();
+
+/** unsigned int reduce_TransportMembership_trmembershipdefault_duration_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_TransportMembership_trmembershipdefault_duration_variable();
+
+
+
+/** unsigned int count_TransportMembership_trmembershipdefault_duration_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_TransportMembership_trmembershipdefault_duration_variable(int count_value);
+
+/** unsigned int min_TransportMembership_trmembershipdefault_duration_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_TransportMembership_trmembershipdefault_duration_variable();
+/** unsigned int max_TransportMembership_trmembershipdefault_duration_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_TransportMembership_trmembershipdefault_duration_variable();
 
 
   
