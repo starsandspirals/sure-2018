@@ -595,15 +595,19 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(fp, "ID, gender, age, household, church\n");
+    fprintf(fp, "ID, gender, age, household_size, time_home, time_church, "
+                "time_transport\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-      fprintf(fp, "%u, %u, %u, %u, %i\n", get_Person_s2_variable_id(index),
+      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u\n",
+              get_Person_s2_variable_id(index),
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
-              get_Person_s2_variable_household(index),
-              get_Person_s2_variable_church(index));
+              get_Person_s2_variable_householdsize(index),
+              get_Person_s2_variable_time(index, 0),
+              get_Person_s2_variable_time(index, 1),
+              get_Person_s2_variable_time(index, 2));
     }
 
     fflush(fp);
