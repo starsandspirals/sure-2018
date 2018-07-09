@@ -150,6 +150,9 @@
     <!-- Functions that will run at the end of the simulation -->
     <gpu:exitFunctions>
       <gpu:exitFunction>
+        <gpu:name>customOutputFunction</gpu:name>
+      </gpu:exitFunction>
+      <gpu:exitFunction>
         <gpu:name>exitFunction</gpu:name>
       </gpu:exitFunction>
     </gpu:exitFunctions>
@@ -158,9 +161,6 @@
     <gpu:stepFunctions>
       <gpu:stepFunction>
         <gpu:name>generatePersonStep</gpu:name>
-      </gpu:stepFunction>
-      <gpu:stepFunction>
-        <gpu:name>customOutputStepFunction</gpu:name>
       </gpu:stepFunction>
     </gpu:stepFunctions>
 

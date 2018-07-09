@@ -577,127 +577,46 @@ __FLAME_GPU_STEP_FUNC__ void generatePersonStep() {
 
 // Function for generating output data in csv files, which runs after every
 // iteration and saves data whenever specified.
-__FLAME_GPU_STEP_FUNC__ void customOutputStepFunction() {
+__FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
 
   // Assign a variable for the directory where our files will be output, and
   // check which iteration we are currently on.
   const char *directory = getOutputDir();
-  unsigned int iteration = getIterationNumber();
 
   // If there is new information about the person agents to output, this code
   // creates a csv file and outputs data about people and their variables to
   // that file.
-  if (iteration == 1) {
+  std::string outputFilename =
+      std::string(std::string(directory) + "person-output.csv");
 
-    std::string outputFilename =
-        std::string(std::string(directory) + "person-output-" +
-                    std::to_string(iteration) + ".csv");
+  FILE *fp = fopen(outputFilename.c_str(), "w");
 
-    FILE *fp = fopen(outputFilename.c_str(), "w");
+  if (fp != nullptr) {
+    fprintf(stdout, "Outputting some Person data to %s\n",
+            outputFilename.c_str());
 
-    if (fp != nullptr) {
-      fprintf(stdout, "Outputting some Person data to %s\n",
-              outputFilename.c_str());
+    fprintf(fp, "ID, gender, age, household, church\n");
 
-      fprintf(fp, "ID, gender, age, household, church\n");
+    for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-      for (int index = 0; index < get_agent_Person_s2_count(); index++) {
-
-        fprintf(fp, "%u, %u, %u, %u, %i\n", get_Person_s2_variable_id(index),
-                get_Person_s2_variable_gender(index),
-                get_Person_s2_variable_age(index),
-                get_Person_s2_variable_household(index),
-                get_Person_s2_variable_church(index));
-      }
-
-      fflush(fp);
-    } else {
-      fprintf(
-          stderr,
-          "Error: file %s could not be created for customOutputStepFunction\n",
-          outputFilename.c_str());
+      fprintf(fp, "%u, %u, %u, %u, %i\n", get_Person_s2_variable_id(index),
+              get_Person_s2_variable_gender(index),
+              get_Person_s2_variable_age(index),
+              get_Person_s2_variable_household(index),
+              get_Person_s2_variable_church(index));
     }
 
-    if (fp != nullptr && fp != stdout && fp != stderr) {
-      fclose(fp);
-      fp = nullptr;
-    }
+    fflush(fp);
+  } else {
+    fprintf(
+        stderr,
+        "Error: file %s could not be created for customOutputStepFunction\n",
+        outputFilename.c_str());
   }
 
-  // At the beginning of the run, output information about households and their
-  // variables to a separate csv file.
-  if (iteration == 1) {
-
-    std::string outputFilename =
-        std::string(std::string(directory) + "household-output.csv");
-
-    FILE *fp = fopen(outputFilename.c_str(), "w");
-
-    if (fp != nullptr) {
-      fprintf(stdout, "Outputting some Household data to %s\n",
-              outputFilename.c_str());
-
-      fprintf(fp, "ID, size, churchgoing, churchfreq, adults\n");
-
-      for (int index = 0; index < get_agent_Household_hhdefault_count();
-           index++) {
-
-        fprintf(fp, "%u, %u, %u, %u, %u\n",
-                get_Household_hhdefault_variable_id(index),
-                get_Household_hhdefault_variable_size(index),
-                get_Household_hhdefault_variable_churchgoing(index),
-                get_Household_hhdefault_variable_churchfreq(index),
-                get_Household_hhdefault_variable_adults(index));
-      }
-
-      fflush(fp);
-    } else {
-      fprintf(
-          stderr,
-          "Error: file %s could not be created for customOutputStepFunction\n",
-          outputFilename.c_str());
-    }
-
-    if (fp != nullptr && fp != stdout && fp != stderr) {
-      fclose(fp);
-      fp = nullptr;
-    }
-  }
-
-  // Similarly, at the beginning of a run output information about churches and
-  // other types of building to their own individual csv files.
-  if (iteration == 1) {
-
-    std::string outputFilename =
-        std::string(std::string(directory) + "church-output.csv");
-
-    FILE *fp = fopen(outputFilename.c_str(), "w");
-
-    if (fp != nullptr) {
-      fprintf(stdout, "Outputting some Church data to %s\n",
-              outputFilename.c_str());
-
-      fprintf(fp, "ID, size, duration\n");
-
-      for (int index = 0; index < get_agent_Church_chudefault_count();
-           index++) {
-        fprintf(fp, "%u, %u, %f\n", get_Church_chudefault_variable_id(index),
-                get_Church_chudefault_variable_size(index),
-                get_Church_chudefault_variable_duration(index));
-      }
-
-      fflush(fp);
-    } else {
-      fprintf(
-          stderr,
-          "Error: file %s could not be created for customOutputStepFunction\n",
-          outputFilename.c_str());
-    }
-
-    if (fp != nullptr && fp != stdout && fp != stderr) {
-      fclose(fp);
-      fp = nullptr;
-    }
+  if (fp != nullptr && fp != stdout && fp != stderr) {
+    fclose(fp);
+    fp = nullptr;
   }
 }
 

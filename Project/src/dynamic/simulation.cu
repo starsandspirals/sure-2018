@@ -1097,6 +1097,21 @@ void cleanup(){
 	cudaEventRecord(instrument_start);
 #endif
 
+    customOutputFunction();
+    PROFILE_PUSH_RANGE("customOutputFunction");
+	PROFILE_POP_RANGE();
+
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) && INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: customOutputFunction = %f (ms)\n", instrument_milliseconds);
+#endif
+	
+#if defined(INSTRUMENT_EXIT_FUNCTIONS) && INSTRUMENT_EXIT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+
     exitFunction();
     PROFILE_PUSH_RANGE("exitFunction");
 	PROFILE_POP_RANGE();
@@ -1370,19 +1385,6 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
 	printf("Instrumentation: generatePersonStep = %f (ms)\n", instrument_milliseconds);
-#endif
-#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-    PROFILE_PUSH_RANGE("customOutputStepFunction");
-	customOutputStepFunction();
-	
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: customOutputStepFunction = %f (ms)\n", instrument_milliseconds);
 #endif
 
 #if defined(OUTPUT_POPULATION_PER_ITERATION) && OUTPUT_POPULATION_PER_ITERATION
