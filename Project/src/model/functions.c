@@ -291,19 +291,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
             daycount++;
           }
-
-          random = ((float)rand() / (RAND_MAX));
-
-          if (random < transport_dur20) {
-            h_person->transportdur = 20;
-          } else if (random < transport_dur45) {
-            h_person->transportdur = 45;
-          } else {
-            h_person->transportdur = 60;
-          }
         } else {
           h_person->transportfreq = -1;
-          h_person->transportdur = -1;
         }
 
         // Update the arrays of information with this person's household size
@@ -522,6 +511,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       h_transport->id = getNextTransportID();
       h_transport->day = i;
 
+      float random = ((float)rand() / (RAND_MAX));
+
+      if (random < transport_dur20) {
+        h_transport->duration = 20;
+      } else if (random < transport_dur45) {
+        h_transport->duration = 45;
+      } else {
+        h_transport->duration = 60;
+      }
+
       while (capacity < transport_size && countdone < currentday) {
 
         h_transport->people[capacity] = currentpeople[countdone];
@@ -530,6 +529,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
             h_allocate_agent_TransportMembership();
         h_trmembership->person_id = currentpeople[countdone];
         h_trmembership->transport_id = h_transport->id;
+        h_trmembership->duration = h_transport->duration;
 
         h_add_agent_TransportMembership_trmembershipdefault(h_trmembership);
 

@@ -337,11 +337,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</transportfreq>\n", file);
         
-		fputs("<transportdur>", file);
-        sprintf(data, "%d", h_Persons_default->transportdur[i]);
-		fputs(data, file);
-		fputs("</transportdur>\n", file);
-        
 		fputs("<transportday1>", file);
         sprintf(data, "%u", h_Persons_default->transportday1[i]);
 		fputs(data, file);
@@ -433,11 +428,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->transportfreq[i]);
 		fputs(data, file);
 		fputs("</transportfreq>\n", file);
-        
-		fputs("<transportdur>", file);
-        sprintf(data, "%d", h_Persons_s2->transportdur[i]);
-		fputs(data, file);
-		fputs("</transportdur>\n", file);
         
 		fputs("<transportday1>", file);
         sprintf(data, "%u", h_Persons_s2->transportday1[i]);
@@ -761,7 +751,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_churchdur;
     int in_Person_transportuser;
     int in_Person_transportfreq;
-    int in_Person_transportdur;
     int in_Person_transportday1;
     int in_Person_transportday2;
     int in_Person_household;
@@ -869,7 +858,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	float Person_churchdur;
 	unsigned int Person_transportuser;
 	int Person_transportfreq;
-	int Person_transportdur;
 	unsigned int Person_transportday1;
 	unsigned int Person_transportday2;
 	unsigned int Person_household;
@@ -958,7 +946,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_churchdur = 0;
 	in_Person_transportuser = 0;
 	in_Person_transportfreq = 0;
-	in_Person_transportdur = 0;
 	in_Person_transportday1 = 0;
 	in_Person_transportday2 = 0;
 	in_Person_household = 0;
@@ -1032,7 +1019,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->churchdur[k] = 0;
 		h_Persons->transportuser[k] = 0;
 		h_Persons->transportfreq[k] = 0;
-		h_Persons->transportdur[k] = 0;
 		h_Persons->transportday1[k] = 0;
 		h_Persons->transportday2[k] = 0;
 		h_Persons->household[k] = 0;
@@ -1123,7 +1109,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_churchdur = 0;
     Person_transportuser = 0;
     Person_transportfreq = 0;
-    Person_transportdur = 0;
     Person_transportday1 = 0;
     Person_transportday2 = 0;
     Person_household = 0;
@@ -1262,7 +1247,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->churchdur[*h_xmachine_memory_Person_count] = Person_churchdur;
 					h_Persons->transportuser[*h_xmachine_memory_Person_count] = Person_transportuser;
 					h_Persons->transportfreq[*h_xmachine_memory_Person_count] = Person_transportfreq;
-					h_Persons->transportdur[*h_xmachine_memory_Person_count] = Person_transportdur;
 					h_Persons->transportday1[*h_xmachine_memory_Person_count] = Person_transportday1;
 					h_Persons->transportday2[*h_xmachine_memory_Person_count] = Person_transportday2;
 					h_Persons->household[*h_xmachine_memory_Person_count] = Person_household;
@@ -1389,7 +1373,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_churchdur = 0;
                 Person_transportuser = 0;
                 Person_transportfreq = 0;
-                Person_transportdur = 0;
                 Person_transportday1 = 0;
                 Person_transportday2 = 0;
                 Person_household = 0;
@@ -1452,8 +1435,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/transportuser") == 0) in_Person_transportuser = 0;
 			if(strcmp(buffer, "transportfreq") == 0) in_Person_transportfreq = 1;
 			if(strcmp(buffer, "/transportfreq") == 0) in_Person_transportfreq = 0;
-			if(strcmp(buffer, "transportdur") == 0) in_Person_transportdur = 1;
-			if(strcmp(buffer, "/transportdur") == 0) in_Person_transportdur = 0;
 			if(strcmp(buffer, "transportday1") == 0) in_Person_transportday1 = 1;
 			if(strcmp(buffer, "/transportday1") == 0) in_Person_transportday1 = 0;
 			if(strcmp(buffer, "transportday2") == 0) in_Person_transportday2 = 1;
@@ -1620,9 +1601,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_transportfreq){
                     Person_transportfreq = (int) fpgu_strtol(buffer); 
-                }
-				if(in_Person_transportdur){
-                    Person_transportdur = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_transportday1){
                     Person_transportday1 = (unsigned int) fpgu_strtoul(buffer); 
