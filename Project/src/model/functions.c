@@ -671,7 +671,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->location = 1;
         person->locationid = person->church;
       }
-    } else if (person->transport != -1 &&
+    } else if (person->transportdur != 0 &&
                (day == person->transportday1 || day == person->transportday2)) {
       if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
         person->startstep = person->step;
