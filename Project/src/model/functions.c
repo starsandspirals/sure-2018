@@ -238,6 +238,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // Pick a random float between 0 and 1, used for deciding whether the
         // person is a transport user.
         float random = ((float)rand() / (RAND_MAX));
+        float rr_as;
+        float weight;
 
         // Allocate memory for the agent we are generating.
         xmachine_memory_Person *h_person = h_allocate_agent_Person();
@@ -245,6 +247,28 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // Pick a random age for the person between the bounds of the age
         // interval they belong to.
         age = (rand() % (maxage - minage)) + minage;
+
+        if (gender = 1) {
+          if (age >= 46) {
+            rr_as = 0.50;
+          } else if (age >= 26) {
+            rr_as = 1.25;
+          } else if (age >= 18) {
+            rr_as = 1.00;
+          } else {
+            rr_as = 0.00;
+          }
+        } else {
+          if (age >= 46) {
+            rr_as = 1.25;
+          } else if (age >= 26) {
+            rr_as = 3.75;
+          } else if (age >= 18) {
+            rr_as = 1.00;
+          } else {
+            rr_as = 0.00;
+          }
+        }
 
         // Assign the variables for the person agent based on information from
         // the histogram.
@@ -316,12 +340,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           random = ((float)rand() / (RAND_MAX));
           if (random < art_coverage) {
             h_person->art = 1;
+            weight = rr_as * rr_hiv * rr_art;
           } else {
             h_person->art = 0;
+            weight = rr_as * rr_hiv;
           }
         } else {
           h_person->hiv = 0;
           h_person->art = 0;
+          weight = rr_as;
         }
 
         // Update the arrays of information with this person's household size
@@ -343,8 +370,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   shuffle(transport, days, h_agent_AoS_MAX);
 
-      // Set a counter for our current position in the array of person ids, to
-      // keep track as we generate households.
+  // Set a counter for our current position in the array of person ids, to
+  // keep track as we generate households.
   count = 0;
   float churchprob;
   total = get_agent_Person_default_count();
