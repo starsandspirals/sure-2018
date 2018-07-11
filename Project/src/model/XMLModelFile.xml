@@ -130,6 +130,26 @@
         <name>TRANSPORT_SIZE</name>
         <defaultValue>15</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>HIV_PREVALENCE</name>
+        <defaultValue>0.14</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>ART_COVERAGE</name>
+        <defaultValue>0.21</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_HIV</name>
+        <defaultValue>4.5</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_ART</name>
+        <defaultValue>0.4</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -261,6 +281,14 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>hiv</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>art</name>
         </gpu:variable>
       </memory>
 

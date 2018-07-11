@@ -285,6 +285,22 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_TRANSPORT_SIZE()));
     fputs(data, file);
     fputs("</TRANSPORT_SIZE>\n", file);
+    fputs("\t<HIV_PREVALENCE>", file);
+    sprintf(data, "%f", (*get_HIV_PREVALENCE()));
+    fputs(data, file);
+    fputs("</HIV_PREVALENCE>\n", file);
+    fputs("\t<ART_COVERAGE>", file);
+    sprintf(data, "%f", (*get_ART_COVERAGE()));
+    fputs(data, file);
+    fputs("</ART_COVERAGE>\n", file);
+    fputs("\t<RR_HIV>", file);
+    sprintf(data, "%f", (*get_RR_HIV()));
+    fputs(data, file);
+    fputs("</RR_HIV>\n", file);
+    fputs("\t<RR_ART>", file);
+    sprintf(data, "%f", (*get_RR_ART()));
+    fputs(data, file);
+    fputs("</RR_ART>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -402,6 +418,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</locationid>\n", file);
         
+		fputs("<hiv>", file);
+        sprintf(data, "%u", h_Persons_default->hiv[i]);
+		fputs(data, file);
+		fputs("</hiv>\n", file);
+        
+		fputs("<art>", file);
+        sprintf(data, "%u", h_Persons_default->art[i]);
+		fputs(data, file);
+		fputs("</art>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -518,6 +544,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->locationid[i]);
 		fputs(data, file);
 		fputs("</locationid>\n", file);
+        
+		fputs("<hiv>", file);
+        sprintf(data, "%u", h_Persons_s2->hiv[i]);
+		fputs(data, file);
+		fputs("</hiv>\n", file);
+        
+		fputs("<art>", file);
+        sprintf(data, "%u", h_Persons_s2->art[i]);
+		fputs(data, file);
+		fputs("</art>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -776,6 +812,14 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_TRANSPORT_DUR45(&t_TRANSPORT_DUR45);
     unsigned int t_TRANSPORT_SIZE = (unsigned int)15;
     set_TRANSPORT_SIZE(&t_TRANSPORT_SIZE);
+    float t_HIV_PREVALENCE = (float)0.14;
+    set_HIV_PREVALENCE(&t_HIV_PREVALENCE);
+    float t_ART_COVERAGE = (float)0.21;
+    set_ART_COVERAGE(&t_ART_COVERAGE);
+    float t_RR_HIV = (float)4.5;
+    set_RR_HIV(&t_RR_HIV);
+    float t_RR_ART = (float)0.4;
+    set_RR_ART(&t_RR_ART);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count)
@@ -819,6 +863,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_startstep;
     int in_Person_location;
     int in_Person_locationid;
+    int in_Person_hiv;
+    int in_Person_art;
     int in_Household_id;
     int in_Household_step;
     int in_Household_size;
@@ -900,6 +946,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_TRANSPORT_SIZE;
     
+    int in_env_HIV_PREVALENCE;
+    
+    int in_env_ART_COVERAGE;
+    
+    int in_env_RR_HIV;
+    
+    int in_env_RR_ART;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_Household_count = 0;
@@ -932,6 +986,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_startstep;
 	unsigned int Person_location;
 	unsigned int Person_locationid;
+	unsigned int Person_hiv;
+	unsigned int Person_art;
 	unsigned int Household_id;
 	unsigned int Household_step;
 	unsigned int Household_size;
@@ -987,6 +1043,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_TRANSPORT_DUR20;
     float env_TRANSPORT_DUR45;
     unsigned int env_TRANSPORT_SIZE;
+    float env_HIV_PREVALENCE;
+    float env_ART_COVERAGE;
+    float env_RR_HIV;
+    float env_RR_ART;
     
 
 
@@ -1026,6 +1086,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_startstep = 0;
 	in_Person_location = 0;
 	in_Person_locationid = 0;
+	in_Person_hiv = 0;
+	in_Person_art = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
 	in_Household_size = 0;
@@ -1079,6 +1141,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_TRANSPORT_DUR20 = 0;
     in_env_TRANSPORT_DUR45 = 0;
     in_env_TRANSPORT_SIZE = 0;
+    in_env_HIV_PREVALENCE = 0;
+    in_env_ART_COVERAGE = 0;
+    in_env_RR_HIV = 0;
+    in_env_RR_ART = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1105,6 +1171,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->startstep[k] = 0;
 		h_Persons->location[k] = 0;
 		h_Persons->locationid[k] = 0;
+		h_Persons->hiv[k] = 0;
+		h_Persons->art[k] = 0;
 	}
 	
 	//set all Household values to 0
@@ -1201,6 +1269,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_startstep = 0;
     Person_location = 0;
     Person_locationid = 0;
+    Person_hiv = 0;
+    Person_art = 0;
     Household_id = 0;
     Household_step = 0;
     Household_size = 0;
@@ -1262,6 +1332,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_TRANSPORT_DUR20 = 0;
     env_TRANSPORT_DUR45 = 0;
     env_TRANSPORT_SIZE = 0;
+    env_HIV_PREVALENCE = 0;
+    env_ART_COVERAGE = 0;
+    env_RR_HIV = 0;
+    env_RR_ART = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1345,6 +1419,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->startstep[*h_xmachine_memory_Person_count] = Person_startstep;
 					h_Persons->location[*h_xmachine_memory_Person_count] = Person_location;
 					h_Persons->locationid[*h_xmachine_memory_Person_count] = Person_locationid;
+					h_Persons->hiv[*h_xmachine_memory_Person_count] = Person_hiv;
+					h_Persons->art[*h_xmachine_memory_Person_count] = Person_art;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "Household") == 0)
@@ -1477,6 +1553,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_startstep = 0;
                 Person_location = 0;
                 Person_locationid = 0;
+                Person_hiv = 0;
+                Person_art = 0;
                 Household_id = 0;
                 Household_step = 0;
                 Household_size = 0;
@@ -1558,6 +1636,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/location") == 0) in_Person_location = 0;
 			if(strcmp(buffer, "locationid") == 0) in_Person_locationid = 1;
 			if(strcmp(buffer, "/locationid") == 0) in_Person_locationid = 0;
+			if(strcmp(buffer, "hiv") == 0) in_Person_hiv = 1;
+			if(strcmp(buffer, "/hiv") == 0) in_Person_hiv = 0;
+			if(strcmp(buffer, "art") == 0) in_Person_art = 1;
+			if(strcmp(buffer, "/art") == 0) in_Person_art = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_Household_id = 0;
 			if(strcmp(buffer, "step") == 0) in_Household_step = 1;
@@ -1666,6 +1748,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/TRANSPORT_DUR45") == 0) in_env_TRANSPORT_DUR45 = 0;
 			if(strcmp(buffer, "TRANSPORT_SIZE") == 0) in_env_TRANSPORT_SIZE = 1;
             if(strcmp(buffer, "/TRANSPORT_SIZE") == 0) in_env_TRANSPORT_SIZE = 0;
+			if(strcmp(buffer, "HIV_PREVALENCE") == 0) in_env_HIV_PREVALENCE = 1;
+            if(strcmp(buffer, "/HIV_PREVALENCE") == 0) in_env_HIV_PREVALENCE = 0;
+			if(strcmp(buffer, "ART_COVERAGE") == 0) in_env_ART_COVERAGE = 1;
+            if(strcmp(buffer, "/ART_COVERAGE") == 0) in_env_ART_COVERAGE = 0;
+			if(strcmp(buffer, "RR_HIV") == 0) in_env_RR_HIV = 1;
+            if(strcmp(buffer, "/RR_HIV") == 0) in_env_RR_HIV = 0;
+			if(strcmp(buffer, "RR_ART") == 0) in_env_RR_ART = 1;
+            if(strcmp(buffer, "/RR_ART") == 0) in_env_RR_ART = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -1749,6 +1839,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_locationid){
                     Person_locationid = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_hiv){
+                    Person_hiv = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_art){
+                    Person_art = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Household_id){
                     Household_id = (unsigned int) fpgu_strtoul(buffer); 
@@ -2010,6 +2106,34 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_TRANSPORT_SIZE = (unsigned int) fpgu_strtoul(buffer);
                     
                     set_TRANSPORT_SIZE(&env_TRANSPORT_SIZE);
+                  
+              }
+            if(in_env_HIV_PREVALENCE){
+              
+                    env_HIV_PREVALENCE = (float) fgpu_atof(buffer);
+                    
+                    set_HIV_PREVALENCE(&env_HIV_PREVALENCE);
+                  
+              }
+            if(in_env_ART_COVERAGE){
+              
+                    env_ART_COVERAGE = (float) fgpu_atof(buffer);
+                    
+                    set_ART_COVERAGE(&env_ART_COVERAGE);
+                  
+              }
+            if(in_env_RR_HIV){
+              
+                    env_RR_HIV = (float) fgpu_atof(buffer);
+                    
+                    set_RR_HIV(&env_RR_HIV);
+                  
+              }
+            if(in_env_RR_ART){
+              
+                    env_RR_ART = (float) fgpu_atof(buffer);
+                    
+                    set_RR_ART(&env_RR_ART);
                   
               }
             

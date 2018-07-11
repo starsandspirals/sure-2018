@@ -132,6 +132,11 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   unsigned int transport_size = *get_TRANSPORT_SIZE();
 
+  float hiv_prevalence = *get_HIV_PREVALENCE();
+  float art_coverage = *get_ART_COVERAGE();
+  float rr_hiv = *get_RR_HIV();
+  float rr_art = *get_RR_ART();
+
   srand(0);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
@@ -163,6 +168,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int total = strtol(fgets(line, sizeof(line), file), NULL, 0);
   unsigned int sizes = strtol(fgets(line, sizeof(line), file), NULL, 0);
   unsigned int categories = strtol(fgets(line, sizeof(line), file), NULL, 0);
+  unsigned int adults = strtol(fgets(line, sizeof(line), file), NULL, 0);
+
+  float hivprob = (hiv_prevalence * *get_STARTING_POPULATION()) / adults;
 
   // Create variables to store all the necessary information about our people.
   unsigned int gender;
@@ -300,6 +308,22 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           h_person->transportday2 = -1;
         }
 
+        random = ((float)rand() / (RAND_MAX));
+
+        if ((random < hivprob) && (h_person->age >= 18)) {
+          h_person->hiv = 1;
+
+          random = ((float)rand() / (RAND_MAX));
+          if (random < art_coverage) {
+            h_person->art = 1;
+          } else {
+            h_person->art = 0;
+          }
+        } else {
+          h_person->hiv = 0;
+          h_person->art = 0;
+        }
+
         // Update the arrays of information with this person's household size
         // and age.
         sizearray[currentsize]++;
@@ -319,8 +343,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   shuffle(transport, days, h_agent_AoS_MAX);
 
-  // Set a counter for our current position in the array of person ids, to keep
-  // track as we generate households.
+      // Set a counter for our current position in the array of person ids, to
+      // keep track as we generate households.
   count = 0;
   float churchprob;
   total = get_agent_Person_default_count();
@@ -599,16 +623,20 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(fp, "ID, gender, age, household_size, time_home, time_church, "
-                "time_transport\n");
+    fprintf(
+        fp,
+        "ID, gender, age, household_size, hiv, art, time_home, time_church, "
+        "time_transport\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u\n",
+      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u\n",
               get_Person_s2_variable_id(index),
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
               get_Person_s2_variable_householdsize(index),
+              get_Person_s2_variable_hiv(index),
+              get_Person_s2_variable_art(index),
               get_Person_s2_variable_householdtime(index),
               get_Person_s2_variable_churchtime(index),
               get_Person_s2_variable_transporttime(index));
