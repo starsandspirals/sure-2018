@@ -220,6 +220,7 @@ unsigned int h_Persons_default_variable_location_data_iteration;
 unsigned int h_Persons_default_variable_locationid_data_iteration;
 unsigned int h_Persons_default_variable_hiv_data_iteration;
 unsigned int h_Persons_default_variable_art_data_iteration;
+unsigned int h_Persons_default_variable_activetb_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
 unsigned int h_Persons_s2_variable_householdtime_data_iteration;
@@ -244,6 +245,7 @@ unsigned int h_Persons_s2_variable_location_data_iteration;
 unsigned int h_Persons_s2_variable_locationid_data_iteration;
 unsigned int h_Persons_s2_variable_hiv_data_iteration;
 unsigned int h_Persons_s2_variable_art_data_iteration;
+unsigned int h_Persons_s2_variable_activetb_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
@@ -379,6 +381,11 @@ void Person_update(cudaStream_t &stream);
  * Agent function prototype for personhhinit function of Person agent
  */
 void Person_personhhinit(cudaStream_t &stream);
+
+/** Person_persontbinit
+ * Agent function prototype for persontbinit function of Person agent
+ */
+void Person_persontbinit(cudaStream_t &stream);
 
 /** Person_persontrinit
  * Agent function prototype for persontrinit function of Person agent
@@ -536,6 +543,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_locationid_data_iteration = 0;
     h_Persons_default_variable_hiv_data_iteration = 0;
     h_Persons_default_variable_art_data_iteration = 0;
+    h_Persons_default_variable_activetb_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
     h_Persons_s2_variable_householdtime_data_iteration = 0;
@@ -560,6 +568,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_locationid_data_iteration = 0;
     h_Persons_s2_variable_hiv_data_iteration = 0;
     h_Persons_s2_variable_art_data_iteration = 0;
+    h_Persons_s2_variable_activetb_data_iteration = 0;
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
@@ -1492,6 +1501,23 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("Person_persontbinit");
+	Person_persontbinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_persontbinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 6*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("Person_personhhinit");
 	Person_personhhinit(stream1);
     PROFILE_POP_RANGE();
@@ -1503,7 +1529,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 6*/
+	/* Layer 7*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -3110,6 +3136,45 @@ __host__ unsigned int get_Person_default_variable_art(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_activetb(unsigned int index)
+ * Gets the value of the activetb variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable activetb
+ */
+__host__ unsigned int get_Person_default_variable_activetb(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_activetb_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->activetb,
+                    d_Persons_default->activetb,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_activetb_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->activetb[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access activetb for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -4040,6 +4105,45 @@ __host__ unsigned int get_Person_s2_variable_art(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access art for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_activetb(unsigned int index)
+ * Gets the value of the activetb variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable activetb
+ */
+__host__ unsigned int get_Person_s2_variable_activetb(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_activetb_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->activetb,
+                    d_Persons_s2->activetb,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_activetb_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->activetb[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access activetb for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -5250,6 +5354,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->hiv, &h_agent->hiv, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->art, &h_agent->art, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->activetb, &h_agent->activetb, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -5313,6 +5419,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->hiv, h_src->hiv, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->art, h_src->art, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->activetb, h_src->activetb, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -5710,6 +5818,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->hiv[i] = src[i]->hiv;
 			 
 			dst->art[i] = src[i]->art;
+			 
+			dst->activetb[i] = src[i]->activetb;
 			
 		}
 	}
@@ -5765,6 +5875,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_locationid_data_iteration = 0;
     h_Persons_default_variable_hiv_data_iteration = 0;
     h_Persons_default_variable_art_data_iteration = 0;
+    h_Persons_default_variable_activetb_data_iteration = 0;
     
 
 }
@@ -5820,6 +5931,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_locationid_data_iteration = 0;
         h_Persons_default_variable_hiv_data_iteration = 0;
         h_Persons_default_variable_art_data_iteration = 0;
+        h_Persons_default_variable_activetb_data_iteration = 0;
         
 
 	}
@@ -5875,6 +5987,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_locationid_data_iteration = 0;
     h_Persons_s2_variable_hiv_data_iteration = 0;
     h_Persons_s2_variable_art_data_iteration = 0;
+    h_Persons_s2_variable_activetb_data_iteration = 0;
     
 
 }
@@ -5930,6 +6043,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_locationid_data_iteration = 0;
         h_Persons_s2_variable_hiv_data_iteration = 0;
         h_Persons_s2_variable_art_data_iteration = 0;
+        h_Persons_s2_variable_activetb_data_iteration = 0;
         
 
 	}
@@ -7260,6 +7374,27 @@ unsigned int max_Person_default_art_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_activetb_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->activetb),  thrust::device_pointer_cast(d_Persons_default->activetb) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_activetb_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->activetb),  thrust::device_pointer_cast(d_Persons_default->activetb) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_activetb_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->activetb);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_activetb_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->activetb);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -7757,6 +7892,27 @@ unsigned int min_Person_s2_art_variable(){
 unsigned int max_Person_s2_art_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->art);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Person_s2_activetb_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->activetb),  thrust::device_pointer_cast(d_Persons_s2->activetb) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_activetb_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->activetb),  thrust::device_pointer_cast(d_Persons_s2->activetb) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_activetb_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->activetb);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_activetb_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->activetb);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -8524,6 +8680,114 @@ void Person_personhhinit(cudaStream_t &stream){
 	//update new state agent size
 	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_persontbinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_tb_assignment));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_persontbinit
+ * Agent function prototype for persontbinit function of Person agent
+ */
+void Person_persontbinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_default_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_default_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
+	d_Persons = d_Persons_default;
+	d_Persons_default = Persons_default_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_default_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_persontbinit, Person_persontbinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_persontbinit_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (persontbinit)
+	//Reallocate   : false
+	//Input        : tb_assignment
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_persontbinit<<<g, b, sm_size, stream>>>(d_Persons, d_tb_assignments);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of persontbinit agents in state default will be exceeded moving working agents to next state in function persontbinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Persons_default_temp = d_Persons;
+  d_Persons = d_Persons_default;
+  d_Persons_default = Persons_default_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_default_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
 	
 	
 }

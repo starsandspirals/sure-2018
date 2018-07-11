@@ -295,6 +295,10 @@
           <type>unsigned int</type>
           <name>art</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>activetb</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
@@ -319,6 +323,18 @@
           <inputs>
             <gpu:input>
               <messageName>household_membership</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>persontbinit</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>tb_assignment</messageName>
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
@@ -854,6 +870,12 @@
     <layer>
       <gpu:layerFunction>
         <name>persontrinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>persontbinit</name>
       </gpu:layerFunction>
     </layer>
 

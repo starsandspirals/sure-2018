@@ -181,6 +181,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int locationid;    /**< X-machine memory variable locationid of type unsigned int.*/
     unsigned int hiv;    /**< X-machine memory variable hiv of type unsigned int.*/
     unsigned int art;    /**< X-machine memory variable art of type unsigned int.*/
+    unsigned int activetb;    /**< X-machine memory variable activetb of type unsigned int.*/
 };
 
 /** struct xmachine_memory_TBAssignment
@@ -384,6 +385,7 @@ struct xmachine_memory_Person_list
     unsigned int locationid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list locationid of type unsigned int.*/
     unsigned int hiv [xmachine_memory_Person_MAX];    /**< X-machine memory variable list hiv of type unsigned int.*/
     unsigned int art [xmachine_memory_Person_MAX];    /**< X-machine memory variable list art of type unsigned int.*/
+    unsigned int activetb [xmachine_memory_Person_MAX];    /**< X-machine memory variable list activetb of type unsigned int.*/
 };
 
 /** struct xmachine_memory_TBAssignment_list
@@ -644,6 +646,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, xmachine_message_lo
 __FLAME_GPU_FUNC__ int personhhinit(xmachine_memory_Person* agent, xmachine_message_household_membership_list* household_membership_messages);
 
 /**
+ * persontbinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param tb_assignment_messages  tb_assignment_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_tb_assignment_message and get_next_tb_assignment_message functions.
+ */
+__FLAME_GPU_FUNC__ int persontbinit(xmachine_memory_Person* agent, xmachine_message_tb_assignment_list* tb_assignment_messages);
+
+/**
  * persontrinit FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
  * @param transport_membership_messages  transport_membership_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_transport_membership_message and get_next_transport_membership_message functions.
@@ -879,8 +888,9 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param locationid	agent agent variable of type unsigned int
  * @param hiv	agent agent variable of type unsigned int
  * @param art	agent agent variable of type unsigned int
+ * @param activetb	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1664,6 +1674,15 @@ __host__ unsigned int get_Person_default_variable_hiv(unsigned int index);
  */
 __host__ unsigned int get_Person_default_variable_art(unsigned int index);
 
+/** unsigned int get_Person_default_variable_activetb(unsigned int index)
+ * Gets the value of the activetb variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable activetb
+ */
+__host__ unsigned int get_Person_default_variable_activetb(unsigned int index);
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1879,6 +1898,15 @@ __host__ unsigned int get_Person_s2_variable_hiv(unsigned int index);
  * @return value of agent variable art
  */
 __host__ unsigned int get_Person_s2_variable_art(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_activetb(unsigned int index)
+ * Gets the value of the activetb variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable activetb
+ */
+__host__ unsigned int get_Person_s2_variable_activetb(unsigned int index);
 
 /** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
@@ -3121,6 +3149,32 @@ unsigned int min_Person_default_art_variable();
  */
 unsigned int max_Person_default_art_variable();
 
+/** unsigned int reduce_Person_default_activetb_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_activetb_variable();
+
+
+
+/** unsigned int count_Person_default_activetb_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_activetb_variable(int count_value);
+
+/** unsigned int min_Person_default_activetb_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_activetb_variable();
+/** unsigned int max_Person_default_activetb_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_activetb_variable();
+
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -3737,6 +3791,32 @@ unsigned int min_Person_s2_art_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_art_variable();
+
+/** unsigned int reduce_Person_s2_activetb_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_activetb_variable();
+
+
+
+/** unsigned int count_Person_s2_activetb_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_activetb_variable(int count_value);
+
+/** unsigned int min_Person_s2_activetb_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_activetb_variable();
+/** unsigned int max_Person_s2_activetb_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_activetb_variable();
 
 /** unsigned int reduce_TBAssignment_tbdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

@@ -382,6 +382,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->householdtime = 0;
         h_person->churchtime = 0;
         h_person->transporttime = 0;
+        h_person->activetb = 0;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -896,6 +897,24 @@ __FLAME_GPU_FUNC__ int hhinit(
       hhmembership->person_id, hhmembership->household_size, churchid,
       hhmembership->churchfreq, churchdur);
   return 1;
+}
+
+__FLAME_GPU_FUNC__ int
+persontbinit(xmachine_memory_Person *person,
+             xmachine_message_tb_assignment_list *tb_assignment_messages) {
+  unsigned int personid = person->id;
+  xmachine_message_tb_assignment *tb_assignment_message =
+      get_first_tb_assignment_message(tb_assignment_messages);
+
+  while (tb_assignment_message) {
+    if (tb_assignment_message->id = personid) {
+      person->activetb = 1;
+    }
+    tb_assignment_message = get_next_tb_assignment_message(
+        tb_assignment_message, tb_assignment_messages);
+  }
+
+  return 0;
 }
 
 __FLAME_GPU_FUNC__ int persontrinit(
