@@ -101,6 +101,19 @@ xmachine_memory_Person_list* h_Persons_s2;      /**< Pointer to agent list (popu
 xmachine_memory_Person_list* d_Persons_s2;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Person_s2_count;   /**< Agent population size counter */ 
 
+/* TBAssignment Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_TBAssignment_list* d_TBAssignments;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_TBAssignment_list* d_TBAssignments_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_TBAssignment_list* d_TBAssignments_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_TBAssignment_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_TBAssignment_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_TBAssignment_values;  /**< Agent sort identifiers value */
+
+/* TBAssignment state variables */
+xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_TBAssignment_tbdefault_count;   /**< Agent population size counter */ 
+
 /* Household Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
 xmachine_memory_Household_list* d_Households;      /**< Pointer to agent list (population) on the device*/
 xmachine_memory_Household_list* d_Households_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
@@ -231,6 +244,7 @@ unsigned int h_Persons_s2_variable_location_data_iteration;
 unsigned int h_Persons_s2_variable_locationid_data_iteration;
 unsigned int h_Persons_s2_variable_hiv_data_iteration;
 unsigned int h_Persons_s2_variable_art_data_iteration;
+unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
 unsigned int h_Households_hhdefault_variable_size_data_iteration;
@@ -262,6 +276,14 @@ unsigned int h_TransportMemberships_trmembershipdefault_variable_duration_data_i
 
 
 /* Message Memory */
+
+/* tb_assignment Message variables */
+xmachine_message_tb_assignment_list* h_tb_assignments;         /**< Pointer to message list on host*/
+xmachine_message_tb_assignment_list* d_tb_assignments;         /**< Pointer to message list on device*/
+xmachine_message_tb_assignment_list* d_tb_assignments_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_tb_assignment_count;         /**< message list counter*/
+int h_message_tb_assignment_output_type;   /**< message output type (single or optional)*/
 
 /* household_membership Message variables */
 xmachine_message_household_membership_list* h_household_memberships;         /**< Pointer to message list on host*/
@@ -303,6 +325,9 @@ cudaStream_t stream1;
 
 void * d_temp_scan_storage_Person;
 size_t temp_scan_storage_bytes_Person;
+
+void * d_temp_scan_storage_TBAssignment;
+size_t temp_scan_storage_bytes_TBAssignment;
 
 void * d_temp_scan_storage_Household;
 size_t temp_scan_storage_bytes_Household;
@@ -359,6 +384,11 @@ void Person_personhhinit(cudaStream_t &stream);
  * Agent function prototype for persontrinit function of Person agent
  */
 void Person_persontrinit(cudaStream_t &stream);
+
+/** TBAssignment_tbinit
+ * Agent function prototype for tbinit function of TBAssignment agent
+ */
+void TBAssignment_tbinit(cudaStream_t &stream);
 
 /** Household_hhupdate
  * Agent function prototype for hhupdate function of Household agent
@@ -530,6 +560,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_locationid_data_iteration = 0;
     h_Persons_s2_variable_hiv_data_iteration = 0;
     h_Persons_s2_variable_art_data_iteration = 0;
+    h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
     h_Households_hhdefault_variable_size_data_iteration = 0;
@@ -568,6 +599,8 @@ void initialise(char * inputfile){
 	int xmachine_Person_SoA_size = sizeof(xmachine_memory_Person_list);
 	h_Persons_default = (xmachine_memory_Person_list*)malloc(xmachine_Person_SoA_size);
 	h_Persons_s2 = (xmachine_memory_Person_list*)malloc(xmachine_Person_SoA_size);
+	int xmachine_TBAssignment_SoA_size = sizeof(xmachine_memory_TBAssignment_list);
+	h_TBAssignments_tbdefault = (xmachine_memory_TBAssignment_list*)malloc(xmachine_TBAssignment_SoA_size);
 	int xmachine_Household_SoA_size = sizeof(xmachine_memory_Household_list);
 	h_Households_hhdefault = (xmachine_memory_Household_list*)malloc(xmachine_Household_SoA_size);
 	int xmachine_HouseholdMembership_SoA_size = sizeof(xmachine_memory_HouseholdMembership_list);
@@ -582,6 +615,8 @@ void initialise(char * inputfile){
 	h_TransportMemberships_trmembershipdefault = (xmachine_memory_TransportMembership_list*)malloc(xmachine_TransportMembership_SoA_size);
 
 	/* Message memory allocation (CPU) */
+	int message_tb_assignment_SoA_size = sizeof(xmachine_message_tb_assignment_list);
+	h_tb_assignments = (xmachine_message_tb_assignment_list*)malloc(message_tb_assignment_SoA_size);
 	int message_household_membership_SoA_size = sizeof(xmachine_message_household_membership_list);
 	h_household_memberships = (xmachine_message_household_membership_list*)malloc(message_household_membership_SoA_size);
 	int message_church_membership_SoA_size = sizeof(xmachine_message_church_membership_list);
@@ -596,7 +631,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -615,6 +650,17 @@ void initialise(char * inputfile){
 	/* s2 memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Persons_s2, xmachine_Person_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Persons_s2, h_Persons_s2, xmachine_Person_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* TBAssignment Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_TBAssignments, xmachine_TBAssignment_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_TBAssignments_swap, xmachine_TBAssignment_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_TBAssignments_new, xmachine_TBAssignment_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_TBAssignment_keys, xmachine_memory_TBAssignment_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_TBAssignment_values, xmachine_memory_TBAssignment_MAX* sizeof(uint)));
+	/* tbdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_TBAssignments_tbdefault, xmachine_TBAssignment_SoA_size));
+	gpuErrchk( cudaMemcpy( d_TBAssignments_tbdefault, h_TBAssignments_tbdefault, xmachine_TBAssignment_SoA_size, cudaMemcpyHostToDevice));
     
 	/* Household Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_Households, xmachine_Household_SoA_size));
@@ -682,6 +728,11 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_TransportMemberships_trmembershipdefault, xmachine_TransportMembership_SoA_size));
 	gpuErrchk( cudaMemcpy( d_TransportMemberships_trmembershipdefault, h_TransportMemberships_trmembershipdefault, xmachine_TransportMembership_SoA_size, cudaMemcpyHostToDevice));
     
+	/* tb_assignment Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments, message_tb_assignment_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments_swap, message_tb_assignment_SoA_size));
+	gpuErrchk( cudaMemcpy( d_tb_assignments, h_tb_assignments, message_tb_assignment_SoA_size, cudaMemcpyHostToDevice));
+	
 	/* household_membership Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_household_memberships, message_household_membership_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_household_memberships_swap, message_household_membership_SoA_size));
@@ -716,6 +767,17 @@ void initialise(char * inputfile){
         xmachine_memory_Person_MAX
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Person, temp_scan_storage_bytes_Person));
+    
+    d_temp_scan_storage_TBAssignment = nullptr;
+    temp_scan_storage_bytes_TBAssignment = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_TBAssignment, 
+        temp_scan_storage_bytes_TBAssignment, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_TBAssignment_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_TBAssignment, temp_scan_storage_bytes_TBAssignment));
     
     d_temp_scan_storage_Household = nullptr;
     temp_scan_storage_bytes_Household = 0;
@@ -867,6 +929,8 @@ void initialise(char * inputfile){
 	
 		printf("Init agent_Person_s2_count: %u\n",get_agent_Person_s2_count());
 	
+		printf("Init agent_TBAssignment_tbdefault_count: %u\n",get_agent_TBAssignment_tbdefault_count());
+	
 		printf("Init agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
 	
 		printf("Init agent_HouseholdMembership_hhmembershipdefault_count: %u\n",get_agent_HouseholdMembership_hhmembershipdefault_count());
@@ -937,6 +1001,34 @@ void sort_Persons_s2(void (*generate_key_value_pairs)(unsigned int* keys, unsign
 	xmachine_memory_Person_list* d_Persons_temp = d_Persons_s2;
 	d_Persons_s2 = d_Persons_swap;
 	d_Persons_swap = d_Persons_temp;	
+}
+
+void sort_TBAssignments_tbdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_TBAssignment_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_TBAssignment_tbdefault_count); 
+	gridSize = (h_xmachine_memory_TBAssignment_tbdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_TBAssignment_keys, d_xmachine_memory_TBAssignment_values, d_TBAssignments_tbdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_TBAssignment_keys),  thrust::device_pointer_cast(d_xmachine_memory_TBAssignment_keys) + h_xmachine_memory_TBAssignment_tbdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_TBAssignment_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_TBAssignment_agents, no_sm, h_xmachine_memory_TBAssignment_tbdefault_count); 
+	gridSize = (h_xmachine_memory_TBAssignment_tbdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_TBAssignment_agents<<<gridSize, blockSize>>>(d_xmachine_memory_TBAssignment_values, d_TBAssignments_tbdefault, d_TBAssignments_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_TBAssignment_list* d_TBAssignments_temp = d_TBAssignments_tbdefault;
+	d_TBAssignments_tbdefault = d_TBAssignments_swap;
+	d_TBAssignments_swap = d_TBAssignments_temp;	
 }
 
 void sort_Households_hhdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Household_list* agents))
@@ -1157,6 +1249,14 @@ void cleanup(){
 	free( h_Persons_s2);
 	gpuErrchk(cudaFree(d_Persons_s2));
 	
+	/* TBAssignment Agent variables */
+	gpuErrchk(cudaFree(d_TBAssignments));
+	gpuErrchk(cudaFree(d_TBAssignments_swap));
+	gpuErrchk(cudaFree(d_TBAssignments_new));
+	
+	free( h_TBAssignments_tbdefault);
+	gpuErrchk(cudaFree(d_TBAssignments_tbdefault));
+	
 	/* Household Agent variables */
 	gpuErrchk(cudaFree(d_Households));
 	gpuErrchk(cudaFree(d_Households_swap));
@@ -1208,6 +1308,11 @@ void cleanup(){
 
 	/* Message data free */
 	
+	/* tb_assignment Message variables */
+	free( h_tb_assignments);
+	gpuErrchk(cudaFree(d_tb_assignments));
+	gpuErrchk(cudaFree(d_tb_assignments_swap));
+	
 	/* household_membership Message variables */
 	free( h_household_memberships);
 	gpuErrchk(cudaFree(d_household_memberships));
@@ -1234,6 +1339,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_Person));
     d_temp_scan_storage_Person = nullptr;
     temp_scan_storage_bytes_Person = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_TBAssignment));
+    d_temp_scan_storage_TBAssignment = nullptr;
+    temp_scan_storage_bytes_TBAssignment = 0;
     
     gpuErrchk(cudaFree(d_temp_scan_storage_Household));
     d_temp_scan_storage_Household = nullptr;
@@ -1286,6 +1395,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
     g_iterationNumber++;
 
 	/* set all non partitioned and spatial partitioned message counts to 0*/
+	h_message_tb_assignment_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_tb_assignment_count, &h_message_tb_assignment_count, sizeof(int)));
+	
 	h_message_household_membership_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_household_membership_count, &h_message_household_membership_count, sizeof(int)));
@@ -1430,6 +1543,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_Person_default_count: %u\n",get_agent_Person_default_count());
 	
 		printf("agent_Person_s2_count: %u\n",get_agent_Person_s2_count());
+	
+		printf("agent_TBAssignment_tbdefault_count: %u\n",get_agent_TBAssignment_tbdefault_count());
 	
 		printf("agent_Household_hhdefault_count: %u\n",get_agent_Household_hhdefault_count());
 	
@@ -1899,6 +2014,26 @@ xmachine_memory_Person_list* get_device_Person_s2_agents(){
 
 xmachine_memory_Person_list* get_host_Person_s2_agents(){
 	return h_Persons_s2;
+}
+
+    
+int get_agent_TBAssignment_MAX_count(){
+    return xmachine_memory_TBAssignment_MAX;
+}
+
+
+int get_agent_TBAssignment_tbdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_TBAssignment_tbdefault_count;
+	
+}
+
+xmachine_memory_TBAssignment_list* get_device_TBAssignment_tbdefault_agents(){
+	return d_TBAssignments_tbdefault;
+}
+
+xmachine_memory_TBAssignment_list* get_host_TBAssignment_tbdefault_agents(){
+	return h_TBAssignments_tbdefault;
 }
 
     
@@ -3897,6 +4032,45 @@ __host__ unsigned int get_Person_s2_variable_art(unsigned int index){
     }
 }
 
+/** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_TBAssignment_tbdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_TBAssignments_tbdefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_TBAssignments_tbdefault->id,
+                    d_TBAssignments_tbdefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_TBAssignments_tbdefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_TBAssignments_tbdefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of TBAssignment_tbdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -5130,6 +5304,36 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 }
 
 
+/* copy_single_xmachine_memory_TBAssignment_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_TBAssignment_hostToDevice(xmachine_memory_TBAssignment_list * d_dst, xmachine_memory_TBAssignment * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_TBAssignment_hostToDevice(xmachine_memory_TBAssignment_list * d_dst, xmachine_memory_TBAssignment_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
 /* copy_single_xmachine_memory_Household_hostToDevice
  * Private function to copy a host agent struct into a device SoA agent list.
  * @param d_dst destination agent state list
@@ -5712,6 +5916,107 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_locationid_data_iteration = 0;
         h_Persons_s2_variable_hiv_data_iteration = 0;
         h_Persons_s2_variable_art_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_TBAssignment* h_allocate_agent_TBAssignment(){
+	xmachine_memory_TBAssignment* agent = (xmachine_memory_TBAssignment*)malloc(sizeof(xmachine_memory_TBAssignment));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_TBAssignment));
+
+	return agent;
+}
+void h_free_agent_TBAssignment(xmachine_memory_TBAssignment** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_TBAssignment** h_allocate_agent_TBAssignment_array(unsigned int count){
+	xmachine_memory_TBAssignment ** agents = (xmachine_memory_TBAssignment**)malloc(count * sizeof(xmachine_memory_TBAssignment*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_TBAssignment();
+	}
+	return agents;
+}
+void h_free_agent_TBAssignment_array(xmachine_memory_TBAssignment*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_TBAssignment(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_TBAssignment_AoS_to_SoA(xmachine_memory_TBAssignment_list * dst, xmachine_memory_TBAssignment** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			
+		}
+	}
+}
+
+
+void h_add_agent_TBAssignment_tbdefault(xmachine_memory_TBAssignment* agent){
+	if (h_xmachine_memory_TBAssignment_count + 1 > xmachine_memory_TBAssignment_MAX){
+		printf("Error: Buffer size of TBAssignment agents in state tbdefault will be exceeded by h_add_agent_TBAssignment_tbdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_TBAssignment_hostToDevice(d_TBAssignments_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_TBAssignment_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_TBAssignment_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_TBAssignments_tbdefault, d_TBAssignments_new, h_xmachine_memory_TBAssignment_tbdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_TBAssignment_tbdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_TBAssignment_tbdefault_count, &h_xmachine_memory_TBAssignment_tbdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
+    
+
+}
+void h_add_agents_TBAssignment_tbdefault(xmachine_memory_TBAssignment** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_TBAssignment_count + count > xmachine_memory_TBAssignment_MAX){
+			printf("Error: Buffer size of TBAssignment agents in state tbdefault will be exceeded by h_add_agents_TBAssignment_tbdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_TBAssignment_AoS_to_SoA(h_TBAssignments_tbdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_TBAssignment_hostToDevice(d_TBAssignments_new, h_TBAssignments_tbdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_TBAssignment_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_TBAssignment_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_TBAssignments_tbdefault, d_TBAssignments_new, h_xmachine_memory_TBAssignment_tbdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_TBAssignment_tbdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_TBAssignment_tbdefault_count, &h_xmachine_memory_TBAssignment_tbdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
         
 
 	}
@@ -7441,6 +7746,27 @@ unsigned int max_Person_s2_art_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_TBAssignment_tbdefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_TBAssignments_tbdefault->id),  thrust::device_pointer_cast(d_TBAssignments_tbdefault->id) + h_xmachine_memory_TBAssignment_tbdefault_count);
+}
+
+unsigned int count_TBAssignment_tbdefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_TBAssignments_tbdefault->id),  thrust::device_pointer_cast(d_TBAssignments_tbdefault->id) + h_xmachine_memory_TBAssignment_tbdefault_count, count_value);
+}
+unsigned int min_TBAssignment_tbdefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_TBAssignments_tbdefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_TBAssignment_tbdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_TBAssignment_tbdefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_TBAssignments_tbdefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_TBAssignment_tbdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Household_hhdefault_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->id),  thrust::device_pointer_cast(d_Households_hhdefault->id) + h_xmachine_memory_Household_hhdefault_count);
@@ -8300,6 +8626,159 @@ void Person_persontrinit(cudaStream_t &stream){
 
 	
 /* Shared memory size calculator for agent function */
+int TBAssignment_tbinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** TBAssignment_tbinit
+ * Agent function prototype for tbinit function of TBAssignment agent
+ */
+void TBAssignment_tbinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_TBAssignment_tbdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_TBAssignment_tbdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_TBAssignment_list* TBAssignments_tbdefault_temp = d_TBAssignments;
+	d_TBAssignments = d_TBAssignments_tbdefault;
+	d_TBAssignments_tbdefault = TBAssignments_tbdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_TBAssignment_count = h_xmachine_memory_TBAssignment_tbdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_TBAssignment_count, &h_xmachine_memory_TBAssignment_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_TBAssignment_tbdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_TBAssignment_tbdefault_count, &h_xmachine_memory_TBAssignment_tbdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_tb_assignment_count + h_xmachine_memory_TBAssignment_count > xmachine_message_tb_assignment_MAX){
+		printf("Error: Buffer size of tb_assignment message will be exceeded in function tbinit\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_tbinit, TBAssignment_tbinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = TBAssignment_tbinit_sm_size(blockSize);
+	
+	
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_tb_assignment_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_tb_assignment_output_type, &h_message_tb_assignment_output_type, sizeof(int)));
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_TBAssignment_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_TBAssignment_scan_input<<<gridSize, blockSize, 0, stream>>>(d_TBAssignments);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (tbinit)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : tb_assignment
+	//Agent Output : 
+	GPUFLAME_tbinit<<<g, b, sm_size, stream>>>(d_TBAssignments, d_tb_assignments);
+	gpuErrchkLaunch();
+	
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_tb_assignment_count += h_xmachine_memory_TBAssignment_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_tb_assignment_count, &h_message_tb_assignment_count, sizeof(int)));	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_TBAssignment, 
+        temp_scan_storage_bytes_TBAssignment, 
+        d_TBAssignments->_scan_input,
+        d_TBAssignments->_position,
+        h_xmachine_memory_TBAssignment_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_TBAssignment_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_TBAssignment_Agents<<<gridSize, blockSize, 0, stream>>>(d_TBAssignments_swap, d_TBAssignments, 0, h_xmachine_memory_TBAssignment_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_TBAssignment_list* tbinit_TBAssignments_temp = d_TBAssignments;
+	d_TBAssignments = d_TBAssignments_swap;
+	d_TBAssignments_swap = tbinit_TBAssignments_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_TBAssignments_swap->_position[h_xmachine_memory_TBAssignment_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_TBAssignments_swap->_scan_input[h_xmachine_memory_TBAssignment_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_TBAssignment_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_TBAssignment_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_TBAssignment_count, &h_xmachine_memory_TBAssignment_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_TBAssignment_tbdefault_count+h_xmachine_memory_TBAssignment_count > xmachine_memory_TBAssignment_MAX){
+		printf("Error: Buffer size of tbinit agents in state tbdefault will be exceeded moving working agents to next state in function tbinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_TBAssignment_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_TBAssignment_Agents<<<gridSize, blockSize, 0, stream>>>(d_TBAssignments_tbdefault, d_TBAssignments, h_xmachine_memory_TBAssignment_tbdefault_count, h_xmachine_memory_TBAssignment_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_TBAssignment_tbdefault_count += h_xmachine_memory_TBAssignment_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_TBAssignment_tbdefault_count, &h_xmachine_memory_TBAssignment_tbdefault_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
 int Household_hhupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
@@ -9071,6 +9550,11 @@ extern void reset_Person_default_count()
 extern void reset_Person_s2_count()
 {
     h_xmachine_memory_Person_s2_count = 0;
+}
+ 
+extern void reset_TBAssignment_tbdefault_count()
+{
+    h_xmachine_memory_TBAssignment_tbdefault_count = 0;
 }
  
 extern void reset_Household_hhdefault_count()

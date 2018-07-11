@@ -60,6 +60,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_memory_Person
 #define xmachine_memory_Person_MAX 32768
 
+//Maximum population size of xmachine_memory_TBAssignment
+#define xmachine_memory_TBAssignment_MAX 32768
+
 //Maximum population size of xmachine_memory_Household
 #define xmachine_memory_Household_MAX 8192
 
@@ -88,6 +91,9 @@ typedef glm::dvec4 dvec4;
   
   
 /* Message population size definitions */
+//Maximum population size of xmachine_mmessage_tb_assignment
+#define xmachine_message_tb_assignment_MAX 32768
+
 //Maximum population size of xmachine_mmessage_household_membership
 #define xmachine_message_household_membership_MAX 32768
 
@@ -103,6 +109,7 @@ typedef glm::dvec4 dvec4;
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
 
+#define xmachine_message_tb_assignment_partitioningNone
 #define xmachine_message_household_membership_partitioningNone
 #define xmachine_message_church_membership_partitioningNone
 #define xmachine_message_transport_membership_partitioningNone
@@ -174,6 +181,15 @@ struct __align__(16) xmachine_memory_Person
     unsigned int locationid;    /**< X-machine memory variable locationid of type unsigned int.*/
     unsigned int hiv;    /**< X-machine memory variable hiv of type unsigned int.*/
     unsigned int art;    /**< X-machine memory variable art of type unsigned int.*/
+};
+
+/** struct xmachine_memory_TBAssignment
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_TBAssignment
+{
+    unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household
@@ -255,6 +271,18 @@ struct __align__(16) xmachine_memory_TransportMembership
 
 
 /* Message structures */
+
+/** struct xmachine_message_tb_assignment
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_tb_assignment
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int id;        /**< Message variable id of type unsigned int.*/
+};
 
 /** struct xmachine_message_household_membership
  * Brute force: No Partitioning
@@ -356,6 +384,19 @@ struct xmachine_memory_Person_list
     unsigned int locationid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list locationid of type unsigned int.*/
     unsigned int hiv [xmachine_memory_Person_MAX];    /**< X-machine memory variable list hiv of type unsigned int.*/
     unsigned int art [xmachine_memory_Person_MAX];    /**< X-machine memory variable list art of type unsigned int.*/
+};
+
+/** struct xmachine_memory_TBAssignment_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_TBAssignment_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_TBAssignment_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_TBAssignment_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_memory_TBAssignment_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
 };
 
 /** struct xmachine_memory_Household_list
@@ -461,6 +502,20 @@ struct xmachine_memory_TransportMembership_list
 
 
 /* Message lists. Structure of Array (SoA) for memory coalescing on GPU */
+
+/** struct xmachine_message_tb_assignment_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_tb_assignment_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_tb_assignment_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_tb_assignment_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_message_tb_assignment_MAX];    /**< Message memory variable list id of type unsigned int.*/
+    
+};
 
 /** struct xmachine_message_household_membership_list
  * Brute force: No Partitioning
@@ -596,6 +651,13 @@ __FLAME_GPU_FUNC__ int personhhinit(xmachine_memory_Person* agent, xmachine_mess
 __FLAME_GPU_FUNC__ int persontrinit(xmachine_memory_Person* agent, xmachine_message_transport_membership_list* transport_membership_messages);
 
 /**
+ * tbinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_TBAssignment. This represents a single agent instance and can be modified directly.
+ * @param tb_assignment_messages Pointer to output message list of type xmachine_message_tb_assignment_list. Must be passed as an argument to the add_tb_assignment_message function ??.
+ */
+__FLAME_GPU_FUNC__ int tbinit(xmachine_memory_TBAssignment* agent, xmachine_message_tb_assignment_list* tb_assignment_messages);
+
+/**
  * hhupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Household. This represents a single agent instance and can be modified directly.
  
@@ -636,6 +698,33 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
  * @param transport_membership_messages Pointer to output message list of type xmachine_message_transport_membership_list. Must be passed as an argument to the add_transport_membership_message function ??.
  */
 __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachine_message_transport_membership_list* transport_membership_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */
+
+/** add_tb_assignment_message
+ * Function for all types of message partitioning
+ * Adds a new tb_assignment agent to the xmachine_memory_tb_assignment_list list using a linear mapping
+ * @param agents	xmachine_memory_tb_assignment_list agent list
+ * @param id	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_tb_assignment_message(xmachine_message_tb_assignment_list* tb_assignment_messages, unsigned int id);
+ 
+/** get_first_tb_assignment_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param tb_assignment_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_tb_assignment * get_first_tb_assignment_message(xmachine_message_tb_assignment_list* tb_assignment_messages);
+
+/** get_next_tb_assignment_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param tb_assignment_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_tb_assignment * get_next_tb_assignment_message(xmachine_message_tb_assignment* current, xmachine_message_tb_assignment_list* tb_assignment_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) household_membership message implemented in FLAMEGPU_Kernels */
@@ -793,6 +882,13 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  */
 __FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art);
 
+/** add_TBAssignment_agent
+ * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_TBAssignment_list agent list
+ * @param id	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_TBAssignment_agent(xmachine_memory_TBAssignment_list* agents, unsigned int id);
+
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_Household_list agent list
@@ -948,6 +1044,9 @@ extern void singleIteration();
  * @param h_Persons Pointer to agent list on the host
  * @param d_Persons Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Person_count Pointer to agent counter
+ * @param h_TBAssignments Pointer to agent list on the host
+ * @param d_TBAssignments Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_TBAssignment_count Pointer to agent counter
  * @param h_Households Pointer to agent list on the host
  * @param d_Households Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Household_count Pointer to agent counter
@@ -967,7 +1066,7 @@ extern void singleIteration();
  * @param d_TransportMemberships Pointer to agent list on the GPU device
  * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count);
 
 
 /** readInitialStates
@@ -975,6 +1074,8 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param	inputpath	file path to XML file used for input of agent data
  * @param h_Persons Pointer to agent list on the host
  * @param h_xmachine_memory_Person_count Pointer to agent counter
+ * @param h_TBAssignments Pointer to agent list on the host
+ * @param h_xmachine_memory_TBAssignment_count Pointer to agent counter
  * @param h_Households Pointer to agent list on the host
  * @param h_xmachine_memory_Household_count Pointer to agent counter
  * @param h_HouseholdMemberships Pointer to agent list on the host
@@ -988,7 +1089,7 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_TransportMemberships Pointer to agent list on the host
  * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -1062,6 +1163,46 @@ extern xmachine_memory_Person_list* get_host_Person_s2_agents();
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_Persons_s2(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Person_list* agents));
+
+
+    
+/** get_agent_TBAssignment_MAX_count
+ * Gets the max agent count for the TBAssignment agent type 
+ * @return		the maximum TBAssignment agent count
+ */
+extern int get_agent_TBAssignment_MAX_count();
+
+
+
+/** get_agent_TBAssignment_tbdefault_count
+ * Gets the agent count for the TBAssignment agent type in state tbdefault
+ * @return		the current TBAssignment agent count in state tbdefault
+ */
+extern int get_agent_TBAssignment_tbdefault_count();
+
+/** reset_tbdefault_count
+ * Resets the agent count of the TBAssignment in state tbdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_TBAssignment_tbdefault_count();
+
+/** get_device_TBAssignment_tbdefault_agents
+ * Gets a pointer to xmachine_memory_TBAssignment_list on the GPU device
+ * @return		a xmachine_memory_TBAssignment_list on the GPU device
+ */
+extern xmachine_memory_TBAssignment_list* get_device_TBAssignment_tbdefault_agents();
+
+/** get_host_TBAssignment_tbdefault_agents
+ * Gets a pointer to xmachine_memory_TBAssignment_list on the CPU host
+ * @return		a xmachine_memory_TBAssignment_list on the CPU host
+ */
+extern xmachine_memory_TBAssignment_list* get_host_TBAssignment_tbdefault_agents();
+
+
+/** sort_TBAssignments_tbdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_TBAssignments_tbdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_TBAssignment_list* agents));
 
 
     
@@ -1739,6 +1880,15 @@ __host__ unsigned int get_Person_s2_variable_hiv(unsigned int index);
  */
 __host__ unsigned int get_Person_s2_variable_art(unsigned int index);
 
+/** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index);
+
 /** unsigned int get_Household_hhdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2056,6 +2206,47 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count);
+
+/** h_allocate_agent_TBAssignment
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated TBAssignment struct.
+ */
+xmachine_memory_TBAssignment* h_allocate_agent_TBAssignment();
+/** h_free_agent_TBAssignment
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_TBAssignment(xmachine_memory_TBAssignment** agent);
+/** h_allocate_agent_TBAssignment_array
+ * Utility function to allocate an array of structs for  TBAssignment agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_TBAssignment** h_allocate_agent_TBAssignment_array(unsigned int count);
+/** h_free_agent_TBAssignment_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_TBAssignment_array(xmachine_memory_TBAssignment*** agents, unsigned int count);
+
+
+/** h_add_agent_TBAssignment_tbdefault
+ * Host function to add a single agent of type TBAssignment to the tbdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_TBAssignment_tbdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_TBAssignment_tbdefault(xmachine_memory_TBAssignment* agent);
+
+/** h_add_agents_TBAssignment_tbdefault(
+ * Host function to add multiple agents of type TBAssignment to the tbdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of TBAssignment agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_TBAssignment_tbdefault(xmachine_memory_TBAssignment** agents, unsigned int count);
 
 /** h_allocate_agent_Household
  * Utility function to allocate and initialise an agent struct on the host.
@@ -3546,6 +3737,32 @@ unsigned int min_Person_s2_art_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_art_variable();
+
+/** unsigned int reduce_TBAssignment_tbdefault_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_TBAssignment_tbdefault_id_variable();
+
+
+
+/** unsigned int count_TBAssignment_tbdefault_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_TBAssignment_tbdefault_id_variable(int count_value);
+
+/** unsigned int min_TBAssignment_tbdefault_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_TBAssignment_tbdefault_id_variable();
+/** unsigned int max_TBAssignment_tbdefault_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_TBAssignment_tbdefault_id_variable();
 
 /** unsigned int reduce_Household_hhdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

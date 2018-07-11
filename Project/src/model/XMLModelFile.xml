@@ -352,6 +352,44 @@
     </gpu:xagent>
 
     <gpu:xagent>
+      <name>TBAssignment</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>tbinit</name>
+          <currentState>tbdefault</currentState>
+          <nextState>tbdefault</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>tb_assignment</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>tbdefault</name>
+        </gpu:state>
+        <initialState>tbdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
       <name>Household</name>
 
       <memory>
@@ -664,6 +702,19 @@
 
   <!-- Messages sent by agents which can be read by other agents -->
   <messages>
+
+    <gpu:message>
+      <name>tb_assignment</name>
+      <description>A message declaring that a person has active TB</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
 
     <gpu:message>
       <name>household_membership</name>

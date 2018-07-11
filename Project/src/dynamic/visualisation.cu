@@ -47,6 +47,10 @@ cudaGraphicsResource_t Person_s2_cgr;
 GLuint Person_s2_tbo;
 GLuint Person_s2_displacementTex;
 
+cudaGraphicsResource_t TBAssignment_tbdefault_cgr;
+GLuint TBAssignment_tbdefault_tbo;
+GLuint TBAssignment_tbdefault_displacementTex;
+
 cudaGraphicsResource_t Household_hhdefault_cgr;
 GLuint Household_hhdefault_tbo;
 GLuint Household_hhdefault_displacementTex;
@@ -224,6 +228,21 @@ __global__ void output_Person_agent_to_VBO(xmachine_memory_Person_list* agents, 
     vbo[index].w = 1.0;
 }
 
+__global__ void output_TBAssignment_agent_to_VBO(xmachine_memory_TBAssignment_list* agents, glm::vec4* vbo, glm::vec3 centralise){
+
+	//global thread index
+	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+
+	vbo[index].x = 0.0;
+	vbo[index].y = 0.0;
+	vbo[index].z = 0.0;
+	
+    vbo[index].x = 0.0;
+    vbo[index].y = 0.0;
+    vbo[index].z = 0.0;
+    vbo[index].w = 1.0;
+}
+
 __global__ void output_Household_agent_to_VBO(xmachine_memory_Household_list* agents, glm::vec4* vbo, glm::vec3 centralise){
 
 	//global thread index
@@ -351,6 +370,8 @@ void initVisualisation()
 	
 	createTBO(&Person_s2_cgr, &Person_s2_tbo, &Person_s2_displacementTex, xmachine_memory_Person_MAX * sizeof( glm::vec4));
 	
+	createTBO(&TBAssignment_tbdefault_cgr, &TBAssignment_tbdefault_tbo, &TBAssignment_tbdefault_displacementTex, xmachine_memory_TBAssignment_MAX * sizeof( glm::vec4));
+	
 	createTBO(&Household_hhdefault_cgr, &Household_hhdefault_tbo, &Household_hhdefault_displacementTex, xmachine_memory_Household_MAX * sizeof( glm::vec4));
 	
 	createTBO(&HouseholdMembership_hhmembershipdefault_cgr, &HouseholdMembership_hhmembershipdefault_tbo, &HouseholdMembership_hhmembershipdefault_displacementTex, xmachine_memory_HouseholdMembership_MAX * sizeof( glm::vec4));
@@ -445,6 +466,27 @@ void runCuda()
 		gpuErrchkLaunch();
 		// unmap buffer object
         gpuErrchk(cudaGraphicsUnmapResources(1, &Person_s2_cgr));
+	}
+	
+	if (get_agent_TBAssignment_tbdefault_count() > 0)
+	{
+		// map OpenGL buffer object for writing from CUDA
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &TBAssignment_tbdefault_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, TBAssignment_tbdefault_cgr));
+		//cuda block size
+		tile_size = (int) ceil((float)get_agent_TBAssignment_tbdefault_count()/threads_per_tile);
+		grid = dim3(tile_size, 1, 1);
+		threads = dim3(threads_per_tile, 1, 1);
+        
+        //continuous variables  
+        centralise = getMaximumBounds() + getMinimumBounds();
+        centralise /= 2;
+        
+		output_TBAssignment_agent_to_VBO<<< grid, threads>>>(get_device_TBAssignment_tbdefault_agents(), dptr, centralise);
+		gpuErrchkLaunch();
+		// unmap buffer object
+        gpuErrchk(cudaGraphicsUnmapResources(1, &TBAssignment_tbdefault_cgr));
 	}
 	
 	if (get_agent_Household_hhdefault_count() > 0)
@@ -883,6 +925,29 @@ void display()
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	
+	//Draw TBAssignment Agents in tbdefault state
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, TBAssignment_tbdefault_displacementTex);
+	//loop
+	for (int i=0; i< get_agent_TBAssignment_tbdefault_count(); i++){
+		glVertexAttrib1f(vs_mapIndex, (float)i);
+		
+		//draw using vertex and attribute data on the gpu (fast)
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereVerts);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereNormals);
+		glNormalPointer(GL_FLOAT, 0, 0);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, SPHERE_SLICES * (SPHERE_STACKS+1));
+
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	
 	//Draw Household Agents in hhdefault state
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER_EXT, Household_hhdefault_displacementTex);
@@ -1065,6 +1130,8 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		deleteTBO( &Person_default_cgr, &Person_default_tbo);
 		
 		deleteTBO( &Person_s2_cgr, &Person_s2_tbo);
+		
+		deleteTBO( &TBAssignment_tbdefault_cgr, &TBAssignment_tbdefault_tbo);
 		
 		deleteTBO( &Household_hhdefault_cgr, &Household_hhdefault_tbo);
 		

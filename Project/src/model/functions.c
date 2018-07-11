@@ -813,6 +813,13 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
   return 0;
 }
 
+__FLAME_GPU_FUNC__ int
+tbinit(xmachine_memory_TBAssignment *tbassignment,
+       xmachine_message_tb_assignment_list *tb_assignment_messages) {
+  add_tb_assignment_message(tb_assignment_messages, tbassignment->id);
+  return 1;
+}
+
 __FLAME_GPU_FUNC__ int trinit(
     xmachine_memory_TransportMembership *trmembership,
     xmachine_message_transport_membership_list *transport_membership_messages) {

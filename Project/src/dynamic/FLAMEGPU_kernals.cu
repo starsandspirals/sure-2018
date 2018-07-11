@@ -27,6 +27,8 @@
 
 __constant__ int d_xmachine_memory_Person_count;
 
+__constant__ int d_xmachine_memory_TBAssignment_count;
+
 __constant__ int d_xmachine_memory_Household_count;
 
 __constant__ int d_xmachine_memory_HouseholdMembership_count;
@@ -45,6 +47,8 @@ __constant__ int d_xmachine_memory_Person_default_count;
 
 __constant__ int d_xmachine_memory_Person_s2_count;
 
+__constant__ int d_xmachine_memory_TBAssignment_tbdefault_count;
+
 __constant__ int d_xmachine_memory_Household_hhdefault_count;
 
 __constant__ int d_xmachine_memory_HouseholdMembership_hhmembershipdefault_count;
@@ -59,6 +63,11 @@ __constant__ int d_xmachine_memory_TransportMembership_trmembershipdefault_count
 
 
 /* Message constants */
+
+/* tb_assignment Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_tb_assignment_count;         /**< message list counter*/
+__constant__ int d_message_tb_assignment_output_type;   /**< message output type (single or optional)*/
 
 /* household_membership Message variables */
 /* Non partitioned and spatial partitioned message variables  */
@@ -87,6 +96,7 @@ __constant__ int d_message_location_output_type;   /**< message output type (sin
 #include "functions.c"
     
 /* Texture bindings */
+
 
 
 
@@ -397,6 +407,117 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->locationid[index] = unordered_agents->locationid[old_pos];
 	ordered_agents->hiv[index] = unordered_agents->hiv[old_pos];
 	ordered_agents->art[index] = unordered_agents->art[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created TBAssignment agent functions */
+
+/** reset_TBAssignment_scan_input
+ * TBAssignment agent reset scan input function
+ * @param agents The xmachine_memory_TBAssignment_list agent list
+ */
+__global__ void reset_TBAssignment_scan_input(xmachine_memory_TBAssignment_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_TBAssignment_Agents
+ * TBAssignment scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_TBAssignment_list agent list destination
+ * @param agents_src xmachine_memory_TBAssignment_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_TBAssignment_Agents(xmachine_memory_TBAssignment_list* agents_dst, xmachine_memory_TBAssignment_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];
+	}
+}
+
+/** append_TBAssignment_Agents
+ * TBAssignment scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_TBAssignment_list agent list destination
+ * @param agents_src xmachine_memory_TBAssignment_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_TBAssignment_Agents(xmachine_memory_TBAssignment_list* agents_dst, xmachine_memory_TBAssignment_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+    }
+}
+
+/** add_TBAssignment_agent
+ * Continuous TBAssignment agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_TBAssignment_list to add agents to 
+ * @param id agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_TBAssignment_agent(xmachine_memory_TBAssignment_list* agents, unsigned int id){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_TBAssignment_agent(xmachine_memory_TBAssignment_list* agents, unsigned int id){
+    add_TBAssignment_agent<DISCRETE_2D>(agents, id);
+}
+
+/** reorder_TBAssignment_agents
+ * Continuous TBAssignment agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_TBAssignment_agents(unsigned int* values, xmachine_memory_TBAssignment_list* unordered_agents, xmachine_memory_TBAssignment_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1281,6 +1402,152 @@ __global__ void reorder_TransportMembership_agents(unsigned int* values, xmachin
 	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
 	ordered_agents->transport_id[index] = unordered_agents->transport_id[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created tb_assignment message functions */
+
+
+/** add_tb_assignment_message
+ * Add non partitioned or spatially partitioned tb_assignment message
+ * @param messages xmachine_message_tb_assignment_list message list to add too
+ * @param id agent variable of type unsigned int
+ */
+__device__ void add_tb_assignment_message(xmachine_message_tb_assignment_list* messages, unsigned int id){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_tb_assignment_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_tb_assignment_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_tb_assignment_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_tb_assignment Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->id[index] = id;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned tb_assignment message (for optional messages)
+ * @param messages scatter_optional_tb_assignment_messages Sparse xmachine_message_tb_assignment_list message list
+ * @param message_swap temp xmachine_message_tb_assignment_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_tb_assignment_messages(xmachine_message_tb_assignment_list* messages, xmachine_message_tb_assignment_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_tb_assignment_count;
+
+		//AoS - xmachine_message_tb_assignment Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->id[output_index] = messages_swap->id[index];				
+	}
+}
+
+/** reset_tb_assignment_swaps
+ * Reset non partitioned or spatially partitioned tb_assignment message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_tb_assignment_swaps(xmachine_message_tb_assignment_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_tb_assignment* get_first_tb_assignment_message(xmachine_message_tb_assignment_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_tb_assignment_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_tb_assignment Coalesced memory read
+	xmachine_message_tb_assignment temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.id = messages->id[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_tb_assignment));
+	xmachine_message_tb_assignment* sm_message = ((xmachine_message_tb_assignment*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_tb_assignment*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_tb_assignment* get_next_tb_assignment_message(xmachine_message_tb_assignment* message, xmachine_message_tb_assignment_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_tb_assignment_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_tb_assignment_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_tb_assignment Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_tb_assignment temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.id = messages->id[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_tb_assignment));
+		xmachine_message_tb_assignment* sm_message = ((xmachine_message_tb_assignment*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_tb_assignment));
+	return ((xmachine_message_tb_assignment*)&message_share[message_index]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2233,6 +2500,37 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->hiv[index] = agent.hiv;
 	agents->art[index] = agent.art;
 	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_tbinit(xmachine_memory_TBAssignment_list* agents, xmachine_message_tb_assignment_list* tb_assignment_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_TBAssignment_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_tbinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_TBAssignment agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.id = agents->id[index];
+
+	//FLAME function call
+	int dead = !tbinit(&agent, tb_assignment_messages	);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_tbinit Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
 }
 
 /**
