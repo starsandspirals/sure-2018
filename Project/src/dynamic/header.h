@@ -162,7 +162,7 @@ struct __align__(16) xmachine_memory_Person
     float churchdur;    /**< X-machine memory variable churchdur of type float.*/
     unsigned int transportuser;    /**< X-machine memory variable transportuser of type unsigned int.*/
     int transportfreq;    /**< X-machine memory variable transportfreq of type int.*/
-    int transportdur;    /**< X-machine memory variable transportdur of type int.*/
+    unsigned int transportdur;    /**< X-machine memory variable transportdur of type unsigned int.*/
     int transportday1;    /**< X-machine memory variable transportday1 of type int.*/
     int transportday2;    /**< X-machine memory variable transportday2 of type int.*/
     unsigned int household;    /**< X-machine memory variable household of type unsigned int.*/
@@ -245,7 +245,7 @@ struct __align__(16) xmachine_memory_Transport
  */
 struct __align__(16) xmachine_memory_TransportMembership
 {
-    unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
+    int person_id;    /**< X-machine memory variable person_id of type int.*/
     unsigned int transport_id;    /**< X-machine memory variable transport_id of type unsigned int.*/
     unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
 };
@@ -342,7 +342,7 @@ struct xmachine_memory_Person_list
     float churchdur [xmachine_memory_Person_MAX];    /**< X-machine memory variable list churchdur of type float.*/
     unsigned int transportuser [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportuser of type unsigned int.*/
     int transportfreq [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportfreq of type int.*/
-    int transportdur [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportdur of type int.*/
+    unsigned int transportdur [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportdur of type unsigned int.*/
     int transportday1 [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportday1 of type int.*/
     int transportday2 [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transportday2 of type int.*/
     unsigned int household [xmachine_memory_Person_MAX];    /**< X-machine memory variable list household of type unsigned int.*/
@@ -449,7 +449,7 @@ struct xmachine_memory_TransportMembership_list
     int _position [xmachine_memory_TransportMembership_MAX];    /**< Holds agents position in the 1D agent list */
     int _scan_input [xmachine_memory_TransportMembership_MAX];  /**< Used during parallel prefix sum */
     
-    unsigned int person_id [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
+    int person_id [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list person_id of type int.*/
     unsigned int transport_id [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list transport_id of type unsigned int.*/
     unsigned int duration [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
 };
@@ -774,7 +774,7 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param churchdur	agent agent variable of type float
  * @param transportuser	agent agent variable of type unsigned int
  * @param transportfreq	agent agent variable of type int
- * @param transportdur	agent agent variable of type int
+ * @param transportdur	agent agent variable of type unsigned int
  * @param transportday1	agent agent variable of type int
  * @param transportday2	agent agent variable of type int
  * @param household	agent agent variable of type unsigned int
@@ -785,7 +785,7 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param location	agent agent variable of type unsigned int
  * @param locationid	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid);
 
 /** add_Household_agent
  * Adds a new continuous valued Household agent to the xmachine_memory_Household_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -905,11 +905,11 @@ __FLAME_GPU_FUNC__ void set_Transport_agent_array_value(T *array, unsigned int i
 /** add_TransportMembership_agent
  * Adds a new continuous valued TransportMembership agent to the xmachine_memory_TransportMembership_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
  * @param agents xmachine_memory_TransportMembership_list agent list
- * @param person_id	agent agent variable of type unsigned int
+ * @param person_id	agent agent variable of type int
  * @param transport_id	agent agent variable of type unsigned int
  * @param duration	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, unsigned int person_id, unsigned int transport_id, unsigned int duration);
+__FLAME_GPU_FUNC__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, int person_id, unsigned int transport_id, unsigned int duration);
 
 
   
@@ -1409,14 +1409,14 @@ __host__ unsigned int get_Person_default_variable_transportuser(unsigned int ind
  */
 __host__ int get_Person_default_variable_transportfreq(unsigned int index);
 
-/** int get_Person_default_variable_transportdur(unsigned int index)
+/** unsigned int get_Person_default_variable_transportdur(unsigned int index)
  * Gets the value of the transportdur variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportdur
  */
-__host__ int get_Person_default_variable_transportdur(unsigned int index);
+__host__ unsigned int get_Person_default_variable_transportdur(unsigned int index);
 
 /** int get_Person_default_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the default state on the host. 
@@ -1607,14 +1607,14 @@ __host__ unsigned int get_Person_s2_variable_transportuser(unsigned int index);
  */
 __host__ int get_Person_s2_variable_transportfreq(unsigned int index);
 
-/** int get_Person_s2_variable_transportdur(unsigned int index)
+/** unsigned int get_Person_s2_variable_transportdur(unsigned int index)
  * Gets the value of the transportdur variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportdur
  */
-__host__ int get_Person_s2_variable_transportdur(unsigned int index);
+__host__ unsigned int get_Person_s2_variable_transportdur(unsigned int index);
 
 /** int get_Person_s2_variable_transportday1(unsigned int index)
  * Gets the value of the transportday1 variable of an Person agent in the s2 state on the host. 
@@ -1925,14 +1925,14 @@ __host__ unsigned int get_Transport_trdefault_variable_day(unsigned int index);
  */
 __host__ int get_Transport_trdefault_variable_people(unsigned int index, unsigned int element);
 
-/** unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index)
+/** int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index)
  * Gets the value of the person_id variable of an TransportMembership agent in the trmembershipdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable person_id
  */
-__host__ unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index);
+__host__ int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index);
 
 /** unsigned int get_TransportMembership_trmembershipdefault_variable_transport_id(unsigned int index)
  * Gets the value of the transport_id variable of an TransportMembership agent in the trmembershipdefault state on the host. 
@@ -2576,31 +2576,31 @@ int min_Person_default_transportfreq_variable();
  */
 int max_Person_default_transportfreq_variable();
 
-/** int reduce_Person_default_transportdur_variable();
+/** unsigned int reduce_Person_default_transportdur_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-int reduce_Person_default_transportdur_variable();
+unsigned int reduce_Person_default_transportdur_variable();
 
 
 
-/** int count_Person_default_transportdur_variable(int count_value){
+/** unsigned int count_Person_default_transportdur_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-int count_Person_default_transportdur_variable(int count_value);
+unsigned int count_Person_default_transportdur_variable(int count_value);
 
-/** int min_Person_default_transportdur_variable();
+/** unsigned int min_Person_default_transportdur_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int min_Person_default_transportdur_variable();
-/** int max_Person_default_transportdur_variable();
+unsigned int min_Person_default_transportdur_variable();
+/** unsigned int max_Person_default_transportdur_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int max_Person_default_transportdur_variable();
+unsigned int max_Person_default_transportdur_variable();
 
 /** int reduce_Person_default_transportday1_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -3141,31 +3141,31 @@ int min_Person_s2_transportfreq_variable();
  */
 int max_Person_s2_transportfreq_variable();
 
-/** int reduce_Person_s2_transportdur_variable();
+/** unsigned int reduce_Person_s2_transportdur_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-int reduce_Person_s2_transportdur_variable();
+unsigned int reduce_Person_s2_transportdur_variable();
 
 
 
-/** int count_Person_s2_transportdur_variable(int count_value){
+/** unsigned int count_Person_s2_transportdur_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-int count_Person_s2_transportdur_variable(int count_value);
+unsigned int count_Person_s2_transportdur_variable(int count_value);
 
-/** int min_Person_s2_transportdur_variable();
+/** unsigned int min_Person_s2_transportdur_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int min_Person_s2_transportdur_variable();
-/** int max_Person_s2_transportdur_variable();
+unsigned int min_Person_s2_transportdur_variable();
+/** unsigned int max_Person_s2_transportdur_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-int max_Person_s2_transportdur_variable();
+unsigned int max_Person_s2_transportdur_variable();
 
 /** int reduce_Person_s2_transportday1_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -3959,31 +3959,31 @@ unsigned int min_Transport_trdefault_day_variable();
  */
 unsigned int max_Transport_trdefault_day_variable();
 
-/** unsigned int reduce_TransportMembership_trmembershipdefault_person_id_variable();
+/** int reduce_TransportMembership_trmembershipdefault_person_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
-unsigned int reduce_TransportMembership_trmembershipdefault_person_id_variable();
+int reduce_TransportMembership_trmembershipdefault_person_id_variable();
 
 
 
-/** unsigned int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value){
+/** int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value);
+int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value);
 
-/** unsigned int min_TransportMembership_trmembershipdefault_person_id_variable();
+/** int min_TransportMembership_trmembershipdefault_person_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int min_TransportMembership_trmembershipdefault_person_id_variable();
-/** unsigned int max_TransportMembership_trmembershipdefault_person_id_variable();
+int min_TransportMembership_trmembershipdefault_person_id_variable();
+/** int max_TransportMembership_trmembershipdefault_person_id_variable();
  * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the minimum variable value of the specified agent name and state
  */
-unsigned int max_TransportMembership_trmembershipdefault_person_id_variable();
+int max_TransportMembership_trmembershipdefault_person_id_variable();
 
 /** unsigned int reduce_TransportMembership_trmembershipdefault_transport_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

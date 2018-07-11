@@ -223,7 +223,7 @@
           <name>transportfreq</name>
         </gpu:variable>
         <gpu:variable>
-          <type>int</type>
+          <type>unsigned int</type>
           <name>transportdur</name>
         </gpu:variable>
         <gpu:variable>
@@ -591,7 +591,7 @@
 
       <memory>
         <gpu:variable>
-          <type>unsigned int</type>
+          <type>int</type>
           <name>person_id</name>
         </gpu:variable>
         <gpu:variable>

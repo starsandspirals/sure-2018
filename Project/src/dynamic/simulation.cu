@@ -2429,14 +2429,14 @@ __host__ int get_Person_default_variable_transportfreq(unsigned int index){
     }
 }
 
-/** int get_Person_default_variable_transportdur(unsigned int index)
+/** unsigned int get_Person_default_variable_transportdur(unsigned int index)
  * Gets the value of the transportdur variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportdur
  */
-__host__ int get_Person_default_variable_transportdur(unsigned int index){
+__host__ unsigned int get_Person_default_variable_transportdur(unsigned int index){
     unsigned int count = get_agent_Person_default_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -2449,7 +2449,7 @@ __host__ int get_Person_default_variable_transportdur(unsigned int index){
                 cudaMemcpy(
                     h_Persons_default->transportdur,
                     d_Persons_default->transportdur,
-                    count * sizeof(int),
+                    count * sizeof(unsigned int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -3287,14 +3287,14 @@ __host__ int get_Person_s2_variable_transportfreq(unsigned int index){
     }
 }
 
-/** int get_Person_s2_variable_transportdur(unsigned int index)
+/** unsigned int get_Person_s2_variable_transportdur(unsigned int index)
  * Gets the value of the transportdur variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable transportdur
  */
-__host__ int get_Person_s2_variable_transportdur(unsigned int index){
+__host__ unsigned int get_Person_s2_variable_transportdur(unsigned int index){
     unsigned int count = get_agent_Person_s2_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -3307,7 +3307,7 @@ __host__ int get_Person_s2_variable_transportdur(unsigned int index){
                 cudaMemcpy(
                     h_Persons_s2->transportdur,
                     d_Persons_s2->transportdur,
-                    count * sizeof(int),
+                    count * sizeof(unsigned int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -4664,14 +4664,14 @@ __host__ int get_Transport_trdefault_variable_people(unsigned int index, unsigne
     }
 }
 
-/** unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index)
+/** int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index)
  * Gets the value of the person_id variable of an TransportMembership agent in the trmembershipdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
  * This has a potentially significant performance impact if used improperly.
  * @param index the index of the agent within the list.
  * @return value of agent variable person_id
  */
-__host__ unsigned int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index){
+__host__ int get_TransportMembership_trmembershipdefault_variable_person_id(unsigned int index){
     unsigned int count = get_agent_TransportMembership_trmembershipdefault_count();
     unsigned int currentIteration = getIterationNumber();
     
@@ -4684,7 +4684,7 @@ __host__ unsigned int get_TransportMembership_trmembershipdefault_variable_perso
                 cudaMemcpy(
                     h_TransportMemberships_trmembershipdefault->person_id,
                     d_TransportMemberships_trmembershipdefault->person_id,
-                    count * sizeof(unsigned int),
+                    count * sizeof(int),
                     cudaMemcpyDeviceToHost
                 )
             );
@@ -4819,7 +4819,7 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, &h_agent->transportfreq, sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportdur, &h_agent->transportdur, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportday1, &h_agent->transportday1, sizeof(int), cudaMemcpyHostToDevice));
  
@@ -4878,7 +4878,7 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
  
 		gpuErrchk(cudaMemcpy(d_dst->transportfreq, h_src->transportfreq, count * sizeof(int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->transportdur, h_src->transportdur, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transportday1, h_src->transportday1, count * sizeof(int), cudaMemcpyHostToDevice));
  
@@ -5154,7 +5154,7 @@ void copy_partial_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpo
  */
 void copy_single_xmachine_memory_TransportMembership_hostToDevice(xmachine_memory_TransportMembership_list * d_dst, xmachine_memory_TransportMembership * h_agent){
  
-		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transport_id, &h_agent->transport_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -5175,7 +5175,7 @@ void copy_partial_xmachine_memory_TransportMembership_hostToDevice(xmachine_memo
     // Only copy elements if there is data to move.
     if (count > 0){
 	 
-		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transport_id, h_src->transport_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -6449,24 +6449,24 @@ int max_Person_default_transportfreq_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-int reduce_Person_default_transportdur_variable(){
+unsigned int reduce_Person_default_transportdur_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->transportdur),  thrust::device_pointer_cast(d_Persons_default->transportdur) + h_xmachine_memory_Person_default_count);
 }
 
-int count_Person_default_transportdur_variable(int count_value){
+unsigned int count_Person_default_transportdur_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->transportdur),  thrust::device_pointer_cast(d_Persons_default->transportdur) + h_xmachine_memory_Person_default_count, count_value);
 }
-int min_Person_default_transportdur_variable(){
+unsigned int min_Person_default_transportdur_variable(){
     //min in default stream
-    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-int max_Person_default_transportdur_variable(){
+unsigned int max_Person_default_transportdur_variable(){
     //max in default stream
-    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transportdur);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -6907,24 +6907,24 @@ int max_Person_s2_transportfreq_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-int reduce_Person_s2_transportdur_variable(){
+unsigned int reduce_Person_s2_transportdur_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->transportdur),  thrust::device_pointer_cast(d_Persons_s2->transportdur) + h_xmachine_memory_Person_s2_count);
 }
 
-int count_Person_s2_transportdur_variable(int count_value){
+unsigned int count_Person_s2_transportdur_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->transportdur),  thrust::device_pointer_cast(d_Persons_s2->transportdur) + h_xmachine_memory_Person_s2_count, count_value);
 }
-int min_Person_s2_transportdur_variable(){
+unsigned int min_Person_s2_transportdur_variable(){
     //min in default stream
-    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-int max_Person_s2_transportdur_variable(){
+unsigned int max_Person_s2_transportdur_variable(){
     //max in default stream
-    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transportdur);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -7571,24 +7571,24 @@ unsigned int max_Transport_trdefault_day_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_TransportMembership_trmembershipdefault_person_id_variable(){
+int reduce_TransportMembership_trmembershipdefault_person_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id),  thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id) + h_xmachine_memory_TransportMembership_trmembershipdefault_count);
 }
 
-unsigned int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value){
+int count_TransportMembership_trmembershipdefault_person_id_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id),  thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id) + h_xmachine_memory_TransportMembership_trmembershipdefault_count, count_value);
 }
-unsigned int min_TransportMembership_trmembershipdefault_person_id_variable(){
+int min_TransportMembership_trmembershipdefault_person_id_variable(){
     //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id);
     size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_TransportMembership_trmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int max_TransportMembership_trmembershipdefault_person_id_variable(){
+int max_TransportMembership_trmembershipdefault_person_id_variable(){
     //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id);
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_TransportMemberships_trmembershipdefault->person_id);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_TransportMembership_trmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

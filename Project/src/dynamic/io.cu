@@ -353,7 +353,7 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</transportfreq>\n", file);
         
 		fputs("<transportdur>", file);
-        sprintf(data, "%d", h_Persons_default->transportdur[i]);
+        sprintf(data, "%u", h_Persons_default->transportdur[i]);
 		fputs(data, file);
 		fputs("</transportdur>\n", file);
         
@@ -470,7 +470,7 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("</transportfreq>\n", file);
         
 		fputs("<transportdur>", file);
-        sprintf(data, "%d", h_Persons_s2->transportdur[i]);
+        sprintf(data, "%u", h_Persons_s2->transportdur[i]);
 		fputs(data, file);
 		fputs("</transportdur>\n", file);
         
@@ -696,7 +696,7 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs("<name>TransportMembership</name>\n", file);
         
 		fputs("<person_id>", file);
-        sprintf(data, "%u", h_TransportMemberships_trmembershipdefault->person_id[i]);
+        sprintf(data, "%d", h_TransportMemberships_trmembershipdefault->person_id[i]);
 		fputs(data, file);
 		fputs("</person_id>\n", file);
         
@@ -922,7 +922,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	float Person_churchdur;
 	unsigned int Person_transportuser;
 	int Person_transportfreq;
-	int Person_transportdur;
+	unsigned int Person_transportdur;
 	int Person_transportday1;
 	int Person_transportday2;
 	unsigned int Person_household;
@@ -957,7 +957,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Transport_duration;
 	unsigned int Transport_day;
     int Transport_people[16];
-	unsigned int TransportMembership_person_id;
+	int TransportMembership_person_id;
 	unsigned int TransportMembership_transport_id;
 	unsigned int TransportMembership_duration;
 
@@ -1721,7 +1721,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Person_transportfreq = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_transportdur){
-                    Person_transportdur = (int) fpgu_strtol(buffer); 
+                    Person_transportdur = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Person_transportday1){
                     Person_transportday1 = (int) fpgu_strtol(buffer); 
@@ -1826,7 +1826,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     readArrayInput<int>(&fpgu_strtol, buffer, Transport_people, 16);    
                 }
 				if(in_TransportMembership_person_id){
-                    TransportMembership_person_id = (unsigned int) fpgu_strtoul(buffer); 
+                    TransportMembership_person_id = (int) fpgu_strtol(buffer); 
                 }
 				if(in_TransportMembership_transport_id){
                     TransportMembership_transport_id = (unsigned int) fpgu_strtoul(buffer); 

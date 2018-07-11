@@ -291,7 +291,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param churchdur agent variable of type float
  * @param transportuser agent variable of type unsigned int
  * @param transportfreq agent variable of type int
- * @param transportdur agent variable of type int
+ * @param transportdur agent variable of type unsigned int
  * @param transportday1 agent variable of type int
  * @param transportday2 agent variable of type int
  * @param household agent variable of type unsigned int
@@ -303,7 +303,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param locationid agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
 	
 	int index;
     
@@ -348,7 +348,7 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid){
     add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid);
 }
 
@@ -1220,12 +1220,12 @@ __global__ void append_TransportMembership_Agents(xmachine_memory_TransportMembe
 /** add_TransportMembership_agent
  * Continuous TransportMembership agent add agent function writes agent data to agent swap
  * @param agents xmachine_memory_TransportMembership_list to add agents to 
- * @param person_id agent variable of type unsigned int
+ * @param person_id agent variable of type int
  * @param transport_id agent variable of type unsigned int
  * @param duration agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, unsigned int person_id, unsigned int transport_id, unsigned int duration){
+__device__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, int person_id, unsigned int transport_id, unsigned int duration){
 	
 	int index;
     
@@ -1251,7 +1251,7 @@ __device__ void add_TransportMembership_agent(xmachine_memory_TransportMembershi
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, unsigned int person_id, unsigned int transport_id, unsigned int duration){
+__device__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, int person_id, unsigned int transport_id, unsigned int duration){
     add_TransportMembership_agent<DISCRETE_2D>(agents, person_id, transport_id, duration);
 }
 

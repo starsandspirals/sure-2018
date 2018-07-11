@@ -248,7 +248,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         // Decide whether the person is a transport user based on given input
         // probabilities.
-        float useprob = 1.0 / (1 + exp(-transport_beta0 - (transport_beta1 * age)));
+        float useprob =
+            1.0 / (1 + exp(-transport_beta0 - (transport_beta1 * age)));
 
         if (random < useprob) {
           h_person->transportuser = 1;
@@ -497,7 +498,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     h_free_agent_Church(&h_church);
   }
 
-  for (unsigned int i = 0; i < 5; i++) {
+  for (unsigned int i = 1; i <= 5; i++) {
 
     unsigned int currentday = 0;
     unsigned int currentpeople[h_agent_AoS_MAX];
@@ -532,10 +533,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       while (capacity < transport_size && countdone < currentday) {
 
         h_transport->people[capacity] = currentpeople[countdone];
+        unsigned int currentperson = h_transport->people[capacity];
+        printf("%u", currentperson);
 
         xmachine_memory_TransportMembership *h_trmembership =
             h_allocate_agent_TransportMembership();
-        h_trmembership->person_id = currentpeople[countdone];
+        h_trmembership->person_id = currentperson;
+        printf("%u\n", h_trmembership->person_id);
         h_trmembership->transport_id = h_transport->id;
         h_trmembership->duration = h_transport->duration;
 
@@ -670,7 +674,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->location = 1;
         person->locationid = person->church;
       }
-    } else if (person->transport != -1 && (day == person->transportday1 || day == person->transportday2)) {
+    } else if (person->transport != -1 &&
+               (day == person->transportday1 || day == person->transportday2)) {
       if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
         person->startstep = person->step;
         person->busy = 1;
@@ -736,7 +741,7 @@ __FLAME_GPU_FUNC__ int trinit(
   add_transport_membership_message(
       transport_membership_messages, trmembership->person_id,
       trmembership->transport_id, trmembership->duration);
-  return 1;
+  return 0;
 }
 
 __FLAME_GPU_FUNC__ int
