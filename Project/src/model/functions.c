@@ -732,11 +732,11 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   person->step += TIME_STEP;
 
   if (person->location == 0) {
-    person->householdtime += 5;
+    person->householdtime += 5 * TIME_STEP;
   } else if (person->location == 1) {
-    person->churchtime += 5;
+    person->churchtime += 5 * TIME_STEP;
   } else if (person->location == 2) {
-    person->transporttime += 5;
+    person->transporttime += 5 * TIME_STEP;
   }
 
   add_location_message(location_messages, person->id, person->location,
