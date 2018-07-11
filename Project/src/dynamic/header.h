@@ -4462,6 +4462,8 @@ __constant__ float RR_HIV;
 
 __constant__ float RR_ART;
 
+__constant__ float TB_PREVALENCE;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -4780,6 +4782,17 @@ extern const float* get_RR_ART();
 
 
 extern float h_env_RR_ART;
+
+/** set_TB_PREVALENCE
+ * Sets the constant variable TB_PREVALENCE on the device which can then be used in the agent functions.
+ * @param h_TB_PREVALENCE value to set the variable
+ */
+extern void set_TB_PREVALENCE(float* h_TB_PREVALENCE);
+
+extern const float* get_TB_PREVALENCE();
+
+
+extern float h_env_TB_PREVALENCE;
 
 
 /** getMaximumBound

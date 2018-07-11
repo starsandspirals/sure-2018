@@ -151,6 +151,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   float art_coverage = *get_ART_COVERAGE();
   float rr_hiv = *get_RR_HIV();
   float rr_art = *get_RR_ART();
+  float tb_prevalence = *get_TB_PREVALENCE();
 
   srand(0);
 
@@ -410,6 +411,38 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   }
 
   shufflefloat(tbarray, weights, total);
+
+  unsigned int weightsum = 0;
+
+  for (unsigned int i = 0; i < total; i++) {
+    weightsum += weights[i];
+  }
+
+  for (unsigned int i = 0; i < total; i++) {
+    float randomfloat = ((float)rand() / (RAND_MAX));
+
+    if (randomfloat < tb_prevalence) {
+
+      float randomweight = weightsum * ((float)rand() / (RAND_MAX));
+
+      for (unsigned int j = 0; j < total; j++) {
+        if (randomweight < weights[j]) {
+
+          xmachine_memory_TBAssignment *h_tbassignment =
+              h_allocate_agent_TBAssignment();
+
+          h_tbassignment->id = tbarray[j];
+          weights[j] = 0.0;
+
+          h_add_agent_TBAssignment_tbdefault(h_tbassignment);
+
+          h_free_agent_TBAssignment(&h_tbassignment);
+        }
+
+        randomweight -= weights[j];
+      }
+    }
+  }
 
   // Create an array to keep track of how many adults are in each household, for
   // use when generating churches.

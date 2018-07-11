@@ -1600,6 +1600,7 @@ float h_env_HIV_PREVALENCE;
 float h_env_ART_COVERAGE;
 float h_env_RR_HIV;
 float h_env_RR_ART;
+float h_env_TB_PREVALENCE;
 
 
 //constant setter
@@ -1975,6 +1976,19 @@ void set_RR_ART(float* h_RR_ART){
 //constant getter
 const float* get_RR_ART(){
     return &h_env_RR_ART;
+}
+
+
+
+//constant setter
+void set_TB_PREVALENCE(float* h_TB_PREVALENCE){
+    gpuErrchk(cudaMemcpyToSymbol(TB_PREVALENCE, h_TB_PREVALENCE, sizeof(float)));
+    memcpy(&h_env_TB_PREVALENCE, h_TB_PREVALENCE,sizeof(float));
+}
+
+//constant getter
+const float* get_TB_PREVALENCE(){
+    return &h_env_TB_PREVALENCE;
 }
 
 

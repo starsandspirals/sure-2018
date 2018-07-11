@@ -150,6 +150,11 @@
         <name>RR_ART</name>
         <defaultValue>0.4</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>TB_PREVALENCE</name>
+        <defaultValue>0.005</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

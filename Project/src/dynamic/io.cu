@@ -307,6 +307,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_RR_ART()));
     fputs(data, file);
     fputs("</RR_ART>\n", file);
+    fputs("\t<TB_PREVALENCE>", file);
+    sprintf(data, "%f", (*get_TB_PREVALENCE()));
+    fputs(data, file);
+    fputs("</TB_PREVALENCE>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -838,6 +842,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RR_HIV(&t_RR_HIV);
     float t_RR_ART = (float)0.4;
     set_RR_ART(&t_RR_ART);
+    float t_TB_PREVALENCE = (float)0.005;
+    set_TB_PREVALENCE(&t_TB_PREVALENCE);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count)
@@ -973,6 +979,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_RR_ART;
     
+    int in_env_TB_PREVALENCE;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1068,6 +1076,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_ART_COVERAGE;
     float env_RR_HIV;
     float env_RR_ART;
+    float env_TB_PREVALENCE;
     
 
 
@@ -1167,6 +1176,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_ART_COVERAGE = 0;
     in_env_RR_HIV = 0;
     in_env_RR_ART = 0;
+    in_env_TB_PREVALENCE = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1366,6 +1376,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_ART_COVERAGE = 0;
     env_RR_HIV = 0;
     env_RR_ART = 0;
+    env_TB_PREVALENCE = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1801,6 +1812,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/RR_HIV") == 0) in_env_RR_HIV = 0;
 			if(strcmp(buffer, "RR_ART") == 0) in_env_RR_ART = 1;
             if(strcmp(buffer, "/RR_ART") == 0) in_env_RR_ART = 0;
+			if(strcmp(buffer, "TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 1;
+            if(strcmp(buffer, "/TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2182,6 +2195,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_RR_ART = (float) fgpu_atof(buffer);
                     
                     set_RR_ART(&env_RR_ART);
+                  
+              }
+            if(in_env_TB_PREVALENCE){
+              
+                    env_TB_PREVALENCE = (float) fgpu_atof(buffer);
+                    
+                    set_TB_PREVALENCE(&env_TB_PREVALENCE);
                   
               }
             
