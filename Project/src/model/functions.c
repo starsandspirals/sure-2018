@@ -67,6 +67,21 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
   }
 }
 
+__host__ void shufflefloat(unsigned int *array1, float *array2, size_t n) {
+  if (n > 1) {
+    size_t i;
+    for (i = 0; i < n - 1; i++) {
+      size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+      unsigned int t1 = array1[j];
+      float t2 = array2[j];
+      array1[j] = array1[i];
+      array2[j] = array2[i];
+      array1[i] = t1;
+      array2[i] = t2;
+    }
+  }
+}
+
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
 __device__ unsigned int dayofweek(unsigned int step) {
@@ -195,6 +210,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int transport[h_agent_AoS_MAX];
   unsigned int days[h_agent_AoS_MAX];
 
+  unsigned int tbarray[h_agent_AoS_MAX];
+  float weights[h_agent_AoS_MAX];
+
   for (unsigned int i = 0; i < 32; i++) {
     sizearray[i] = 0;
   }
@@ -248,7 +266,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // interval they belong to.
         age = (rand() % (maxage - minage)) + minage;
 
-        if (gender = 1) {
+        if (gender == 1) {
           if (age >= 46) {
             rr_as = 0.50;
           } else if (age >= 26) {
@@ -351,6 +369,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           weight = rr_as;
         }
 
+        weights[h_person->id] = weight;
+
         // Update the arrays of information with this person's household size
         // and age.
         sizearray[currentsize]++;
@@ -384,6 +404,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   }
 
   shuffle(order, ages, total);
+
+  for (unsigned int i = 0; i < total; i++) {
+    tbarray[i] = i;
+  }
+
+  shufflefloat(tbarray, weights, total);
 
   // Create an array to keep track of how many adults are in each household, for
   // use when generating churches.
