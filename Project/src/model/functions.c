@@ -533,13 +533,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       while (capacity < transport_size && countdone < currentday) {
 
         h_transport->people[capacity] = currentpeople[countdone];
-        unsigned int currentperson = h_transport->people[capacity];
-        printf("%u", currentperson);
 
         xmachine_memory_TransportMembership *h_trmembership =
             h_allocate_agent_TransportMembership();
-        h_trmembership->person_id = currentperson;
-        printf("%u\n", h_trmembership->person_id);
+        h_trmembership->person_id = h_transport->people[capacity];
         h_trmembership->transport_id = h_transport->id;
         h_trmembership->duration = h_transport->duration;
 
@@ -741,7 +738,7 @@ __FLAME_GPU_FUNC__ int trinit(
   add_transport_membership_message(
       transport_membership_messages, trmembership->person_id,
       trmembership->transport_id, trmembership->duration);
-  return 0;
+  return 1;
 }
 
 __FLAME_GPU_FUNC__ int
@@ -791,6 +788,7 @@ __FLAME_GPU_FUNC__ int persontrinit(
     if (transport_membership_message->person_id == personid) {
       person->transport = transport_membership_message->transport_id;
       person->transportdur = transport_membership_message->duration;
+    } else {
     }
     transport_membership_message = get_next_transport_membership_message(
         transport_membership_message, transport_membership_messages);

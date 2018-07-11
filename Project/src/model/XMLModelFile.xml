@@ -769,13 +769,13 @@
 
     <layer>
       <gpu:layerFunction>
-        <name>personhhinit</name>
+        <name>persontrinit</name>
       </gpu:layerFunction>
     </layer>
 
     <layer>
       <gpu:layerFunction>
-        <name>persontrinit</name>
+        <name>personhhinit</name>
       </gpu:layerFunction>
     </layer>
 

@@ -1354,14 +1354,14 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("Person_personhhinit");
-	Person_personhhinit(stream1);
+    PROFILE_PUSH_RANGE("Person_persontrinit");
+	Person_persontrinit(stream1);
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_personhhinit = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: Person_persontrinit = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
@@ -1371,14 +1371,14 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("Person_persontrinit");
-	Person_persontrinit(stream1);
+    PROFILE_PUSH_RANGE("Person_personhhinit");
+	Person_personhhinit(stream1);
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_persontrinit = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: Person_personhhinit = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
