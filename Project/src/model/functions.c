@@ -248,7 +248,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         // Decide whether the person is a transport user based on given input
         // probabilities.
-        float useprob = 1 + exp(-transport_beta0 - (transport_beta1 * age));
+        float useprob = 1.0 / (1 + exp(-transport_beta0 - (transport_beta1 * age)));
 
         if (random < useprob) {
           h_person->transportuser = 1;
