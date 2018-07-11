@@ -851,6 +851,12 @@
 
     <layer>
       <gpu:layerFunction>
+        <name>tbinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
         <name>trinit</name>
       </gpu:layerFunction>
     </layer>

@@ -413,7 +413,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   shufflefloat(tbarray, weights, total);
 
-  unsigned int weightsum = 0;
+  float weightsum = 0;
 
   for (unsigned int i = 0; i < total; i++) {
     weightsum += weights[i];
@@ -438,6 +438,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           h_add_agent_TBAssignment_tbdefault(h_tbassignment);
 
           h_free_agent_TBAssignment(&h_tbassignment);
+          break;
         }
 
         randomweight -= weights[j];
@@ -710,20 +711,20 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(
-        fp,
-        "ID, gender, age, household_size, hiv, art, time_home, time_church, "
-        "time_transport\n");
+    fprintf(fp, "ID, gender, age, household_size, hiv, art, active_tb, "
+                "time_home, time_church, "
+                "time_transport\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++) {
 
-      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u\n",
+      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u, %u\n",
               get_Person_s2_variable_id(index),
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
               get_Person_s2_variable_householdsize(index),
               get_Person_s2_variable_hiv(index),
               get_Person_s2_variable_art(index),
+              get_Person_s2_variable_activetb(index),
               get_Person_s2_variable_householdtime(index),
               get_Person_s2_variable_churchtime(index),
               get_Person_s2_variable_transporttime(index));
@@ -907,7 +908,7 @@ persontbinit(xmachine_memory_Person *person,
       get_first_tb_assignment_message(tb_assignment_messages);
 
   while (tb_assignment_message) {
-    if (tb_assignment_message->id = personid) {
+    if (tb_assignment_message->id == personid) {
       person->activetb = 1;
     }
     tb_assignment_message = get_next_tb_assignment_message(
