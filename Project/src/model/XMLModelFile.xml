@@ -220,6 +220,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>clinictime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>age</name>
           <defaultValue>0</defaultValue>
         </gpu:variable>

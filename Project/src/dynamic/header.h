@@ -165,6 +165,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int householdtime;    /**< X-machine memory variable householdtime of type unsigned int.*/
     unsigned int churchtime;    /**< X-machine memory variable churchtime of type unsigned int.*/
     unsigned int transporttime;    /**< X-machine memory variable transporttime of type unsigned int.*/
+    unsigned int clinictime;    /**< X-machine memory variable clinictime of type unsigned int.*/
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     unsigned int gender;    /**< X-machine memory variable gender of type unsigned int.*/
     unsigned int householdsize;    /**< X-machine memory variable householdsize of type unsigned int.*/
@@ -380,6 +381,7 @@ struct xmachine_memory_Person_list
     unsigned int householdtime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list householdtime of type unsigned int.*/
     unsigned int churchtime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list churchtime of type unsigned int.*/
     unsigned int transporttime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transporttime of type unsigned int.*/
+    unsigned int clinictime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list clinictime of type unsigned int.*/
     unsigned int age [xmachine_memory_Person_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     unsigned int gender [xmachine_memory_Person_MAX];    /**< X-machine memory variable list gender of type unsigned int.*/
     unsigned int householdsize [xmachine_memory_Person_MAX];    /**< X-machine memory variable list householdsize of type unsigned int.*/
@@ -905,6 +907,7 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param householdtime	agent agent variable of type unsigned int
  * @param churchtime	agent agent variable of type unsigned int
  * @param transporttime	agent agent variable of type unsigned int
+ * @param clinictime	agent agent variable of type unsigned int
  * @param age	agent agent variable of type unsigned int
  * @param gender	agent agent variable of type unsigned int
  * @param householdsize	agent agent variable of type unsigned int
@@ -927,7 +930,7 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param activetb	agent agent variable of type unsigned int
  * @param artday	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1593,6 +1596,15 @@ __host__ unsigned int get_Person_default_variable_churchtime(unsigned int index)
  */
 __host__ unsigned int get_Person_default_variable_transporttime(unsigned int index);
 
+/** unsigned int get_Person_default_variable_clinictime(unsigned int index)
+ * Gets the value of the clinictime variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable clinictime
+ */
+__host__ unsigned int get_Person_default_variable_clinictime(unsigned int index);
+
 /** unsigned int get_Person_default_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -1826,6 +1838,15 @@ __host__ unsigned int get_Person_s2_variable_churchtime(unsigned int index);
  * @return value of agent variable transporttime
  */
 __host__ unsigned int get_Person_s2_variable_transporttime(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_clinictime(unsigned int index)
+ * Gets the value of the clinictime variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable clinictime
+ */
+__host__ unsigned int get_Person_s2_variable_clinictime(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the s2 state on the host. 
@@ -2829,6 +2850,32 @@ unsigned int min_Person_default_transporttime_variable();
  */
 unsigned int max_Person_default_transporttime_variable();
 
+/** unsigned int reduce_Person_default_clinictime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_clinictime_variable();
+
+
+
+/** unsigned int count_Person_default_clinictime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_clinictime_variable(int count_value);
+
+/** unsigned int min_Person_default_clinictime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_clinictime_variable();
+/** unsigned int max_Person_default_clinictime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_clinictime_variable();
+
 /** unsigned int reduce_Person_default_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -3497,6 +3544,32 @@ unsigned int min_Person_s2_transporttime_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_transporttime_variable();
+
+/** unsigned int reduce_Person_s2_clinictime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_clinictime_variable();
+
+
+
+/** unsigned int count_Person_s2_clinictime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_clinictime_variable(int count_value);
+
+/** unsigned int min_Person_s2_clinictime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_clinictime_variable();
+/** unsigned int max_Person_s2_clinictime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_clinictime_variable();
 
 /** unsigned int reduce_Person_s2_age_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
