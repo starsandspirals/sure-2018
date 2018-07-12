@@ -366,6 +366,18 @@
           <type>float</type>
           <name>q</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>infections</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>lastinfected</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>lastinfectedid</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
@@ -380,6 +392,18 @@
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>true</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>infect</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>infection</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
@@ -1101,7 +1125,38 @@
         <name>update</name>
       </gpu:layerFunction>
     </layer>
-  </layers>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>hhupdate</name>
+      </gpu:layerFunction>
+    </layer>
+    
+
+    <layer>
+      <gpu:layerFunction>
+        <name>chuupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>trupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>clupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>infect</name>
+      </gpu:layerFunction>
+    </layer> 
+  </layers> 
 
 </gpu:xmodel>
 

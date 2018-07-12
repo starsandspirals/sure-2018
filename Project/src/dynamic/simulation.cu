@@ -238,6 +238,9 @@ unsigned int h_Persons_default_variable_activetb_data_iteration;
 unsigned int h_Persons_default_variable_artday_data_iteration;
 unsigned int h_Persons_default_variable_p_data_iteration;
 unsigned int h_Persons_default_variable_q_data_iteration;
+unsigned int h_Persons_default_variable_infections_data_iteration;
+unsigned int h_Persons_default_variable_lastinfected_data_iteration;
+unsigned int h_Persons_default_variable_lastinfectedid_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
 unsigned int h_Persons_s2_variable_householdtime_data_iteration;
@@ -267,6 +270,9 @@ unsigned int h_Persons_s2_variable_activetb_data_iteration;
 unsigned int h_Persons_s2_variable_artday_data_iteration;
 unsigned int h_Persons_s2_variable_p_data_iteration;
 unsigned int h_Persons_s2_variable_q_data_iteration;
+unsigned int h_Persons_s2_variable_infections_data_iteration;
+unsigned int h_Persons_s2_variable_lastinfected_data_iteration;
+unsigned int h_Persons_s2_variable_lastinfectedid_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
@@ -414,6 +420,11 @@ int scan_last_included;      /**< Indicates if last sum value is included in the
  * Agent function prototype for update function of Person agent
  */
 void Person_update(cudaStream_t &stream);
+
+/** Person_infect
+ * Agent function prototype for infect function of Person agent
+ */
+void Person_infect(cudaStream_t &stream);
 
 /** Person_personhhinit
  * Agent function prototype for personhhinit function of Person agent
@@ -591,6 +602,9 @@ void initialise(char * inputfile){
     h_Persons_default_variable_artday_data_iteration = 0;
     h_Persons_default_variable_p_data_iteration = 0;
     h_Persons_default_variable_q_data_iteration = 0;
+    h_Persons_default_variable_infections_data_iteration = 0;
+    h_Persons_default_variable_lastinfected_data_iteration = 0;
+    h_Persons_default_variable_lastinfectedid_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
     h_Persons_s2_variable_householdtime_data_iteration = 0;
@@ -620,6 +634,9 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_artday_data_iteration = 0;
     h_Persons_s2_variable_p_data_iteration = 0;
     h_Persons_s2_variable_q_data_iteration = 0;
+    h_Persons_s2_variable_infections_data_iteration = 0;
+    h_Persons_s2_variable_lastinfected_data_iteration = 0;
+    h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
@@ -1699,6 +1716,91 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
 	printf("Instrumentation: Person_update = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 9*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Household_hhupdate");
+	Household_hhupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Household_hhupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 10*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Church_chuupdate");
+	Church_chuupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Church_chuupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 11*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Transport_trupdate");
+	Transport_trupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Transport_trupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 12*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Clinic_clupdate");
+	Clinic_clupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Clinic_clupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 13*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_infect");
+	Person_infect(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_infect = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
@@ -3649,6 +3751,123 @@ __host__ float get_Person_default_variable_q(unsigned int index){
     }
 }
 
+/** unsigned int get_Person_default_variable_infections(unsigned int index)
+ * Gets the value of the infections variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable infections
+ */
+__host__ unsigned int get_Person_default_variable_infections(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_infections_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->infections,
+                    d_Persons_default->infections,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_infections_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->infections[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access infections for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_default_variable_lastinfected(unsigned int index)
+ * Gets the value of the lastinfected variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfected
+ */
+__host__ int get_Person_default_variable_lastinfected(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_lastinfected_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->lastinfected,
+                    d_Persons_default->lastinfected,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_lastinfected_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->lastinfected[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lastinfected for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_default_variable_lastinfectedid(unsigned int index)
+ * Gets the value of the lastinfectedid variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedid
+ */
+__host__ int get_Person_default_variable_lastinfectedid(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_lastinfectedid_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->lastinfectedid,
+                    d_Persons_default->lastinfectedid,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_lastinfectedid_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->lastinfectedid[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lastinfectedid for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -4774,6 +4993,123 @@ __host__ float get_Person_s2_variable_q(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access q for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_infections(unsigned int index)
+ * Gets the value of the infections variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable infections
+ */
+__host__ unsigned int get_Person_s2_variable_infections(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_infections_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->infections,
+                    d_Persons_s2->infections,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_infections_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->infections[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access infections for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_s2_variable_lastinfected(unsigned int index)
+ * Gets the value of the lastinfected variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfected
+ */
+__host__ int get_Person_s2_variable_lastinfected(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_lastinfected_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->lastinfected,
+                    d_Persons_s2->lastinfected,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_lastinfected_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->lastinfected[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lastinfected for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_s2_variable_lastinfectedid(unsigned int index)
+ * Gets the value of the lastinfectedid variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedid
+ */
+__host__ int get_Person_s2_variable_lastinfectedid(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_lastinfectedid_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->lastinfectedid,
+                    d_Persons_s2->lastinfectedid,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_lastinfectedid_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->lastinfectedid[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lastinfectedid for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -6228,6 +6564,12 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->p, &h_agent->p, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->q, &h_agent->q, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->infections, &h_agent->infections, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lastinfected, &h_agent->lastinfected, sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lastinfectedid, &h_agent->lastinfectedid, sizeof(int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -6301,6 +6643,12 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->p, h_src->p, count * sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->q, h_src->q, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->infections, h_src->infections, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lastinfected, h_src->lastinfected, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lastinfectedid, h_src->lastinfectedid, count * sizeof(int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6758,6 +7106,12 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->p[i] = src[i]->p;
 			 
 			dst->q[i] = src[i]->q;
+			 
+			dst->infections[i] = src[i]->infections;
+			 
+			dst->lastinfected[i] = src[i]->lastinfected;
+			 
+			dst->lastinfectedid[i] = src[i]->lastinfectedid;
 			
 		}
 	}
@@ -6818,6 +7172,9 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_artday_data_iteration = 0;
     h_Persons_default_variable_p_data_iteration = 0;
     h_Persons_default_variable_q_data_iteration = 0;
+    h_Persons_default_variable_infections_data_iteration = 0;
+    h_Persons_default_variable_lastinfected_data_iteration = 0;
+    h_Persons_default_variable_lastinfectedid_data_iteration = 0;
     
 
 }
@@ -6878,6 +7235,9 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_artday_data_iteration = 0;
         h_Persons_default_variable_p_data_iteration = 0;
         h_Persons_default_variable_q_data_iteration = 0;
+        h_Persons_default_variable_infections_data_iteration = 0;
+        h_Persons_default_variable_lastinfected_data_iteration = 0;
+        h_Persons_default_variable_lastinfectedid_data_iteration = 0;
         
 
 	}
@@ -6938,6 +7298,9 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_artday_data_iteration = 0;
     h_Persons_s2_variable_p_data_iteration = 0;
     h_Persons_s2_variable_q_data_iteration = 0;
+    h_Persons_s2_variable_infections_data_iteration = 0;
+    h_Persons_s2_variable_lastinfected_data_iteration = 0;
+    h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
     
 
 }
@@ -6998,6 +7361,9 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_artday_data_iteration = 0;
         h_Persons_s2_variable_p_data_iteration = 0;
         h_Persons_s2_variable_q_data_iteration = 0;
+        h_Persons_s2_variable_infections_data_iteration = 0;
+        h_Persons_s2_variable_lastinfected_data_iteration = 0;
+        h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
         
 
 	}
@@ -8546,6 +8912,69 @@ float max_Person_default_q_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_infections_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->infections),  thrust::device_pointer_cast(d_Persons_default->infections) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_infections_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->infections),  thrust::device_pointer_cast(d_Persons_default->infections) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_infections_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->infections);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_infections_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->infections);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_default_lastinfected_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->lastinfected),  thrust::device_pointer_cast(d_Persons_default->lastinfected) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_lastinfected_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->lastinfected),  thrust::device_pointer_cast(d_Persons_default->lastinfected) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_lastinfected_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lastinfected);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_lastinfected_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lastinfected);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_default_lastinfectedid_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->lastinfectedid),  thrust::device_pointer_cast(d_Persons_default->lastinfectedid) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_lastinfectedid_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->lastinfectedid),  thrust::device_pointer_cast(d_Persons_default->lastinfectedid) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_lastinfectedid_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lastinfectedid);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_lastinfectedid_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lastinfectedid);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -9140,6 +9569,69 @@ float min_Person_s2_q_variable(){
 float max_Person_s2_q_variable(){
     //max in default stream
     thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->q);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Person_s2_infections_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->infections),  thrust::device_pointer_cast(d_Persons_s2->infections) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_infections_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->infections),  thrust::device_pointer_cast(d_Persons_s2->infections) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_infections_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->infections);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_infections_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->infections);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_s2_lastinfected_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->lastinfected),  thrust::device_pointer_cast(d_Persons_s2->lastinfected) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_lastinfected_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->lastinfected),  thrust::device_pointer_cast(d_Persons_s2->lastinfected) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_lastinfected_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lastinfected);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_lastinfected_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lastinfected);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_s2_lastinfectedid_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->lastinfectedid),  thrust::device_pointer_cast(d_Persons_s2->lastinfectedid) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_lastinfectedid_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->lastinfectedid),  thrust::device_pointer_cast(d_Persons_s2->lastinfectedid) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_lastinfectedid_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lastinfectedid);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_lastinfectedid_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lastinfectedid);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -9897,6 +10389,114 @@ void Person_update(cudaStream_t &stream){
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
 		printf("Error: Buffer size of update agents in state s2 will be exceeded moving working agents to next state in function update\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Persons_s2_temp = d_Persons;
+  d_Persons = d_Persons_s2;
+  d_Persons_s2 = Persons_s2_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_infect_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_infection));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_infect
+ * Agent function prototype for infect function of Person agent
+ */
+void Person_infect(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_s2_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_s2_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_s2_temp = d_Persons;
+	d_Persons = d_Persons_s2;
+	d_Persons_s2 = Persons_s2_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_s2_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_s2_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_infect, Person_infect_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_infect_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (infect)
+	//Reallocate   : false
+	//Input        : infection
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_infect<<<g, b, sm_size, stream>>>(d_Persons, d_infections, d_rand48);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of infect agents in state s2 will be exceeded moving working agents to next state in function infect\n");
       exit(EXIT_FAILURE);
       }
       

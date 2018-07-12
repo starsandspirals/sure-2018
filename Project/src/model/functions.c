@@ -397,6 +397,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_person->churchtime = 0;
         h_person->transporttime = 0;
         h_person->activetb = 0;
+
+        h_person->infections = 0;
+        h_person->lastinfected = -1;
+        h_person->lastinfectedid = -1;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -857,8 +861,6 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
     }
   }
 
-  person->step += TIME_STEP;
-
   if (person->location == 0) {
     person->householdtime += 5 * TIME_STEP;
   } else if (person->location == 1) {
@@ -874,6 +876,44 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                          person->locationid, day, hour, minute, person->p,
                          person->q);
   }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+infect(xmachine_memory_Person *person,
+       xmachine_message_infection_list *infection_messages,
+       RNG_rand48 *rand48) {
+
+  unsigned int day = dayofweek(person->step);
+  struct Time t = timeofday(person->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  float lambda = 0.0;
+
+  xmachine_message_infection *infection_message =
+      get_first_infection_message(infection_messages);
+
+  while (infection_message) {
+    if (person->location == infection_message->location &&
+        person->locationid == infection_message->locationid &&
+        day == infection_message->day && hour == infection_message->hour &&
+        minute == infection_message->minute) {
+      lambda = infection_message->lambda;
+    }
+    infection_message = get_next_infection_message(infection_message, infection_messages);
+  }
+
+  float prob = 1 - device_exp(-person->p * lambda * TIME_STEP);
+  float random = rnd<CONTINUOUS>(rand48);
+
+  if (random < prob && lambda != 0 && person->activetb != 1) {
+    person->infections++;
+    person->lastinfected = person->location;
+    person->lastinfectedid = person->locationid;
+  }
+
+  person->step += TIME_STEP;
 
   return 0;
 }

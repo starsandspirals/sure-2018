@@ -509,6 +509,21 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</q>\n", file);
         
+		fputs("<infections>", file);
+        sprintf(data, "%u", h_Persons_default->infections[i]);
+		fputs(data, file);
+		fputs("</infections>\n", file);
+        
+		fputs("<lastinfected>", file);
+        sprintf(data, "%d", h_Persons_default->lastinfected[i]);
+		fputs(data, file);
+		fputs("</lastinfected>\n", file);
+        
+		fputs("<lastinfectedid>", file);
+        sprintf(data, "%d", h_Persons_default->lastinfectedid[i]);
+		fputs(data, file);
+		fputs("</lastinfectedid>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -660,6 +675,21 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%f", h_Persons_s2->q[i]);
 		fputs(data, file);
 		fputs("</q>\n", file);
+        
+		fputs("<infections>", file);
+        sprintf(data, "%u", h_Persons_s2->infections[i]);
+		fputs(data, file);
+		fputs("</infections>\n", file);
+        
+		fputs("<lastinfected>", file);
+        sprintf(data, "%d", h_Persons_s2->lastinfected[i]);
+		fputs(data, file);
+		fputs("</lastinfected>\n", file);
+        
+		fputs("<lastinfectedid>", file);
+        sprintf(data, "%d", h_Persons_s2->lastinfectedid[i]);
+		fputs(data, file);
+		fputs("</lastinfectedid>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1047,6 +1077,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_artday;
     int in_Person_p;
     int in_Person_q;
+    int in_Person_infections;
+    int in_Person_lastinfected;
+    int in_Person_lastinfectedid;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_step;
@@ -1206,6 +1239,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_artday;
 	float Person_p;
 	float Person_q;
+	unsigned int Person_infections;
+	int Person_lastinfected;
+	int Person_lastinfectedid;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	unsigned int Household_step;
@@ -1329,6 +1365,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_artday = 0;
 	in_Person_p = 0;
 	in_Person_q = 0;
+	in_Person_infections = 0;
+	in_Person_lastinfected = 0;
+	in_Person_lastinfectedid = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
@@ -1437,6 +1476,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->artday[k] = 0;
 		h_Persons->p[k] = 0;
 		h_Persons->q[k] = 0;
+		h_Persons->infections[k] = 0;
+		h_Persons->lastinfected[k] = 0;
+		h_Persons->lastinfectedid[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1559,6 +1601,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_artday = 0;
     Person_p = 0;
     Person_q = 0;
+    Person_infections = 0;
+    Person_lastinfected = 0;
+    Person_lastinfectedid = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_step = 0;
@@ -1732,6 +1777,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->artday[*h_xmachine_memory_Person_count] = Person_artday;
 					h_Persons->p[*h_xmachine_memory_Person_count] = Person_p;
 					h_Persons->q[*h_xmachine_memory_Person_count] = Person_q;
+					h_Persons->infections[*h_xmachine_memory_Person_count] = Person_infections;
+					h_Persons->lastinfected[*h_xmachine_memory_Person_count] = Person_lastinfected;
+					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -1900,6 +1948,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_artday = 0;
                 Person_p = 0;
                 Person_q = 0;
+                Person_infections = 0;
+                Person_lastinfected = 0;
+                Person_lastinfectedid = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_step = 0;
@@ -2002,6 +2053,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/p") == 0) in_Person_p = 0;
 			if(strcmp(buffer, "q") == 0) in_Person_q = 1;
 			if(strcmp(buffer, "/q") == 0) in_Person_q = 0;
+			if(strcmp(buffer, "infections") == 0) in_Person_infections = 1;
+			if(strcmp(buffer, "/infections") == 0) in_Person_infections = 0;
+			if(strcmp(buffer, "lastinfected") == 0) in_Person_lastinfected = 1;
+			if(strcmp(buffer, "/lastinfected") == 0) in_Person_lastinfected = 0;
+			if(strcmp(buffer, "lastinfectedid") == 0) in_Person_lastinfectedid = 1;
+			if(strcmp(buffer, "/lastinfectedid") == 0) in_Person_lastinfectedid = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2258,6 +2315,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_q){
                     Person_q = (float) fgpu_atof(buffer); 
+                }
+				if(in_Person_infections){
+                    Person_infections = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_lastinfected){
+                    Person_lastinfected = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_lastinfectedid){
+                    Person_lastinfectedid = (int) fpgu_strtol(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 

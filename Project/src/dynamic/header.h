@@ -193,6 +193,9 @@ struct __align__(16) xmachine_memory_Person
     unsigned int artday;    /**< X-machine memory variable artday of type unsigned int.*/
     float p;    /**< X-machine memory variable p of type float.*/
     float q;    /**< X-machine memory variable q of type float.*/
+    unsigned int infections;    /**< X-machine memory variable infections of type unsigned int.*/
+    int lastinfected;    /**< X-machine memory variable lastinfected of type int.*/
+    int lastinfectedid;    /**< X-machine memory variable lastinfectedid of type int.*/
 };
 
 /** struct xmachine_memory_TBAssignment
@@ -434,6 +437,9 @@ struct xmachine_memory_Person_list
     unsigned int artday [xmachine_memory_Person_MAX];    /**< X-machine memory variable list artday of type unsigned int.*/
     float p [xmachine_memory_Person_MAX];    /**< X-machine memory variable list p of type float.*/
     float q [xmachine_memory_Person_MAX];    /**< X-machine memory variable list q of type float.*/
+    unsigned int infections [xmachine_memory_Person_MAX];    /**< X-machine memory variable list infections of type unsigned int.*/
+    int lastinfected [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfected of type int.*/
+    int lastinfectedid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfectedid of type int.*/
 };
 
 /** struct xmachine_memory_TBAssignment_list
@@ -724,6 +730,13 @@ __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
  * @param location_messages Pointer to output message list of type xmachine_message_location_list. Must be passed as an argument to the add_location_message function ??.* @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an argument to the rand48 function for generating random numbers on the GPU.
  */
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, xmachine_message_location_list* location_messages, RNG_rand48* rand48);
+
+/**
+ * infect FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param infection_messages  infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_infection_message and get_next_infection_message functions.* @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an argument to the rand48 function for generating random numbers on the GPU.
+ */
+__FLAME_GPU_FUNC__ int infect(xmachine_memory_Person* agent, xmachine_message_infection_list* infection_messages, RNG_rand48* rand48);
 
 /**
  * personhhinit FLAMEGPU Agent Function
@@ -1021,8 +1034,11 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param artday	agent agent variable of type unsigned int
  * @param p	agent agent variable of type float
  * @param q	agent agent variable of type float
+ * @param infections	agent agent variable of type unsigned int
+ * @param lastinfected	agent agent variable of type int
+ * @param lastinfectedid	agent agent variable of type int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1908,6 +1924,33 @@ __host__ float get_Person_default_variable_p(unsigned int index);
  */
 __host__ float get_Person_default_variable_q(unsigned int index);
 
+/** unsigned int get_Person_default_variable_infections(unsigned int index)
+ * Gets the value of the infections variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable infections
+ */
+__host__ unsigned int get_Person_default_variable_infections(unsigned int index);
+
+/** int get_Person_default_variable_lastinfected(unsigned int index)
+ * Gets the value of the lastinfected variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfected
+ */
+__host__ int get_Person_default_variable_lastinfected(unsigned int index);
+
+/** int get_Person_default_variable_lastinfectedid(unsigned int index)
+ * Gets the value of the lastinfectedid variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedid
+ */
+__host__ int get_Person_default_variable_lastinfectedid(unsigned int index);
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2168,6 +2211,33 @@ __host__ float get_Person_s2_variable_p(unsigned int index);
  * @return value of agent variable q
  */
 __host__ float get_Person_s2_variable_q(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_infections(unsigned int index)
+ * Gets the value of the infections variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable infections
+ */
+__host__ unsigned int get_Person_s2_variable_infections(unsigned int index);
+
+/** int get_Person_s2_variable_lastinfected(unsigned int index)
+ * Gets the value of the lastinfected variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfected
+ */
+__host__ int get_Person_s2_variable_lastinfected(unsigned int index);
+
+/** int get_Person_s2_variable_lastinfectedid(unsigned int index)
+ * Gets the value of the lastinfectedid variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedid
+ */
+__host__ int get_Person_s2_variable_lastinfectedid(unsigned int index);
 
 /** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
@@ -3621,6 +3691,84 @@ float min_Person_default_q_variable();
  */
 float max_Person_default_q_variable();
 
+/** unsigned int reduce_Person_default_infections_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_infections_variable();
+
+
+
+/** unsigned int count_Person_default_infections_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_infections_variable(int count_value);
+
+/** unsigned int min_Person_default_infections_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_infections_variable();
+/** unsigned int max_Person_default_infections_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_infections_variable();
+
+/** int reduce_Person_default_lastinfected_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_default_lastinfected_variable();
+
+
+
+/** int count_Person_default_lastinfected_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_default_lastinfected_variable(int count_value);
+
+/** int min_Person_default_lastinfected_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_default_lastinfected_variable();
+/** int max_Person_default_lastinfected_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_default_lastinfected_variable();
+
+/** int reduce_Person_default_lastinfectedid_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_default_lastinfectedid_variable();
+
+
+
+/** int count_Person_default_lastinfectedid_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_default_lastinfectedid_variable(int count_value);
+
+/** int min_Person_default_lastinfectedid_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_default_lastinfectedid_variable();
+/** int max_Person_default_lastinfectedid_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_default_lastinfectedid_variable();
+
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -4353,6 +4501,84 @@ float min_Person_s2_q_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 float max_Person_s2_q_variable();
+
+/** unsigned int reduce_Person_s2_infections_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_infections_variable();
+
+
+
+/** unsigned int count_Person_s2_infections_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_infections_variable(int count_value);
+
+/** unsigned int min_Person_s2_infections_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_infections_variable();
+/** unsigned int max_Person_s2_infections_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_infections_variable();
+
+/** int reduce_Person_s2_lastinfected_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_s2_lastinfected_variable();
+
+
+
+/** int count_Person_s2_lastinfected_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_s2_lastinfected_variable(int count_value);
+
+/** int min_Person_s2_lastinfected_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_s2_lastinfected_variable();
+/** int max_Person_s2_lastinfected_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_s2_lastinfected_variable();
+
+/** int reduce_Person_s2_lastinfectedid_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_s2_lastinfectedid_variable();
+
+
+
+/** int count_Person_s2_lastinfectedid_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_s2_lastinfectedid_variable(int count_value);
+
+/** int min_Person_s2_lastinfectedid_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_s2_lastinfectedid_variable();
+/** int max_Person_s2_lastinfectedid_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_s2_lastinfectedid_variable();
 
 /** unsigned int reduce_TBAssignment_tbdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

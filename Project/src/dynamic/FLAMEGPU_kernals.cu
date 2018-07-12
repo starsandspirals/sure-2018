@@ -258,7 +258,10 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->activetb[output_index] = agents_src->activetb[index];        
 		agents_dst->artday[output_index] = agents_src->artday[index];        
 		agents_dst->p[output_index] = agents_src->p[index];        
-		agents_dst->q[output_index] = agents_src->q[index];
+		agents_dst->q[output_index] = agents_src->q[index];        
+		agents_dst->infections[output_index] = agents_src->infections[index];        
+		agents_dst->lastinfected[output_index] = agents_src->lastinfected[index];        
+		agents_dst->lastinfectedid[output_index] = agents_src->lastinfectedid[index];
 	}
 }
 
@@ -307,6 +310,9 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->artday[output_index] = agents_src->artday[index];
 	    agents_dst->p[output_index] = agents_src->p[index];
 	    agents_dst->q[output_index] = agents_src->q[index];
+	    agents_dst->infections[output_index] = agents_src->infections[index];
+	    agents_dst->lastinfected[output_index] = agents_src->lastinfected[index];
+	    agents_dst->lastinfectedid[output_index] = agents_src->lastinfectedid[index];
     }
 }
 
@@ -342,9 +348,12 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param artday agent variable of type unsigned int
  * @param p agent variable of type float
  * @param q agent variable of type float
+ * @param infections agent variable of type unsigned int
+ * @param lastinfected agent variable of type int
+ * @param lastinfectedid agent variable of type int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
 	
 	int index;
     
@@ -392,12 +401,15 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->artday[index] = artday;
 	agents->p[index] = p;
 	agents->q[index] = q;
+	agents->infections[index] = infections;
+	agents->lastinfected[index] = lastinfected;
+	agents->lastinfectedid[index] = lastinfectedid;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid);
 }
 
 /** reorder_Person_agents
@@ -442,6 +454,9 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->artday[index] = unordered_agents->artday[old_pos];
 	ordered_agents->p[index] = unordered_agents->p[old_pos];
 	ordered_agents->q[index] = unordered_agents->q[old_pos];
+	ordered_agents->infections[index] = unordered_agents->infections[old_pos];
+	ordered_agents->lastinfected[index] = unordered_agents->lastinfected[old_pos];
+	ordered_agents->lastinfectedid[index] = unordered_agents->lastinfectedid[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2610,6 +2625,9 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.artday = agents->artday[index];
 	agent.p = agents->p[index];
 	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
 
 	//FLAME function call
 	int dead = !update(&agent, location_messages	, rand48);
@@ -2648,6 +2666,140 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->artday[index] = agent.artday;
 	agents->p[index] = agent.p;
 	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, xmachine_message_infection_list* infection_messages, RNG_rand48* rand48){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_infect Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportuser = agents->transportuser[index];
+	agent.transportfreq = agents->transportfreq[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportuser = 0;
+	agent.transportfreq = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	}
+
+	//FLAME function call
+	int dead = !infect(&agent, infection_messages, rand48);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_infect Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportuser[index] = agent.transportuser;
+	agents->transportfreq[index] = agent.transportfreq;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	}
 }
 
 /**
@@ -2696,6 +2848,9 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = agents->artday[index];
 	agent.p = agents->p[index];
 	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
 	} else {
 	
 	agent.id = 0;
@@ -2727,6 +2882,9 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = 0;
 	agent.p = 0;
 	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
 	}
 
 	//FLAME function call
@@ -2769,6 +2927,9 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agents->artday[index] = agent.artday;
 	agents->p[index] = agent.p;
 	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
 	}
 }
 
@@ -2818,6 +2979,9 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = agents->artday[index];
 	agent.p = agents->p[index];
 	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
 	} else {
 	
 	agent.id = 0;
@@ -2849,6 +3013,9 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = 0;
 	agent.p = 0;
 	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
 	}
 
 	//FLAME function call
@@ -2891,6 +3058,9 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agents->artday[index] = agent.artday;
 	agents->p[index] = agent.p;
 	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
 	}
 }
 
@@ -2940,6 +3110,9 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = agents->artday[index];
 	agent.p = agents->p[index];
 	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
 	} else {
 	
 	agent.id = 0;
@@ -2971,6 +3144,9 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.artday = 0;
 	agent.p = 0;
 	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
 	}
 
 	//FLAME function call
@@ -3013,6 +3189,9 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->artday[index] = agent.artday;
 	agents->p[index] = agent.p;
 	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
 	}
 }
 
