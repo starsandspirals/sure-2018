@@ -88,6 +88,10 @@ __device__ unsigned int dayofweek(unsigned int step) {
   return (step % 2016) / 288;
 }
 
+__device__ unsigned int dayofmonth(unsigned int step) {
+  return (step % 2016) / 72;
+}
+
 // A struct to represent a time of day, and a function that returns a time of
 // day given an iteration number of increments of 5 minutes.
 struct Time {
@@ -360,6 +364,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           if (random < art_coverage) {
             h_person->art = 1;
             weight = rr_as * rr_hiv * rr_art;
+
+            unsigned int randomday = rand() % 28;
+
+            while (randomday % 7 == 0 || randomday % 7 == 6) {
+              randomday = rand() % 28;
+            }
+
+            h_person->artday = randomday;
           } else {
             h_person->art = 0;
             weight = rr_as * rr_hiv;

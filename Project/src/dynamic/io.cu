@@ -443,6 +443,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</activetb>\n", file);
         
+		fputs("<artday>", file);
+        sprintf(data, "%u", h_Persons_default->artday[i]);
+		fputs(data, file);
+		fputs("</artday>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -574,6 +579,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->activetb[i]);
 		fputs(data, file);
 		fputs("</activetb>\n", file);
+        
+		fputs("<artday>", file);
+        sprintf(data, "%u", h_Persons_s2->artday[i]);
+		fputs(data, file);
+		fputs("</artday>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -900,6 +910,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_hiv;
     int in_Person_art;
     int in_Person_activetb;
+    int in_Person_artday;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_step;
@@ -1028,6 +1039,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_hiv;
 	unsigned int Person_art;
 	unsigned int Person_activetb;
+	unsigned int Person_artday;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	unsigned int Household_step;
@@ -1131,6 +1143,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_hiv = 0;
 	in_Person_art = 0;
 	in_Person_activetb = 0;
+	in_Person_artday = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
@@ -1219,6 +1232,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->hiv[k] = 0;
 		h_Persons->art[k] = 0;
 		h_Persons->activetb[k] = 0;
+		h_Persons->artday[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1325,6 +1339,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_hiv = 0;
     Person_art = 0;
     Person_activetb = 0;
+    Person_artday = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_step = 0;
@@ -1478,6 +1493,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->hiv[*h_xmachine_memory_Person_count] = Person_hiv;
 					h_Persons->art[*h_xmachine_memory_Person_count] = Person_art;
 					h_Persons->activetb[*h_xmachine_memory_Person_count] = Person_activetb;
+					h_Persons->artday[*h_xmachine_memory_Person_count] = Person_artday;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -1625,6 +1641,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_hiv = 0;
                 Person_art = 0;
                 Person_activetb = 0;
+                Person_artday = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_step = 0;
@@ -1713,6 +1730,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/art") == 0) in_Person_art = 0;
 			if(strcmp(buffer, "activetb") == 0) in_Person_activetb = 1;
 			if(strcmp(buffer, "/activetb") == 0) in_Person_activetb = 0;
+			if(strcmp(buffer, "artday") == 0) in_Person_artday = 1;
+			if(strcmp(buffer, "/artday") == 0) in_Person_artday = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -1925,6 +1944,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_activetb){
                     Person_activetb = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_artday){
+                    Person_artday = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 

@@ -299,6 +299,10 @@
           <type>unsigned int</type>
           <name>activetb</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>artday</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
