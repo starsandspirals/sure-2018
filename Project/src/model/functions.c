@@ -14,10 +14,12 @@ xmachine_memory_Person **h_agent_AoS;
 xmachine_memory_Household **h_household_AoS;
 xmachine_memory_Church **h_church_AoS;
 xmachine_memory_Transport **h_transport_AoS;
+xmachine_memory_Clinic **h_clinic_AoS;
 const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
 const unsigned int h_church_AoS_MAX = 256;
 const unsigned int h_transport_AoS_MAX = 2048;
+const unsigned int h_clinic_AoS_MAX = 2;
 
 // Create variables for the next unused ID for each agent type, so that they
 // remain unique, and also get functions to update the ID each time.
@@ -679,6 +681,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     }
   }
 
+  xmachine_memory_Clinic *h_clinic = h_allocate_agent_Clinic();
+
+  h_clinic->id = 1;
+  h_clinic->step = 0;
+
+  h_add_agent_Clinic_cldefault(h_clinic);
+
+  h_free_agent_Clinic(&h_clinic);
+
   while (fgets(line, sizeof(line), file)) {
     printf("%s", line);
   }
@@ -857,6 +868,11 @@ __FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) {
 
 __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
   transport->step += TIME_STEP;
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic *clinic) {
+  clinic->step += TIME_STEP;
   return 0;
 }
 

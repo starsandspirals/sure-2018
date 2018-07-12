@@ -79,7 +79,10 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_Transport_MAX 2048
 
 //Maximum population size of xmachine_memory_TransportMembership
-#define xmachine_memory_TransportMembership_MAX 32768 
+#define xmachine_memory_TransportMembership_MAX 32768
+
+//Maximum population size of xmachine_memory_Clinic
+#define xmachine_memory_Clinic_MAX 2 
 //Agent variable array length for xmachine_memory_Household->people
 #define xmachine_memory_Household_people_LENGTH 32 
 //Agent variable array length for xmachine_memory_Church->households
@@ -268,6 +271,16 @@ struct __align__(16) xmachine_memory_TransportMembership
     int person_id;    /**< X-machine memory variable person_id of type int.*/
     unsigned int transport_id;    /**< X-machine memory variable transport_id of type unsigned int.*/
     unsigned int duration;    /**< X-machine memory variable duration of type unsigned int.*/
+};
+
+/** struct xmachine_memory_Clinic
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_Clinic
+{
+    unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
 };
 
 
@@ -503,6 +516,20 @@ struct xmachine_memory_TransportMembership_list
     unsigned int duration [xmachine_memory_TransportMembership_MAX];    /**< X-machine memory variable list duration of type unsigned int.*/
 };
 
+/** struct xmachine_memory_Clinic_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_Clinic_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_Clinic_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_Clinic_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_memory_Clinic_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Clinic_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
+};
+
 
 
 /* Message lists. Structure of Array (SoA) for memory coalescing on GPU */
@@ -709,6 +736,13 @@ __FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
  * @param transport_membership_messages Pointer to output message list of type xmachine_message_transport_membership_list. Must be passed as an argument to the add_transport_membership_message function ??.
  */
 __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachine_message_transport_membership_list* transport_membership_messages);
+
+/**
+ * clupdate FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Clinic. This represents a single agent instance and can be modified directly.
+ 
+ */
+__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */
@@ -1026,6 +1060,14 @@ __FLAME_GPU_FUNC__ void set_Transport_agent_array_value(T *array, unsigned int i
  */
 __FLAME_GPU_FUNC__ void add_TransportMembership_agent(xmachine_memory_TransportMembership_list* agents, int person_id, unsigned int transport_id, unsigned int duration);
 
+/** add_Clinic_agent
+ * Adds a new continuous valued Clinic agent to the xmachine_memory_Clinic_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_Clinic_list agent list
+ * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_Clinic_agent(xmachine_memory_Clinic_list* agents, unsigned int id, unsigned int step);
+
 
   
 /* Simulation function prototypes implemented in simulation.cu */
@@ -1078,8 +1120,11 @@ extern void singleIteration();
  * @param h_TransportMemberships Pointer to agent list on the host
  * @param d_TransportMemberships Pointer to agent list on the GPU device
  * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
+ * @param h_Clinics Pointer to agent list on the host
+ * @param d_Clinics Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_Clinic_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count);
 
 
 /** readInitialStates
@@ -1101,8 +1146,10 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_Transport_count Pointer to agent counter
  * @param h_TransportMemberships Pointer to agent list on the host
  * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
+ * @param h_Clinics Pointer to agent list on the host
+ * @param h_xmachine_memory_Clinic_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -1456,6 +1503,46 @@ extern xmachine_memory_TransportMembership_list* get_host_TransportMembership_tr
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_TransportMemberships_trmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_TransportMembership_list* agents));
+
+
+    
+/** get_agent_Clinic_MAX_count
+ * Gets the max agent count for the Clinic agent type 
+ * @return		the maximum Clinic agent count
+ */
+extern int get_agent_Clinic_MAX_count();
+
+
+
+/** get_agent_Clinic_cldefault_count
+ * Gets the agent count for the Clinic agent type in state cldefault
+ * @return		the current Clinic agent count in state cldefault
+ */
+extern int get_agent_Clinic_cldefault_count();
+
+/** reset_cldefault_count
+ * Resets the agent count of the Clinic in state cldefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_Clinic_cldefault_count();
+
+/** get_device_Clinic_cldefault_agents
+ * Gets a pointer to xmachine_memory_Clinic_list on the GPU device
+ * @return		a xmachine_memory_Clinic_list on the GPU device
+ */
+extern xmachine_memory_Clinic_list* get_device_Clinic_cldefault_agents();
+
+/** get_host_Clinic_cldefault_agents
+ * Gets a pointer to xmachine_memory_Clinic_list on the CPU host
+ * @return		a xmachine_memory_Clinic_list on the CPU host
+ */
+extern xmachine_memory_Clinic_list* get_host_Clinic_cldefault_agents();
+
+
+/** sort_Clinics_cldefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_Clinics_cldefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Clinic_list* agents));
 
 
 
@@ -2193,6 +2280,24 @@ __host__ unsigned int get_TransportMembership_trmembershipdefault_variable_trans
  */
 __host__ unsigned int get_TransportMembership_trmembershipdefault_variable_duration(unsigned int index);
 
+/** unsigned int get_Clinic_cldefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Clinic agent in the cldefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Clinic_cldefault_variable_id(unsigned int index);
+
+/** unsigned int get_Clinic_cldefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Clinic agent in the cldefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Clinic_cldefault_variable_step(unsigned int index);
+
 
 
 
@@ -2542,6 +2647,47 @@ void h_add_agent_TransportMembership_trmembershipdefault(xmachine_memory_Transpo
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_TransportMembership_trmembershipdefault(xmachine_memory_TransportMembership** agents, unsigned int count);
+
+/** h_allocate_agent_Clinic
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated Clinic struct.
+ */
+xmachine_memory_Clinic* h_allocate_agent_Clinic();
+/** h_free_agent_Clinic
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_Clinic(xmachine_memory_Clinic** agent);
+/** h_allocate_agent_Clinic_array
+ * Utility function to allocate an array of structs for  Clinic agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_Clinic** h_allocate_agent_Clinic_array(unsigned int count);
+/** h_free_agent_Clinic_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_Clinic_array(xmachine_memory_Clinic*** agents, unsigned int count);
+
+
+/** h_add_agent_Clinic_cldefault
+ * Host function to add a single agent of type Clinic to the cldefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_Clinic_cldefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_Clinic_cldefault(xmachine_memory_Clinic* agent);
+
+/** h_add_agents_Clinic_cldefault(
+ * Host function to add multiple agents of type Clinic to the cldefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of Clinic agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_Clinic_cldefault(xmachine_memory_Clinic** agents, unsigned int count);
 
   
   
@@ -4552,6 +4698,58 @@ unsigned int min_TransportMembership_trmembershipdefault_duration_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_TransportMembership_trmembershipdefault_duration_variable();
+
+/** unsigned int reduce_Clinic_cldefault_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Clinic_cldefault_id_variable();
+
+
+
+/** unsigned int count_Clinic_cldefault_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Clinic_cldefault_id_variable(int count_value);
+
+/** unsigned int min_Clinic_cldefault_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Clinic_cldefault_id_variable();
+/** unsigned int max_Clinic_cldefault_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Clinic_cldefault_id_variable();
+
+/** unsigned int reduce_Clinic_cldefault_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Clinic_cldefault_step_variable();
+
+
+
+/** unsigned int count_Clinic_cldefault_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Clinic_cldefault_step_variable(int count_value);
+
+/** unsigned int min_Clinic_cldefault_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Clinic_cldefault_step_variable();
+/** unsigned int max_Clinic_cldefault_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Clinic_cldefault_step_variable();
 
 
   

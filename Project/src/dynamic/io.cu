@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -171,6 +171,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying TransportMembership Agent trmembershipdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Clinics_cldefault, d_Clinics_cldefault, sizeof(xmachine_memory_Clinic_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying Clinic Agent cldefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -790,6 +796,23 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each Clinic agent to xml
+	for (int i=0; i<h_xmachine_memory_Clinic_cldefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>Clinic</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Clinics_cldefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<step>", file);
+        sprintf(data, "%u", h_Clinics_cldefault->step[i]);
+		fputs(data, file);
+		fputs("</step>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -866,7 +889,7 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_TB_PREVALENCE(&t_TB_PREVALENCE);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -940,6 +963,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_TransportMembership_person_id;
     int in_TransportMembership_transport_id;
     int in_TransportMembership_duration;
+    int in_Clinic_id;
+    int in_Clinic_step;
     
     /* tags for environment global variables */
     int in_env;
@@ -1012,6 +1037,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	*h_xmachine_memory_ChurchMembership_count = 0;
 	*h_xmachine_memory_Transport_count = 0;
 	*h_xmachine_memory_TransportMembership_count = 0;
+	*h_xmachine_memory_Clinic_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
@@ -1069,6 +1095,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int TransportMembership_person_id;
 	unsigned int TransportMembership_transport_id;
 	unsigned int TransportMembership_duration;
+	unsigned int Clinic_id;
+	unsigned int Clinic_step;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -1173,6 +1201,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_TransportMembership_person_id = 0;
 	in_TransportMembership_transport_id = 0;
 	in_TransportMembership_duration = 0;
+	in_Clinic_id = 0;
+	in_Clinic_step = 0;
     in_env_TIME_STEP = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
@@ -1312,6 +1342,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_TransportMemberships->duration[k] = 0;
 	}
 	
+	//set all Clinic values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_Clinic_MAX; k++)
+	{	
+		h_Clinics->id[k] = 0;
+		h_Clinics->step[k] = 0;
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
@@ -1375,6 +1413,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     TransportMembership_person_id = 0;
     TransportMembership_transport_id = 0;
     TransportMembership_duration = 0;
+    Clinic_id = 0;
+    Clinic_step = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -1608,6 +1648,19 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_TransportMemberships->duration[*h_xmachine_memory_TransportMembership_count] = TransportMembership_duration;
 					(*h_xmachine_memory_TransportMembership_count) ++;	
 				}
+				else if(strcmp(agentname, "Clinic") == 0)
+				{
+					if (*h_xmachine_memory_Clinic_count > xmachine_memory_Clinic_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Clinic exceeded whilst reading data\n", xmachine_memory_Clinic_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Clinics->id[*h_xmachine_memory_Clinic_count] = Clinic_id;
+					h_Clinics->step[*h_xmachine_memory_Clinic_count] = Clinic_step;
+					(*h_xmachine_memory_Clinic_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -1677,6 +1730,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 TransportMembership_person_id = 0;
                 TransportMembership_transport_id = 0;
                 TransportMembership_duration = 0;
+                Clinic_id = 0;
+                Clinic_step = 0;
                 
                 in_xagent = 0;
 			}
@@ -1790,6 +1845,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/transport_id") == 0) in_TransportMembership_transport_id = 0;
 			if(strcmp(buffer, "duration") == 0) in_TransportMembership_duration = 1;
 			if(strcmp(buffer, "/duration") == 0) in_TransportMembership_duration = 0;
+			if(strcmp(buffer, "id") == 0) in_Clinic_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Clinic_id = 0;
+			if(strcmp(buffer, "step") == 0) in_Clinic_step = 1;
+			if(strcmp(buffer, "/step") == 0) in_Clinic_step = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -2034,6 +2093,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_TransportMembership_duration){
                     TransportMembership_duration = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Clinic_id){
+                    Clinic_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Clinic_step){
+                    Clinic_step = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }

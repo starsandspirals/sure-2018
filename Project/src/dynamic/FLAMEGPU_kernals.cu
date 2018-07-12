@@ -41,6 +41,8 @@ __constant__ int d_xmachine_memory_Transport_count;
 
 __constant__ int d_xmachine_memory_TransportMembership_count;
 
+__constant__ int d_xmachine_memory_Clinic_count;
+
 /* Agent state count constants */
 
 __constant__ int d_xmachine_memory_Person_default_count;
@@ -60,6 +62,8 @@ __constant__ int d_xmachine_memory_ChurchMembership_chumembershipdefault_count;
 __constant__ int d_xmachine_memory_Transport_trdefault_count;
 
 __constant__ int d_xmachine_memory_TransportMembership_trmembershipdefault_count;
+
+__constant__ int d_xmachine_memory_Clinic_cldefault_count;
 
 
 /* Message constants */
@@ -1412,6 +1416,122 @@ __global__ void reorder_TransportMembership_agents(unsigned int* values, xmachin
 	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
 	ordered_agents->transport_id[index] = unordered_agents->transport_id[old_pos];
 	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created Clinic agent functions */
+
+/** reset_Clinic_scan_input
+ * Clinic agent reset scan input function
+ * @param agents The xmachine_memory_Clinic_list agent list
+ */
+__global__ void reset_Clinic_scan_input(xmachine_memory_Clinic_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_Clinic_Agents
+ * Clinic scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Clinic_list agent list destination
+ * @param agents_src xmachine_memory_Clinic_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_Clinic_Agents(xmachine_memory_Clinic_list* agents_dst, xmachine_memory_Clinic_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->step[output_index] = agents_src->step[index];
+	}
+}
+
+/** append_Clinic_Agents
+ * Clinic scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Clinic_list agent list destination
+ * @param agents_src xmachine_memory_Clinic_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_Clinic_Agents(xmachine_memory_Clinic_list* agents_dst, xmachine_memory_Clinic_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->step[output_index] = agents_src->step[index];
+    }
+}
+
+/** add_Clinic_agent
+ * Continuous Clinic agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_Clinic_list to add agents to 
+ * @param id agent variable of type unsigned int
+ * @param step agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_Clinic_agent(xmachine_memory_Clinic_list* agents, unsigned int id, unsigned int step){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+	agents->step[index] = step;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_Clinic_agent(xmachine_memory_Clinic_list* agents, unsigned int id, unsigned int step){
+    add_Clinic_agent<DISCRETE_2D>(agents, id, step);
+}
+
+/** reorder_Clinic_agents
+ * Continuous Clinic agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_Clinic_agents(unsigned int* values, xmachine_memory_Clinic_list* unordered_agents, xmachine_memory_Clinic_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->step[index] = unordered_agents->step[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2908,6 +3028,39 @@ __global__ void GPUFLAME_trinit(xmachine_memory_TransportMembership_list* agents
 	agents->person_id[index] = agent.person_id;
 	agents->transport_id[index] = agent.transport_id;
 	agents->duration[index] = agent.duration;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_Clinic_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_clupdate Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Clinic agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+
+	//FLAME function call
+	int dead = !clupdate(&agent);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_clupdate Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
 }
 
 	

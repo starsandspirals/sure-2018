@@ -723,6 +723,43 @@
       <gpu:bufferSize>32768</gpu:bufferSize>
     </gpu:xagent>
 
+    <gpu:xagent>
+      <name>Clinic</name>
+      
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>step</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>clupdate</name>
+          <currentState>cldefault</currentState>
+          <nextState>cldefault</nextState>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>cldefault</name>
+        </gpu:state>
+        <initialState>cldefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>2</gpu:bufferSize>
+    </gpu:xagent>
+
   </xagents>
 
   <!-- Messages sent by agents which can be read by other agents -->

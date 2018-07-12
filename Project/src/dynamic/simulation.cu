@@ -192,6 +192,19 @@ xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdef
 xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_TransportMembership_trmembershipdefault_count;   /**< Agent population size counter */ 
 
+/* Clinic Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_Clinic_list* d_Clinics;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_Clinic_list* d_Clinics_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_Clinic_list* d_Clinics_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_Clinic_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_Clinic_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_Clinic_values;  /**< Agent sort identifiers value */
+
+/* Clinic state variables */
+xmachine_memory_Clinic_list* h_Clinics_cldefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_Clinic_list* d_Clinics_cldefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_Clinic_cldefault_count;   /**< Agent population size counter */ 
+
 
 /* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
@@ -277,6 +290,8 @@ unsigned int h_Transports_trdefault_variable_people_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration;
+unsigned int h_Clinics_cldefault_variable_id_data_iteration;
+unsigned int h_Clinics_cldefault_variable_step_data_iteration;
 
 
 /* Message Memory */
@@ -350,6 +365,9 @@ size_t temp_scan_storage_bytes_Transport;
 
 void * d_temp_scan_storage_TransportMembership;
 size_t temp_scan_storage_bytes_TransportMembership;
+
+void * d_temp_scan_storage_Clinic;
+size_t temp_scan_storage_bytes_Clinic;
 
 
 /*Global condition counts*/
@@ -428,6 +446,11 @@ void Transport_trupdate(cudaStream_t &stream);
  * Agent function prototype for trinit function of TransportMembership agent
  */
 void TransportMembership_trinit(cudaStream_t &stream);
+
+/** Clinic_clupdate
+ * Agent function prototype for clupdate function of Clinic agent
+ */
+void Clinic_clupdate(cudaStream_t &stream);
 
   
 void setPaddingAndOffset()
@@ -602,6 +625,8 @@ void initialise(char * inputfile){
     h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration = 0;
+    h_Clinics_cldefault_variable_id_data_iteration = 0;
+    h_Clinics_cldefault_variable_step_data_iteration = 0;
     
 
 
@@ -626,6 +651,8 @@ void initialise(char * inputfile){
 	h_Transports_trdefault = (xmachine_memory_Transport_list*)malloc(xmachine_Transport_SoA_size);
 	int xmachine_TransportMembership_SoA_size = sizeof(xmachine_memory_TransportMembership_list);
 	h_TransportMemberships_trmembershipdefault = (xmachine_memory_TransportMembership_list*)malloc(xmachine_TransportMembership_SoA_size);
+	int xmachine_Clinic_SoA_size = sizeof(xmachine_memory_Clinic_list);
+	h_Clinics_cldefault = (xmachine_memory_Clinic_list*)malloc(xmachine_Clinic_SoA_size);
 
 	/* Message memory allocation (CPU) */
 	int message_tb_assignment_SoA_size = sizeof(xmachine_message_tb_assignment_list);
@@ -644,7 +671,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -740,6 +767,17 @@ void initialise(char * inputfile){
 	/* trmembershipdefault memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_TransportMemberships_trmembershipdefault, xmachine_TransportMembership_SoA_size));
 	gpuErrchk( cudaMemcpy( d_TransportMemberships_trmembershipdefault, h_TransportMemberships_trmembershipdefault, xmachine_TransportMembership_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* Clinic Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Clinics, xmachine_Clinic_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Clinics_swap, xmachine_Clinic_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Clinics_new, xmachine_Clinic_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Clinic_keys, xmachine_memory_Clinic_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Clinic_values, xmachine_memory_Clinic_MAX* sizeof(uint)));
+	/* cldefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Clinics_cldefault, xmachine_Clinic_SoA_size));
+	gpuErrchk( cudaMemcpy( d_Clinics_cldefault, h_Clinics_cldefault, xmachine_Clinic_SoA_size, cudaMemcpyHostToDevice));
     
 	/* tb_assignment Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments, message_tb_assignment_SoA_size));
@@ -858,6 +896,17 @@ void initialise(char * inputfile){
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_TransportMembership, temp_scan_storage_bytes_TransportMembership));
     
+    d_temp_scan_storage_Clinic = nullptr;
+    temp_scan_storage_bytes_Clinic = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Clinic, 
+        temp_scan_storage_bytes_Clinic, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_Clinic_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_Clinic, temp_scan_storage_bytes_Clinic));
+    
 
 	/*Set global condition counts*/
 
@@ -955,6 +1004,8 @@ void initialise(char * inputfile){
 		printf("Init agent_Transport_trdefault_count: %u\n",get_agent_Transport_trdefault_count());
 	
 		printf("Init agent_TransportMembership_trmembershipdefault_count: %u\n",get_agent_TransportMembership_trmembershipdefault_count());
+	
+		printf("Init agent_Clinic_cldefault_count: %u\n",get_agent_Clinic_cldefault_count());
 	
 #endif
 } 
@@ -1212,6 +1263,34 @@ void sort_TransportMemberships_trmembershipdefault(void (*generate_key_value_pai
 	d_TransportMemberships_swap = d_TransportMemberships_temp;	
 }
 
+void sort_Clinics_cldefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Clinic_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_Clinic_cldefault_count); 
+	gridSize = (h_xmachine_memory_Clinic_cldefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_Clinic_keys, d_xmachine_memory_Clinic_values, d_Clinics_cldefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_Clinic_keys),  thrust::device_pointer_cast(d_xmachine_memory_Clinic_keys) + h_xmachine_memory_Clinic_cldefault_count,  thrust::device_pointer_cast(d_xmachine_memory_Clinic_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_Clinic_agents, no_sm, h_xmachine_memory_Clinic_cldefault_count); 
+	gridSize = (h_xmachine_memory_Clinic_cldefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_Clinic_agents<<<gridSize, blockSize>>>(d_xmachine_memory_Clinic_values, d_Clinics_cldefault, d_Clinics_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_Clinic_list* d_Clinics_temp = d_Clinics_cldefault;
+	d_Clinics_cldefault = d_Clinics_swap;
+	d_Clinics_swap = d_Clinics_temp;	
+}
+
 
 void cleanup(){
     PROFILE_SCOPED_RANGE("cleanup");
@@ -1318,6 +1397,14 @@ void cleanup(){
 	free( h_TransportMemberships_trmembershipdefault);
 	gpuErrchk(cudaFree(d_TransportMemberships_trmembershipdefault));
 	
+	/* Clinic Agent variables */
+	gpuErrchk(cudaFree(d_Clinics));
+	gpuErrchk(cudaFree(d_Clinics_swap));
+	gpuErrchk(cudaFree(d_Clinics_new));
+	
+	free( h_Clinics_cldefault);
+	gpuErrchk(cudaFree(d_Clinics_cldefault));
+	
 
 	/* Message data free */
 	
@@ -1380,6 +1467,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_TransportMembership));
     d_temp_scan_storage_TransportMembership = nullptr;
     temp_scan_storage_bytes_TransportMembership = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_Clinic));
+    d_temp_scan_storage_Clinic = nullptr;
+    temp_scan_storage_bytes_Clinic = 0;
     
   
   /* CUDA Streams for function layers */
@@ -1604,6 +1695,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_Transport_trdefault_count: %u\n",get_agent_Transport_trdefault_count());
 	
 		printf("agent_TransportMembership_trmembershipdefault_count: %u\n",get_agent_TransportMembership_trmembershipdefault_count());
+	
+		printf("agent_Clinic_cldefault_count: %u\n",get_agent_Clinic_cldefault_count());
 	
 #endif
 
@@ -2215,6 +2308,26 @@ xmachine_memory_TransportMembership_list* get_device_TransportMembership_trmembe
 
 xmachine_memory_TransportMembership_list* get_host_TransportMembership_trmembershipdefault_agents(){
 	return h_TransportMemberships_trmembershipdefault;
+}
+
+    
+int get_agent_Clinic_MAX_count(){
+    return xmachine_memory_Clinic_MAX;
+}
+
+
+int get_agent_Clinic_cldefault_count(){
+	//continuous agent
+	return h_xmachine_memory_Clinic_cldefault_count;
+	
+}
+
+xmachine_memory_Clinic_list* get_device_Clinic_cldefault_agents(){
+	return d_Clinics_cldefault;
+}
+
+xmachine_memory_Clinic_list* get_host_Clinic_cldefault_agents(){
+	return h_Clinics_cldefault;
 }
 
 
@@ -5392,6 +5505,84 @@ __host__ unsigned int get_TransportMembership_trmembershipdefault_variable_durat
     }
 }
 
+/** unsigned int get_Clinic_cldefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Clinic agent in the cldefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Clinic_cldefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_Clinic_cldefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Clinics_cldefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Clinics_cldefault->id,
+                    d_Clinics_cldefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Clinics_cldefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Clinics_cldefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of Clinic_cldefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Clinic_cldefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Clinic agent in the cldefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Clinic_cldefault_variable_step(unsigned int index){
+    unsigned int count = get_agent_Clinic_cldefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Clinics_cldefault_variable_step_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Clinics_cldefault->step,
+                    d_Clinics_cldefault->step,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Clinics_cldefault_variable_step_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Clinics_cldefault->step[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Clinic_cldefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -5837,6 +6028,40 @@ void copy_partial_xmachine_memory_TransportMembership_hostToDevice(xmachine_memo
 		gpuErrchk(cudaMemcpy(d_dst->transport_id, h_src->transport_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_Clinic_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_list * d_dst, xmachine_memory_Clinic * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_list * d_dst, xmachine_memory_Clinic_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6975,6 +7200,111 @@ void h_add_agents_TransportMembership_trmembershipdefault(xmachine_memory_Transp
         h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration = 0;
         h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration = 0;
         h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_Clinic* h_allocate_agent_Clinic(){
+	xmachine_memory_Clinic* agent = (xmachine_memory_Clinic*)malloc(sizeof(xmachine_memory_Clinic));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_Clinic));
+
+	return agent;
+}
+void h_free_agent_Clinic(xmachine_memory_Clinic** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_Clinic** h_allocate_agent_Clinic_array(unsigned int count){
+	xmachine_memory_Clinic ** agents = (xmachine_memory_Clinic**)malloc(count * sizeof(xmachine_memory_Clinic*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_Clinic();
+	}
+	return agents;
+}
+void h_free_agent_Clinic_array(xmachine_memory_Clinic*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_Clinic(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_Clinic_AoS_to_SoA(xmachine_memory_Clinic_list * dst, xmachine_memory_Clinic** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			 
+			dst->step[i] = src[i]->step;
+			
+		}
+	}
+}
+
+
+void h_add_agent_Clinic_cldefault(xmachine_memory_Clinic* agent){
+	if (h_xmachine_memory_Clinic_count + 1 > xmachine_memory_Clinic_MAX){
+		printf("Error: Buffer size of Clinic agents in state cldefault will be exceeded by h_add_agent_Clinic_cldefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_Clinic_hostToDevice(d_Clinics_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Clinic_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_Clinic_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Clinics_cldefault, d_Clinics_new, h_xmachine_memory_Clinic_cldefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_Clinic_cldefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Clinic_cldefault_count, &h_xmachine_memory_Clinic_cldefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_Clinics_cldefault_variable_id_data_iteration = 0;
+    h_Clinics_cldefault_variable_step_data_iteration = 0;
+    
+
+}
+void h_add_agents_Clinic_cldefault(xmachine_memory_Clinic** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_Clinic_count + count > xmachine_memory_Clinic_MAX){
+			printf("Error: Buffer size of Clinic agents in state cldefault will be exceeded by h_add_agents_Clinic_cldefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_Clinic_AoS_to_SoA(h_Clinics_cldefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_Clinic_hostToDevice(d_Clinics_new, h_Clinics_cldefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Clinic_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_Clinic_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Clinics_cldefault, d_Clinics_new, h_xmachine_memory_Clinic_cldefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_Clinic_cldefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Clinic_cldefault_count, &h_xmachine_memory_Clinic_cldefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_Clinics_cldefault_variable_id_data_iteration = 0;
+        h_Clinics_cldefault_variable_step_data_iteration = 0;
         
 
 	}
@@ -8605,6 +8935,48 @@ unsigned int max_TransportMembership_trmembershipdefault_duration_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_TransportMembership_trmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Clinic_cldefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Clinics_cldefault->id),  thrust::device_pointer_cast(d_Clinics_cldefault->id) + h_xmachine_memory_Clinic_cldefault_count);
+}
+
+unsigned int count_Clinic_cldefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Clinics_cldefault->id),  thrust::device_pointer_cast(d_Clinics_cldefault->id) + h_xmachine_memory_Clinic_cldefault_count, count_value);
+}
+unsigned int min_Clinic_cldefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Clinic_cldefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Clinic_cldefault_step_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Clinics_cldefault->step),  thrust::device_pointer_cast(d_Clinics_cldefault->step) + h_xmachine_memory_Clinic_cldefault_count);
+}
+
+unsigned int count_Clinic_cldefault_step_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Clinics_cldefault->step),  thrust::device_pointer_cast(d_Clinics_cldefault->step) + h_xmachine_memory_Clinic_cldefault_count, count_value);
+}
+unsigned int min_Clinic_cldefault_step_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->step);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Clinic_cldefault_step_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->step);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 
 
 
@@ -9970,6 +10342,105 @@ void TransportMembership_trinit(cudaStream_t &stream){
 }
 
 
+
+	
+/* Shared memory size calculator for agent function */
+int Clinic_clupdate_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** Clinic_clupdate
+ * Agent function prototype for clupdate function of Clinic agent
+ */
+void Clinic_clupdate(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Clinic_cldefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Clinic_cldefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Clinic_list* Clinics_cldefault_temp = d_Clinics;
+	d_Clinics = d_Clinics_cldefault;
+	d_Clinics_cldefault = Clinics_cldefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_Clinic_count = h_xmachine_memory_Clinic_cldefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Clinic_count, &h_xmachine_memory_Clinic_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Clinic_cldefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Clinic_cldefault_count, &h_xmachine_memory_Clinic_cldefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_clupdate, Clinic_clupdate_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Clinic_clupdate_sm_size(blockSize);
+	
+	
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (clupdate)
+	//Reallocate   : false
+	//Input        : 
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_clupdate<<<g, b, sm_size, stream>>>(d_Clinics);
+	gpuErrchkLaunch();
+	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Clinic_cldefault_count+h_xmachine_memory_Clinic_count > xmachine_memory_Clinic_MAX){
+		printf("Error: Buffer size of clupdate agents in state cldefault will be exceeded moving working agents to next state in function clupdate\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Clinics_cldefault_temp = d_Clinics;
+  d_Clinics = d_Clinics_cldefault;
+  d_Clinics_cldefault = Clinics_cldefault_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Clinic_cldefault_count += h_xmachine_memory_Clinic_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Clinic_cldefault_count, &h_xmachine_memory_Clinic_cldefault_count, sizeof(int)));	
+	
+	
+}
+
+
  
 extern void reset_Person_default_count()
 {
@@ -10014,4 +10485,9 @@ extern void reset_Transport_trdefault_count()
 extern void reset_TransportMembership_trmembershipdefault_count()
 {
     h_xmachine_memory_TransportMembership_trmembershipdefault_count = 0;
+}
+ 
+extern void reset_Clinic_cldefault_count()
+{
+    h_xmachine_memory_Clinic_cldefault_count = 0;
 }
