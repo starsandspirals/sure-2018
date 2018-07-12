@@ -10363,8 +10363,13 @@ void Person_update(cudaStream_t &stream){
 	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
 	//Set the message_type for non partitioned and spatially partitioned message outputs
-	h_message_location_output_type = single_message;
+	h_message_location_output_type = optional_message;
 	gpuErrchk( cudaMemcpyToSymbol( d_message_location_output_type, &h_message_location_output_type, sizeof(int)));
+	//message is optional so reset the swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_location_swaps, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_location_swaps<<<gridSize, blockSize, 0, stream>>>(d_locations); 
+	gpuErrchkLaunch();
 	
 	
 	//MAIN XMACHINE FUNCTION CALL (update)
@@ -10377,10 +10382,38 @@ void Person_update(cudaStream_t &stream){
 	
 	
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	//location Message Type Prefix Sum
+	
+	//swap output
+	xmachine_message_location_list* d_locations_scanswap_temp = d_locations;
+	d_locations = d_locations_swap;
+	d_locations_swap = d_locations_scanswap_temp;
+	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Person, 
+        temp_scan_storage_bytes_Person, 
+        d_locations_swap->_scan_input,
+        d_locations_swap->_position,
+        h_xmachine_memory_Person_count, 
+        stream
+    );
+
+	//Scatter
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_optional_location_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_optional_location_messages<<<gridSize, blockSize, 0, stream>>>(d_locations, d_locations_swap);
+	gpuErrchkLaunch();
 	
 	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
-	h_message_location_count += h_xmachine_memory_Person_count;
-	//Copy count to device
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_locations_swap->_position[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_locations_swap->_scan_input[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//If last item in prefix sum was 1 then increase its index to get the count
+	if (scan_last_included == 1){
+		h_message_location_count += scan_last_sum+1;
+	}else{
+		h_message_location_count += scan_last_sum;
+	}
+    //Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_location_count, &h_message_location_count, sizeof(int)));	
 	
 	

@@ -389,7 +389,7 @@
           <outputs>
             <gpu:output>
               <messageName>location</messageName>
-              <gpu:type>single_message</gpu:type>
+              <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
           <gpu:reallocate>false</gpu:reallocate>
@@ -1133,7 +1133,7 @@
     </layer>
     
 
-    <layer>
+     <layer>
       <gpu:layerFunction>
         <name>chuupdate</name>
       </gpu:layerFunction>
@@ -1149,7 +1149,7 @@
       <gpu:layerFunction>
         <name>clupdate</name>
       </gpu:layerFunction>
-    </layer>
+    </layer> 
 
     <layer>
       <gpu:layerFunction>
