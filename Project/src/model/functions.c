@@ -871,22 +871,30 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household *household) {
+__FLAME_GPU_FUNC__ int
+hhupdate(xmachine_memory_Household *household,
+         xmachine_message_location_list *location_messages) {
   household->step += TIME_STEP;
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church *church) {
+__FLAME_GPU_FUNC__ int
+chuupdate(xmachine_memory_Church *church,
+          xmachine_message_location_list *location_messages) {
   church->step += TIME_STEP;
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport *transport) {
+__FLAME_GPU_FUNC__ int
+trupdate(xmachine_memory_Transport *transport,
+         xmachine_message_location_list *location_messages) {
   transport->step += TIME_STEP;
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic *clinic) {
+__FLAME_GPU_FUNC__ int
+clupdate(xmachine_memory_Clinic *clinic,
+         xmachine_message_location_list *location_messages) {
   clinic->step += TIME_STEP;
   return 0;
 }

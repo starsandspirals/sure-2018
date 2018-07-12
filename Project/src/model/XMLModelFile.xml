@@ -510,6 +510,11 @@
           <name>hhupdate</name>
           <currentState>hhdefault</currentState>
           <nextState>hhdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -619,6 +624,11 @@
           <name>chuupdate</name>
           <currentState>chudefault</currentState>
           <nextState>chudefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -715,6 +725,11 @@
           <name>trupdate</name>
           <currentState>trdefault</currentState>
           <nextState>trdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -798,6 +813,11 @@
           <name>clupdate</name>
           <currentState>cldefault</currentState>
           <nextState>cldefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>

@@ -700,9 +700,9 @@ __FLAME_GPU_FUNC__ int tbinit(xmachine_memory_TBAssignment* agent, xmachine_mess
 /**
  * hhupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Household. This represents a single agent instance and can be modified directly.
- 
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
  */
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent);
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent, xmachine_message_location_list* location_messages);
 
 /**
  * hhinit FLAMEGPU Agent Function
@@ -714,9 +714,9 @@ __FLAME_GPU_FUNC__ int hhinit(xmachine_memory_HouseholdMembership* agent, xmachi
 /**
  * chuupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Church. This represents a single agent instance and can be modified directly.
- 
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
  */
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent);
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent, xmachine_message_location_list* location_messages);
 
 /**
  * chuinit FLAMEGPU Agent Function
@@ -728,9 +728,9 @@ __FLAME_GPU_FUNC__ int chuinit(xmachine_memory_ChurchMembership* agent, xmachine
 /**
  * trupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Transport. This represents a single agent instance and can be modified directly.
- 
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
  */
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent);
+__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent, xmachine_message_location_list* location_messages);
 
 /**
  * trinit FLAMEGPU Agent Function
@@ -742,9 +742,9 @@ __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachi
 /**
  * clupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Clinic. This represents a single agent instance and can be modified directly.
- 
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
  */
-__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent);
+__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */

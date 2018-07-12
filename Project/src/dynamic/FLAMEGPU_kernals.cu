@@ -2811,21 +2811,20 @@ __global__ void GPUFLAME_tbinit(xmachine_memory_TBAssignment_list* agents, xmach
 /**
  *
  */
-__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
+__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachine_message_location_list* location_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
-    //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_Household_count)
-        return;
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
 	//SoA to AoS - xmachine_memory_hhupdate Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Household agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Household_count){
     
-    // Thread bounds already checked, but the agent function will still execute. load default values?
-	
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
 	agent.size = agents->size[index];
@@ -2833,12 +2832,25 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 	agent.churchgoing = agents->churchgoing[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.adults = agents->adults[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.size = 0;
+    agent.people = nullptr;
+	agent.churchgoing = 0;
+	agent.churchfreq = 0;
+	agent.adults = 0;
+	}
 
 	//FLAME function call
-	int dead = !hhupdate(&agent);
+	int dead = !hhupdate(&agent, location_messages);
 	
 
-	//continuous agent: set reallocation flag
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Household_count){
+    //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
 	//AoS to SoA - xmachine_memory_hhupdate Coalesced memory write (ignore arrays)
@@ -2848,6 +2860,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents){
 	agents->churchgoing[index] = agent.churchgoing;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->adults[index] = agent.adults;
+	}
 }
 
 /**
@@ -2903,32 +2916,42 @@ __global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
+__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine_message_location_list* location_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
-    //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_Church_count)
-        return;
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
 	//SoA to AoS - xmachine_memory_chuupdate Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Church agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Church_count){
     
-    // Thread bounds already checked, but the agent function will still execute. load default values?
-	
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
 	agent.size = agents->size[index];
 	agent.duration = agents->duration[index];
     agent.households = &(agents->households[index]);
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.size = 0;
+	agent.duration = 0;
+    agent.households = nullptr;
+	}
 
 	//FLAME function call
-	int dead = !chuupdate(&agent);
+	int dead = !chuupdate(&agent, location_messages);
 	
 
-	//continuous agent: set reallocation flag
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Church_count){
+    //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
 	//AoS to SoA - xmachine_memory_chuupdate Coalesced memory write (ignore arrays)
@@ -2936,6 +2959,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents){
 	agents->step[index] = agent.step;
 	agents->size[index] = agent.size;
 	agents->duration[index] = agent.duration;
+	}
 }
 
 /**
@@ -2976,32 +3000,42 @@ __global__ void GPUFLAME_chuinit(xmachine_memory_ChurchMembership_list* agents, 
 /**
  *
  */
-__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents){
+__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachine_message_location_list* location_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
-    //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_Transport_count)
-        return;
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
 	//SoA to AoS - xmachine_memory_trupdate Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Transport agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Transport_count){
     
-    // Thread bounds already checked, but the agent function will still execute. load default values?
-	
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
 	agent.duration = agents->duration[index];
 	agent.day = agents->day[index];
     agent.people = &(agents->people[index]);
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.duration = 0;
+	agent.day = 0;
+    agent.people = nullptr;
+	}
 
 	//FLAME function call
-	int dead = !trupdate(&agent);
+	int dead = !trupdate(&agent, location_messages);
 	
 
-	//continuous agent: set reallocation flag
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Transport_count){
+    //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
 	//AoS to SoA - xmachine_memory_trupdate Coalesced memory write (ignore arrays)
@@ -3009,6 +3043,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents){
 	agents->step[index] = agent.step;
 	agents->duration[index] = agent.duration;
 	agents->day[index] = agent.day;
+	}
 }
 
 /**
@@ -3049,34 +3084,42 @@ __global__ void GPUFLAME_trinit(xmachine_memory_TransportMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents){
+__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_message_location_list* location_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
-    //For agents not using non partitioned message input check the agent bounds
-    if (index >= d_xmachine_memory_Clinic_count)
-        return;
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
 	//SoA to AoS - xmachine_memory_clupdate Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Clinic agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Clinic_count){
     
-    // Thread bounds already checked, but the agent function will still execute. load default values?
-	
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	}
 
 	//FLAME function call
-	int dead = !clupdate(&agent);
+	int dead = !clupdate(&agent, location_messages);
 	
 
-	//continuous agent: set reallocation flag
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Clinic_count){
+    //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
 	//AoS to SoA - xmachine_memory_clupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
+	}
 }
 
 	

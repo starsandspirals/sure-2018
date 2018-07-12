@@ -9857,7 +9857,12 @@ void TBAssignment_tbinit(cudaStream_t &stream){
 int Household_hhupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
-  
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
 	return sm_size;
 }
 
@@ -9918,15 +9923,19 @@ void Household_hhupdate(cudaStream_t &stream){
 	
 	
 	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (hhupdate)
 	//Reallocate   : false
-	//Input        : 
+	//Input        : location
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households);
+	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households, d_locations);
 	gpuErrchkLaunch();
 	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -10118,7 +10127,12 @@ void HouseholdMembership_hhinit(cudaStream_t &stream){
 int Church_chuupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
-  
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
 	return sm_size;
 }
 
@@ -10179,15 +10193,19 @@ void Church_chuupdate(cudaStream_t &stream){
 	
 	
 	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (chuupdate)
 	//Reallocate   : false
-	//Input        : 
+	//Input        : location
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_chuupdate<<<g, b, sm_size, stream>>>(d_Churchs);
+	GPUFLAME_chuupdate<<<g, b, sm_size, stream>>>(d_Churchs, d_locations);
 	gpuErrchkLaunch();
 	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -10370,7 +10388,12 @@ void ChurchMembership_chuinit(cudaStream_t &stream){
 int Transport_trupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
-  
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
 	return sm_size;
 }
 
@@ -10431,15 +10454,19 @@ void Transport_trupdate(cudaStream_t &stream){
 	
 	
 	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (trupdate)
 	//Reallocate   : false
-	//Input        : 
+	//Input        : location
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_trupdate<<<g, b, sm_size, stream>>>(d_Transports);
+	GPUFLAME_trupdate<<<g, b, sm_size, stream>>>(d_Transports, d_locations);
 	gpuErrchkLaunch();
 	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -10622,7 +10649,12 @@ void TransportMembership_trinit(cudaStream_t &stream){
 int Clinic_clupdate_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
-  
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
 	return sm_size;
 }
 
@@ -10683,15 +10715,19 @@ void Clinic_clupdate(cudaStream_t &stream){
 	
 	
 	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (clupdate)
 	//Reallocate   : false
-	//Input        : 
+	//Input        : location
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_clupdate<<<g, b, sm_size, stream>>>(d_Clinics);
+	GPUFLAME_clupdate<<<g, b, sm_size, stream>>>(d_Clinics, d_locations);
 	gpuErrchkLaunch();
 	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
