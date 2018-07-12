@@ -962,11 +962,11 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
-          <name>location_type</name>
+          <name>location</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
-          <name>location_id</name>
+          <name>locationid</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>

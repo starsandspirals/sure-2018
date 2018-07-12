@@ -361,8 +361,8 @@ struct __align__(16) xmachine_message_location
     int _position;          /**< 1D position of message in linear message list */   
       
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
-    unsigned int location_type;        /**< Message variable location_type of type unsigned int.*/  
-    unsigned int location_id;        /**< Message variable location_id of type unsigned int.*/  
+    unsigned int location;        /**< Message variable location of type unsigned int.*/  
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
     unsigned int day;        /**< Message variable day of type unsigned int.*/  
     unsigned int hour;        /**< Message variable hour of type unsigned int.*/  
     unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
@@ -626,8 +626,8 @@ struct xmachine_message_location_list
     int _scan_input [xmachine_message_location_MAX];  /**< Used during parallel prefix sum */
     
     unsigned int person_id [xmachine_message_location_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
-    unsigned int location_type [xmachine_message_location_MAX];    /**< Message memory variable list location_type of type unsigned int.*/
-    unsigned int location_id [xmachine_message_location_MAX];    /**< Message memory variable list location_id of type unsigned int.*/
+    unsigned int location [xmachine_message_location_MAX];    /**< Message memory variable list location of type unsigned int.*/
+    unsigned int locationid [xmachine_message_location_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
     unsigned int day [xmachine_message_location_MAX];    /**< Message memory variable list day of type unsigned int.*/
     unsigned int hour [xmachine_message_location_MAX];    /**< Message memory variable list hour of type unsigned int.*/
     unsigned int minute [xmachine_message_location_MAX];    /**< Message memory variable list minute of type unsigned int.*/
@@ -887,8 +887,8 @@ __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_me
  * Adds a new location agent to the xmachine_memory_location_list list using a linear mapping
  * @param agents	xmachine_memory_location_list agent list
  * @param person_id	message variable of type unsigned int
- * @param location_type	message variable of type unsigned int
- * @param location_id	message variable of type unsigned int
+ * @param location	message variable of type unsigned int
+ * @param locationid	message variable of type unsigned int
  * @param day	message variable of type unsigned int
  * @param hour	message variable of type unsigned int
  * @param minute	message variable of type unsigned int
@@ -896,7 +896,7 @@ __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_me
  * @param q	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location_type, unsigned int location_id, unsigned int day, unsigned int hour, unsigned int minute, float p, float q);
+ __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float p, float q);
  
 /** get_first_location_message
  * Get first message function for non partitioned (brute force) messages

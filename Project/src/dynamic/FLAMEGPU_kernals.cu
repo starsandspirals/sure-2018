@@ -2206,15 +2206,15 @@ __device__ xmachine_message_transport_membership* get_next_transport_membership_
  * Add non partitioned or spatially partitioned location message
  * @param messages xmachine_message_location_list message list to add too
  * @param person_id agent variable of type unsigned int
- * @param location_type agent variable of type unsigned int
- * @param location_id agent variable of type unsigned int
+ * @param location agent variable of type unsigned int
+ * @param locationid agent variable of type unsigned int
  * @param day agent variable of type unsigned int
  * @param hour agent variable of type unsigned int
  * @param minute agent variable of type unsigned int
  * @param p agent variable of type float
  * @param q agent variable of type float
  */
-__device__ void add_location_message(xmachine_message_location_list* messages, unsigned int person_id, unsigned int location_type, unsigned int location_id, unsigned int day, unsigned int hour, unsigned int minute, float p, float q){
+__device__ void add_location_message(xmachine_message_location_list* messages, unsigned int person_id, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float p, float q){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_location_count;
@@ -2235,8 +2235,8 @@ __device__ void add_location_message(xmachine_message_location_list* messages, u
 	messages->_scan_input[index] = _scan_input;	
 	messages->_position[index] = _position;
 	messages->person_id[index] = person_id;
-	messages->location_type[index] = location_type;
-	messages->location_id[index] = location_id;
+	messages->location[index] = location;
+	messages->locationid[index] = locationid;
 	messages->day[index] = day;
 	messages->hour[index] = hour;
 	messages->minute[index] = minute;
@@ -2263,8 +2263,8 @@ __global__ void scatter_optional_location_messages(xmachine_message_location_lis
 		//AoS - xmachine_message_location Un-Coalesced scattered memory write
 		messages->_position[output_index] = output_index;
 		messages->person_id[output_index] = messages_swap->person_id[index];
-		messages->location_type[output_index] = messages_swap->location_type[index];
-		messages->location_id[output_index] = messages_swap->location_id[index];
+		messages->location[output_index] = messages_swap->location[index];
+		messages->locationid[output_index] = messages_swap->locationid[index];
 		messages->day[output_index] = messages_swap->day[index];
 		messages->hour[output_index] = messages_swap->hour[index];
 		messages->minute[output_index] = messages_swap->minute[index];
@@ -2310,8 +2310,8 @@ __device__ xmachine_message_location* get_first_location_message(xmachine_messag
 	xmachine_message_location temp_message;
 	temp_message._position = messages->_position[index];
 	temp_message.person_id = messages->person_id[index];
-	temp_message.location_type = messages->location_type[index];
-	temp_message.location_id = messages->location_id[index];
+	temp_message.location = messages->location[index];
+	temp_message.locationid = messages->locationid[index];
 	temp_message.day = messages->day[index];
 	temp_message.hour = messages->hour[index];
 	temp_message.minute = messages->minute[index];
@@ -2359,8 +2359,8 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 		xmachine_message_location temp_message;
 		temp_message._position = messages->_position[index];
 		temp_message.person_id = messages->person_id[index];
-		temp_message.location_type = messages->location_type[index];
-		temp_message.location_id = messages->location_id[index];
+		temp_message.location = messages->location[index];
+		temp_message.locationid = messages->locationid[index];
 		temp_message.day = messages->day[index];
 		temp_message.hour = messages->hour[index];
 		temp_message.minute = messages->minute[index];

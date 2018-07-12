@@ -881,6 +881,32 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 __FLAME_GPU_FUNC__ int
 hhupdate(xmachine_memory_Household *household,
          xmachine_message_location_list *location_messages) {
+
+  unsigned int day = dayofweek(household->step);
+  struct Time t = timeofday(household->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  float qsum = 0;
+
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
+
+  while (location_message) {
+    if (location_message->location == 0 &&
+        location_message->locationid == household->id &&
+        location_message->day == day && location_message->hour == hour &&
+        location_message->minute == minute) {
+      qsum += location_message->q;
+    }
+    location_message =
+        get_next_location_message(location_message, location_messages);
+  }
+
+  household->lambda =
+      (household->lambda * device_exp(-HOUSEHOLD_A * TIME_STEP)) +
+      ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
+       (1 - device_exp(-HOUSEHOLD_A * TIME_STEP)));
+
   household->step += TIME_STEP;
   return 0;
 }
@@ -888,6 +914,30 @@ hhupdate(xmachine_memory_Household *household,
 __FLAME_GPU_FUNC__ int
 chuupdate(xmachine_memory_Church *church,
           xmachine_message_location_list *location_messages) {
+
+  unsigned int day = dayofweek(church->step);
+  struct Time t = timeofday(church->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  float qsum = 0;
+
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
+
+  while (location_message) {
+    if (location_message->location == 1 &&
+        location_message->locationid == church->id &&
+        location_message->day == day && location_message->hour == hour &&
+        location_message->minute == minute) {
+      qsum += location_message->q;
+    }
+    location_message =
+        get_next_location_message(location_message, location_messages);
+  }
+
+  church->lambda = (church->lambda * device_exp(-CHURCH_A * TIME_STEP)) +
+                   ((qsum / (CHURCH_V_MULTIPLIER * church->size * CHURCH_A)) *
+                    (1 - device_exp(-CHURCH_A * TIME_STEP)));
   church->step += TIME_STEP;
   return 0;
 }
@@ -895,6 +945,31 @@ chuupdate(xmachine_memory_Church *church,
 __FLAME_GPU_FUNC__ int
 trupdate(xmachine_memory_Transport *transport,
          xmachine_message_location_list *location_messages) {
+
+  unsigned int day = dayofweek(transport->step);
+  struct Time t = timeofday(transport->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  float qsum = 0;
+
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
+
+  while (location_message) {
+    if (location_message->location == 2 &&
+        location_message->locationid == transport->id &&
+        location_message->day == day && location_message->hour == hour &&
+        location_message->minute == minute) {
+      qsum += location_message->q;
+    }
+    location_message =
+        get_next_location_message(location_message, location_messages);
+  }
+
+  transport->lambda =
+      (transport->lambda * device_exp(-TRANSPORT_A * TIME_STEP)) +
+      ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
+       (1 - device_exp(-TRANSPORT_A * TIME_STEP)));
   transport->step += TIME_STEP;
   return 0;
 }
@@ -902,6 +977,30 @@ trupdate(xmachine_memory_Transport *transport,
 __FLAME_GPU_FUNC__ int
 clupdate(xmachine_memory_Clinic *clinic,
          xmachine_message_location_list *location_messages) {
+
+  unsigned int day = dayofweek(clinic->step);
+  struct Time t = timeofday(clinic->step);
+  unsigned int hour = t.hour;
+  unsigned int minute = t.minute;
+  float qsum = 0;
+
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
+
+  while (location_message) {
+    if (location_message->location == 3 &&
+        location_message->locationid == clinic->id &&
+        location_message->day == day && location_message->hour == hour &&
+        location_message->minute == minute) {
+      qsum += location_message->q;
+    }
+    location_message =
+        get_next_location_message(location_message, location_messages);
+  }
+
+  clinic->lambda = (clinic->lambda * device_exp(-CLINIC_A * TIME_STEP)) +
+                   ((qsum / (CLINIC_V * CLINIC_A)) *
+                    (1 - device_exp(-CLINIC_A * TIME_STEP)));
   clinic->step += TIME_STEP;
   return 0;
 }
