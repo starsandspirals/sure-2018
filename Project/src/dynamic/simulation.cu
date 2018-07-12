@@ -1745,6 +1745,16 @@ float h_env_ART_COVERAGE;
 float h_env_RR_HIV;
 float h_env_RR_ART;
 float h_env_TB_PREVALENCE;
+float h_env_DEFAULT_P;
+float h_env_DEFAULT_Q;
+float h_env_TRANSPORT_A;
+float h_env_CHURCH_A;
+float h_env_CLINIC_A;
+float h_env_HOUSEHOLD_A;
+float h_env_TRANSPORT_V;
+float h_env_HOUSEHOLD_V;
+float h_env_CLINIC_V;
+float h_env_CHURCH_V_MULTIPLIER;
 
 
 //constant setter
@@ -2133,6 +2143,136 @@ void set_TB_PREVALENCE(float* h_TB_PREVALENCE){
 //constant getter
 const float* get_TB_PREVALENCE(){
     return &h_env_TB_PREVALENCE;
+}
+
+
+
+//constant setter
+void set_DEFAULT_P(float* h_DEFAULT_P){
+    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_P, h_DEFAULT_P, sizeof(float)));
+    memcpy(&h_env_DEFAULT_P, h_DEFAULT_P,sizeof(float));
+}
+
+//constant getter
+const float* get_DEFAULT_P(){
+    return &h_env_DEFAULT_P;
+}
+
+
+
+//constant setter
+void set_DEFAULT_Q(float* h_DEFAULT_Q){
+    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_Q, h_DEFAULT_Q, sizeof(float)));
+    memcpy(&h_env_DEFAULT_Q, h_DEFAULT_Q,sizeof(float));
+}
+
+//constant getter
+const float* get_DEFAULT_Q(){
+    return &h_env_DEFAULT_Q;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_A(float* h_TRANSPORT_A){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_A, h_TRANSPORT_A, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_A, h_TRANSPORT_A,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_A(){
+    return &h_env_TRANSPORT_A;
+}
+
+
+
+//constant setter
+void set_CHURCH_A(float* h_CHURCH_A){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_A, h_CHURCH_A, sizeof(float)));
+    memcpy(&h_env_CHURCH_A, h_CHURCH_A,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_A(){
+    return &h_env_CHURCH_A;
+}
+
+
+
+//constant setter
+void set_CLINIC_A(float* h_CLINIC_A){
+    gpuErrchk(cudaMemcpyToSymbol(CLINIC_A, h_CLINIC_A, sizeof(float)));
+    memcpy(&h_env_CLINIC_A, h_CLINIC_A,sizeof(float));
+}
+
+//constant getter
+const float* get_CLINIC_A(){
+    return &h_env_CLINIC_A;
+}
+
+
+
+//constant setter
+void set_HOUSEHOLD_A(float* h_HOUSEHOLD_A){
+    gpuErrchk(cudaMemcpyToSymbol(HOUSEHOLD_A, h_HOUSEHOLD_A, sizeof(float)));
+    memcpy(&h_env_HOUSEHOLD_A, h_HOUSEHOLD_A,sizeof(float));
+}
+
+//constant getter
+const float* get_HOUSEHOLD_A(){
+    return &h_env_HOUSEHOLD_A;
+}
+
+
+
+//constant setter
+void set_TRANSPORT_V(float* h_TRANSPORT_V){
+    gpuErrchk(cudaMemcpyToSymbol(TRANSPORT_V, h_TRANSPORT_V, sizeof(float)));
+    memcpy(&h_env_TRANSPORT_V, h_TRANSPORT_V,sizeof(float));
+}
+
+//constant getter
+const float* get_TRANSPORT_V(){
+    return &h_env_TRANSPORT_V;
+}
+
+
+
+//constant setter
+void set_HOUSEHOLD_V(float* h_HOUSEHOLD_V){
+    gpuErrchk(cudaMemcpyToSymbol(HOUSEHOLD_V, h_HOUSEHOLD_V, sizeof(float)));
+    memcpy(&h_env_HOUSEHOLD_V, h_HOUSEHOLD_V,sizeof(float));
+}
+
+//constant getter
+const float* get_HOUSEHOLD_V(){
+    return &h_env_HOUSEHOLD_V;
+}
+
+
+
+//constant setter
+void set_CLINIC_V(float* h_CLINIC_V){
+    gpuErrchk(cudaMemcpyToSymbol(CLINIC_V, h_CLINIC_V, sizeof(float)));
+    memcpy(&h_env_CLINIC_V, h_CLINIC_V,sizeof(float));
+}
+
+//constant getter
+const float* get_CLINIC_V(){
+    return &h_env_CLINIC_V;
+}
+
+
+
+//constant setter
+void set_CHURCH_V_MULTIPLIER(float* h_CHURCH_V_MULTIPLIER){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_V_MULTIPLIER, h_CHURCH_V_MULTIPLIER, sizeof(float)));
+    memcpy(&h_env_CHURCH_V_MULTIPLIER, h_CHURCH_V_MULTIPLIER,sizeof(float));
+}
+
+//constant getter
+const float* get_CHURCH_V_MULTIPLIER(){
+    return &h_env_CHURCH_V_MULTIPLIER;
 }
 
 

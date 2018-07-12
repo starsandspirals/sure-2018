@@ -155,6 +155,57 @@
         <name>TB_PREVALENCE</name>
         <defaultValue>0.005</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>DEFAULT_P</name>
+        <defaultValue>0.36</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>DEFAULT_Q</name>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>TRANSPORT_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CLINIC_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>HOUSEHOLD_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>TRANSPORT_V</name>
+        <defaultValue>20</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>HOUSEHOLD_V</name>
+        <defaultValue>30</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CLINIC_V</name>
+        <defaultValue>40</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_V_MULTIPLIER</name>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

@@ -317,6 +317,46 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_TB_PREVALENCE()));
     fputs(data, file);
     fputs("</TB_PREVALENCE>\n", file);
+    fputs("\t<DEFAULT_P>", file);
+    sprintf(data, "%f", (*get_DEFAULT_P()));
+    fputs(data, file);
+    fputs("</DEFAULT_P>\n", file);
+    fputs("\t<DEFAULT_Q>", file);
+    sprintf(data, "%f", (*get_DEFAULT_Q()));
+    fputs(data, file);
+    fputs("</DEFAULT_Q>\n", file);
+    fputs("\t<TRANSPORT_A>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_A()));
+    fputs(data, file);
+    fputs("</TRANSPORT_A>\n", file);
+    fputs("\t<CHURCH_A>", file);
+    sprintf(data, "%f", (*get_CHURCH_A()));
+    fputs(data, file);
+    fputs("</CHURCH_A>\n", file);
+    fputs("\t<CLINIC_A>", file);
+    sprintf(data, "%f", (*get_CLINIC_A()));
+    fputs(data, file);
+    fputs("</CLINIC_A>\n", file);
+    fputs("\t<HOUSEHOLD_A>", file);
+    sprintf(data, "%f", (*get_HOUSEHOLD_A()));
+    fputs(data, file);
+    fputs("</HOUSEHOLD_A>\n", file);
+    fputs("\t<TRANSPORT_V>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_V()));
+    fputs(data, file);
+    fputs("</TRANSPORT_V>\n", file);
+    fputs("\t<HOUSEHOLD_V>", file);
+    sprintf(data, "%f", (*get_HOUSEHOLD_V()));
+    fputs(data, file);
+    fputs("</HOUSEHOLD_V>\n", file);
+    fputs("\t<CLINIC_V>", file);
+    sprintf(data, "%f", (*get_CLINIC_V()));
+    fputs(data, file);
+    fputs("</CLINIC_V>\n", file);
+    fputs("\t<CHURCH_V_MULTIPLIER>", file);
+    sprintf(data, "%f", (*get_CHURCH_V_MULTIPLIER()));
+    fputs(data, file);
+    fputs("</CHURCH_V_MULTIPLIER>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -897,6 +937,26 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RR_ART(&t_RR_ART);
     float t_TB_PREVALENCE = (float)0.005;
     set_TB_PREVALENCE(&t_TB_PREVALENCE);
+    float t_DEFAULT_P = (float)0.36;
+    set_DEFAULT_P(&t_DEFAULT_P);
+    float t_DEFAULT_Q = (float)1;
+    set_DEFAULT_Q(&t_DEFAULT_Q);
+    float t_TRANSPORT_A = (float)3;
+    set_TRANSPORT_A(&t_TRANSPORT_A);
+    float t_CHURCH_A = (float)3;
+    set_CHURCH_A(&t_CHURCH_A);
+    float t_CLINIC_A = (float)3;
+    set_CLINIC_A(&t_CLINIC_A);
+    float t_HOUSEHOLD_A = (float)3;
+    set_HOUSEHOLD_A(&t_HOUSEHOLD_A);
+    float t_TRANSPORT_V = (float)20;
+    set_TRANSPORT_V(&t_TRANSPORT_V);
+    float t_HOUSEHOLD_V = (float)30;
+    set_HOUSEHOLD_V(&t_HOUSEHOLD_V);
+    float t_CLINIC_V = (float)40;
+    set_CLINIC_V(&t_CLINIC_V);
+    float t_CHURCH_V_MULTIPLIER = (float)1;
+    set_CHURCH_V_MULTIPLIER(&t_CHURCH_V_MULTIPLIER);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count)
@@ -1039,6 +1099,26 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_TB_PREVALENCE;
     
+    int in_env_DEFAULT_P;
+    
+    int in_env_DEFAULT_Q;
+    
+    int in_env_TRANSPORT_A;
+    
+    int in_env_CHURCH_A;
+    
+    int in_env_CLINIC_A;
+    
+    int in_env_HOUSEHOLD_A;
+    
+    int in_env_TRANSPORT_V;
+    
+    int in_env_HOUSEHOLD_V;
+    
+    int in_env_CLINIC_V;
+    
+    int in_env_CHURCH_V_MULTIPLIER;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1141,6 +1221,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_RR_HIV;
     float env_RR_ART;
     float env_TB_PREVALENCE;
+    float env_DEFAULT_P;
+    float env_DEFAULT_Q;
+    float env_TRANSPORT_A;
+    float env_CHURCH_A;
+    float env_CLINIC_A;
+    float env_HOUSEHOLD_A;
+    float env_TRANSPORT_V;
+    float env_HOUSEHOLD_V;
+    float env_CLINIC_V;
+    float env_CHURCH_V_MULTIPLIER;
     
 
 
@@ -1246,6 +1336,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_RR_HIV = 0;
     in_env_RR_ART = 0;
     in_env_TB_PREVALENCE = 0;
+    in_env_DEFAULT_P = 0;
+    in_env_DEFAULT_Q = 0;
+    in_env_TRANSPORT_A = 0;
+    in_env_CHURCH_A = 0;
+    in_env_CLINIC_A = 0;
+    in_env_HOUSEHOLD_A = 0;
+    in_env_TRANSPORT_V = 0;
+    in_env_HOUSEHOLD_V = 0;
+    in_env_CLINIC_V = 0;
+    in_env_CHURCH_V_MULTIPLIER = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1462,6 +1562,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_RR_HIV = 0;
     env_RR_ART = 0;
     env_TB_PREVALENCE = 0;
+    env_DEFAULT_P = 0;
+    env_DEFAULT_Q = 0;
+    env_TRANSPORT_A = 0;
+    env_CHURCH_A = 0;
+    env_CLINIC_A = 0;
+    env_HOUSEHOLD_A = 0;
+    env_TRANSPORT_V = 0;
+    env_HOUSEHOLD_V = 0;
+    env_CLINIC_V = 0;
+    env_CHURCH_V_MULTIPLIER = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1930,6 +2040,26 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/RR_ART") == 0) in_env_RR_ART = 0;
 			if(strcmp(buffer, "TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 1;
             if(strcmp(buffer, "/TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 0;
+			if(strcmp(buffer, "DEFAULT_P") == 0) in_env_DEFAULT_P = 1;
+            if(strcmp(buffer, "/DEFAULT_P") == 0) in_env_DEFAULT_P = 0;
+			if(strcmp(buffer, "DEFAULT_Q") == 0) in_env_DEFAULT_Q = 1;
+            if(strcmp(buffer, "/DEFAULT_Q") == 0) in_env_DEFAULT_Q = 0;
+			if(strcmp(buffer, "TRANSPORT_A") == 0) in_env_TRANSPORT_A = 1;
+            if(strcmp(buffer, "/TRANSPORT_A") == 0) in_env_TRANSPORT_A = 0;
+			if(strcmp(buffer, "CHURCH_A") == 0) in_env_CHURCH_A = 1;
+            if(strcmp(buffer, "/CHURCH_A") == 0) in_env_CHURCH_A = 0;
+			if(strcmp(buffer, "CLINIC_A") == 0) in_env_CLINIC_A = 1;
+            if(strcmp(buffer, "/CLINIC_A") == 0) in_env_CLINIC_A = 0;
+			if(strcmp(buffer, "HOUSEHOLD_A") == 0) in_env_HOUSEHOLD_A = 1;
+            if(strcmp(buffer, "/HOUSEHOLD_A") == 0) in_env_HOUSEHOLD_A = 0;
+			if(strcmp(buffer, "TRANSPORT_V") == 0) in_env_TRANSPORT_V = 1;
+            if(strcmp(buffer, "/TRANSPORT_V") == 0) in_env_TRANSPORT_V = 0;
+			if(strcmp(buffer, "HOUSEHOLD_V") == 0) in_env_HOUSEHOLD_V = 1;
+            if(strcmp(buffer, "/HOUSEHOLD_V") == 0) in_env_HOUSEHOLD_V = 0;
+			if(strcmp(buffer, "CLINIC_V") == 0) in_env_CLINIC_V = 1;
+            if(strcmp(buffer, "/CLINIC_V") == 0) in_env_CLINIC_V = 0;
+			if(strcmp(buffer, "CHURCH_V_MULTIPLIER") == 0) in_env_CHURCH_V_MULTIPLIER = 1;
+            if(strcmp(buffer, "/CHURCH_V_MULTIPLIER") == 0) in_env_CHURCH_V_MULTIPLIER = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2333,6 +2463,76 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_TB_PREVALENCE = (float) fgpu_atof(buffer);
                     
                     set_TB_PREVALENCE(&env_TB_PREVALENCE);
+                  
+              }
+            if(in_env_DEFAULT_P){
+              
+                    env_DEFAULT_P = (float) fgpu_atof(buffer);
+                    
+                    set_DEFAULT_P(&env_DEFAULT_P);
+                  
+              }
+            if(in_env_DEFAULT_Q){
+              
+                    env_DEFAULT_Q = (float) fgpu_atof(buffer);
+                    
+                    set_DEFAULT_Q(&env_DEFAULT_Q);
+                  
+              }
+            if(in_env_TRANSPORT_A){
+              
+                    env_TRANSPORT_A = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_A(&env_TRANSPORT_A);
+                  
+              }
+            if(in_env_CHURCH_A){
+              
+                    env_CHURCH_A = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_A(&env_CHURCH_A);
+                  
+              }
+            if(in_env_CLINIC_A){
+              
+                    env_CLINIC_A = (float) fgpu_atof(buffer);
+                    
+                    set_CLINIC_A(&env_CLINIC_A);
+                  
+              }
+            if(in_env_HOUSEHOLD_A){
+              
+                    env_HOUSEHOLD_A = (float) fgpu_atof(buffer);
+                    
+                    set_HOUSEHOLD_A(&env_HOUSEHOLD_A);
+                  
+              }
+            if(in_env_TRANSPORT_V){
+              
+                    env_TRANSPORT_V = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_V(&env_TRANSPORT_V);
+                  
+              }
+            if(in_env_HOUSEHOLD_V){
+              
+                    env_HOUSEHOLD_V = (float) fgpu_atof(buffer);
+                    
+                    set_HOUSEHOLD_V(&env_HOUSEHOLD_V);
+                  
+              }
+            if(in_env_CLINIC_V){
+              
+                    env_CLINIC_V = (float) fgpu_atof(buffer);
+                    
+                    set_CLINIC_V(&env_CLINIC_V);
+                  
+              }
+            if(in_env_CHURCH_V_MULTIPLIER){
+              
+                    env_CHURCH_V_MULTIPLIER = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_V_MULTIPLIER(&env_CHURCH_V_MULTIPLIER);
                   
               }
             

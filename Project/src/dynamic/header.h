@@ -4888,6 +4888,26 @@ __constant__ float RR_ART;
 
 __constant__ float TB_PREVALENCE;
 
+__constant__ float DEFAULT_P;
+
+__constant__ float DEFAULT_Q;
+
+__constant__ float TRANSPORT_A;
+
+__constant__ float CHURCH_A;
+
+__constant__ float CLINIC_A;
+
+__constant__ float HOUSEHOLD_A;
+
+__constant__ float TRANSPORT_V;
+
+__constant__ float HOUSEHOLD_V;
+
+__constant__ float CLINIC_V;
+
+__constant__ float CHURCH_V_MULTIPLIER;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -5217,6 +5237,116 @@ extern const float* get_TB_PREVALENCE();
 
 
 extern float h_env_TB_PREVALENCE;
+
+/** set_DEFAULT_P
+ * Sets the constant variable DEFAULT_P on the device which can then be used in the agent functions.
+ * @param h_DEFAULT_P value to set the variable
+ */
+extern void set_DEFAULT_P(float* h_DEFAULT_P);
+
+extern const float* get_DEFAULT_P();
+
+
+extern float h_env_DEFAULT_P;
+
+/** set_DEFAULT_Q
+ * Sets the constant variable DEFAULT_Q on the device which can then be used in the agent functions.
+ * @param h_DEFAULT_Q value to set the variable
+ */
+extern void set_DEFAULT_Q(float* h_DEFAULT_Q);
+
+extern const float* get_DEFAULT_Q();
+
+
+extern float h_env_DEFAULT_Q;
+
+/** set_TRANSPORT_A
+ * Sets the constant variable TRANSPORT_A on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_A value to set the variable
+ */
+extern void set_TRANSPORT_A(float* h_TRANSPORT_A);
+
+extern const float* get_TRANSPORT_A();
+
+
+extern float h_env_TRANSPORT_A;
+
+/** set_CHURCH_A
+ * Sets the constant variable CHURCH_A on the device which can then be used in the agent functions.
+ * @param h_CHURCH_A value to set the variable
+ */
+extern void set_CHURCH_A(float* h_CHURCH_A);
+
+extern const float* get_CHURCH_A();
+
+
+extern float h_env_CHURCH_A;
+
+/** set_CLINIC_A
+ * Sets the constant variable CLINIC_A on the device which can then be used in the agent functions.
+ * @param h_CLINIC_A value to set the variable
+ */
+extern void set_CLINIC_A(float* h_CLINIC_A);
+
+extern const float* get_CLINIC_A();
+
+
+extern float h_env_CLINIC_A;
+
+/** set_HOUSEHOLD_A
+ * Sets the constant variable HOUSEHOLD_A on the device which can then be used in the agent functions.
+ * @param h_HOUSEHOLD_A value to set the variable
+ */
+extern void set_HOUSEHOLD_A(float* h_HOUSEHOLD_A);
+
+extern const float* get_HOUSEHOLD_A();
+
+
+extern float h_env_HOUSEHOLD_A;
+
+/** set_TRANSPORT_V
+ * Sets the constant variable TRANSPORT_V on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_V value to set the variable
+ */
+extern void set_TRANSPORT_V(float* h_TRANSPORT_V);
+
+extern const float* get_TRANSPORT_V();
+
+
+extern float h_env_TRANSPORT_V;
+
+/** set_HOUSEHOLD_V
+ * Sets the constant variable HOUSEHOLD_V on the device which can then be used in the agent functions.
+ * @param h_HOUSEHOLD_V value to set the variable
+ */
+extern void set_HOUSEHOLD_V(float* h_HOUSEHOLD_V);
+
+extern const float* get_HOUSEHOLD_V();
+
+
+extern float h_env_HOUSEHOLD_V;
+
+/** set_CLINIC_V
+ * Sets the constant variable CLINIC_V on the device which can then be used in the agent functions.
+ * @param h_CLINIC_V value to set the variable
+ */
+extern void set_CLINIC_V(float* h_CLINIC_V);
+
+extern const float* get_CLINIC_V();
+
+
+extern float h_env_CLINIC_V;
+
+/** set_CHURCH_V_MULTIPLIER
+ * Sets the constant variable CHURCH_V_MULTIPLIER on the device which can then be used in the agent functions.
+ * @param h_CHURCH_V_MULTIPLIER value to set the variable
+ */
+extern void set_CHURCH_V_MULTIPLIER(float* h_CHURCH_V_MULTIPLIER);
+
+extern const float* get_CHURCH_V_MULTIPLIER();
+
+
+extern float h_env_CHURCH_V_MULTIPLIER;
 
 
 /** getMaximumBound
