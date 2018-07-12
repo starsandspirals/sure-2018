@@ -93,6 +93,11 @@ __constant__ int d_message_transport_membership_output_type;   /**< message outp
 __constant__ int d_message_location_count;         /**< message list counter*/
 __constant__ int d_message_location_output_type;   /**< message output type (single or optional)*/
 
+/* infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_infection_count;         /**< message list counter*/
+__constant__ int d_message_infection_output_type;   /**< message output type (single or optional)*/
+
 	
     
 //include each function file
@@ -100,6 +105,7 @@ __constant__ int d_message_location_output_type;   /**< message output type (sin
 #include "functions.c"
     
 /* Texture bindings */
+
 
 
 
@@ -2379,6 +2385,177 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 	return ((xmachine_message_location*)&message_share[message_index]);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created infection message functions */
+
+
+/** add_infection_message
+ * Add non partitioned or spatially partitioned infection message
+ * @param messages xmachine_message_infection_list message list to add too
+ * @param location agent variable of type unsigned int
+ * @param locationid agent variable of type unsigned int
+ * @param day agent variable of type unsigned int
+ * @param hour agent variable of type unsigned int
+ * @param minute agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_infection_message(xmachine_message_infection_list* messages, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->location[index] = location;
+	messages->locationid[index] = locationid;
+	messages->day[index] = day;
+	messages->hour[index] = hour;
+	messages->minute[index] = minute;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned infection message (for optional messages)
+ * @param messages scatter_optional_infection_messages Sparse xmachine_message_infection_list message list
+ * @param message_swap temp xmachine_message_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_infection_messages(xmachine_message_infection_list* messages, xmachine_message_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_infection_count;
+
+		//AoS - xmachine_message_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->location[output_index] = messages_swap->location[index];
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->day[output_index] = messages_swap->day[index];
+		messages->hour[output_index] = messages_swap->hour[index];
+		messages->minute[output_index] = messages_swap->minute[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_infection_swaps
+ * Reset non partitioned or spatially partitioned infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_infection_swaps(xmachine_message_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_infection* get_first_infection_message(xmachine_message_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_infection Coalesced memory read
+	xmachine_message_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.location = messages->location[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.day = messages->day[index];
+	temp_message.hour = messages->hour[index];
+	temp_message.minute = messages->minute[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_infection));
+	xmachine_message_infection* sm_message = ((xmachine_message_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_infection* get_next_infection_message(xmachine_message_infection* message, xmachine_message_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.location = messages->location[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.day = messages->day[index];
+		temp_message.hour = messages->hour[index];
+		temp_message.minute = messages->minute[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_infection));
+		xmachine_message_infection* sm_message = ((xmachine_message_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_infection));
+	return ((xmachine_message_infection*)&message_share[message_index]);
+}
+
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2873,7 +3050,7 @@ __global__ void GPUFLAME_tbinit(xmachine_memory_TBAssignment_list* agents, xmach
 /**
  *
  */
-__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachine_message_location_list* location_messages){
+__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -2908,7 +3085,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	}
 
 	//FLAME function call
-	int dead = !hhupdate(&agent, location_messages);
+	int dead = !hhupdate(&agent, location_messages, infection_messages	);
 	
 
 	
@@ -2981,7 +3158,7 @@ __global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine_message_location_list* location_messages){
+__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -3012,7 +3189,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	}
 
 	//FLAME function call
-	int dead = !chuupdate(&agent, location_messages);
+	int dead = !chuupdate(&agent, location_messages, infection_messages	);
 	
 
 	
@@ -3068,7 +3245,7 @@ __global__ void GPUFLAME_chuinit(xmachine_memory_ChurchMembership_list* agents, 
 /**
  *
  */
-__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachine_message_location_list* location_messages){
+__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -3099,7 +3276,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	}
 
 	//FLAME function call
-	int dead = !trupdate(&agent, location_messages);
+	int dead = !trupdate(&agent, location_messages, infection_messages	);
 	
 
 	
@@ -3155,7 +3332,7 @@ __global__ void GPUFLAME_trinit(xmachine_memory_TransportMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_message_location_list* location_messages){
+__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -3180,7 +3357,7 @@ __global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_
 	}
 
 	//FLAME function call
-	int dead = !clupdate(&agent, location_messages);
+	int dead = !clupdate(&agent, location_messages, infection_messages	);
 	
 
 	

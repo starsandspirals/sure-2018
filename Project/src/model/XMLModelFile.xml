@@ -527,6 +527,12 @@
               <messageName>location</messageName>
             </gpu:input>
           </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -645,6 +651,12 @@
               <messageName>location</messageName>
             </gpu:input>
           </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -750,6 +762,12 @@
               <messageName>location</messageName>
             </gpu:input>
           </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -842,6 +860,12 @@
               <messageName>location</messageName>
             </gpu:input>
           </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -987,6 +1011,39 @@
         <gpu:variable>
           <type>float</type>
           <name>q</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>location</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>day</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>hour</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>minute</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>

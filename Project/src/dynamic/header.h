@@ -109,6 +109,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_mmessage_location
 #define xmachine_message_location_MAX 32768
 
+//Maximum population size of xmachine_mmessage_infection
+#define xmachine_message_infection_MAX 32768
+
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
 
@@ -117,6 +120,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_church_membership_partitioningNone
 #define xmachine_message_transport_membership_partitioningNone
 #define xmachine_message_location_partitioningNone
+#define xmachine_message_infection_partitioningNone
 
 /* Spatial partitioning grid size definitions */
   
@@ -368,6 +372,23 @@ struct __align__(16) xmachine_message_location
     unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
     float p;        /**< Message variable p of type float.*/  
     float q;        /**< Message variable q of type float.*/
+};
+
+/** struct xmachine_message_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int location;        /**< Message variable location of type unsigned int.*/  
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    unsigned int day;        /**< Message variable day of type unsigned int.*/  
+    unsigned int hour;        /**< Message variable hour of type unsigned int.*/  
+    unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
 };
 
 
@@ -636,6 +657,25 @@ struct xmachine_message_location_list
     
 };
 
+/** struct xmachine_message_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int location [xmachine_message_infection_MAX];    /**< Message memory variable list location of type unsigned int.*/
+    unsigned int locationid [xmachine_message_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    unsigned int day [xmachine_message_infection_MAX];    /**< Message memory variable list day of type unsigned int.*/
+    unsigned int hour [xmachine_message_infection_MAX];    /**< Message memory variable list hour of type unsigned int.*/
+    unsigned int minute [xmachine_message_infection_MAX];    /**< Message memory variable list minute of type unsigned int.*/
+    float lambda [xmachine_message_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
 
 
 /* Spatially Partitioned Message boundary Matrices */
@@ -716,9 +756,9 @@ __FLAME_GPU_FUNC__ int tbinit(xmachine_memory_TBAssignment* agent, xmachine_mess
 /**
  * hhupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Household. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent, xmachine_message_location_list* location_messages);
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
 
 /**
  * hhinit FLAMEGPU Agent Function
@@ -730,9 +770,9 @@ __FLAME_GPU_FUNC__ int hhinit(xmachine_memory_HouseholdMembership* agent, xmachi
 /**
  * chuupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Church. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent, xmachine_message_location_list* location_messages);
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
 
 /**
  * chuinit FLAMEGPU Agent Function
@@ -744,9 +784,9 @@ __FLAME_GPU_FUNC__ int chuinit(xmachine_memory_ChurchMembership* agent, xmachine
 /**
  * trupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Transport. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent, xmachine_message_location_list* location_messages);
+__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
 
 /**
  * trinit FLAMEGPU Agent Function
@@ -758,9 +798,9 @@ __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachi
 /**
  * clupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Clinic. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages);
+__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */
@@ -912,6 +952,38 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_first_location_message(xmachi
  * @return        returns the first message from the message list (offset depending on agent block)
  */
 __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachine_message_location* current, xmachine_message_location_list* location_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) infection message implemented in FLAMEGPU_Kernels */
+
+/** add_infection_message
+ * Function for all types of message partitioning
+ * Adds a new infection agent to the xmachine_memory_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_infection_list agent list
+ * @param location	message variable of type unsigned int
+ * @param locationid	message variable of type unsigned int
+ * @param day	message variable of type unsigned int
+ * @param hour	message variable of type unsigned int
+ * @param minute	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_infection_message(xmachine_message_infection_list* infection_messages, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float lambda);
+ 
+/** get_first_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_infection * get_first_infection_message(xmachine_message_infection_list* infection_messages);
+
+/** get_next_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmachine_message_infection* current, xmachine_message_infection_list* infection_messages);
   
   
   

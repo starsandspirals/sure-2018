@@ -880,7 +880,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 
 __FLAME_GPU_FUNC__ int
 hhupdate(xmachine_memory_Household *household,
-         xmachine_message_location_list *location_messages) {
+         xmachine_message_location_list *location_messages,
+         xmachine_message_infection_list *infection_messages) {
 
   unsigned int day = dayofweek(household->step);
   struct Time t = timeofday(household->step);
@@ -907,13 +908,17 @@ hhupdate(xmachine_memory_Household *household,
       ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
        (1 - device_exp(-HOUSEHOLD_A * TIME_STEP)));
 
+  add_infection_message(infection_messages, 0, household->id, day, hour, minute,
+                        household->lambda);
+
   household->step += TIME_STEP;
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int
 chuupdate(xmachine_memory_Church *church,
-          xmachine_message_location_list *location_messages) {
+          xmachine_message_location_list *location_messages,
+          xmachine_message_infection_list *infection_messages) {
 
   unsigned int day = dayofweek(church->step);
   struct Time t = timeofday(church->step);
@@ -938,13 +943,18 @@ chuupdate(xmachine_memory_Church *church,
   church->lambda = (church->lambda * device_exp(-CHURCH_A * TIME_STEP)) +
                    ((qsum / (CHURCH_V_MULTIPLIER * church->size * CHURCH_A)) *
                     (1 - device_exp(-CHURCH_A * TIME_STEP)));
+
+  add_infection_message(infection_messages, 1, church->id, day, hour, minute,
+                        church->lambda);
+
   church->step += TIME_STEP;
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int
 trupdate(xmachine_memory_Transport *transport,
-         xmachine_message_location_list *location_messages) {
+         xmachine_message_location_list *location_messages,
+         xmachine_message_infection_list *infection_messages) {
 
   unsigned int day = dayofweek(transport->step);
   struct Time t = timeofday(transport->step);
@@ -970,13 +980,18 @@ trupdate(xmachine_memory_Transport *transport,
       (transport->lambda * device_exp(-TRANSPORT_A * TIME_STEP)) +
       ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
        (1 - device_exp(-TRANSPORT_A * TIME_STEP)));
+
+  add_infection_message(infection_messages, 2, transport->id, day, hour, minute,
+                        transport->lambda);
+
   transport->step += TIME_STEP;
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int
 clupdate(xmachine_memory_Clinic *clinic,
-         xmachine_message_location_list *location_messages) {
+         xmachine_message_location_list *location_messages,
+         xmachine_message_infection_list *infection_messages) {
 
   unsigned int day = dayofweek(clinic->step);
   struct Time t = timeofday(clinic->step);
@@ -1001,6 +1016,10 @@ clupdate(xmachine_memory_Clinic *clinic,
   clinic->lambda = (clinic->lambda * device_exp(-CLINIC_A * TIME_STEP)) +
                    ((qsum / (CLINIC_V * CLINIC_A)) *
                     (1 - device_exp(-CLINIC_A * TIME_STEP)));
+
+  add_infection_message(infection_messages, 3, clinic->id, day, hour, minute,
+                        clinic->lambda);
+
   clinic->step += TIME_STEP;
   return 0;
 }

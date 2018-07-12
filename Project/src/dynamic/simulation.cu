@@ -346,6 +346,14 @@ xmachine_message_location_list* d_locations_swap;    /**< Pointer to message swa
 int h_message_location_count;         /**< message list counter*/
 int h_message_location_output_type;   /**< message output type (single or optional)*/
 
+/* infection Message variables */
+xmachine_message_infection_list* h_infections;         /**< Pointer to message list on host*/
+xmachine_message_infection_list* d_infections;         /**< Pointer to message list on device*/
+xmachine_message_infection_list* d_infections_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_infection_count;         /**< message list counter*/
+int h_message_infection_output_type;   /**< message output type (single or optional)*/
+
   
 /* CUDA Streams for function layers */
 cudaStream_t stream1;
@@ -685,6 +693,8 @@ void initialise(char * inputfile){
 	h_transport_memberships = (xmachine_message_transport_membership_list*)malloc(message_transport_membership_SoA_size);
 	int message_location_SoA_size = sizeof(xmachine_message_location_list);
 	h_locations = (xmachine_message_location_list*)malloc(message_location_SoA_size);
+	int message_infection_SoA_size = sizeof(xmachine_message_infection_list);
+	h_infections = (xmachine_message_infection_list*)malloc(message_infection_SoA_size);
 
 	//Exit if agent or message buffer sizes are to small for function outputs
     PROFILE_POP_RANGE(); //"allocate host"
@@ -823,6 +833,11 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_locations, message_location_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_locations_swap, message_location_SoA_size));
 	gpuErrchk( cudaMemcpy( d_locations, h_locations, message_location_SoA_size, cudaMemcpyHostToDevice));
+	
+	/* infection Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_infections, message_infection_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_infections_swap, message_infection_SoA_size));
+	gpuErrchk( cudaMemcpy( d_infections, h_infections, message_infection_SoA_size, cudaMemcpyHostToDevice));
 		
     PROFILE_POP_RANGE(); // "allocate device"
 
@@ -1453,6 +1468,11 @@ void cleanup(){
 	gpuErrchk(cudaFree(d_locations));
 	gpuErrchk(cudaFree(d_locations_swap));
 	
+	/* infection Message variables */
+	free( h_infections);
+	gpuErrchk(cudaFree(d_infections));
+	gpuErrchk(cudaFree(d_infections_swap));
+	
 
     /* Free temporary CUB memory */
     
@@ -1538,6 +1558,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	h_message_location_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_location_count, &h_message_location_count, sizeof(int)));
+	
+	h_message_infection_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));
 	
 
 	/* Call agent functions in order iterating through the layer functions */
@@ -10428,6 +10452,12 @@ void Household_hhupdate(cudaStream_t &stream){
 	//******************************** AGENT FUNCTION *******************************
 
 	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Household_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function hhupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_hhupdate, Household_hhupdate_sm_size, state_list_size);
@@ -10441,17 +10471,29 @@ void Household_hhupdate(cudaStream_t &stream){
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (hhupdate)
 	//Reallocate   : false
 	//Input        : location
-	//Output       : 
+	//Output       : infection
 	//Agent Output : 
-	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households, d_locations);
+	GPUFLAME_hhupdate<<<g, b, sm_size, stream>>>(d_Households, d_locations, d_infections);
 	gpuErrchkLaunch();
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_infection_count += h_xmachine_memory_Household_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -10698,6 +10740,12 @@ void Church_chuupdate(cudaStream_t &stream){
 	//******************************** AGENT FUNCTION *******************************
 
 	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Church_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function chuupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_chuupdate, Church_chuupdate_sm_size, state_list_size);
@@ -10711,17 +10759,29 @@ void Church_chuupdate(cudaStream_t &stream){
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (chuupdate)
 	//Reallocate   : false
 	//Input        : location
-	//Output       : 
+	//Output       : infection
 	//Agent Output : 
-	GPUFLAME_chuupdate<<<g, b, sm_size, stream>>>(d_Churchs, d_locations);
+	GPUFLAME_chuupdate<<<g, b, sm_size, stream>>>(d_Churchs, d_locations, d_infections);
 	gpuErrchkLaunch();
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_infection_count += h_xmachine_memory_Church_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -10959,6 +11019,12 @@ void Transport_trupdate(cudaStream_t &stream){
 	//******************************** AGENT FUNCTION *******************************
 
 	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Transport_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function trupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_trupdate, Transport_trupdate_sm_size, state_list_size);
@@ -10972,17 +11038,29 @@ void Transport_trupdate(cudaStream_t &stream){
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (trupdate)
 	//Reallocate   : false
 	//Input        : location
-	//Output       : 
+	//Output       : infection
 	//Agent Output : 
-	GPUFLAME_trupdate<<<g, b, sm_size, stream>>>(d_Transports, d_locations);
+	GPUFLAME_trupdate<<<g, b, sm_size, stream>>>(d_Transports, d_locations, d_infections);
 	gpuErrchkLaunch();
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_infection_count += h_xmachine_memory_Transport_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
@@ -11220,6 +11298,12 @@ void Clinic_clupdate(cudaStream_t &stream){
 	//******************************** AGENT FUNCTION *******************************
 
 	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Clinic_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function clupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	
 	//calculate the grid block size for main agent function
 	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_clupdate, Clinic_clupdate_sm_size, state_list_size);
@@ -11233,17 +11317,29 @@ void Clinic_clupdate(cudaStream_t &stream){
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	
 	
 	//MAIN XMACHINE FUNCTION CALL (clupdate)
 	//Reallocate   : false
 	//Input        : location
-	//Output       : 
+	//Output       : infection
 	//Agent Output : 
-	GPUFLAME_clupdate<<<g, b, sm_size, stream>>>(d_Clinics, d_locations);
+	GPUFLAME_clupdate<<<g, b, sm_size, stream>>>(d_Clinics, d_locations, d_infections);
 	gpuErrchkLaunch();
 	
 	
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_infection_count += h_xmachine_memory_Clinic_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
 	
 	
 	//************************ MOVE AGENTS TO NEXT STATE ****************************
