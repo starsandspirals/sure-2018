@@ -865,8 +865,11 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
     person->clinictime += 5 * TIME_STEP;
   }
 
-  add_location_message(location_messages, person->id, person->location,
-                       person->locationid, day, hour, minute);
+  if (person->activetb) {
+    add_location_message(location_messages, person->id, person->location,
+                         person->locationid, day, hour, minute, person->p,
+                         person->q);
+  }
 
   return 0;
 }
@@ -955,6 +958,10 @@ __FLAME_GPU_FUNC__ int
 persontbinit(xmachine_memory_Person *person,
              xmachine_message_tb_assignment_list *tb_assignment_messages) {
   unsigned int personid = person->id;
+
+  person->p = DEFAULT_P;
+  person->q = DEFAULT_Q;
+  
   xmachine_message_tb_assignment *tb_assignment_message =
       get_first_tb_assignment_message(tb_assignment_messages);
 

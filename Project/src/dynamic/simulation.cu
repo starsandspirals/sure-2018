@@ -236,6 +236,8 @@ unsigned int h_Persons_default_variable_hiv_data_iteration;
 unsigned int h_Persons_default_variable_art_data_iteration;
 unsigned int h_Persons_default_variable_activetb_data_iteration;
 unsigned int h_Persons_default_variable_artday_data_iteration;
+unsigned int h_Persons_default_variable_p_data_iteration;
+unsigned int h_Persons_default_variable_q_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
 unsigned int h_Persons_s2_variable_householdtime_data_iteration;
@@ -263,6 +265,8 @@ unsigned int h_Persons_s2_variable_hiv_data_iteration;
 unsigned int h_Persons_s2_variable_art_data_iteration;
 unsigned int h_Persons_s2_variable_activetb_data_iteration;
 unsigned int h_Persons_s2_variable_artday_data_iteration;
+unsigned int h_Persons_s2_variable_p_data_iteration;
+unsigned int h_Persons_s2_variable_q_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
@@ -573,6 +577,8 @@ void initialise(char * inputfile){
     h_Persons_default_variable_art_data_iteration = 0;
     h_Persons_default_variable_activetb_data_iteration = 0;
     h_Persons_default_variable_artday_data_iteration = 0;
+    h_Persons_default_variable_p_data_iteration = 0;
+    h_Persons_default_variable_q_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
     h_Persons_s2_variable_householdtime_data_iteration = 0;
@@ -600,6 +606,8 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_art_data_iteration = 0;
     h_Persons_s2_variable_activetb_data_iteration = 0;
     h_Persons_s2_variable_artday_data_iteration = 0;
+    h_Persons_s2_variable_p_data_iteration = 0;
+    h_Persons_s2_variable_q_data_iteration = 0;
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
@@ -3531,6 +3539,84 @@ __host__ unsigned int get_Person_default_variable_artday(unsigned int index){
     }
 }
 
+/** float get_Person_default_variable_p(unsigned int index)
+ * Gets the value of the p variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable p
+ */
+__host__ float get_Person_default_variable_p(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_p_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->p,
+                    d_Persons_default->p,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_p_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->p[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access p for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_Person_default_variable_q(unsigned int index)
+ * Gets the value of the q variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable q
+ */
+__host__ float get_Person_default_variable_q(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_q_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->q,
+                    d_Persons_default->q,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_q_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->q[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access q for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -4578,6 +4664,84 @@ __host__ unsigned int get_Person_s2_variable_artday(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access artday for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_Person_s2_variable_p(unsigned int index)
+ * Gets the value of the p variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable p
+ */
+__host__ float get_Person_s2_variable_p(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_p_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->p,
+                    d_Persons_s2->p,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_p_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->p[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access p for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_Person_s2_variable_q(unsigned int index)
+ * Gets the value of the q variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable q
+ */
+__host__ float get_Person_s2_variable_q(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_q_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->q,
+                    d_Persons_s2->q,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_q_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->q[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access q for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -5872,6 +6036,10 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->activetb, &h_agent->activetb, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->artday, &h_agent->artday, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->p, &h_agent->p, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->q, &h_agent->q, sizeof(float), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -5941,6 +6109,10 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->activetb, h_src->activetb, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->artday, h_src->artday, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->p, h_src->p, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->q, h_src->q, count * sizeof(float), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6378,6 +6550,10 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->activetb[i] = src[i]->activetb;
 			 
 			dst->artday[i] = src[i]->artday;
+			 
+			dst->p[i] = src[i]->p;
+			 
+			dst->q[i] = src[i]->q;
 			
 		}
 	}
@@ -6436,6 +6612,8 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_art_data_iteration = 0;
     h_Persons_default_variable_activetb_data_iteration = 0;
     h_Persons_default_variable_artday_data_iteration = 0;
+    h_Persons_default_variable_p_data_iteration = 0;
+    h_Persons_default_variable_q_data_iteration = 0;
     
 
 }
@@ -6494,6 +6672,8 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_art_data_iteration = 0;
         h_Persons_default_variable_activetb_data_iteration = 0;
         h_Persons_default_variable_artday_data_iteration = 0;
+        h_Persons_default_variable_p_data_iteration = 0;
+        h_Persons_default_variable_q_data_iteration = 0;
         
 
 	}
@@ -6552,6 +6732,8 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_art_data_iteration = 0;
     h_Persons_s2_variable_activetb_data_iteration = 0;
     h_Persons_s2_variable_artday_data_iteration = 0;
+    h_Persons_s2_variable_p_data_iteration = 0;
+    h_Persons_s2_variable_q_data_iteration = 0;
     
 
 }
@@ -6610,6 +6792,8 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_art_data_iteration = 0;
         h_Persons_s2_variable_activetb_data_iteration = 0;
         h_Persons_s2_variable_artday_data_iteration = 0;
+        h_Persons_s2_variable_p_data_iteration = 0;
+        h_Persons_s2_variable_q_data_iteration = 0;
         
 
 	}
@@ -8108,6 +8292,40 @@ unsigned int max_Person_default_artday_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+float reduce_Person_default_p_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->p),  thrust::device_pointer_cast(d_Persons_default->p) + h_xmachine_memory_Person_default_count);
+}
+
+float min_Person_default_p_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->p);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_default_p_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->p);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Person_default_q_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->q),  thrust::device_pointer_cast(d_Persons_default->q) + h_xmachine_memory_Person_default_count);
+}
+
+float min_Person_default_q_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->q);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_default_q_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->q);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -8668,6 +8886,40 @@ unsigned int min_Person_s2_artday_variable(){
 unsigned int max_Person_s2_artday_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->artday);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Person_s2_p_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->p),  thrust::device_pointer_cast(d_Persons_s2->p) + h_xmachine_memory_Person_s2_count);
+}
+
+float min_Person_s2_p_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->p);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_s2_p_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->p);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Person_s2_q_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->q),  thrust::device_pointer_cast(d_Persons_s2->q) + h_xmachine_memory_Person_s2_count);
+}
+
+float min_Person_s2_q_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->q);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_s2_q_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->q);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

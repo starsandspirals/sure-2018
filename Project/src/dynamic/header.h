@@ -187,6 +187,8 @@ struct __align__(16) xmachine_memory_Person
     unsigned int art;    /**< X-machine memory variable art of type unsigned int.*/
     unsigned int activetb;    /**< X-machine memory variable activetb of type unsigned int.*/
     unsigned int artday;    /**< X-machine memory variable artday of type unsigned int.*/
+    float p;    /**< X-machine memory variable p of type float.*/
+    float q;    /**< X-machine memory variable q of type float.*/
 };
 
 /** struct xmachine_memory_TBAssignment
@@ -359,7 +361,9 @@ struct __align__(16) xmachine_message_location
     unsigned int location_id;        /**< Message variable location_id of type unsigned int.*/  
     unsigned int day;        /**< Message variable day of type unsigned int.*/  
     unsigned int hour;        /**< Message variable hour of type unsigned int.*/  
-    unsigned int minute;        /**< Message variable minute of type unsigned int.*/
+    unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
+    float p;        /**< Message variable p of type float.*/  
+    float q;        /**< Message variable q of type float.*/
 };
 
 
@@ -403,6 +407,8 @@ struct xmachine_memory_Person_list
     unsigned int art [xmachine_memory_Person_MAX];    /**< X-machine memory variable list art of type unsigned int.*/
     unsigned int activetb [xmachine_memory_Person_MAX];    /**< X-machine memory variable list activetb of type unsigned int.*/
     unsigned int artday [xmachine_memory_Person_MAX];    /**< X-machine memory variable list artday of type unsigned int.*/
+    float p [xmachine_memory_Person_MAX];    /**< X-machine memory variable list p of type float.*/
+    float q [xmachine_memory_Person_MAX];    /**< X-machine memory variable list q of type float.*/
 };
 
 /** struct xmachine_memory_TBAssignment_list
@@ -617,6 +623,8 @@ struct xmachine_message_location_list
     unsigned int day [xmachine_message_location_MAX];    /**< Message memory variable list day of type unsigned int.*/
     unsigned int hour [xmachine_message_location_MAX];    /**< Message memory variable list hour of type unsigned int.*/
     unsigned int minute [xmachine_message_location_MAX];    /**< Message memory variable list minute of type unsigned int.*/
+    float p [xmachine_message_location_MAX];    /**< Message memory variable list p of type float.*/
+    float q [xmachine_message_location_MAX];    /**< Message memory variable list q of type float.*/
     
 };
 
@@ -876,9 +884,11 @@ __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_me
  * @param day	message variable of type unsigned int
  * @param hour	message variable of type unsigned int
  * @param minute	message variable of type unsigned int
+ * @param p	message variable of type float
+ * @param q	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location_type, unsigned int location_id, unsigned int day, unsigned int hour, unsigned int minute);
+ __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location_type, unsigned int location_id, unsigned int day, unsigned int hour, unsigned int minute, float p, float q);
  
 /** get_first_location_message
  * Get first message function for non partitioned (brute force) messages
@@ -929,8 +939,10 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param art	agent agent variable of type unsigned int
  * @param activetb	agent agent variable of type unsigned int
  * @param artday	agent agent variable of type unsigned int
+ * @param p	agent agent variable of type float
+ * @param q	agent agent variable of type float
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1794,6 +1806,24 @@ __host__ unsigned int get_Person_default_variable_activetb(unsigned int index);
  */
 __host__ unsigned int get_Person_default_variable_artday(unsigned int index);
 
+/** float get_Person_default_variable_p(unsigned int index)
+ * Gets the value of the p variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable p
+ */
+__host__ float get_Person_default_variable_p(unsigned int index);
+
+/** float get_Person_default_variable_q(unsigned int index)
+ * Gets the value of the q variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable q
+ */
+__host__ float get_Person_default_variable_q(unsigned int index);
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2036,6 +2066,24 @@ __host__ unsigned int get_Person_s2_variable_activetb(unsigned int index);
  * @return value of agent variable artday
  */
 __host__ unsigned int get_Person_s2_variable_artday(unsigned int index);
+
+/** float get_Person_s2_variable_p(unsigned int index)
+ * Gets the value of the p variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable p
+ */
+__host__ float get_Person_s2_variable_p(unsigned int index);
+
+/** float get_Person_s2_variable_q(unsigned int index)
+ * Gets the value of the q variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable q
+ */
+__host__ float get_Person_s2_variable_q(unsigned int index);
 
 /** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
@@ -3415,6 +3463,44 @@ unsigned int min_Person_default_artday_variable();
  */
 unsigned int max_Person_default_artday_variable();
 
+/** float reduce_Person_default_p_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_Person_default_p_variable();
+
+
+
+/** float min_Person_default_p_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_Person_default_p_variable();
+/** float max_Person_default_p_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_Person_default_p_variable();
+
+/** float reduce_Person_default_q_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_Person_default_q_variable();
+
+
+
+/** float min_Person_default_q_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_Person_default_q_variable();
+/** float max_Person_default_q_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_Person_default_q_variable();
+
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -4109,6 +4195,44 @@ unsigned int min_Person_s2_artday_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_artday_variable();
+
+/** float reduce_Person_s2_p_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_Person_s2_p_variable();
+
+
+
+/** float min_Person_s2_p_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_Person_s2_p_variable();
+/** float max_Person_s2_p_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_Person_s2_p_variable();
+
+/** float reduce_Person_s2_q_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_Person_s2_q_variable();
+
+
+
+/** float min_Person_s2_q_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_Person_s2_q_variable();
+/** float max_Person_s2_q_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_Person_s2_q_variable();
 
 /** unsigned int reduce_TBAssignment_tbdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
