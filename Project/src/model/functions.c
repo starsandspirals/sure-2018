@@ -544,6 +544,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       adult[h_household->id] = adultcount;
 
       h_household->step = 0;
+      h_household->lambda = 0;
       h_add_agent_Household_hhdefault(h_household);
 
       h_free_agent_Household(&h_household);
@@ -619,6 +620,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
     // Generate the church agent and free it from memory on the host.
     h_church->step = 0;
+    h_church->lambda = 0;
     h_add_agent_Church_chudefault(h_church);
 
     h_free_agent_Church(&h_church);
@@ -675,6 +677,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       }
 
       h_transport->step = 0;
+      h_transport->lambda = 0;
       h_add_agent_Transport_trdefault(h_transport);
 
       h_free_agent_Transport(&h_transport);
@@ -685,6 +688,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   h_clinic->id = 1;
   h_clinic->step = 0;
+  h_clinic->lambda = 0;
 
   h_add_agent_Clinic_cldefault(h_clinic);
 
@@ -961,7 +965,7 @@ persontbinit(xmachine_memory_Person *person,
 
   person->p = DEFAULT_P;
   person->q = DEFAULT_Q;
-  
+
   xmachine_message_tb_assignment *tb_assignment_message =
       get_first_tb_assignment_message(tb_assignment_messages);
 

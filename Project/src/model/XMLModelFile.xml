@@ -511,6 +511,10 @@
           <type>unsigned int</type>
           <name>adults</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -625,6 +629,10 @@
           <arrayLength>128</arrayLength>
           <defaultValue>-1</defaultValue>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -726,6 +734,10 @@
           <arrayLength>16</arrayLength>
           <defaultValue>-1</defaultValue>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -813,6 +825,10 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>step</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
         </gpu:variable>
       </memory>
 
