@@ -273,7 +273,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // interval they belong to.
         age = (rand() % (maxage - minage)) + minage;
 
-        if (gender == 1) {
+        if (gender == 2) {
           if (age >= 46) {
             rr_as = 0.50;
           } else if (age >= 26) {
