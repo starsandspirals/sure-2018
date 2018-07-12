@@ -947,7 +947,7 @@ __FLAME_GPU_FUNC__ int personhhinit(
   while (household_membership_message) {
     if (household_membership_message->person_id == personid) {
       person->household = household_membership_message->household_id;
-      person->householdsize = household_membership_message->household_size;
+      // person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;
       person->churchfreq = household_membership_message->churchfreq;
       person->churchdur = household_membership_message->churchdur;
