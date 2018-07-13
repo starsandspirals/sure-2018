@@ -282,6 +282,7 @@ unsigned int h_Households_hhdefault_variable_churchgoing_data_iteration;
 unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
 unsigned int h_Households_hhdefault_variable_adults_data_iteration;
 unsigned int h_Households_hhdefault_variable_lambda_data_iteration;
+unsigned int h_Households_hhdefault_variable_active_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration;
@@ -293,6 +294,7 @@ unsigned int h_Churchs_chudefault_variable_size_data_iteration;
 unsigned int h_Churchs_chudefault_variable_duration_data_iteration;
 unsigned int h_Churchs_chudefault_variable_households_data_iteration;
 unsigned int h_Churchs_chudefault_variable_lambda_data_iteration;
+unsigned int h_Churchs_chudefault_variable_active_data_iteration;
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration;
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration;
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration;
@@ -302,6 +304,7 @@ unsigned int h_Transports_trdefault_variable_duration_data_iteration;
 unsigned int h_Transports_trdefault_variable_day_data_iteration;
 unsigned int h_Transports_trdefault_variable_people_data_iteration;
 unsigned int h_Transports_trdefault_variable_lambda_data_iteration;
+unsigned int h_Transports_trdefault_variable_active_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration;
@@ -646,6 +649,7 @@ void initialise(char * inputfile){
     h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
     h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
+    h_Households_hhdefault_variable_active_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_person_id_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_household_size_data_iteration = 0;
@@ -657,6 +661,7 @@ void initialise(char * inputfile){
     h_Churchs_chudefault_variable_duration_data_iteration = 0;
     h_Churchs_chudefault_variable_households_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
+    h_Churchs_chudefault_variable_active_data_iteration = 0;
     h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = 0;
     h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = 0;
     h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration = 0;
@@ -666,6 +671,7 @@ void initialise(char * inputfile){
     h_Transports_trdefault_variable_day_data_iteration = 0;
     h_Transports_trdefault_variable_people_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
+    h_Transports_trdefault_variable_active_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration = 0;
@@ -5471,6 +5477,45 @@ __host__ float get_Household_hhdefault_variable_lambda(unsigned int index){
     }
 }
 
+/** unsigned int get_Household_hhdefault_variable_active(unsigned int index)
+ * Gets the value of the active variable of an Household agent in the hhdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable active
+ */
+__host__ unsigned int get_Household_hhdefault_variable_active(unsigned int index){
+    unsigned int count = get_agent_Household_hhdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Households_hhdefault_variable_active_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Households_hhdefault->active,
+                    d_Households_hhdefault->active,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Households_hhdefault_variable_active_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Households_hhdefault->active[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access active for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_HouseholdMembership_hhmembershipdefault_variable_household_id(unsigned int index)
  * Gets the value of the household_id variable of an HouseholdMembership agent in the hhmembershipdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -5904,6 +5949,45 @@ __host__ float get_Church_chudefault_variable_lambda(unsigned int index){
     }
 }
 
+/** unsigned int get_Church_chudefault_variable_active(unsigned int index)
+ * Gets the value of the active variable of an Church agent in the chudefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable active
+ */
+__host__ unsigned int get_Church_chudefault_variable_active(unsigned int index){
+    unsigned int count = get_agent_Church_chudefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Churchs_chudefault_variable_active_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Churchs_chudefault->active,
+                    d_Churchs_chudefault->active,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Churchs_chudefault_variable_active_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Churchs_chudefault->active[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access active for the %u th member of Church_chudefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_ChurchMembership_chumembershipdefault_variable_church_id(unsigned int index)
  * Gets the value of the church_id variable of an ChurchMembership agent in the chumembershipdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6253,6 +6337,45 @@ __host__ float get_Transport_trdefault_variable_lambda(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Transport_trdefault_variable_active(unsigned int index)
+ * Gets the value of the active variable of an Transport agent in the trdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable active
+ */
+__host__ unsigned int get_Transport_trdefault_variable_active(unsigned int index){
+    unsigned int count = get_agent_Transport_trdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Transports_trdefault_variable_active_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Transports_trdefault->active,
+                    d_Transports_trdefault->active,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Transports_trdefault_variable_active_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Transports_trdefault->active[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access active for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -6708,6 +6831,8 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
 		gpuErrchk(cudaMemcpy(d_dst->adults, &h_agent->adults, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -6742,6 +6867,8 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 		gpuErrchk(cudaMemcpy(d_dst->adults, h_src->adults, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, h_src->active, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6813,6 +6940,8 @@ void copy_single_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_list
     }
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -6843,6 +6972,8 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
 
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, h_src->active, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6906,6 +7037,8 @@ void copy_single_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpor
     }
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -6936,6 +7069,8 @@ void copy_partial_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpo
 
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->active, h_src->active, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -7525,6 +7660,8 @@ void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, 
 			dst->adults[i] = src[i]->adults;
 			 
 			dst->lambda[i] = src[i]->lambda;
+			 
+			dst->active[i] = src[i]->active;
 			
 		}
 	}
@@ -7564,6 +7701,7 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
     h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
     h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
+    h_Households_hhdefault_variable_active_data_iteration = 0;
     
 
 }
@@ -7603,6 +7741,7 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
         h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
         h_Households_hhdefault_variable_adults_data_iteration = 0;
         h_Households_hhdefault_variable_lambda_data_iteration = 0;
+        h_Households_hhdefault_variable_active_data_iteration = 0;
         
 
 	}
@@ -7776,6 +7915,8 @@ void h_unpack_agents_Church_AoS_to_SoA(xmachine_memory_Church_list * dst, xmachi
 			}
 			 
 			dst->lambda[i] = src[i]->lambda;
+			 
+			dst->active[i] = src[i]->active;
 			
 		}
 	}
@@ -7813,6 +7954,7 @@ void h_add_agent_Church_chudefault(xmachine_memory_Church* agent){
     h_Churchs_chudefault_variable_duration_data_iteration = 0;
     h_Churchs_chudefault_variable_households_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
+    h_Churchs_chudefault_variable_active_data_iteration = 0;
     
 
 }
@@ -7850,6 +7992,7 @@ void h_add_agents_Church_chudefault(xmachine_memory_Church** agents, unsigned in
         h_Churchs_chudefault_variable_duration_data_iteration = 0;
         h_Churchs_chudefault_variable_households_data_iteration = 0;
         h_Churchs_chudefault_variable_lambda_data_iteration = 0;
+        h_Churchs_chudefault_variable_active_data_iteration = 0;
         
 
 	}
@@ -8015,6 +8158,8 @@ void h_unpack_agents_Transport_AoS_to_SoA(xmachine_memory_Transport_list * dst, 
 			}
 			 
 			dst->lambda[i] = src[i]->lambda;
+			 
+			dst->active[i] = src[i]->active;
 			
 		}
 	}
@@ -8052,6 +8197,7 @@ void h_add_agent_Transport_trdefault(xmachine_memory_Transport* agent){
     h_Transports_trdefault_variable_day_data_iteration = 0;
     h_Transports_trdefault_variable_people_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
+    h_Transports_trdefault_variable_active_data_iteration = 0;
     
 
 }
@@ -8089,6 +8235,7 @@ void h_add_agents_Transport_trdefault(xmachine_memory_Transport** agents, unsign
         h_Transports_trdefault_variable_day_data_iteration = 0;
         h_Transports_trdefault_variable_people_data_iteration = 0;
         h_Transports_trdefault_variable_lambda_data_iteration = 0;
+        h_Transports_trdefault_variable_active_data_iteration = 0;
         
 
 	}
@@ -9799,6 +9946,27 @@ float max_Household_hhdefault_lambda_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Household_hhdefault_active_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->active),  thrust::device_pointer_cast(d_Households_hhdefault->active) + h_xmachine_memory_Household_hhdefault_count);
+}
+
+unsigned int count_Household_hhdefault_active_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->active),  thrust::device_pointer_cast(d_Households_hhdefault->active) + h_xmachine_memory_Household_hhdefault_count, count_value);
+}
+unsigned int min_Household_hhdefault_active_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->active);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Household_hhdefault_active_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->active);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id),  thrust::device_pointer_cast(d_HouseholdMemberships_hhmembershipdefault->household_id) + h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count);
@@ -10001,6 +10169,27 @@ float max_Church_chudefault_lambda_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Church_chudefault_active_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->active),  thrust::device_pointer_cast(d_Churchs_chudefault->active) + h_xmachine_memory_Church_chudefault_count);
+}
+
+unsigned int count_Church_chudefault_active_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Churchs_chudefault->active),  thrust::device_pointer_cast(d_Churchs_chudefault->active) + h_xmachine_memory_Church_chudefault_count, count_value);
+}
+unsigned int min_Church_chudefault_active_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->active);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Church_chudefault_active_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->active);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_ChurchMembership_chumembershipdefault_church_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id),  thrust::device_pointer_cast(d_ChurchMemberships_chumembershipdefault->church_id) + h_xmachine_memory_ChurchMembership_chumembershipdefault_count);
@@ -10158,6 +10347,27 @@ float min_Transport_trdefault_lambda_variable(){
 float max_Transport_trdefault_lambda_variable(){
     //max in default stream
     thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->lambda);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Transport_trdefault_active_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Transports_trdefault->active),  thrust::device_pointer_cast(d_Transports_trdefault->active) + h_xmachine_memory_Transport_trdefault_count);
+}
+
+unsigned int count_Transport_trdefault_active_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Transports_trdefault->active),  thrust::device_pointer_cast(d_Transports_trdefault->active) + h_xmachine_memory_Transport_trdefault_count, count_value);
+}
+unsigned int min_Transport_trdefault_active_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->active);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Transport_trdefault_active_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->active);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -11068,17 +11278,95 @@ void Household_hhupdate(cudaStream_t &stream){
 	
 
 	//******************************** AGENT FUNCTION CONDITION *********************
-	//THERE IS NOT A FUNCTION CONDITION
-	//currentState maps to working list
-	xmachine_memory_Household_list* Households_hhdefault_temp = d_Households;
-	d_Households = d_Households_hhdefault;
-	d_Households_hhdefault = Households_hhdefault_temp;
-	//set working count to current state count
+	//CONTINUOUS AGENT FUNCTION AND THERE IS A FUNCTION CONDITION
+  	
+	//COPY CURRENT STATE COUNT TO WORKING COUNT (host and device)
 	h_xmachine_memory_Household_count = h_xmachine_memory_Household_hhdefault_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_count, &h_xmachine_memory_Household_count, sizeof(int)));	
-	//set current state count to 0
-	h_xmachine_memory_Household_hhdefault_count = 0;
+	
+	//RESET SCAN INPUTS
+	//reset scan input for currentState
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Household_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_Household_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Households_hhdefault);
+	gpuErrchkLaunch();
+	//reset scan input for working lists
+	reset_Household_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Households);
+	gpuErrchkLaunch();
+
+	//APPLY FUNCTION FILTER
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, hhupdate_function_filter, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	hhupdate_function_filter<<<gridSize, blockSize, 0, stream>>>(d_Households_hhdefault, d_Households);
+	gpuErrchkLaunch();
+
+	//GRID AND BLOCK SIZE FOR COMPACT
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Household_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	
+	//COMPACT CURRENT STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Household, 
+        temp_scan_storage_bytes_Household, 
+        d_Households_hhdefault->_scan_input,
+        d_Households_hhdefault->_position,
+        h_xmachine_memory_Household_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Households_hhdefault->_position[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Households_hhdefault->_scan_input[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_Household_hhdefault_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Household_hhdefault_count = scan_last_sum;
+	//Scatter into swap
+	scatter_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_swap, d_Households_hhdefault, 0, h_xmachine_memory_Household_count);
+	gpuErrchkLaunch();
+	//use a temp pointer change working swap list with current state list
+	xmachine_memory_Household_list* Households_hhdefault_temp = d_Households_hhdefault;
+	d_Households_hhdefault = d_Households_swap;
+	d_Households_swap = Households_hhdefault_temp;
+	//update the device count
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_hhdefault_count, &h_xmachine_memory_Household_hhdefault_count, sizeof(int)));	
+		
+	//COMPACT WORKING STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Household, 
+        temp_scan_storage_bytes_Household, 
+        d_Households->_scan_input,
+        d_Households->_position,
+        h_xmachine_memory_Household_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Households->_position[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Households->_scan_input[h_xmachine_memory_Household_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//Scatter into swap
+	scatter_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_swap, d_Households, 0, h_xmachine_memory_Household_count);
+	gpuErrchkLaunch();
+	//update working agent count after the scatter
+	if (scan_last_included == 1)
+		h_xmachine_memory_Household_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Household_count = scan_last_sum;
+    //use a temp pointer change working swap list with current state list
+	xmachine_memory_Household_list* Households_temp = d_Households;
+	d_Households = d_Households_swap;
+	d_Households_swap = Households_temp;
+	//update the device count
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Household_count, &h_xmachine_memory_Household_count, sizeof(int)));	
+	
+	//CHECK WORKING LIST COUNT IS NOT EQUAL TO 0
+	if (h_xmachine_memory_Household_count == 0)
+	{
+		return;
+	}
+	
+	//Update the state list size for occupancy calculations
+	state_list_size = h_xmachine_memory_Household_count;
 	
  
 
@@ -11137,10 +11425,11 @@ void Household_hhupdate(cudaStream_t &stream){
       exit(EXIT_FAILURE);
       }
       
-  //pointer swap the updated data
-  Households_hhdefault_temp = d_Households;
-  d_Households = d_Households_hhdefault;
-  d_Households_hhdefault = Households_hhdefault_temp;
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Household_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Household_Agents<<<gridSize, blockSize, 0, stream>>>(d_Households_hhdefault, d_Households, h_xmachine_memory_Household_hhdefault_count, h_xmachine_memory_Household_count);
+  gpuErrchkLaunch();
         
 	//update new state agent size
 	h_xmachine_memory_Household_hhdefault_count += h_xmachine_memory_Household_count;
@@ -11356,17 +11645,95 @@ void Church_chuupdate(cudaStream_t &stream){
 	
 
 	//******************************** AGENT FUNCTION CONDITION *********************
-	//THERE IS NOT A FUNCTION CONDITION
-	//currentState maps to working list
-	xmachine_memory_Church_list* Churchs_chudefault_temp = d_Churchs;
-	d_Churchs = d_Churchs_chudefault;
-	d_Churchs_chudefault = Churchs_chudefault_temp;
-	//set working count to current state count
+	//CONTINUOUS AGENT FUNCTION AND THERE IS A FUNCTION CONDITION
+  	
+	//COPY CURRENT STATE COUNT TO WORKING COUNT (host and device)
 	h_xmachine_memory_Church_count = h_xmachine_memory_Church_chudefault_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Church_count, &h_xmachine_memory_Church_count, sizeof(int)));	
-	//set current state count to 0
-	h_xmachine_memory_Church_chudefault_count = 0;
+	
+	//RESET SCAN INPUTS
+	//reset scan input for currentState
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Church_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_Church_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Churchs_chudefault);
+	gpuErrchkLaunch();
+	//reset scan input for working lists
+	reset_Church_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Churchs);
+	gpuErrchkLaunch();
+
+	//APPLY FUNCTION FILTER
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, chuupdate_function_filter, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	chuupdate_function_filter<<<gridSize, blockSize, 0, stream>>>(d_Churchs_chudefault, d_Churchs);
+	gpuErrchkLaunch();
+
+	//GRID AND BLOCK SIZE FOR COMPACT
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Church_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	
+	//COMPACT CURRENT STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Church, 
+        temp_scan_storage_bytes_Church, 
+        d_Churchs_chudefault->_scan_input,
+        d_Churchs_chudefault->_position,
+        h_xmachine_memory_Church_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Churchs_chudefault->_position[h_xmachine_memory_Church_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Churchs_chudefault->_scan_input[h_xmachine_memory_Church_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_Church_chudefault_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Church_chudefault_count = scan_last_sum;
+	//Scatter into swap
+	scatter_Church_Agents<<<gridSize, blockSize, 0, stream>>>(d_Churchs_swap, d_Churchs_chudefault, 0, h_xmachine_memory_Church_count);
+	gpuErrchkLaunch();
+	//use a temp pointer change working swap list with current state list
+	xmachine_memory_Church_list* Churchs_chudefault_temp = d_Churchs_chudefault;
+	d_Churchs_chudefault = d_Churchs_swap;
+	d_Churchs_swap = Churchs_chudefault_temp;
+	//update the device count
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Church_chudefault_count, &h_xmachine_memory_Church_chudefault_count, sizeof(int)));	
+		
+	//COMPACT WORKING STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Church, 
+        temp_scan_storage_bytes_Church, 
+        d_Churchs->_scan_input,
+        d_Churchs->_position,
+        h_xmachine_memory_Church_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Churchs->_position[h_xmachine_memory_Church_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Churchs->_scan_input[h_xmachine_memory_Church_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//Scatter into swap
+	scatter_Church_Agents<<<gridSize, blockSize, 0, stream>>>(d_Churchs_swap, d_Churchs, 0, h_xmachine_memory_Church_count);
+	gpuErrchkLaunch();
+	//update working agent count after the scatter
+	if (scan_last_included == 1)
+		h_xmachine_memory_Church_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Church_count = scan_last_sum;
+    //use a temp pointer change working swap list with current state list
+	xmachine_memory_Church_list* Churchs_temp = d_Churchs;
+	d_Churchs = d_Churchs_swap;
+	d_Churchs_swap = Churchs_temp;
+	//update the device count
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Church_count, &h_xmachine_memory_Church_count, sizeof(int)));	
+	
+	//CHECK WORKING LIST COUNT IS NOT EQUAL TO 0
+	if (h_xmachine_memory_Church_count == 0)
+	{
+		return;
+	}
+	
+	//Update the state list size for occupancy calculations
+	state_list_size = h_xmachine_memory_Church_count;
 	
  
 
@@ -11425,10 +11792,11 @@ void Church_chuupdate(cudaStream_t &stream){
       exit(EXIT_FAILURE);
       }
       
-  //pointer swap the updated data
-  Churchs_chudefault_temp = d_Churchs;
-  d_Churchs = d_Churchs_chudefault;
-  d_Churchs_chudefault = Churchs_chudefault_temp;
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Church_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Church_Agents<<<gridSize, blockSize, 0, stream>>>(d_Churchs_chudefault, d_Churchs, h_xmachine_memory_Church_chudefault_count, h_xmachine_memory_Church_count);
+  gpuErrchkLaunch();
         
 	//update new state agent size
 	h_xmachine_memory_Church_chudefault_count += h_xmachine_memory_Church_count;
@@ -11635,17 +12003,95 @@ void Transport_trupdate(cudaStream_t &stream){
 	
 
 	//******************************** AGENT FUNCTION CONDITION *********************
-	//THERE IS NOT A FUNCTION CONDITION
-	//currentState maps to working list
-	xmachine_memory_Transport_list* Transports_trdefault_temp = d_Transports;
-	d_Transports = d_Transports_trdefault;
-	d_Transports_trdefault = Transports_trdefault_temp;
-	//set working count to current state count
+	//CONTINUOUS AGENT FUNCTION AND THERE IS A FUNCTION CONDITION
+  	
+	//COPY CURRENT STATE COUNT TO WORKING COUNT (host and device)
 	h_xmachine_memory_Transport_count = h_xmachine_memory_Transport_trdefault_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Transport_count, &h_xmachine_memory_Transport_count, sizeof(int)));	
-	//set current state count to 0
-	h_xmachine_memory_Transport_trdefault_count = 0;
+	
+	//RESET SCAN INPUTS
+	//reset scan input for currentState
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Transport_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_Transport_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Transports_trdefault);
+	gpuErrchkLaunch();
+	//reset scan input for working lists
+	reset_Transport_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Transports);
+	gpuErrchkLaunch();
+
+	//APPLY FUNCTION FILTER
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, trupdate_function_filter, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	trupdate_function_filter<<<gridSize, blockSize, 0, stream>>>(d_Transports_trdefault, d_Transports);
+	gpuErrchkLaunch();
+
+	//GRID AND BLOCK SIZE FOR COMPACT
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Transport_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	
+	//COMPACT CURRENT STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Transport, 
+        temp_scan_storage_bytes_Transport, 
+        d_Transports_trdefault->_scan_input,
+        d_Transports_trdefault->_position,
+        h_xmachine_memory_Transport_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Transports_trdefault->_position[h_xmachine_memory_Transport_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Transports_trdefault->_scan_input[h_xmachine_memory_Transport_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_Transport_trdefault_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Transport_trdefault_count = scan_last_sum;
+	//Scatter into swap
+	scatter_Transport_Agents<<<gridSize, blockSize, 0, stream>>>(d_Transports_swap, d_Transports_trdefault, 0, h_xmachine_memory_Transport_count);
+	gpuErrchkLaunch();
+	//use a temp pointer change working swap list with current state list
+	xmachine_memory_Transport_list* Transports_trdefault_temp = d_Transports_trdefault;
+	d_Transports_trdefault = d_Transports_swap;
+	d_Transports_swap = Transports_trdefault_temp;
+	//update the device count
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Transport_trdefault_count, &h_xmachine_memory_Transport_trdefault_count, sizeof(int)));	
+		
+	//COMPACT WORKING STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Transport, 
+        temp_scan_storage_bytes_Transport, 
+        d_Transports->_scan_input,
+        d_Transports->_position,
+        h_xmachine_memory_Transport_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Transports->_position[h_xmachine_memory_Transport_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Transports->_scan_input[h_xmachine_memory_Transport_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//Scatter into swap
+	scatter_Transport_Agents<<<gridSize, blockSize, 0, stream>>>(d_Transports_swap, d_Transports, 0, h_xmachine_memory_Transport_count);
+	gpuErrchkLaunch();
+	//update working agent count after the scatter
+	if (scan_last_included == 1)
+		h_xmachine_memory_Transport_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Transport_count = scan_last_sum;
+    //use a temp pointer change working swap list with current state list
+	xmachine_memory_Transport_list* Transports_temp = d_Transports;
+	d_Transports = d_Transports_swap;
+	d_Transports_swap = Transports_temp;
+	//update the device count
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Transport_count, &h_xmachine_memory_Transport_count, sizeof(int)));	
+	
+	//CHECK WORKING LIST COUNT IS NOT EQUAL TO 0
+	if (h_xmachine_memory_Transport_count == 0)
+	{
+		return;
+	}
+	
+	//Update the state list size for occupancy calculations
+	state_list_size = h_xmachine_memory_Transport_count;
 	
  
 
@@ -11704,10 +12150,11 @@ void Transport_trupdate(cudaStream_t &stream){
       exit(EXIT_FAILURE);
       }
       
-  //pointer swap the updated data
-  Transports_trdefault_temp = d_Transports;
-  d_Transports = d_Transports_trdefault;
-  d_Transports_trdefault = Transports_trdefault_temp;
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Transport_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Transport_Agents<<<gridSize, blockSize, 0, stream>>>(d_Transports_trdefault, d_Transports, h_xmachine_memory_Transport_trdefault_count, h_xmachine_memory_Transport_count);
+  gpuErrchkLaunch();
         
 	//update new state agent size
 	h_xmachine_memory_Transport_trdefault_count += h_xmachine_memory_Transport_count;
@@ -11952,8 +12399,13 @@ void Clinic_clupdate(cudaStream_t &stream){
 	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
 	//Set the message_type for non partitioned and spatially partitioned message outputs
-	h_message_infection_output_type = single_message;
+	h_message_infection_output_type = optional_message;
 	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	//message is optional so reset the swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_infection_swaps, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_infection_swaps<<<gridSize, blockSize, 0, stream>>>(d_infections); 
+	gpuErrchkLaunch();
 	
 	
 	//MAIN XMACHINE FUNCTION CALL (clupdate)
@@ -11968,10 +12420,38 @@ void Clinic_clupdate(cudaStream_t &stream){
 	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
 	
 	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	//infection Message Type Prefix Sum
+	
+	//swap output
+	xmachine_message_infection_list* d_infections_scanswap_temp = d_infections;
+	d_infections = d_infections_swap;
+	d_infections_swap = d_infections_scanswap_temp;
+	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Clinic, 
+        temp_scan_storage_bytes_Clinic, 
+        d_infections_swap->_scan_input,
+        d_infections_swap->_position,
+        h_xmachine_memory_Clinic_count, 
+        stream
+    );
+
+	//Scatter
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_optional_infection_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_optional_infection_messages<<<gridSize, blockSize, 0, stream>>>(d_infections, d_infections_swap);
+	gpuErrchkLaunch();
 	
 	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
-	h_message_infection_count += h_xmachine_memory_Clinic_count;
-	//Copy count to device
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_infections_swap->_position[h_xmachine_memory_Clinic_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_infections_swap->_scan_input[h_xmachine_memory_Clinic_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//If last item in prefix sum was 1 then increase its index to get the count
+	if (scan_last_included == 1){
+		h_message_infection_count += scan_last_sum+1;
+	}else{
+		h_message_infection_count += scan_last_sum;
+	}
+    //Copy count to device
 	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
 	
 	

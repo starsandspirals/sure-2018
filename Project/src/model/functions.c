@@ -499,35 +499,49 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     weightsum += weights[i];
   }
 
+  unsigned int tbnumber = 0;
+
   for (unsigned int i = 0; i < total; i++)
   {
     float randomfloat = ((float)rand() / (RAND_MAX));
 
     if (randomfloat < tb_prevalence)
     {
+      tbnumber++;
+    }
+  }
 
-      float randomweight = weightsum * ((float)rand() / (RAND_MAX));
+  unsigned int activepeople[total];
 
-      for (unsigned int j = 0; j < total; j++)
+  for (unsigned int i = 0; i < total; i++) {
+    activepeople[i] = 0;
+  }
+
+  for (unsigned int i = 0; i < tbnumber; i++)
+  {
+
+    float randomweight = weightsum * ((float)rand() / (RAND_MAX));
+
+    for (unsigned int j = 0; j < total; j++)
+    {
+      if (randomweight < weights[j])
       {
-        if (randomweight < weights[j])
-        {
 
-          xmachine_memory_TBAssignment *h_tbassignment =
-              h_allocate_agent_TBAssignment();
+        xmachine_memory_TBAssignment *h_tbassignment =
+            h_allocate_agent_TBAssignment();
 
-          h_tbassignment->id = tbarray[j];
-          weightsum -= weights[j];
-          weights[j] = 0.0;
+        h_tbassignment->id = tbarray[j];
+        activepeople[tbarray[j]] = 1;
+        weightsum -= weights[j];
+        weights[j] = 0.0;
 
-          h_add_agent_TBAssignment_tbdefault(h_tbassignment);
+        h_add_agent_TBAssignment_tbdefault(h_tbassignment);
 
-          h_free_agent_TBAssignment(&h_tbassignment);
-          break;
-        }
-
-        randomweight -= weights[j];
+        h_free_agent_TBAssignment(&h_tbassignment);
+        break;
       }
+
+      randomweight -= weights[j];
     }
   }
 
@@ -535,6 +549,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   // use when generating churches.
   unsigned int adult[h_household_AoS_MAX];
   unsigned int adultcount;
+
+  unsigned int activehouseholds[h_household_AoS_MAX];
+
+  for (unsigned int i = 0; i < h_household_AoS_MAX; i++) {
+    activehouseholds[i] = 0;
+  }
 
   // This loop runs once for each possible size of household.
   for (unsigned int i = 1; i < 32; i++)
@@ -553,6 +573,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
       // Set the household's id and size.
       h_household->id = getNextHouseholdID();
       h_household->size = i;
+      h_household->active = 0;
 
       // Decide if the household is a churchgoing household, based on given
       // input probabilities.
@@ -629,6 +650,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
           adultcount++;
         }
 
+        if (activepeople[order[count]] == 1) {
+          h_household->active = 1;
+        }
+
         h_add_agent_HouseholdMembership_hhmembershipdefault(h_hhmembership);
 
         h_free_agent_HouseholdMembership(&h_hhmembership);
@@ -638,6 +663,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
       // the agent and then free it from memory on the host.
       h_household->adults = adultcount;
       adult[h_household->id] = adultcount;
+
+      if (h_household->active) {
+        activehouseholds[h_household->id] = 1;
+      }
 
       h_household->step = 0;
       h_household->lambda = 0;
@@ -716,6 +745,11 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
       h_chumembership->churchdur = h_church->duration;
 
       h_church->households[count] = hhorder[hhposition];
+
+      if (activehouseholds[hhorder[hhposition]] == 1) {
+        h_church->active = 1;
+      }
+
       count++;
       capacity += adult[hhposition];
       hhposition++;
@@ -778,6 +812,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
       {
 
         h_transport->people[capacity] = currentpeople[countdone];
+
+        if (activepeople[currentpeople[countdone]] == 1) {
+          h_transport->active = 1;
+        }
 
         xmachine_memory_TransportMembership *h_trmembership =
             h_allocate_agent_TransportMembership();
@@ -862,12 +900,12 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
 
     fprintf(fp, "ID, gender, age, household_size, hiv, art, active_tb, "
                 "time_home, time_church, "
-                "time_transport, time_clinic\n");
+                "time_transport, time_clinic, infections, last_infected\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u\n",
+      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i\n",
               get_Person_s2_variable_id(index),
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
@@ -878,7 +916,9 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
               get_Person_s2_variable_householdtime(index),
               get_Person_s2_variable_churchtime(index),
               get_Person_s2_variable_transporttime(index),
-              get_Person_s2_variable_clinictime(index));
+              get_Person_s2_variable_clinictime(index),
+              get_Person_s2_variable_infections(index),
+              get_Person_s2_variable_lastinfected(index));
     }
 
     fflush(fp);
@@ -1053,7 +1093,8 @@ infect(xmachine_memory_Person *person,
     {
       lambda = infection_message->lambda;
     }
-    infection_message = get_next_infection_message(infection_message, infection_messages);
+    infection_message =
+        get_next_infection_message(infection_message, infection_messages);
   }
 
   float prob = 1 - device_exp(-person->p * lambda * (TIME_STEP / 12));

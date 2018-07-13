@@ -539,6 +539,10 @@
           <type>float</type>
           <name>lambda</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>active</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -557,6 +561,15 @@
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
+          <condition>
+            <lhs>
+              <agentVariable>active</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>1</value>
+            </rhs>
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -663,6 +676,10 @@
           <type>float</type>
           <name>lambda</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>active</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -681,6 +698,15 @@
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
+          <condition>
+            <lhs>
+              <agentVariable>active</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>1</value>
+            </rhs>
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -774,6 +800,10 @@
           <type>float</type>
           <name>lambda</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>active</name>
+        </gpu:variable>
       </memory>
 
       <functions>
@@ -792,6 +822,15 @@
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
+          <condition>
+            <lhs>
+              <agentVariable>active</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>1</value>
+            </rhs>
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -887,7 +926,7 @@
           <outputs>
             <gpu:output>
               <messageName>infection</messageName>
-              <gpu:type>single_message</gpu:type>
+              <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
           <gpu:reallocate>false</gpu:reallocate>

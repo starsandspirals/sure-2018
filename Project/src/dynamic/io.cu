@@ -753,6 +753,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</lambda>\n", file);
         
+		fputs("<active>", file);
+        sprintf(data, "%u", h_Households_hhdefault->active[i]);
+		fputs(data, file);
+		fputs("</active>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each HouseholdMembership agent to xml
@@ -825,6 +830,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</lambda>\n", file);
         
+		fputs("<active>", file);
+        sprintf(data, "%u", h_Churchs_chudefault->active[i]);
+		fputs(data, file);
+		fputs("</active>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each ChurchMembership agent to xml
@@ -886,6 +896,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%f", h_Transports_trdefault->lambda[i]);
 		fputs(data, file);
 		fputs("</lambda>\n", file);
+        
+		fputs("<active>", file);
+        sprintf(data, "%u", h_Transports_trdefault->active[i]);
+		fputs(data, file);
+		fputs("</active>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1089,6 +1104,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Household_churchfreq;
     int in_Household_adults;
     int in_Household_lambda;
+    int in_Household_active;
     int in_HouseholdMembership_household_id;
     int in_HouseholdMembership_person_id;
     int in_HouseholdMembership_household_size;
@@ -1100,6 +1116,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Church_duration;
     int in_Church_households;
     int in_Church_lambda;
+    int in_Church_active;
     int in_ChurchMembership_church_id;
     int in_ChurchMembership_household_id;
     int in_ChurchMembership_churchdur;
@@ -1109,6 +1126,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Transport_day;
     int in_Transport_people;
     int in_Transport_lambda;
+    int in_Transport_active;
     int in_TransportMembership_person_id;
     int in_TransportMembership_transport_id;
     int in_TransportMembership_duration;
@@ -1251,6 +1269,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Household_churchfreq;
 	unsigned int Household_adults;
 	float Household_lambda;
+	unsigned int Household_active;
 	unsigned int HouseholdMembership_household_id;
 	unsigned int HouseholdMembership_person_id;
 	unsigned int HouseholdMembership_household_size;
@@ -1262,6 +1281,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	float Church_duration;
     int Church_households[128];
 	float Church_lambda;
+	unsigned int Church_active;
 	unsigned int ChurchMembership_church_id;
 	unsigned int ChurchMembership_household_id;
 	float ChurchMembership_churchdur;
@@ -1271,6 +1291,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Transport_day;
     int Transport_people[16];
 	float Transport_lambda;
+	unsigned int Transport_active;
 	int TransportMembership_person_id;
 	unsigned int TransportMembership_transport_id;
 	unsigned int TransportMembership_duration;
@@ -1377,6 +1398,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Household_churchfreq = 0;
 	in_Household_adults = 0;
 	in_Household_lambda = 0;
+	in_Household_active = 0;
 	in_HouseholdMembership_household_id = 0;
 	in_HouseholdMembership_person_id = 0;
 	in_HouseholdMembership_household_size = 0;
@@ -1388,6 +1410,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Church_duration = 0;
 	in_Church_households = 0;
 	in_Church_lambda = 0;
+	in_Church_active = 0;
 	in_ChurchMembership_church_id = 0;
 	in_ChurchMembership_household_id = 0;
 	in_ChurchMembership_churchdur = 0;
@@ -1397,6 +1420,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Transport_day = 0;
 	in_Transport_people = 0;
 	in_Transport_lambda = 0;
+	in_Transport_active = 0;
 	in_TransportMembership_person_id = 0;
 	in_TransportMembership_transport_id = 0;
 	in_TransportMembership_duration = 0;
@@ -1502,6 +1526,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Households->churchfreq[k] = 0;
 		h_Households->adults[k] = 0;
 		h_Households->lambda[k] = 0;
+		h_Households->active[k] = 0;
 	}
 	
 	//set all HouseholdMembership values to 0
@@ -1527,6 +1552,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             h_Churchs->households[(i*xmachine_memory_Church_MAX)+k] = 0;
         }
 		h_Churchs->lambda[k] = 0;
+		h_Churchs->active[k] = 0;
 	}
 	
 	//set all ChurchMembership values to 0
@@ -1550,6 +1576,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             h_Transports->people[(i*xmachine_memory_Transport_MAX)+k] = 0;
         }
 		h_Transports->lambda[k] = 0;
+		h_Transports->active[k] = 0;
 	}
 	
 	//set all TransportMembership values to 0
@@ -1615,6 +1642,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Household_churchfreq = 0;
     Household_adults = 0;
     Household_lambda = 0;
+    Household_active = 0;
     HouseholdMembership_household_id = 0;
     HouseholdMembership_person_id = 0;
     HouseholdMembership_household_size = 0;
@@ -1628,6 +1656,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         Church_households[i] = -1;
     }
     Church_lambda = 0;
+    Church_active = 0;
     ChurchMembership_church_id = 0;
     ChurchMembership_household_id = 0;
     ChurchMembership_churchdur = 0;
@@ -1639,6 +1668,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         Transport_people[i] = -1;
     }
     Transport_lambda = 0;
+    Transport_active = 0;
     TransportMembership_person_id = 0;
     TransportMembership_transport_id = 0;
     TransportMembership_duration = 0;
@@ -1813,6 +1843,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Households->churchfreq[*h_xmachine_memory_Household_count] = Household_churchfreq;
 					h_Households->adults[*h_xmachine_memory_Household_count] = Household_adults;
 					h_Households->lambda[*h_xmachine_memory_Household_count] = Household_lambda;
+					h_Households->active[*h_xmachine_memory_Household_count] = Household_active;
 					(*h_xmachine_memory_Household_count) ++;	
 				}
 				else if(strcmp(agentname, "HouseholdMembership") == 0)
@@ -1848,6 +1879,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                         h_Churchs->households[(k*xmachine_memory_Church_MAX)+(*h_xmachine_memory_Church_count)] = Church_households[k];
                     }
 					h_Churchs->lambda[*h_xmachine_memory_Church_count] = Church_lambda;
+					h_Churchs->active[*h_xmachine_memory_Church_count] = Church_active;
 					(*h_xmachine_memory_Church_count) ++;	
 				}
 				else if(strcmp(agentname, "ChurchMembership") == 0)
@@ -1881,6 +1913,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                         h_Transports->people[(k*xmachine_memory_Transport_MAX)+(*h_xmachine_memory_Transport_count)] = Transport_people[k];
                     }
 					h_Transports->lambda[*h_xmachine_memory_Transport_count] = Transport_lambda;
+					h_Transports->active[*h_xmachine_memory_Transport_count] = Transport_active;
 					(*h_xmachine_memory_Transport_count) ++;	
 				}
 				else if(strcmp(agentname, "TransportMembership") == 0)
@@ -1962,6 +1995,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Household_churchfreq = 0;
                 Household_adults = 0;
                 Household_lambda = 0;
+                Household_active = 0;
                 HouseholdMembership_household_id = 0;
                 HouseholdMembership_person_id = 0;
                 HouseholdMembership_household_size = 0;
@@ -1975,6 +2009,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Church_households[i] = -1;
                 }
                 Church_lambda = 0;
+                Church_active = 0;
                 ChurchMembership_church_id = 0;
                 ChurchMembership_household_id = 0;
                 ChurchMembership_churchdur = 0;
@@ -1986,6 +2021,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     Transport_people[i] = -1;
                 }
                 Transport_lambda = 0;
+                Transport_active = 0;
                 TransportMembership_person_id = 0;
                 TransportMembership_transport_id = 0;
                 TransportMembership_duration = 0;
@@ -2077,6 +2113,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/adults") == 0) in_Household_adults = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Household_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Household_lambda = 0;
+			if(strcmp(buffer, "active") == 0) in_Household_active = 1;
+			if(strcmp(buffer, "/active") == 0) in_Household_active = 0;
 			if(strcmp(buffer, "household_id") == 0) in_HouseholdMembership_household_id = 1;
 			if(strcmp(buffer, "/household_id") == 0) in_HouseholdMembership_household_id = 0;
 			if(strcmp(buffer, "person_id") == 0) in_HouseholdMembership_person_id = 1;
@@ -2099,6 +2137,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/households") == 0) in_Church_households = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Church_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Church_lambda = 0;
+			if(strcmp(buffer, "active") == 0) in_Church_active = 1;
+			if(strcmp(buffer, "/active") == 0) in_Church_active = 0;
 			if(strcmp(buffer, "church_id") == 0) in_ChurchMembership_church_id = 1;
 			if(strcmp(buffer, "/church_id") == 0) in_ChurchMembership_church_id = 0;
 			if(strcmp(buffer, "household_id") == 0) in_ChurchMembership_household_id = 1;
@@ -2117,6 +2157,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/people") == 0) in_Transport_people = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Transport_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Transport_lambda = 0;
+			if(strcmp(buffer, "active") == 0) in_Transport_active = 1;
+			if(strcmp(buffer, "/active") == 0) in_Transport_active = 0;
 			if(strcmp(buffer, "person_id") == 0) in_TransportMembership_person_id = 1;
 			if(strcmp(buffer, "/person_id") == 0) in_TransportMembership_person_id = 0;
 			if(strcmp(buffer, "transport_id") == 0) in_TransportMembership_transport_id = 1;
@@ -2352,6 +2394,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				if(in_Household_lambda){
                     Household_lambda = (float) fgpu_atof(buffer); 
                 }
+				if(in_Household_active){
+                    Household_active = (unsigned int) fpgu_strtoul(buffer); 
+                }
 				if(in_HouseholdMembership_household_id){
                     HouseholdMembership_household_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
@@ -2385,6 +2430,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 				if(in_Church_lambda){
                     Church_lambda = (float) fgpu_atof(buffer); 
                 }
+				if(in_Church_active){
+                    Church_active = (unsigned int) fpgu_strtoul(buffer); 
+                }
 				if(in_ChurchMembership_church_id){
                     ChurchMembership_church_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
@@ -2411,6 +2459,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Transport_lambda){
                     Transport_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_Transport_active){
+                    Transport_active = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_TransportMembership_person_id){
                     TransportMembership_person_id = (int) fpgu_strtol(buffer); 

@@ -193,6 +193,113 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 }
 
 
+/** hhupdate_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Household_list representing agent i the current state
+ * @param nextState xmachine_memory_Household_list representing agent i the next state
+ */
+ __global__ void hhupdate_function_filter(xmachine_memory_Household_list* currentState, xmachine_memory_Household_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Household_count){
+	
+		//apply the filter
+		if (currentState->active[index]==1)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->size[index] = currentState->size[index];
+			nextState->people[index] = currentState->people[index];
+			nextState->churchgoing[index] = currentState->churchgoing[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->adults[index] = currentState->adults[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->active[index] = currentState->active[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** chuupdate_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Church_list representing agent i the current state
+ * @param nextState xmachine_memory_Church_list representing agent i the next state
+ */
+ __global__ void chuupdate_function_filter(xmachine_memory_Church_list* currentState, xmachine_memory_Church_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Church_count){
+	
+		//apply the filter
+		if (currentState->active[index]==1)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->size[index] = currentState->size[index];
+			nextState->duration[index] = currentState->duration[index];
+			nextState->households[index] = currentState->households[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->active[index] = currentState->active[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** trupdate_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Transport_list representing agent i the current state
+ * @param nextState xmachine_memory_Transport_list representing agent i the next state
+ */
+ __global__ void trupdate_function_filter(xmachine_memory_Transport_list* currentState, xmachine_memory_Transport_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Transport_count){
+	
+		//apply the filter
+		if (currentState->active[index]==1)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->duration[index] = currentState->duration[index];
+			nextState->day[index] = currentState->day[index];
+			nextState->people[index] = currentState->people[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->active[index] = currentState->active[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dyanamically created Person agent functions */
 
@@ -616,7 +723,8 @@ __global__ void scatter_Household_Agents(xmachine_memory_Household_list* agents_
 		agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];        
 		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];        
 		agents_dst->adults[output_index] = agents_src->adults[index];        
-		agents_dst->lambda[output_index] = agents_src->lambda[index];
+		agents_dst->lambda[output_index] = agents_src->lambda[index];        
+		agents_dst->active[output_index] = agents_src->active[index];
 	}
 }
 
@@ -646,6 +754,7 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
 	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
 	    agents_dst->adults[output_index] = agents_src->adults[index];
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+	    agents_dst->active[output_index] = agents_src->active[index];
     }
 }
 
@@ -660,9 +769,10 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * @param churchfreq agent variable of type unsigned int
  * @param adults agent variable of type unsigned int
  * @param lambda agent variable of type float
+ * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda){
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda, unsigned int active){
 	
 	int index;
     
@@ -688,12 +798,13 @@ __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsi
 	agents->churchfreq[index] = churchfreq;
 	agents->adults[index] = adults;
 	agents->lambda[index] = lambda;
+	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda){
-    add_Household_agent<DISCRETE_2D>(agents, id, step, size, churchgoing, churchfreq, adults, lambda);
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda, unsigned int active){
+    add_Household_agent<DISCRETE_2D>(agents, id, step, size, churchgoing, churchfreq, adults, lambda, active);
 }
 
 /** reorder_Household_agents
@@ -719,6 +830,7 @@ __global__ void reorder_Household_agents(unsigned int* values, xmachine_memory_H
 	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
 	ordered_agents->adults[index] = unordered_agents->adults[old_pos];
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
+	ordered_agents->active[index] = unordered_agents->active[old_pos];
 }
 
 /** get_Household_agent_array_value
@@ -927,7 +1039,8 @@ __global__ void scatter_Church_Agents(xmachine_memory_Church_list* agents_dst, x
 	    for (int i=0; i<128; i++){
 	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
 	    }        
-		agents_dst->lambda[output_index] = agents_src->lambda[index];
+		agents_dst->lambda[output_index] = agents_src->lambda[index];        
+		agents_dst->active[output_index] = agents_src->active[index];
 	}
 }
 
@@ -955,6 +1068,7 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
 	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
 	    }
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+	    agents_dst->active[output_index] = agents_src->active[index];
     }
 }
 
@@ -967,9 +1081,10 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
  * @param duration agent variable of type float
  * @param households agent variable of type int
  * @param lambda agent variable of type float
+ * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda){
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda, unsigned int active){
 	
 	int index;
     
@@ -993,12 +1108,13 @@ __device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned i
 	agents->size[index] = size;
 	agents->duration[index] = duration;
 	agents->lambda[index] = lambda;
+	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda){
-    add_Church_agent<DISCRETE_2D>(agents, id, step, size, duration, lambda);
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda, unsigned int active){
+    add_Church_agent<DISCRETE_2D>(agents, id, step, size, duration, lambda, active);
 }
 
 /** reorder_Church_agents
@@ -1022,6 +1138,7 @@ __global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Chur
 	  ordered_agents->households[(i*xmachine_memory_Church_MAX)+index] = unordered_agents->households[(i*xmachine_memory_Church_MAX)+old_pos];
 	}
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
+	ordered_agents->active[index] = unordered_agents->active[old_pos];
 }
 
 /** get_Church_agent_array_value
@@ -1220,7 +1337,8 @@ __global__ void scatter_Transport_Agents(xmachine_memory_Transport_list* agents_
 	    for (int i=0; i<16; i++){
 	      agents_dst->people[(i*xmachine_memory_Transport_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Transport_MAX)+index];
 	    }        
-		agents_dst->lambda[output_index] = agents_src->lambda[index];
+		agents_dst->lambda[output_index] = agents_src->lambda[index];        
+		agents_dst->active[output_index] = agents_src->active[index];
 	}
 }
 
@@ -1248,6 +1366,7 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
 	      agents_dst->people[(i*xmachine_memory_Transport_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Transport_MAX)+index];
 	    }
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+	    agents_dst->active[output_index] = agents_src->active[index];
     }
 }
 
@@ -1260,9 +1379,10 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
  * @param day agent variable of type unsigned int
  * @param people agent variable of type int
  * @param lambda agent variable of type float
+ * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda){
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda, unsigned int active){
 	
 	int index;
     
@@ -1286,12 +1406,13 @@ __device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsi
 	agents->duration[index] = duration;
 	agents->day[index] = day;
 	agents->lambda[index] = lambda;
+	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda){
-    add_Transport_agent<DISCRETE_2D>(agents, id, step, duration, day, lambda);
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda, unsigned int active){
+    add_Transport_agent<DISCRETE_2D>(agents, id, step, duration, day, lambda, active);
 }
 
 /** reorder_Transport_agents
@@ -1315,6 +1436,7 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
 	  ordered_agents->people[(i*xmachine_memory_Transport_MAX)+index] = unordered_agents->people[(i*xmachine_memory_Transport_MAX)+old_pos];
 	}
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
+	ordered_agents->active[index] = unordered_agents->active[old_pos];
 }
 
 /** get_Transport_agent_array_value
@@ -3251,6 +3373,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	agent.churchfreq = agents->churchfreq[index];
 	agent.adults = agents->adults[index];
 	agent.lambda = agents->lambda[index];
+	agent.active = agents->active[index];
 	} else {
 	
 	agent.id = 0;
@@ -3261,6 +3384,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	agent.churchfreq = 0;
 	agent.adults = 0;
 	agent.lambda = 0;
+	agent.active = 0;
 	}
 
 	//FLAME function call
@@ -3281,6 +3405,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->adults[index] = agent.adults;
 	agents->lambda[index] = agent.lambda;
+	agents->active[index] = agent.active;
 	}
 }
 
@@ -3357,6 +3482,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agent.duration = agents->duration[index];
     agent.households = &(agents->households[index]);
 	agent.lambda = agents->lambda[index];
+	agent.active = agents->active[index];
 	} else {
 	
 	agent.id = 0;
@@ -3365,6 +3491,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agent.duration = 0;
     agent.households = nullptr;
 	agent.lambda = 0;
+	agent.active = 0;
 	}
 
 	//FLAME function call
@@ -3383,6 +3510,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agents->size[index] = agent.size;
 	agents->duration[index] = agent.duration;
 	agents->lambda[index] = agent.lambda;
+	agents->active[index] = agent.active;
 	}
 }
 
@@ -3444,6 +3572,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	agent.day = agents->day[index];
     agent.people = &(agents->people[index]);
 	agent.lambda = agents->lambda[index];
+	agent.active = agents->active[index];
 	} else {
 	
 	agent.id = 0;
@@ -3452,6 +3581,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	agent.day = 0;
     agent.people = nullptr;
 	agent.lambda = 0;
+	agent.active = 0;
 	}
 
 	//FLAME function call
@@ -3470,6 +3600,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	agents->duration[index] = agent.duration;
 	agents->day[index] = agent.day;
 	agents->lambda[index] = agent.lambda;
+	agents->active[index] = agent.active;
 	}
 }
 
