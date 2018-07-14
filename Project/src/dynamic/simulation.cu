@@ -240,6 +240,7 @@ unsigned int h_Persons_default_variable_infections_data_iteration;
 unsigned int h_Persons_default_variable_lastinfected_data_iteration;
 unsigned int h_Persons_default_variable_lastinfectedid_data_iteration;
 unsigned int h_Persons_default_variable_time_step_data_iteration;
+unsigned int h_Persons_default_variable_lambda_data_iteration;
 unsigned int h_Persons_s2_variable_id_data_iteration;
 unsigned int h_Persons_s2_variable_step_data_iteration;
 unsigned int h_Persons_s2_variable_householdtime_data_iteration;
@@ -271,6 +272,7 @@ unsigned int h_Persons_s2_variable_infections_data_iteration;
 unsigned int h_Persons_s2_variable_lastinfected_data_iteration;
 unsigned int h_Persons_s2_variable_lastinfectedid_data_iteration;
 unsigned int h_Persons_s2_variable_time_step_data_iteration;
+unsigned int h_Persons_s2_variable_lambda_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
@@ -411,6 +413,11 @@ int scan_last_included;      /**< Indicates if last sum value is included in the
  * Agent function prototype for update function of Person agent
  */
 void Person_update(cudaStream_t &stream);
+
+/** Person_updatelambda
+ * Agent function prototype for updatelambda function of Person agent
+ */
+void Person_updatelambda(cudaStream_t &stream);
 
 /** Person_infect
  * Agent function prototype for infect function of Person agent
@@ -595,6 +602,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_lastinfected_data_iteration = 0;
     h_Persons_default_variable_lastinfectedid_data_iteration = 0;
     h_Persons_default_variable_time_step_data_iteration = 0;
+    h_Persons_default_variable_lambda_data_iteration = 0;
     h_Persons_s2_variable_id_data_iteration = 0;
     h_Persons_s2_variable_step_data_iteration = 0;
     h_Persons_s2_variable_householdtime_data_iteration = 0;
@@ -626,6 +634,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_lastinfected_data_iteration = 0;
     h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
     h_Persons_s2_variable_time_step_data_iteration = 0;
+    h_Persons_s2_variable_lambda_data_iteration = 0;
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
@@ -1775,6 +1784,23 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("Person_updatelambda");
+	Person_updatelambda(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_updatelambda = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 14*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("Person_infect");
 	Person_infect(stream1);
     PROFILE_POP_RANGE();
@@ -1866,6 +1892,11 @@ float h_env_TRANSPORT_V;
 float h_env_HOUSEHOLD_V;
 float h_env_CLINIC_V;
 float h_env_CHURCH_V_MULTIPLIER;
+float h_env_WORKPLACE_BETA0;
+float h_env_WORKPLACE_BETAA;
+float h_env_WORKPLACE_BETAS;
+float h_env_WORKPLACE_BETAAS;
+float h_env_WORKPLACE_A;
 
 
 //constant setter
@@ -2384,6 +2415,71 @@ void set_CHURCH_V_MULTIPLIER(float* h_CHURCH_V_MULTIPLIER){
 //constant getter
 const float* get_CHURCH_V_MULTIPLIER(){
     return &h_env_CHURCH_V_MULTIPLIER;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_BETA0(float* h_WORKPLACE_BETA0){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_BETA0, h_WORKPLACE_BETA0, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_BETA0, h_WORKPLACE_BETA0,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_BETA0(){
+    return &h_env_WORKPLACE_BETA0;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_BETAA(float* h_WORKPLACE_BETAA){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_BETAA, h_WORKPLACE_BETAA, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_BETAA, h_WORKPLACE_BETAA,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_BETAA(){
+    return &h_env_WORKPLACE_BETAA;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_BETAS(float* h_WORKPLACE_BETAS){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_BETAS, h_WORKPLACE_BETAS, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_BETAS, h_WORKPLACE_BETAS,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_BETAS(){
+    return &h_env_WORKPLACE_BETAS;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_BETAAS(float* h_WORKPLACE_BETAAS){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_BETAAS, h_WORKPLACE_BETAAS, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_BETAAS, h_WORKPLACE_BETAAS,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_BETAAS(){
+    return &h_env_WORKPLACE_BETAAS;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_A(float* h_WORKPLACE_A){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_A, h_WORKPLACE_A, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_A, h_WORKPLACE_A,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_A(){
+    return &h_env_WORKPLACE_A;
 }
 
 
@@ -3798,6 +3894,45 @@ __host__ float get_Person_default_variable_time_step(unsigned int index){
     }
 }
 
+/** float get_Person_default_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_Person_default_variable_lambda(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_lambda_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->lambda,
+                    d_Persons_default->lambda,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_lambda_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->lambda[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -5007,6 +5142,45 @@ __host__ float get_Person_s2_variable_time_step(unsigned int index){
     }
 }
 
+/** float get_Person_s2_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_Person_s2_variable_lambda(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_lambda_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->lambda,
+                    d_Persons_s2->lambda,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_lambda_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->lambda[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6174,6 +6348,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->lastinfectedid, &h_agent->lastinfectedid, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->time_step, &h_agent->time_step, sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
 
 }
 /*
@@ -6251,6 +6427,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->lastinfectedid, h_src->lastinfectedid, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->time_step, h_src->time_step, count * sizeof(float), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
 
     }
 }
@@ -6669,6 +6847,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->lastinfectedid[i] = src[i]->lastinfectedid;
 			 
 			dst->time_step[i] = src[i]->time_step;
+			 
+			dst->lambda[i] = src[i]->lambda;
 			
 		}
 	}
@@ -6731,6 +6911,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_lastinfected_data_iteration = 0;
     h_Persons_default_variable_lastinfectedid_data_iteration = 0;
     h_Persons_default_variable_time_step_data_iteration = 0;
+    h_Persons_default_variable_lambda_data_iteration = 0;
     
 
 }
@@ -6793,6 +6974,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_lastinfected_data_iteration = 0;
         h_Persons_default_variable_lastinfectedid_data_iteration = 0;
         h_Persons_default_variable_time_step_data_iteration = 0;
+        h_Persons_default_variable_lambda_data_iteration = 0;
         
 
 	}
@@ -6855,6 +7037,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_lastinfected_data_iteration = 0;
     h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
     h_Persons_s2_variable_time_step_data_iteration = 0;
+    h_Persons_s2_variable_lambda_data_iteration = 0;
     
 
 }
@@ -6917,6 +7100,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_lastinfected_data_iteration = 0;
         h_Persons_s2_variable_lastinfectedid_data_iteration = 0;
         h_Persons_s2_variable_time_step_data_iteration = 0;
+        h_Persons_s2_variable_lambda_data_iteration = 0;
         
 
 	}
@@ -8448,6 +8632,23 @@ float max_Person_default_time_step_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+float reduce_Person_default_lambda_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->lambda),  thrust::device_pointer_cast(d_Persons_default->lambda) + h_xmachine_memory_Person_default_count);
+}
+
+float min_Person_default_lambda_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lambda);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_default_lambda_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->lambda);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_s2_id_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->id),  thrust::device_pointer_cast(d_Persons_s2->id) + h_xmachine_memory_Person_s2_count);
@@ -9080,6 +9281,23 @@ float min_Person_s2_time_step_variable(){
 float max_Person_s2_time_step_variable(){
     //max in default stream
     thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->time_step);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Person_s2_lambda_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->lambda),  thrust::device_pointer_cast(d_Persons_s2->lambda) + h_xmachine_memory_Person_s2_count);
+}
+
+float min_Person_s2_lambda_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lambda);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Person_s2_lambda_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->lambda);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -9809,7 +10027,7 @@ void Person_update(cudaStream_t &stream){
 
 	
 /* Shared memory size calculator for agent function */
-int Person_infect_sm_size(int blockSize){
+int Person_updatelambda_sm_size(int blockSize){
 	int sm_size;
 	sm_size = SM_START;
   //Continuous agent and message input has no partitioning
@@ -9821,10 +10039,10 @@ int Person_infect_sm_size(int blockSize){
 	return sm_size;
 }
 
-/** Person_infect
- * Agent function prototype for infect function of Person agent
+/** Person_updatelambda
+ * Agent function prototype for updatelambda function of Person agent
  */
-void Person_infect(cudaStream_t &stream){
+void Person_updatelambda(cudaStream_t &stream){
 
     int sm_size;
     int blockSize;
@@ -9869,24 +10087,24 @@ void Person_infect(cudaStream_t &stream){
 	
 	
 	//calculate the grid block size for main agent function
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_infect, Person_infect_sm_size, state_list_size);
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_updatelambda, Person_updatelambda_sm_size, state_list_size);
 	gridSize = (state_list_size + blockSize - 1) / blockSize;
 	b.x = blockSize;
 	g.x = gridSize;
 	
-	sm_size = Person_infect_sm_size(blockSize);
+	sm_size = Person_updatelambda_sm_size(blockSize);
 	
 	
 	
 	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
 	
 	
-	//MAIN XMACHINE FUNCTION CALL (infect)
+	//MAIN XMACHINE FUNCTION CALL (updatelambda)
 	//Reallocate   : false
 	//Input        : infection
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_infect<<<g, b, sm_size, stream>>>(d_Persons, d_infections, d_rand48);
+	GPUFLAME_updatelambda<<<g, b, sm_size, stream>>>(d_Persons, d_infections);
 	gpuErrchkLaunch();
 	
 	
@@ -9897,7 +10115,7 @@ void Person_infect(cudaStream_t &stream){
     
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
-		printf("Error: Buffer size of infect agents in state s2 will be exceeded moving working agents to next state in function infect\n");
+		printf("Error: Buffer size of updatelambda agents in state s2 will be exceeded moving working agents to next state in function updatelambda\n");
       exit(EXIT_FAILURE);
       }
       
@@ -9905,6 +10123,184 @@ void Person_infect(cudaStream_t &stream){
   Persons_s2_temp = d_Persons;
   d_Persons = d_Persons_s2;
   d_Persons_s2 = Persons_s2_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_infect_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** Person_infect
+ * Agent function prototype for infect function of Person agent
+ */
+void Person_infect(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_s2_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_s2_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//CONTINUOUS AGENT FUNCTION AND THERE IS A FUNCTION CONDITION
+  	
+	//COPY CURRENT STATE COUNT TO WORKING COUNT (host and device)
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_s2_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	
+	//RESET SCAN INPUTS
+	//reset scan input for currentState
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_Person_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_Person_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Persons_s2);
+	gpuErrchkLaunch();
+	//reset scan input for working lists
+	reset_Person_scan_input<<<gridSize, blockSize, 0, stream>>>(d_Persons);
+	gpuErrchkLaunch();
+
+	//APPLY FUNCTION FILTER
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, infect_function_filter, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	infect_function_filter<<<gridSize, blockSize, 0, stream>>>(d_Persons_s2, d_Persons);
+	gpuErrchkLaunch();
+
+	//GRID AND BLOCK SIZE FOR COMPACT
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_Person_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	
+	//COMPACT CURRENT STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Person, 
+        temp_scan_storage_bytes_Person, 
+        d_Persons_s2->_scan_input,
+        d_Persons_s2->_position,
+        h_xmachine_memory_Person_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Persons_s2->_position[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Persons_s2->_scan_input[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_Person_s2_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Person_s2_count = scan_last_sum;
+	//Scatter into swap
+	scatter_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_swap, d_Persons_s2, 0, h_xmachine_memory_Person_count);
+	gpuErrchkLaunch();
+	//use a temp pointer change working swap list with current state list
+	xmachine_memory_Person_list* Persons_s2_temp = d_Persons_s2;
+	d_Persons_s2 = d_Persons_swap;
+	d_Persons_swap = Persons_s2_temp;
+	//update the device count
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_s2_count, &h_xmachine_memory_Person_s2_count, sizeof(int)));	
+		
+	//COMPACT WORKING STATE LIST
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Person, 
+        temp_scan_storage_bytes_Person, 
+        d_Persons->_scan_input,
+        d_Persons->_position,
+        h_xmachine_memory_Person_count, 
+        stream
+    );
+
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_Persons->_position[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_Persons->_scan_input[h_xmachine_memory_Person_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//Scatter into swap
+	scatter_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_swap, d_Persons, 0, h_xmachine_memory_Person_count);
+	gpuErrchkLaunch();
+	//update working agent count after the scatter
+	if (scan_last_included == 1)
+		h_xmachine_memory_Person_count = scan_last_sum+1;
+	else		
+		h_xmachine_memory_Person_count = scan_last_sum;
+    //use a temp pointer change working swap list with current state list
+	xmachine_memory_Person_list* Persons_temp = d_Persons;
+	d_Persons = d_Persons_swap;
+	d_Persons_swap = Persons_temp;
+	//update the device count
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	
+	//CHECK WORKING LIST COUNT IS NOT EQUAL TO 0
+	if (h_xmachine_memory_Person_count == 0)
+	{
+		return;
+	}
+	
+	//Update the state list size for occupancy calculations
+	state_list_size = h_xmachine_memory_Person_count;
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_infect, Person_infect_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_infect_sm_size(blockSize);
+	
+	
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (infect)
+	//Reallocate   : false
+	//Input        : 
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_infect<<<g, b, sm_size, stream>>>(d_Persons, d_rand48);
+	gpuErrchkLaunch();
+	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_s2_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of infect agents in state s2 will be exceeded moving working agents to next state in function infect\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_Person_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_Person_Agents<<<gridSize, blockSize, 0, stream>>>(d_Persons_s2, d_Persons, h_xmachine_memory_Person_s2_count, h_xmachine_memory_Person_count);
+  gpuErrchkLaunch();
         
 	//update new state agent size
 	h_xmachine_memory_Person_s2_count += h_xmachine_memory_Person_count;

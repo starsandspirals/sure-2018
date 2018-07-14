@@ -205,7 +205,31 @@
         <name>CHURCH_V_MULTIPLIER</name>
         <defaultValue>1</defaultValue>
       </gpu:variable>
-
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_BETA0</name>
+        <defaultValue>-1.78923</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_BETAA</name>
+        <defaultValue>-0.03557</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_BETAS</name>
+        <defaultValue>0.16305</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_BETAAS</name>
+        <defaultValue>0.04272</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -367,6 +391,10 @@
           <type>float</type>
           <name>time_step</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
@@ -385,7 +413,7 @@
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
         <gpu:function>
-          <name>infect</name>
+          <name>updatelambda</name>
           <currentState>s2</currentState>
           <nextState>s2</nextState>
           <inputs>
@@ -393,6 +421,46 @@
               <messageName>infection</messageName>
             </gpu:input>
           </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>infect</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <condition>
+            <lhs>
+              <condition>
+                <lhs>
+                  <condition>
+                    <lhs>
+                      <agentVariable>lambda</agentVariable>
+                    </lhs>
+                    <operator>==</operator>
+                    <rhs>
+                      <value>0.0</value>
+                    </rhs>
+                  </condition>
+                </lhs>
+                <operator>||</operator>
+                <rhs>
+                  <condition>
+                    <lhs>
+                      <agentVariable>activetb</agentVariable>
+                    </lhs>
+                    <operator>==</operator>
+                    <rhs>
+                      <value>1</value>
+                    </rhs>
+                  </condition>
+                </rhs>
+              </condition>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>0</value>
+            </rhs>
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
@@ -1078,7 +1146,7 @@
       </gpu:layerFunction>
     </layer>
 
-    <layer>
+   <layer>
       <gpu:layerFunction>
         <name>update</name>
       </gpu:layerFunction>
@@ -1094,19 +1162,25 @@
       <gpu:layerFunction>
         <name>chuupdate</name>
       </gpu:layerFunction>
-    </layer>
+    </layer> 
 
     <layer>
       <gpu:layerFunction>
         <name>trupdate</name>
       </gpu:layerFunction>
-    </layer>
+    </layer> 
 
     <layer>
       <gpu:layerFunction>
         <name>clupdate</name>
       </gpu:layerFunction>
-    </layer> 
+    </layer>
+
+   <layer>
+      <gpu:layerFunction>
+        <name>updatelambda</name>
+      </gpu:layerFunction>
+    </layer>
 
     <layer>
       <gpu:layerFunction>

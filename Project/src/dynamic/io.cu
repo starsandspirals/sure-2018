@@ -357,6 +357,26 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_CHURCH_V_MULTIPLIER()));
     fputs(data, file);
     fputs("</CHURCH_V_MULTIPLIER>\n", file);
+    fputs("\t<WORKPLACE_BETA0>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_BETA0()));
+    fputs(data, file);
+    fputs("</WORKPLACE_BETA0>\n", file);
+    fputs("\t<WORKPLACE_BETAA>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_BETAA()));
+    fputs(data, file);
+    fputs("</WORKPLACE_BETAA>\n", file);
+    fputs("\t<WORKPLACE_BETAS>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_BETAS()));
+    fputs(data, file);
+    fputs("</WORKPLACE_BETAS>\n", file);
+    fputs("\t<WORKPLACE_BETAAS>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_BETAAS()));
+    fputs(data, file);
+    fputs("</WORKPLACE_BETAAS>\n", file);
+    fputs("\t<WORKPLACE_A>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_A()));
+    fputs(data, file);
+    fputs("</WORKPLACE_A>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -519,6 +539,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</time_step>\n", file);
         
+		fputs("<lambda>", file);
+        sprintf(data, "%f", h_Persons_default->lambda[i]);
+		fputs(data, file);
+		fputs("</lambda>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -680,6 +705,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%f", h_Persons_s2->time_step[i]);
 		fputs(data, file);
 		fputs("</time_step>\n", file);
+        
+		fputs("<lambda>", file);
+        sprintf(data, "%f", h_Persons_s2->lambda[i]);
+		fputs(data, file);
+		fputs("</lambda>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -973,6 +1003,16 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_CLINIC_V(&t_CLINIC_V);
     float t_CHURCH_V_MULTIPLIER = (float)1;
     set_CHURCH_V_MULTIPLIER(&t_CHURCH_V_MULTIPLIER);
+    float t_WORKPLACE_BETA0 = (float)-1.78923;
+    set_WORKPLACE_BETA0(&t_WORKPLACE_BETA0);
+    float t_WORKPLACE_BETAA = (float)-0.03557;
+    set_WORKPLACE_BETAA(&t_WORKPLACE_BETAA);
+    float t_WORKPLACE_BETAS = (float)0.16305;
+    set_WORKPLACE_BETAS(&t_WORKPLACE_BETAS);
+    float t_WORKPLACE_BETAAS = (float)0.04272;
+    set_WORKPLACE_BETAAS(&t_WORKPLACE_BETAAS);
+    float t_WORKPLACE_A = (float)3;
+    set_WORKPLACE_A(&t_WORKPLACE_A);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count)
@@ -1025,6 +1065,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_lastinfected;
     int in_Person_lastinfectedid;
     int in_Person_time_step;
+    int in_Person_lambda;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_step;
@@ -1136,6 +1177,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_CHURCH_V_MULTIPLIER;
     
+    int in_env_WORKPLACE_BETA0;
+    
+    int in_env_WORKPLACE_BETAA;
+    
+    int in_env_WORKPLACE_BETAS;
+    
+    int in_env_WORKPLACE_BETAAS;
+    
+    int in_env_WORKPLACE_A;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1179,6 +1230,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int Person_lastinfected;
 	int Person_lastinfectedid;
 	float Person_time_step;
+	float Person_lambda;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	unsigned int Household_step;
@@ -1249,6 +1301,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_HOUSEHOLD_V;
     float env_CLINIC_V;
     float env_CHURCH_V_MULTIPLIER;
+    float env_WORKPLACE_BETA0;
+    float env_WORKPLACE_BETAA;
+    float env_WORKPLACE_BETAS;
+    float env_WORKPLACE_BETAAS;
+    float env_WORKPLACE_A;
     
 
 
@@ -1297,6 +1354,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_lastinfected = 0;
 	in_Person_lastinfectedid = 0;
 	in_Person_time_step = 0;
+	in_Person_lambda = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
@@ -1365,6 +1423,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_HOUSEHOLD_V = 0;
     in_env_CLINIC_V = 0;
     in_env_CHURCH_V_MULTIPLIER = 0;
+    in_env_WORKPLACE_BETA0 = 0;
+    in_env_WORKPLACE_BETAA = 0;
+    in_env_WORKPLACE_BETAS = 0;
+    in_env_WORKPLACE_BETAAS = 0;
+    in_env_WORKPLACE_A = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1400,6 +1463,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->lastinfected[k] = 0;
 		h_Persons->lastinfectedid[k] = 0;
 		h_Persons->time_step[k] = 0;
+		h_Persons->lambda[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1511,6 +1575,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_lastinfected = 0;
     Person_lastinfectedid = 0;
     Person_time_step = 0;
+    Person_lambda = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_step = 0;
@@ -1581,6 +1646,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_HOUSEHOLD_V = 0;
     env_CLINIC_V = 0;
     env_CHURCH_V_MULTIPLIER = 0;
+    env_WORKPLACE_BETA0 = 0;
+    env_WORKPLACE_BETAA = 0;
+    env_WORKPLACE_BETAS = 0;
+    env_WORKPLACE_BETAAS = 0;
+    env_WORKPLACE_A = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1673,6 +1743,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->lastinfected[*h_xmachine_memory_Person_count] = Person_lastinfected;
 					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
 					h_Persons->time_step[*h_xmachine_memory_Person_count] = Person_time_step;
+					h_Persons->lambda[*h_xmachine_memory_Person_count] = Person_lambda;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -1830,6 +1901,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_lastinfected = 0;
                 Person_lastinfectedid = 0;
                 Person_time_step = 0;
+                Person_lambda = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_step = 0;
@@ -1923,6 +1995,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/lastinfectedid") == 0) in_Person_lastinfectedid = 0;
 			if(strcmp(buffer, "time_step") == 0) in_Person_time_step = 1;
 			if(strcmp(buffer, "/time_step") == 0) in_Person_time_step = 0;
+			if(strcmp(buffer, "lambda") == 0) in_Person_lambda = 1;
+			if(strcmp(buffer, "/lambda") == 0) in_Person_lambda = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2061,6 +2135,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/CLINIC_V") == 0) in_env_CLINIC_V = 0;
 			if(strcmp(buffer, "CHURCH_V_MULTIPLIER") == 0) in_env_CHURCH_V_MULTIPLIER = 1;
             if(strcmp(buffer, "/CHURCH_V_MULTIPLIER") == 0) in_env_CHURCH_V_MULTIPLIER = 0;
+			if(strcmp(buffer, "WORKPLACE_BETA0") == 0) in_env_WORKPLACE_BETA0 = 1;
+            if(strcmp(buffer, "/WORKPLACE_BETA0") == 0) in_env_WORKPLACE_BETA0 = 0;
+			if(strcmp(buffer, "WORKPLACE_BETAA") == 0) in_env_WORKPLACE_BETAA = 1;
+            if(strcmp(buffer, "/WORKPLACE_BETAA") == 0) in_env_WORKPLACE_BETAA = 0;
+			if(strcmp(buffer, "WORKPLACE_BETAS") == 0) in_env_WORKPLACE_BETAS = 1;
+            if(strcmp(buffer, "/WORKPLACE_BETAS") == 0) in_env_WORKPLACE_BETAS = 0;
+			if(strcmp(buffer, "WORKPLACE_BETAAS") == 0) in_env_WORKPLACE_BETAAS = 1;
+            if(strcmp(buffer, "/WORKPLACE_BETAAS") == 0) in_env_WORKPLACE_BETAAS = 0;
+			if(strcmp(buffer, "WORKPLACE_A") == 0) in_env_WORKPLACE_A = 1;
+            if(strcmp(buffer, "/WORKPLACE_A") == 0) in_env_WORKPLACE_A = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2171,6 +2255,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_time_step){
                     Person_time_step = (float) fgpu_atof(buffer); 
+                }
+				if(in_Person_lambda){
+                    Person_lambda = (float) fgpu_atof(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 
@@ -2537,6 +2624,41 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_CHURCH_V_MULTIPLIER = (float) fgpu_atof(buffer);
                     
                     set_CHURCH_V_MULTIPLIER(&env_CHURCH_V_MULTIPLIER);
+                  
+              }
+            if(in_env_WORKPLACE_BETA0){
+              
+                    env_WORKPLACE_BETA0 = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_BETA0(&env_WORKPLACE_BETA0);
+                  
+              }
+            if(in_env_WORKPLACE_BETAA){
+              
+                    env_WORKPLACE_BETAA = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_BETAA(&env_WORKPLACE_BETAA);
+                  
+              }
+            if(in_env_WORKPLACE_BETAS){
+              
+                    env_WORKPLACE_BETAS = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_BETAS(&env_WORKPLACE_BETAS);
+                  
+              }
+            if(in_env_WORKPLACE_BETAAS){
+              
+                    env_WORKPLACE_BETAAS = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_BETAAS(&env_WORKPLACE_BETAAS);
+                  
+              }
+            if(in_env_WORKPLACE_A){
+              
+                    env_WORKPLACE_A = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_A(&env_WORKPLACE_A);
                   
               }
             
