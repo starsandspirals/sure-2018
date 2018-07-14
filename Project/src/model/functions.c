@@ -45,31 +45,36 @@ unsigned int h_nextTransportID;
 unsigned int h_nextClinicID;
 unsigned int h_nextWorkplaceID;
 
-__host__ unsigned int getNextID() {
+__host__ unsigned int getNextID()
+{
   unsigned int old = h_nextID;
   h_nextID++;
   return old;
 }
 
-__host__ unsigned int getNextHouseholdID() {
+__host__ unsigned int getNextHouseholdID()
+{
   unsigned int old = h_nextHouseholdID;
   h_nextHouseholdID++;
   return old;
 }
 
-__host__ unsigned int getNextChurchID() {
+__host__ unsigned int getNextChurchID()
+{
   unsigned int old = h_nextChurchID;
   h_nextChurchID++;
   return old;
 }
 
-__host__ unsigned int getNextTransportID() {
+__host__ unsigned int getNextTransportID()
+{
   unsigned int old = h_nextTransportID;
   h_nextTransportID++;
   return old;
 }
 
-__host__ unsigned int getNextWorkplaceID() {
+__host__ unsigned int getNextWorkplaceID()
+{
   unsigned int old = h_nextWorkplaceID;
   h_nextWorkplaceID++;
   return old;
@@ -77,10 +82,13 @@ __host__ unsigned int getNextWorkplaceID() {
 
 // A function to shuffle two arrays with the same permutation, so that
 // information can be kept together during the shuffle.
-__host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
-  if (n > 1) {
+__host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n)
+{
+  if (n > 1)
+  {
     size_t i;
-    for (i = 0; i < n - 1; i++) {
+    for (i = 0; i < n - 1; i++)
+    {
       size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
       unsigned int t1 = array1[j];
       unsigned int t2 = array2[j];
@@ -94,36 +102,42 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n) {
 
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
-__device__ unsigned int dayofweek(unsigned int step) {
+__device__ unsigned int dayofweek(unsigned int step)
+{
   return (step % 2016) / 288;
 }
 
-__device__ unsigned int dayofmonth(unsigned int step) {
+__device__ unsigned int dayofmonth(unsigned int step)
+{
   return (step % 8064) / 288;
 }
 
 // A struct to represent a time of day, and a function that returns a time of
 // day given an iteration number of increments of 5 minutes.
-struct Time {
+struct Time
+{
   unsigned int hour;
   unsigned int minute;
 };
 
-__device__ struct Time timeofday(unsigned int step) {
+__device__ struct Time timeofday(unsigned int step)
+{
   unsigned int hour = (step % 288) / 12;
   unsigned int minute = (step % 12) * 5;
   Time t = {hour, minute};
   return t;
 }
 
-__device__ float device_exp(float x) {
+__device__ float device_exp(float x)
+{
   float y = exp(x);
   return y;
 }
 
 // The function called at the beginning of the program on the CPU, to initialise
 // all agents and their corresponding variables.
-__FLAME_GPU_INIT_FUNC__ void initialiseHost() {
+__FLAME_GPU_INIT_FUNC__ void initialiseHost()
+{
   // Set all of the variables that are input as parameters in the input.xml
   // file, so that they are available in functions later.
 
@@ -258,13 +272,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int employedcount = 0;
   unsigned int workarray[h_agent_AoS_MAX];
 
-  for (unsigned int i = 0; i < 32; i++) {
+  for (unsigned int i = 0; i < 32; i++)
+  {
     sizearray[i] = 0;
   }
 
   // This loop runs once for each age/gender category, so once for every row in
   // the histogram.
-  for (unsigned int i = 0; i < categories; i++) {
+  for (unsigned int i = 0; i < categories; i++)
+  {
 
     // Read in the age/gender category we are working with. (Max age can be
     // infinity, in which case we set this to the max age parameter given in the
@@ -274,16 +290,20 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
     maxagestring = fgets(line, sizeof(line), file);
 
-    if (not strcmp(maxagestring, "Inf\n")) {
+    if (not strcmp(maxagestring, "Inf\n"))
+    {
       maxage = (*get_MAX_AGE());
-    } else {
+    }
+    else
+    {
       maxage = strtol(maxagestring, NULL, 0);
     }
 
     // This loop runs once for each size of household, so once for every column
     // in the histogram. At this point we are working with individual values
     // from the histogram.
-    for (unsigned int j = 0; j < sizes; j++) {
+    for (unsigned int j = 0; j < sizes; j++)
+    {
 
       // Read in the household size we are working with and the relevant value
       // from the histogram.
@@ -296,7 +316,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       // This loop runs once for each individual person, and so this is where we
       // generate the person agents.
-      for (unsigned int k = 0; k < rounded; k++) {
+      for (unsigned int k = 0; k < rounded; k++)
+      {
 
         // Pick a random float between 0 and 1, used for deciding whether the
         // person is a transport user.
@@ -312,24 +333,41 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // interval they belong to.
         age = (rand() % (maxage - minage)) + minage;
 
-        if (gender == 2) {
-          if (age >= 46) {
+        if (gender == 2)
+        {
+          if (age >= 46)
+          {
             rr_as = 0.50;
-          } else if (age >= 26) {
+          }
+          else if (age >= 26)
+          {
             rr_as = 1.25;
-          } else if (age >= 18) {
+          }
+          else if (age >= 18)
+          {
             rr_as = 1.00;
-          } else {
+          }
+          else
+          {
             rr_as = 0.00;
           }
-        } else {
-          if (age >= 46) {
+        }
+        else
+        {
+          if (age >= 46)
+          {
             rr_as = 1.25;
-          } else if (age >= 26) {
+          }
+          else if (age >= 26)
+          {
             rr_as = 3.75;
-          } else if (age >= 18) {
+          }
+          else if (age >= 18)
+          {
             rr_as = 1.00;
-          } else {
+          }
+          else
+          {
             rr_as = 0.00;
           }
         }
@@ -347,20 +385,27 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         float useprob =
             1.0 / (1 + exp(-transport_beta0 - (transport_beta1 * age)));
 
-        if (random < useprob) {
+        if (random < useprob)
+        {
           transportuser = 1;
-        } else {
+        }
+        else
+        {
           transportuser = 0;
         }
 
         // If the person is a transport user, pick a transport frequency and
         // duration for them based on input probabilities; otherwise, set these
         // variables to a dummy value.
-        if (transportuser) {
+        if (transportuser)
+        {
           random = ((float)rand() / (RAND_MAX));
 
-          if (random < transport_freq0) {
-          } else if (random < transport_freq2) {
+          if (random < transport_freq0)
+          {
+          }
+          else if (random < transport_freq2)
+          {
             h_person->transportday1 = (rand() % 5) + 1;
             h_person->transportday2 = -1;
 
@@ -368,11 +413,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
             days[daycount] = h_person->transportday1;
 
             daycount++;
-          } else {
+          }
+          else
+          {
             h_person->transportday1 = (rand() % 5) + 1;
             h_person->transportday2 = h_person->transportday1;
 
-            while (h_person->transportday2 == h_person->transportday1) {
+            while (h_person->transportday2 == h_person->transportday1)
+            {
               h_person->transportday2 = (rand() % 5) + 1;
             }
 
@@ -386,7 +434,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
             daycount++;
           }
-        } else {
+        }
+        else
+        {
           h_person->transport = -1;
           h_person->transportday1 = -1;
           h_person->transportday2 = -1;
@@ -401,33 +451,41 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         random = ((float)rand() / (RAND_MAX));
 
-        if (random < workprob && h_person->age >= 18) {
+        if (random < workprob && h_person->age >= 18)
+        {
           workarray[employedcount] = h_person->id;
           employedcount++;
         }
 
         random = ((float)rand() / (RAND_MAX));
 
-        if ((random < hivprob) && (h_person->age >= 18)) {
+        if ((random < hivprob) && (h_person->age >= 18))
+        {
           h_person->hiv = 1;
 
           random = ((float)rand() / (RAND_MAX));
-          if (random < art_coverage) {
+          if (random < art_coverage)
+          {
             h_person->art = 1;
             weight = rr_as * rr_hiv * rr_art;
 
             unsigned int randomday = rand() % 28;
 
-            while (randomday % 7 == 0 || randomday % 7 == 6) {
+            while (randomday % 7 == 0 || randomday % 7 == 6)
+            {
               randomday = rand() % 28;
             }
 
             h_person->artday = randomday;
-          } else {
+          }
+          else
+          {
             h_person->art = 0;
             weight = rr_as * rr_hiv;
           }
-        } else {
+        }
+        else
+        {
           h_person->hiv = 0;
           h_person->art = 0;
           weight = rr_as;
@@ -464,19 +522,22 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   // Populate the array of person ids with ids up to the total number of people,
   // and then shuffle it so households are assigned randomly.
-  for (unsigned int i = 0; i < total; i++) {
+  for (unsigned int i = 0; i < total; i++)
+  {
     order[i] = i;
   }
 
   shuffle(order, ages, total);
 
-  for (unsigned int i = 0; i < total; i++) {
+  for (unsigned int i = 0; i < total; i++)
+  {
     tbarray[i] = i;
   }
 
   float weightsum = 0;
 
-  for (unsigned int i = 0; i < total; i++) {
+  for (unsigned int i = 0; i < total; i++)
+  {
     weightsum += weights[i];
   }
 
@@ -484,16 +545,20 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   unsigned int activepeople[total];
 
-  for (unsigned int i = 0; i < total; i++) {
+  for (unsigned int i = 0; i < total; i++)
+  {
     activepeople[i] = 0;
   }
 
-  for (unsigned int i = 0; i < tbnumber; i++) {
+  for (unsigned int i = 0; i < tbnumber; i++)
+  {
 
     float randomweight = weightsum * ((float)rand() / (RAND_MAX));
 
-    for (unsigned int j = 0; j < total; j++) {
-      if (randomweight < weights[j]) {
+    for (unsigned int j = 0; j < total; j++)
+    {
+      if (randomweight < weights[j])
+      {
 
         xmachine_memory_TBAssignment *h_tbassignment =
             h_allocate_agent_TBAssignment();
@@ -523,16 +588,19 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int churchfreq;
   unsigned int churchgoing;
 
-  for (unsigned int i = 0; i < h_household_AoS_MAX; i++) {
+  for (unsigned int i = 0; i < h_household_AoS_MAX; i++)
+  {
     activehouseholds[i] = 0;
   }
 
   // This loop runs once for each possible size of household.
-  for (unsigned int i = 1; i < 32; i++) {
+  for (unsigned int i = 1; i < 32; i++)
+  {
 
     // This loop runs once for each individual household, as calculated from the
     // number of people living in households of each size.
-    for (unsigned int j = 0; j < (sizearray[i] / i); j++) {
+    for (unsigned int j = 0; j < (sizearray[i] / i); j++)
+    {
 
       // Allocate memory for the household agent.
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
@@ -547,40 +615,62 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       // input probabilities.
       float random = ((float)rand() / (RAND_MAX));
 
-      if (random < churchprob) {
+      if (random < churchprob)
+      {
         churchgoing = 1;
-      } else {
+      }
+      else
+      {
         churchgoing = 0;
       }
 
       // If the household is churchgoing, decide how frequently they go based on
       // input probabilities; if not, set this variable to a dummy value.
-      if (churchgoing) {
+      if (churchgoing)
+      {
         random = ((float)rand() / (RAND_MAX));
-        if (random < church_prob0) {
+        if (random < church_prob0)
+        {
           churchfreq = 0;
-        } else if (random < church_prob1) {
+        }
+        else if (random < church_prob1)
+        {
           churchfreq = 1;
-        } else if (random < church_prob2) {
+        }
+        else if (random < church_prob2)
+        {
           churchfreq = 2;
-        } else if (random < church_prob3) {
+        }
+        else if (random < church_prob3)
+        {
           churchfreq = 3;
-        } else if (random < church_prob4) {
+        }
+        else if (random < church_prob4)
+        {
           churchfreq = 4;
-        } else if (random < church_prob5) {
+        }
+        else if (random < church_prob5)
+        {
           churchfreq = 5;
-        } else if (random < church_prob6) {
+        }
+        else if (random < church_prob6)
+        {
           churchfreq = 6;
-        } else {
+        }
+        else
+        {
           churchfreq = 7;
         }
-      } else {
+      }
+      else
+      {
         churchfreq = 0;
       }
 
       // Allocate individual people to the household until it is full, keeping
       // track of how many of them are adults.
-      for (unsigned int k = 0; k < i; k++) {
+      for (unsigned int k = 0; k < i; k++)
+      {
         xmachine_memory_HouseholdMembership *h_hhmembership =
             h_allocate_agent_HouseholdMembership();
         h_hhmembership->household_id = h_household->id;
@@ -590,11 +680,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         h_hhmembership->household_size = i;
         count++;
 
-        if (ages[count] >= 15) {
+        if (ages[count] >= 15)
+        {
           adultcount++;
         }
 
-        if (activepeople[order[count]] == 1) {
+        if (activepeople[order[count]] == 1)
+        {
           h_household->active = 1;
         }
 
@@ -607,7 +699,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       // the agent and then free it from memory on the host.
       adult[h_household->id] = adultcount;
 
-      if (h_household->active) {
+      if (h_household->active)
+      {
         activehouseholds[h_household->id] = 1;
       }
 
@@ -622,7 +715,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int hhtotal = get_agent_Household_hhdefault_count();
   unsigned int hhorder[hhtotal];
 
-  for (unsigned int i = 0; i < hhtotal; i++) {
+  for (unsigned int i = 0; i < hhtotal; i++)
+  {
     hhorder[i] = i;
   }
 
@@ -635,7 +729,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   float duration;
 
   // This loop runs until all households have been assigned to a church.
-  while (hhposition < hhtotal) {
+  while (hhposition < hhtotal)
+  {
 
     // Allocate memory for the church agent, and set a variable to keep track of
     // how many adults have been assigned to it.
@@ -647,11 +742,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     // Decide what size the church is, based on given input probabilities.
     float random = ((float)rand() / (RAND_MAX));
 
-    if (random < church_p1) {
+    if (random < church_p1)
+    {
       h_church->size = church_k1;
-    } else if (random < church_p2) {
+    }
+    else if (random < church_p2)
+    {
       h_church->size = church_k2;
-    } else {
+    }
+    else
+    {
       h_church->size = church_k3;
     }
 
@@ -659,9 +759,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     // on the input probability.
     random = ((float)rand() / (RAND_MAX));
 
-    if (random < church_duration) {
+    if (random < church_duration)
+    {
       duration = 1.5;
-    } else {
+    }
+    else
+    {
       duration = 3.5;
     }
 
@@ -669,14 +772,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     // adults, as defined by the size of the church.
     count = 0;
 
-    while (capacity < h_church->size && hhposition < hhtotal) {
+    while (capacity < h_church->size && hhposition < hhtotal)
+    {
       xmachine_memory_ChurchMembership *h_chumembership =
           h_allocate_agent_ChurchMembership();
       h_chumembership->church_id = h_church->id;
       h_chumembership->household_id = hhorder[hhposition];
       h_chumembership->churchdur = duration;
 
-      if (activehouseholds[hhorder[hhposition]] == 1) {
+      if (activehouseholds[hhorder[hhposition]] == 1)
+      {
         h_church->active = 1;
       }
 
@@ -695,13 +800,16 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     h_free_agent_Church(&h_church);
   }
 
-  for (unsigned int i = 1; i <= 5; i++) {
+  for (unsigned int i = 1; i <= 5; i++)
+  {
 
     unsigned int currentday = 0;
     unsigned int currentpeople[h_agent_AoS_MAX];
 
-    for (unsigned int j = 0; j < h_agent_AoS_MAX; j++) {
-      if (days[j] == i) {
+    for (unsigned int j = 0; j < h_agent_AoS_MAX; j++)
+    {
+      if (days[j] == i)
+      {
         currentpeople[currentday] = transport[j];
         currentday++;
       }
@@ -710,7 +818,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     unsigned int countdone = 0;
     unsigned int capacity;
 
-    while (countdone < currentday) {
+    while (countdone < currentday)
+    {
       xmachine_memory_Transport *h_transport = h_allocate_agent_Transport();
       capacity = 0;
 
@@ -718,17 +827,24 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       float random = ((float)rand() / (RAND_MAX));
 
-      if (random < transport_dur20) {
+      if (random < transport_dur20)
+      {
         duration = 20;
-      } else if (random < transport_dur45) {
+      }
+      else if (random < transport_dur45)
+      {
         duration = 45;
-      } else {
+      }
+      else
+      {
         duration = 60;
       }
 
-      while (capacity < transport_size && countdone < currentday) {
+      while (capacity < transport_size && countdone < currentday)
+      {
 
-        if (activepeople[currentpeople[countdone]] == 1) {
+        if (activepeople[currentpeople[countdone]] == 1)
+        {
           h_transport->active = 1;
         }
 
@@ -764,14 +880,17 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   shuffle(workarray, workarray, employedcount);
 
-  while (employedpos < employedcount) {
+  while (employedpos < employedcount)
+  {
 
     xmachine_memory_Workplace *h_workplace = h_allocate_agent_Workplace();
 
     h_workplace->id = getNextWorkplaceID();
 
-    for (unsigned int j = 0; j < workplace_size; j++) {
-      if (employedpos < employedcount) {
+    for (unsigned int j = 0; j < workplace_size; j++)
+    {
+      if (employedpos < employedcount)
+      {
         xmachine_memory_WorkplaceMembership *h_wpmembership =
             h_allocate_agent_WorkplaceMembership();
 
@@ -791,7 +910,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 }
 
 // Function that prints out the number of agents generated after initialisation.
-__FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
+__FLAME_GPU_INIT_FUNC__ void generateAgentsInit()
+{
 
   printf("Population after init function: %u\n",
          get_agent_Person_default_count());
@@ -799,7 +919,8 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
 
 // Function for generating output data in csv files, which runs after every
 // iteration and saves data whenever specified.
-__FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
+__FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
+{
 
   // Assign a variable for the directory where our files will be output, and
   // check which iteration we are currently on.
@@ -813,49 +934,57 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
 
   FILE *fp = fopen(outputFilename.c_str(), "w");
 
-  if (fp != nullptr) {
+  if (fp != nullptr)
+  {
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(fp, "ID, gender, age, household_size, household, church, workplace, hiv, art, "
+    fprintf(fp, "ID, gender, age, household_size, household, church, "
+                "workplace, hiv, art, "
                 "active_tb, "
                 "time_home, time_church, "
-                "time_transport, time_clinic, infections, last_infected_type, "
+                "time_transport, time_clinic, time_workplace, infections, "
+                "last_infected_type, "
                 "last_infected_id\n");
 
-    for (int index = 0; index < get_agent_Person_s2_count(); index++) {
+    for (int index = 0; index < get_agent_Person_s2_count(); index++)
+    {
 
-      fprintf(fp,
-              "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %i, "
-              "%i\n",
-              get_Person_s2_variable_id(index),
-              get_Person_s2_variable_gender(index),
-              get_Person_s2_variable_age(index),
-              get_Person_s2_variable_householdsize(index),
-              get_Person_s2_variable_household(index),
-              get_Person_s2_variable_church(index),
-              get_Person_s2_variable_workplace(index),
-              get_Person_s2_variable_hiv(index),
-              get_Person_s2_variable_art(index),
-              get_Person_s2_variable_activetb(index),
-              get_Person_s2_variable_householdtime(index),
-              get_Person_s2_variable_churchtime(index),
-              get_Person_s2_variable_transporttime(index),
-              get_Person_s2_variable_clinictime(index),
-              get_Person_s2_variable_infections(index),
-              get_Person_s2_variable_lastinfected(index),
-              get_Person_s2_variable_lastinfectedid(index));
+      fprintf(
+          fp,
+          "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, "
+          "%i\n",
+          get_Person_s2_variable_id(index),
+          get_Person_s2_variable_gender(index),
+          get_Person_s2_variable_age(index),
+          get_Person_s2_variable_householdsize(index),
+          get_Person_s2_variable_household(index),
+          get_Person_s2_variable_church(index),
+          get_Person_s2_variable_workplace(index),
+          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
+          get_Person_s2_variable_activetb(index),
+          get_Person_s2_variable_householdtime(index),
+          get_Person_s2_variable_churchtime(index),
+          get_Person_s2_variable_transporttime(index),
+          get_Person_s2_variable_clinictime(index),
+          get_Person_s2_variable_workplacetime(index),
+          get_Person_s2_variable_infections(index),
+          get_Person_s2_variable_lastinfected(index),
+          get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
-  } else {
+  }
+  else
+  {
     fprintf(
         stderr,
         "Error: file %s could not be created for customOutputStepFunction\n",
         outputFilename.c_str());
   }
 
-  if (fp != nullptr && fp != stdout && fp != stderr) {
+  if (fp != nullptr && fp != stdout && fp != stderr)
+  {
     fclose(fp);
     fp = nullptr;
   }
@@ -863,7 +992,8 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {
 
 // At the end of the run, free all of the agents from memory and output the
 // final population of people.
-__FLAME_GPU_EXIT_FUNC__ void exitFunction() {
+__FLAME_GPU_EXIT_FUNC__ void exitFunction()
+{
 
   h_free_agent_Person_array(&h_agent_AoS, h_agent_AoS_MAX);
   h_free_agent_Household_array(&h_household_AoS, h_household_AoS_MAX);
@@ -882,10 +1012,10 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction() {
 
 // The update functions for each agent type, which are involved in deciding
 // where a person is at a given time.
-__FLAME_GPU_FUNC__ int
-update(xmachine_memory_Person *person,
-       xmachine_message_location_list *location_messages,
-       RNG_rand48 *rand48) {
+__FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
+                              xmachine_message_location_list *location_messages,
+                              RNG_rand48 *rand48)
+{
 
   unsigned int day = dayofweek(person->step);
   unsigned int monthday = dayofmonth(person->step);
@@ -893,98 +1023,155 @@ update(xmachine_memory_Person *person,
   unsigned int hour = t.hour;
   unsigned int minute = t.minute;
 
-  if (person->busy == 0) {
-    if (hour == 14 && minute == 0 && person->church != -1) {
-      if (person->churchfreq == 0) {
+  if (person->busy == 0)
+  {
+    if (hour == 18 && minute == 0 && person->church != -1)
+    {
+      if (person->churchfreq == 0)
+      {
         float random = rnd<CONTINUOUS>(rand48);
         float prob = 1 - device_exp(-6.0 / 365);
 
-        if (random < prob) {
+        if (random < prob)
+        {
           person->startstep = person->step;
           person->busy = 1;
           person->location = 1;
           person->locationid = person->church;
-        } else {
+        }
+        else
+        {
           person->location = 0;
           person->locationid = person->household;
         }
-      } else if (person->churchfreq > day) {
+      }
+      else if (person->churchfreq > day)
+      {
         person->startstep = person->step;
         person->busy = 1;
         person->location = 1;
         person->locationid = person->church;
       }
-    } else if (person->transportdur != 0 &&
-               (day == person->transportday1 || day == person->transportday2)) {
-      if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0)) {
+    }
+    else if (person->transportdur != 0 &&
+             (day == person->transportday1 || day == person->transportday2))
+    {
+      if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0))
+      {
         person->startstep = person->step;
         person->busy = 1;
         person->location = 2;
         person->locationid = person->transport;
-      } else {
+      }
+      else
+      {
         person->location = 0;
         person->locationid = person->household;
       }
-    } else if (person->art == 1 && monthday == person->artday && hour == 9 &&
-               minute == 0) {
+    }
+    else if (person->art == 1 && monthday == person->artday && hour == 9 &&
+             minute == 0)
+    {
       person->startstep = person->step;
       person->busy = 1;
       person->location = 3;
       person->locationid = 1;
-    } else {
+    }
+    else if (person->workplace != -1 && day != 0 && day != 6 && hour == 9 &&
+             minute == 0)
+    {
+      person->startstep = person->step;
+      person->busy = 1;
+      person->location = 4;
+      person->locationid = person->workplace;
+    }
+    else
+    {
       person->location = 0;
       person->locationid = person->household;
     }
-  } else {
+  }
+  else
+  {
     if (person->location == 1 &&
-        (float)(person->step - person->startstep) >= person->churchdur * 12) {
+        (float)(person->step - person->startstep) >= person->churchdur * 12)
+    {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
-    } else if (person->location == 2 &&
-               (float)(person->step - person->startstep) >=
-                   person->transportdur / 5) {
+    }
+    else if (person->location == 2 &&
+             (float)(person->step - person->startstep) >=
+                 person->transportdur / 5)
+    {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
-    } else if (person->location == 3 &&
-               (float)(person->step - person->startstep) >= 36) {
+    }
+    else if (person->location == 3 &&
+             (float)(person->step - person->startstep) >= 36)
+    {
+      person->busy = 0;
+      person->location = 0;
+      person->locationid = person->household;
+    }
+    else if (person->location == 4 &&
+             (float)(person->step - person->startstep) >=
+                 WORKPLACE_DUR * 12)
+    {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
     }
   }
 
-  if (person->location == 0) {
+  if (person->location == 0)
+  {
     person->householdtime += 5 * person->time_step;
-  } else if (person->location == 1) {
+  }
+  else if (person->location == 1)
+  {
     person->churchtime += 5 * person->time_step;
-  } else if (person->location == 2) {
+  }
+  else if (person->location == 2)
+  {
     person->transporttime += 5 * person->time_step;
-  } else if (person->location == 3) {
+  }
+  else if (person->location == 3)
+  {
     person->clinictime += 5 * person->time_step;
   }
+  else if (person->location == 4)
+  {
+    person->workplacetime += 5 * person->time_step;
+  }
 
-  if (person->activetb == 1) {
+  if (person->activetb == 1)
+  {
     add_location_message(location_messages, person->id, person->location,
                          person->locationid, person->p, person->q);
   }
+
+  person->step += person->time_step;
 
   return 0;
 }
 
 __FLAME_GPU_FUNC__ int
 updatelambda(xmachine_memory_Person *person,
-             xmachine_message_infection_list *infection_messages) {
+             xmachine_message_infection_list *infection_messages)
+{
 
   xmachine_message_infection *infection_message =
       get_first_infection_message(infection_messages);
   unsigned int location = person->location;
   unsigned int locationid = person->locationid;
 
-  while (infection_message) {
+  while (infection_message)
+  {
     if (location == infection_message->location &&
-        locationid == infection_message->locationid) {
+        locationid == infection_message->locationid)
+    {
       person->lambda = infection_message->lambda;
     }
     infection_message =
@@ -996,13 +1183,15 @@ updatelambda(xmachine_memory_Person *person,
 }
 
 __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
-                              RNG_rand48 *rand48) {
+                              RNG_rand48 *rand48)
+{
 
   float prob =
       1 - device_exp(-person->p * person->lambda * (person->time_step / 12));
   float random = rnd<CONTINUOUS>(rand48);
 
-  if (random < prob) {
+  if (random < prob)
+  {
     person->infections++;
     person->lastinfected = person->location;
     person->lastinfectedid = person->locationid;
@@ -1014,16 +1203,19 @@ __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
 __FLAME_GPU_FUNC__ int
 hhupdate(xmachine_memory_Household *household,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages) {
+         xmachine_message_infection_list *infection_messages)
+{
 
   float qsum = 0.0;
 
   xmachine_message_location *location_message =
       get_first_location_message(location_messages);
 
-  while (location_message) {
+  while (location_message)
+  {
     if (location_message->location == 0 &&
-        location_message->locationid == household->id) {
+        location_message->locationid == household->id)
+    {
       qsum += location_message->q;
     }
     location_message =
@@ -1045,16 +1237,19 @@ hhupdate(xmachine_memory_Household *household,
 __FLAME_GPU_FUNC__ int
 chuupdate(xmachine_memory_Church *church,
           xmachine_message_location_list *location_messages,
-          xmachine_message_infection_list *infection_messages) {
+          xmachine_message_infection_list *infection_messages)
+{
 
   float qsum = 0;
 
   xmachine_message_location *location_message =
       get_first_location_message(location_messages);
 
-  while (location_message) {
+  while (location_message)
+  {
     if (location_message->location == 1 &&
-        location_message->locationid == church->id) {
+        location_message->locationid == church->id)
+    {
       qsum += location_message->q;
     }
     location_message =
@@ -1074,16 +1269,19 @@ chuupdate(xmachine_memory_Church *church,
 __FLAME_GPU_FUNC__ int
 trupdate(xmachine_memory_Transport *transport,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages) {
+         xmachine_message_infection_list *infection_messages)
+{
 
   float qsum = 0;
 
   xmachine_message_location *location_message =
       get_first_location_message(location_messages);
 
-  while (location_message) {
+  while (location_message)
+  {
     if (location_message->location == 2 &&
-        location_message->locationid == transport->id) {
+        location_message->locationid == transport->id)
+    {
       qsum += location_message->q;
     }
     location_message =
@@ -1105,16 +1303,19 @@ trupdate(xmachine_memory_Transport *transport,
 __FLAME_GPU_FUNC__ int
 clupdate(xmachine_memory_Clinic *clinic,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages) {
+         xmachine_message_infection_list *infection_messages)
+{
 
   float qsum = 0;
 
   xmachine_message_location *location_message =
       get_first_location_message(location_messages);
 
-  while (location_message) {
+  while (location_message)
+  {
     if (location_message->location == 3 &&
-        location_message->locationid == clinic->id) {
+        location_message->locationid == clinic->id)
+    {
       qsum += location_message->q;
     }
     location_message =
@@ -1133,28 +1334,33 @@ clupdate(xmachine_memory_Clinic *clinic,
 
 __FLAME_GPU_FUNC__ int
 wpupdate(xmachine_memory_Workplace *workplace,
-          xmachine_message_location_list *location_messages,
-          xmachine_message_infection_list *infection_messages) {
+         xmachine_message_location_list *location_messages,
+         xmachine_message_infection_list *infection_messages)
+{
 
   float qsum = 0;
 
   xmachine_message_location *location_message =
       get_first_location_message(location_messages);
 
-  while (location_message) {
+  while (location_message)
+  {
     if (location_message->location == 4 &&
-        location_message->locationid == workplace->id) {
+        location_message->locationid == workplace->id)
+    {
       qsum += location_message->q;
     }
     location_message =
         get_next_location_message(location_message, location_messages);
   }
 
-  workplace->lambda = (workplace->lambda * device_exp(-WORKPLACE_A * (TIME_STEP / 12))) +
-                   ((qsum / (WORKPLACE_V * WORKPLACE_A)) *
-                    (1 - device_exp(-WORKPLACE_A * (TIME_STEP / 12))));
+  workplace->lambda =
+      (workplace->lambda * device_exp(-WORKPLACE_A * (TIME_STEP / 12))) +
+      ((qsum / (WORKPLACE_V * WORKPLACE_A)) *
+       (1 - device_exp(-WORKPLACE_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 4, workplace->id, workplace->lambda);
+  add_infection_message(infection_messages, 4, workplace->id,
+                        workplace->lambda);
 
   workplace->step += TIME_STEP;
   return 0;
@@ -1162,14 +1368,16 @@ wpupdate(xmachine_memory_Workplace *workplace,
 
 __FLAME_GPU_FUNC__ int
 tbinit(xmachine_memory_TBAssignment *tbassignment,
-       xmachine_message_tb_assignment_list *tb_assignment_messages) {
+       xmachine_message_tb_assignment_list *tb_assignment_messages)
+{
   add_tb_assignment_message(tb_assignment_messages, tbassignment->id);
   return 1;
 }
 
 __FLAME_GPU_FUNC__ int wpinit(
     xmachine_memory_WorkplaceMembership *wpmembership,
-    xmachine_message_workplace_membership_list *workplace_membership_messages) {
+    xmachine_message_workplace_membership_list *workplace_membership_messages)
+{
   add_workplace_membership_message(workplace_membership_messages,
                                    wpmembership->person_id,
                                    wpmembership->workplace_id);
@@ -1178,7 +1386,8 @@ __FLAME_GPU_FUNC__ int wpinit(
 
 __FLAME_GPU_FUNC__ int trinit(
     xmachine_memory_TransportMembership *trmembership,
-    xmachine_message_transport_membership_list *transport_membership_messages) {
+    xmachine_message_transport_membership_list *transport_membership_messages)
+{
   add_transport_membership_message(
       transport_membership_messages, trmembership->person_id,
       trmembership->transport_id, trmembership->duration);
@@ -1187,7 +1396,8 @@ __FLAME_GPU_FUNC__ int trinit(
 
 __FLAME_GPU_FUNC__ int
 chuinit(xmachine_memory_ChurchMembership *chumembership,
-        xmachine_message_church_membership_list *church_membership_messages) {
+        xmachine_message_church_membership_list *church_membership_messages)
+{
   add_church_membership_message(
       church_membership_messages, chumembership->church_id,
       chumembership->household_id, chumembership->churchdur);
@@ -1197,7 +1407,8 @@ chuinit(xmachine_memory_ChurchMembership *chumembership,
 __FLAME_GPU_FUNC__ int hhinit(
     xmachine_memory_HouseholdMembership *hhmembership,
     xmachine_message_church_membership_list *church_membership_messages,
-    xmachine_message_household_membership_list *household_membership_messages) {
+    xmachine_message_household_membership_list *household_membership_messages)
+{
 
   int churchid = -1;
   float churchdur = 0;
@@ -1205,9 +1416,11 @@ __FLAME_GPU_FUNC__ int hhinit(
       get_first_church_membership_message(church_membership_messages);
   unsigned int householdid = hhmembership->household_id;
 
-  while (church_membership_message) {
+  while (church_membership_message)
+  {
     if (church_membership_message->household_id == householdid &&
-        hhmembership->churchgoing) {
+        hhmembership->churchgoing)
+    {
       churchid = (int)church_membership_message->church_id;
       churchdur = church_membership_message->churchdur;
     }
@@ -1223,7 +1436,8 @@ __FLAME_GPU_FUNC__ int hhinit(
 
 __FLAME_GPU_FUNC__ int
 persontbinit(xmachine_memory_Person *person,
-             xmachine_message_tb_assignment_list *tb_assignment_messages) {
+             xmachine_message_tb_assignment_list *tb_assignment_messages)
+{
   unsigned int personid = person->id;
 
   person->p = DEFAULT_P;
@@ -1232,8 +1446,10 @@ persontbinit(xmachine_memory_Person *person,
   xmachine_message_tb_assignment *tb_assignment_message =
       get_first_tb_assignment_message(tb_assignment_messages);
 
-  while (tb_assignment_message) {
-    if (tb_assignment_message->id == personid) {
+  while (tb_assignment_message)
+  {
+    if (tb_assignment_message->id == personid)
+    {
       person->activetb = 1;
     }
     tb_assignment_message = get_next_tb_assignment_message(
@@ -1245,14 +1461,17 @@ persontbinit(xmachine_memory_Person *person,
 
 __FLAME_GPU_FUNC__ int personwpinit(
     xmachine_memory_Person *person,
-    xmachine_message_workplace_membership_list *workplace_membership_messages) {
+    xmachine_message_workplace_membership_list *workplace_membership_messages)
+{
   unsigned int personid = person->id;
   person->workplace = -1;
   xmachine_message_workplace_membership *workplace_membership_message =
       get_first_workplace_membership_message(workplace_membership_messages);
 
-  while (workplace_membership_message) {
-    if (workplace_membership_message->person_id == personid) {
+  while (workplace_membership_message)
+  {
+    if (workplace_membership_message->person_id == personid)
+    {
       person->workplace = workplace_membership_message->workplace_id;
     }
     workplace_membership_message = get_next_workplace_membership_message(
@@ -1264,16 +1483,21 @@ __FLAME_GPU_FUNC__ int personwpinit(
 
 __FLAME_GPU_FUNC__ int persontrinit(
     xmachine_memory_Person *person,
-    xmachine_message_transport_membership_list *transport_membership_messages) {
+    xmachine_message_transport_membership_list *transport_membership_messages)
+{
   unsigned int personid = person->id;
   xmachine_message_transport_membership *transport_membership_message =
       get_first_transport_membership_message(transport_membership_messages);
 
-  while (transport_membership_message) {
-    if (transport_membership_message->person_id == personid) {
+  while (transport_membership_message)
+  {
+    if (transport_membership_message->person_id == personid)
+    {
       person->transport = transport_membership_message->transport_id;
       person->transportdur = transport_membership_message->duration;
-    } else {
+    }
+    else
+    {
     }
     transport_membership_message = get_next_transport_membership_message(
         transport_membership_message, transport_membership_messages);
@@ -1283,13 +1507,16 @@ __FLAME_GPU_FUNC__ int persontrinit(
 }
 __FLAME_GPU_FUNC__ int personhhinit(
     xmachine_memory_Person *person,
-    xmachine_message_household_membership_list *household_membership_messages) {
+    xmachine_message_household_membership_list *household_membership_messages)
+{
   xmachine_message_household_membership *household_membership_message =
       get_first_household_membership_message(household_membership_messages);
   unsigned int personid = person->id;
 
-  while (household_membership_message) {
-    if (household_membership_message->person_id == personid) {
+  while (household_membership_message)
+  {
+    if (household_membership_message->person_id == personid)
+    {
       person->household = household_membership_message->household_id;
       person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;

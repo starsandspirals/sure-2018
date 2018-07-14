@@ -438,6 +438,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</clinictime>\n", file);
         
+		fputs("<workplacetime>", file);
+        sprintf(data, "%u", h_Persons_default->workplacetime[i]);
+		fputs(data, file);
+		fputs("</workplacetime>\n", file);
+        
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_default->age[i]);
 		fputs(data, file);
@@ -609,6 +614,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->clinictime[i]);
 		fputs(data, file);
 		fputs("</clinictime>\n", file);
+        
+		fputs("<workplacetime>", file);
+        sprintf(data, "%u", h_Persons_s2->workplacetime[i]);
+		fputs(data, file);
+		fputs("</workplacetime>\n", file);
         
 		fputs("<age>", file);
         sprintf(data, "%u", h_Persons_s2->age[i]);
@@ -1119,6 +1129,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_churchtime;
     int in_Person_transporttime;
     int in_Person_clinictime;
+    int in_Person_workplacetime;
     int in_Person_age;
     int in_Person_gender;
     int in_Person_householdsize;
@@ -1298,6 +1309,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_churchtime;
 	unsigned int Person_transporttime;
 	unsigned int Person_clinictime;
+	unsigned int Person_workplacetime;
 	unsigned int Person_age;
 	unsigned int Person_gender;
 	unsigned int Person_householdsize;
@@ -1431,6 +1443,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_churchtime = 0;
 	in_Person_transporttime = 0;
 	in_Person_clinictime = 0;
+	in_Person_workplacetime = 0;
 	in_Person_age = 0;
 	in_Person_gender = 0;
 	in_Person_householdsize = 0;
@@ -1549,6 +1562,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->churchtime[k] = 0;
 		h_Persons->transporttime[k] = 0;
 		h_Persons->clinictime[k] = 0;
+		h_Persons->workplacetime[k] = 0;
 		h_Persons->age[k] = 0;
 		h_Persons->gender[k] = 0;
 		h_Persons->householdsize[k] = 0;
@@ -1679,6 +1693,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_churchtime = 0;
     Person_transporttime = 0;
     Person_clinictime = 0;
+    Person_workplacetime = 0;
     Person_age = 0;
     Person_gender = 0;
     Person_householdsize = 0;
@@ -1856,6 +1871,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->churchtime[*h_xmachine_memory_Person_count] = Person_churchtime;
 					h_Persons->transporttime[*h_xmachine_memory_Person_count] = Person_transporttime;
 					h_Persons->clinictime[*h_xmachine_memory_Person_count] = Person_clinictime;
+					h_Persons->workplacetime[*h_xmachine_memory_Person_count] = Person_workplacetime;
 					h_Persons->age[*h_xmachine_memory_Person_count] = Person_age;
 					h_Persons->gender[*h_xmachine_memory_Person_count] = Person_gender;
 					h_Persons->householdsize[*h_xmachine_memory_Person_count] = Person_householdsize;
@@ -2042,6 +2058,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_churchtime = 0;
                 Person_transporttime = 0;
                 Person_clinictime = 0;
+                Person_workplacetime = 0;
                 Person_age = 0;
                 Person_gender = 0;
                 Person_householdsize = 0;
@@ -2117,6 +2134,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/transporttime") == 0) in_Person_transporttime = 0;
 			if(strcmp(buffer, "clinictime") == 0) in_Person_clinictime = 1;
 			if(strcmp(buffer, "/clinictime") == 0) in_Person_clinictime = 0;
+			if(strcmp(buffer, "workplacetime") == 0) in_Person_workplacetime = 1;
+			if(strcmp(buffer, "/workplacetime") == 0) in_Person_workplacetime = 0;
 			if(strcmp(buffer, "age") == 0) in_Person_age = 1;
 			if(strcmp(buffer, "/age") == 0) in_Person_age = 0;
 			if(strcmp(buffer, "gender") == 0) in_Person_gender = 1;
@@ -2370,6 +2389,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_clinictime){
                     Person_clinictime = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_workplacetime){
+                    Person_workplacetime = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_Person_age){
                     Person_age = (unsigned int) fpgu_strtoul(buffer); 

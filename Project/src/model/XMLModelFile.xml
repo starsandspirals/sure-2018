@@ -307,6 +307,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>workplacetime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>age</name>
           <defaultValue>0</defaultValue>
         </gpu:variable>
@@ -1335,11 +1339,11 @@
       </gpu:layerFunction>
     </layer>
 
-   <!--<layer>
+ <!--  <layer>
       <gpu:layerFunction>
         <name>updatelambda</name>
       </gpu:layerFunction>
-    </layer>-->
+    </layer> -->
 
     <layer>
       <gpu:layerFunction>
