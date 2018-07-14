@@ -731,13 +731,6 @@ __FLAME_GPU_INIT_FUNC__ void generateAgentsInit() {
          get_agent_Person_default_count());
 }
 
-// Function that prints out the number of agents after each iteration.
-__FLAME_GPU_STEP_FUNC__ void generatePersonStep() {
-
-  // printf("Population after step function %u\n",
-  //        get_agent_Person_default_count());
-}
-
 // Function for generating output data in csv files, which runs after every
 // iteration and saves data whenever specified.
 __FLAME_GPU_EXIT_FUNC__ void customOutputFunction() {

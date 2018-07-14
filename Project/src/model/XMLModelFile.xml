@@ -233,13 +233,6 @@
       </gpu:exitFunction>
     </gpu:exitFunctions>
 
-    <!-- Functions that will run during each iteration -->
-    <gpu:stepFunctions>
-      <gpu:stepFunction>
-        <gpu:name>generatePersonStep</gpu:name>
-      </gpu:stepFunction>
-    </gpu:stepFunctions>
-
   </gpu:environment>
   <xagents>
 
