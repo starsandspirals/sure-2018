@@ -2173,13 +2173,10 @@ __device__ xmachine_message_transport_membership* get_next_transport_membership_
  * @param person_id agent variable of type unsigned int
  * @param location agent variable of type unsigned int
  * @param locationid agent variable of type unsigned int
- * @param day agent variable of type unsigned int
- * @param hour agent variable of type unsigned int
- * @param minute agent variable of type unsigned int
  * @param p agent variable of type float
  * @param q agent variable of type float
  */
-__device__ void add_location_message(xmachine_message_location_list* messages, unsigned int person_id, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float p, float q){
+__device__ void add_location_message(xmachine_message_location_list* messages, unsigned int person_id, unsigned int location, unsigned int locationid, float p, float q){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_location_count;
@@ -2202,9 +2199,6 @@ __device__ void add_location_message(xmachine_message_location_list* messages, u
 	messages->person_id[index] = person_id;
 	messages->location[index] = location;
 	messages->locationid[index] = locationid;
-	messages->day[index] = day;
-	messages->hour[index] = hour;
-	messages->minute[index] = minute;
 	messages->p[index] = p;
 	messages->q[index] = q;
 
@@ -2230,9 +2224,6 @@ __global__ void scatter_optional_location_messages(xmachine_message_location_lis
 		messages->person_id[output_index] = messages_swap->person_id[index];
 		messages->location[output_index] = messages_swap->location[index];
 		messages->locationid[output_index] = messages_swap->locationid[index];
-		messages->day[output_index] = messages_swap->day[index];
-		messages->hour[output_index] = messages_swap->hour[index];
-		messages->minute[output_index] = messages_swap->minute[index];
 		messages->p[output_index] = messages_swap->p[index];
 		messages->q[output_index] = messages_swap->q[index];				
 	}
@@ -2277,9 +2268,6 @@ __device__ xmachine_message_location* get_first_location_message(xmachine_messag
 	temp_message.person_id = messages->person_id[index];
 	temp_message.location = messages->location[index];
 	temp_message.locationid = messages->locationid[index];
-	temp_message.day = messages->day[index];
-	temp_message.hour = messages->hour[index];
-	temp_message.minute = messages->minute[index];
 	temp_message.p = messages->p[index];
 	temp_message.q = messages->q[index];
 
@@ -2326,9 +2314,6 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 		temp_message.person_id = messages->person_id[index];
 		temp_message.location = messages->location[index];
 		temp_message.locationid = messages->locationid[index];
-		temp_message.day = messages->day[index];
-		temp_message.hour = messages->hour[index];
-		temp_message.minute = messages->minute[index];
 		temp_message.p = messages->p[index];
 		temp_message.q = messages->q[index];
 
@@ -2353,12 +2338,9 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
  * @param messages xmachine_message_infection_list message list to add too
  * @param location agent variable of type unsigned int
  * @param locationid agent variable of type unsigned int
- * @param day agent variable of type unsigned int
- * @param hour agent variable of type unsigned int
- * @param minute agent variable of type unsigned int
  * @param lambda agent variable of type float
  */
-__device__ void add_infection_message(xmachine_message_infection_list* messages, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float lambda){
+__device__ void add_infection_message(xmachine_message_infection_list* messages, unsigned int location, unsigned int locationid, float lambda){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_infection_count;
@@ -2380,9 +2362,6 @@ __device__ void add_infection_message(xmachine_message_infection_list* messages,
 	messages->_position[index] = _position;
 	messages->location[index] = location;
 	messages->locationid[index] = locationid;
-	messages->day[index] = day;
-	messages->hour[index] = hour;
-	messages->minute[index] = minute;
 	messages->lambda[index] = lambda;
 
 }
@@ -2406,9 +2385,6 @@ __global__ void scatter_optional_infection_messages(xmachine_message_infection_l
 		messages->_position[output_index] = output_index;
 		messages->location[output_index] = messages_swap->location[index];
 		messages->locationid[output_index] = messages_swap->locationid[index];
-		messages->day[output_index] = messages_swap->day[index];
-		messages->hour[output_index] = messages_swap->hour[index];
-		messages->minute[output_index] = messages_swap->minute[index];
 		messages->lambda[output_index] = messages_swap->lambda[index];				
 	}
 }
@@ -2451,9 +2427,6 @@ __device__ xmachine_message_infection* get_first_infection_message(xmachine_mess
 	temp_message._position = messages->_position[index];
 	temp_message.location = messages->location[index];
 	temp_message.locationid = messages->locationid[index];
-	temp_message.day = messages->day[index];
-	temp_message.hour = messages->hour[index];
-	temp_message.minute = messages->minute[index];
 	temp_message.lambda = messages->lambda[index];
 
 	//AoS to shared memory
@@ -2498,9 +2471,6 @@ __device__ xmachine_message_infection* get_next_infection_message(xmachine_messa
 		temp_message._position = messages->_position[index];
 		temp_message.location = messages->location[index];
 		temp_message.locationid = messages->locationid[index];
-		temp_message.day = messages->day[index];
-		temp_message.hour = messages->hour[index];
-		temp_message.minute = messages->minute[index];
 		temp_message.lambda = messages->lambda[index];
 
 		//AoS to shared memory

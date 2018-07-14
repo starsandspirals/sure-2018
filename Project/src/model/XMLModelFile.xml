@@ -995,18 +995,6 @@
           <name>locationid</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
-          <name>day</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>hour</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>minute</name>
-        </gpu:variable>
-        <gpu:variable>
           <type>float</type>
           <name>p</name>
         </gpu:variable>
@@ -1030,18 +1018,6 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>locationid</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>day</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>hour</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>minute</name>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
@@ -1109,9 +1085,8 @@
         <name>hhupdate</name>
       </gpu:layerFunction>
     </layer>
-    
 
-     <layer>
+    <layer>
       <gpu:layerFunction>
         <name>chuupdate</name>
       </gpu:layerFunction>

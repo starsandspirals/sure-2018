@@ -355,9 +355,6 @@ struct __align__(16) xmachine_message_location
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
     unsigned int location;        /**< Message variable location of type unsigned int.*/  
     unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
-    unsigned int day;        /**< Message variable day of type unsigned int.*/  
-    unsigned int hour;        /**< Message variable hour of type unsigned int.*/  
-    unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
     float p;        /**< Message variable p of type float.*/  
     float q;        /**< Message variable q of type float.*/
 };
@@ -373,9 +370,6 @@ struct __align__(16) xmachine_message_infection
       
     unsigned int location;        /**< Message variable location of type unsigned int.*/  
     unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
-    unsigned int day;        /**< Message variable day of type unsigned int.*/  
-    unsigned int hour;        /**< Message variable hour of type unsigned int.*/  
-    unsigned int minute;        /**< Message variable minute of type unsigned int.*/  
     float lambda;        /**< Message variable lambda of type float.*/
 };
 
@@ -631,9 +625,6 @@ struct xmachine_message_location_list
     unsigned int person_id [xmachine_message_location_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
     unsigned int location [xmachine_message_location_MAX];    /**< Message memory variable list location of type unsigned int.*/
     unsigned int locationid [xmachine_message_location_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
-    unsigned int day [xmachine_message_location_MAX];    /**< Message memory variable list day of type unsigned int.*/
-    unsigned int hour [xmachine_message_location_MAX];    /**< Message memory variable list hour of type unsigned int.*/
-    unsigned int minute [xmachine_message_location_MAX];    /**< Message memory variable list minute of type unsigned int.*/
     float p [xmachine_message_location_MAX];    /**< Message memory variable list p of type float.*/
     float q [xmachine_message_location_MAX];    /**< Message memory variable list q of type float.*/
     
@@ -651,9 +642,6 @@ struct xmachine_message_infection_list
     
     unsigned int location [xmachine_message_infection_MAX];    /**< Message memory variable list location of type unsigned int.*/
     unsigned int locationid [xmachine_message_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
-    unsigned int day [xmachine_message_infection_MAX];    /**< Message memory variable list day of type unsigned int.*/
-    unsigned int hour [xmachine_message_infection_MAX];    /**< Message memory variable list hour of type unsigned int.*/
-    unsigned int minute [xmachine_message_infection_MAX];    /**< Message memory variable list minute of type unsigned int.*/
     float lambda [xmachine_message_infection_MAX];    /**< Message memory variable list lambda of type float.*/
     
 };
@@ -918,14 +906,11 @@ __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_me
  * @param person_id	message variable of type unsigned int
  * @param location	message variable of type unsigned int
  * @param locationid	message variable of type unsigned int
- * @param day	message variable of type unsigned int
- * @param hour	message variable of type unsigned int
- * @param minute	message variable of type unsigned int
  * @param p	message variable of type float
  * @param q	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float p, float q);
+ __FLAME_GPU_FUNC__ void add_location_message(xmachine_message_location_list* location_messages, unsigned int person_id, unsigned int location, unsigned int locationid, float p, float q);
  
 /** get_first_location_message
  * Get first message function for non partitioned (brute force) messages
@@ -951,13 +936,10 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachin
  * @param agents	xmachine_memory_infection_list agent list
  * @param location	message variable of type unsigned int
  * @param locationid	message variable of type unsigned int
- * @param day	message variable of type unsigned int
- * @param hour	message variable of type unsigned int
- * @param minute	message variable of type unsigned int
  * @param lambda	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_infection_message(xmachine_message_infection_list* infection_messages, unsigned int location, unsigned int locationid, unsigned int day, unsigned int hour, unsigned int minute, float lambda);
+ __FLAME_GPU_FUNC__ void add_infection_message(xmachine_message_infection_list* infection_messages, unsigned int location, unsigned int locationid, float lambda);
  
 /** get_first_infection_message
  * Get first message function for non partitioned (brute force) messages

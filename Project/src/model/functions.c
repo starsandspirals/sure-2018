@@ -483,7 +483,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   unsigned int churchgoing;
 
   for (unsigned int i = 0; i < h_household_AoS_MAX; i++) {
-    activehouseholds[i] = 0;        
+    activehouseholds[i] = 0;
   }
 
   // This loop runs once for each possible size of household.
@@ -893,7 +893,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 
   if (person->activetb == 1) {
     add_location_message(location_messages, person->id, person->location,
-                         person->locationid, day, hour, minute, person->p,
+                         person->locationid, person->p,
                          person->q);
   }
 
@@ -938,10 +938,6 @@ hhupdate(xmachine_memory_Household *household,
          xmachine_message_location_list *location_messages,
          xmachine_message_infection_list *infection_messages) {
 
-  unsigned int day = dayofweek(household->step);
-  struct Time t = timeofday(household->step);
-  unsigned int hour = t.hour;
-  unsigned int minute = t.minute;
   float qsum = 0.0;
 
   xmachine_message_location *location_message =
@@ -961,7 +957,7 @@ hhupdate(xmachine_memory_Household *household,
       ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
        (1 - device_exp(-HOUSEHOLD_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 0, household->id, day, hour, minute,
+  add_infection_message(infection_messages, 0, household->id,
                         household->lambda);
 
   household->step += TIME_STEP;
@@ -973,10 +969,6 @@ chuupdate(xmachine_memory_Church *church,
           xmachine_message_location_list *location_messages,
           xmachine_message_infection_list *infection_messages) {
 
-  unsigned int day = dayofweek(church->step);
-  struct Time t = timeofday(church->step);
-  unsigned int hour = t.hour;
-  unsigned int minute = t.minute;
   float qsum = 0;
 
   xmachine_message_location *location_message =
@@ -995,7 +987,7 @@ chuupdate(xmachine_memory_Church *church,
                    ((qsum / (CHURCH_V_MULTIPLIER * church->size * CHURCH_A)) *
                     (1 - device_exp(-CHURCH_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 1, church->id, day, hour, minute,
+  add_infection_message(infection_messages, 1, church->id,
                         church->lambda);
 
   church->step += TIME_STEP;
@@ -1007,10 +999,6 @@ trupdate(xmachine_memory_Transport *transport,
          xmachine_message_location_list *location_messages,
          xmachine_message_infection_list *infection_messages) {
 
-  unsigned int day = dayofweek(transport->step);
-  struct Time t = timeofday(transport->step);
-  unsigned int hour = t.hour;
-  unsigned int minute = t.minute;
   float qsum = 0;
 
   xmachine_message_location *location_message =
@@ -1030,7 +1018,7 @@ trupdate(xmachine_memory_Transport *transport,
       ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
        (1 - device_exp(-TRANSPORT_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 2, transport->id, day, hour, minute,
+  add_infection_message(infection_messages, 2, transport->id,
                         transport->lambda);
 
   transport->step += TIME_STEP;
@@ -1042,10 +1030,6 @@ clupdate(xmachine_memory_Clinic *clinic,
          xmachine_message_location_list *location_messages,
          xmachine_message_infection_list *infection_messages) {
 
-  unsigned int day = dayofweek(clinic->step);
-  struct Time t = timeofday(clinic->step);
-  unsigned int hour = t.hour;
-  unsigned int minute = t.minute;
   float qsum = 0;
 
   xmachine_message_location *location_message =
@@ -1064,7 +1048,7 @@ clupdate(xmachine_memory_Clinic *clinic,
                    ((qsum / (CLINIC_V * CLINIC_A)) *
                     (1 - device_exp(-CLINIC_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 3, clinic->id, day, hour, minute,
+  add_infection_message(infection_messages, 3, clinic->id,
                         clinic->lambda);
 
   clinic->step += TIME_STEP;
