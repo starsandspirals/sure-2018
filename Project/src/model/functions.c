@@ -906,6 +906,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     }
   }
 
+  unsigned int householdcount = get_agent_Household_hhdefault_count();
+  set_HOUSEHOLDS(&householdcount);
+
   fclose(file);
 }
 
@@ -942,7 +945,7 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
     fprintf(fp, "ID, gender, age, household_size, household, church, "
                 "workplace, hiv, art, "
                 "active_tb, "
-                "time_home, time_church, "
+                "time_home, time_visiting, time_church, "
                 "time_transport, time_clinic, time_workplace, infections, "
                 "last_infected_type, "
                 "last_infected_id\n");
@@ -950,27 +953,29 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(
-          fp,
-          "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, "
-          "%i\n",
-          get_Person_s2_variable_id(index),
-          get_Person_s2_variable_gender(index),
-          get_Person_s2_variable_age(index),
-          get_Person_s2_variable_householdsize(index),
-          get_Person_s2_variable_household(index),
-          get_Person_s2_variable_church(index),
-          get_Person_s2_variable_workplace(index),
-          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
-          get_Person_s2_variable_activetb(index),
-          get_Person_s2_variable_householdtime(index),
-          get_Person_s2_variable_churchtime(index),
-          get_Person_s2_variable_transporttime(index),
-          get_Person_s2_variable_clinictime(index),
-          get_Person_s2_variable_workplacetime(index),
-          get_Person_s2_variable_infections(index),
-          get_Person_s2_variable_lastinfected(index),
-          get_Person_s2_variable_lastinfectedid(index));
+      fprintf(fp,
+              "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
+              "%u, %i, "
+              "%i\n",
+              get_Person_s2_variable_id(index),
+              get_Person_s2_variable_gender(index),
+              get_Person_s2_variable_age(index),
+              get_Person_s2_variable_householdsize(index),
+              get_Person_s2_variable_household(index),
+              get_Person_s2_variable_church(index),
+              get_Person_s2_variable_workplace(index),
+              get_Person_s2_variable_hiv(index),
+              get_Person_s2_variable_art(index),
+              get_Person_s2_variable_activetb(index),
+              get_Person_s2_variable_householdtime(index),
+              get_Person_s2_variable_timevisiting(index),
+              get_Person_s2_variable_churchtime(index),
+              get_Person_s2_variable_transporttime(index),
+              get_Person_s2_variable_clinictime(index),
+              get_Person_s2_variable_workplacetime(index),
+              get_Person_s2_variable_infections(index),
+              get_Person_s2_variable_lastinfected(index),
+              get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
@@ -1085,6 +1090,22 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->location = 4;
       person->locationid = person->workplace;
     }
+    else if (hour == 7 && minute == 0)
+    {
+      float prob = 0.23;
+      float random = rnd<CONTINUOUS>(rand48);
+
+      if (random < prob)
+      {
+        float random = rnd<CONTINUOUS>(rand48);
+        unsigned int randomhouse = ceil(random * HOUSEHOLDS);
+
+        person->startstep = person->step;
+        person->busy = 1;
+        person->location = 0;
+        person->locationid = randomhouse;
+      }
+    }
     else
     {
       person->location = 0;
@@ -1123,9 +1144,19 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->location = 0;
       person->locationid = person->household;
     }
+    else if (person->location == 0 &&
+             (float)(person->step - person->startstep) >= 8)
+    {
+      person->busy = 0;
+      person->locationid = person->household;
+    }
   }
 
-  if (person->location == 0)
+  if (person->location == 0 && person->busy == 1)
+  {
+    person->timevisiting += 5 * person->time_step;
+  }
+  else if (person->location == 0)
   {
     person->householdtime += 5 * person->time_step;
   }

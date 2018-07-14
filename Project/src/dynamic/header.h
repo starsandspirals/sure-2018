@@ -202,6 +202,7 @@ struct __align__(16) xmachine_memory_Person
     int lastinfectedid;    /**< X-machine memory variable lastinfectedid of type int.*/
     float time_step;    /**< X-machine memory variable time_step of type float.*/
     float lambda;    /**< X-machine memory variable lambda of type float.*/
+    unsigned int timevisiting;    /**< X-machine memory variable timevisiting of type unsigned int.*/
 };
 
 /** struct xmachine_memory_TBAssignment
@@ -469,6 +470,7 @@ struct xmachine_memory_Person_list
     int lastinfectedid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfectedid of type int.*/
     float time_step [xmachine_memory_Person_MAX];    /**< X-machine memory variable list time_step of type float.*/
     float lambda [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lambda of type float.*/
+    unsigned int timevisiting [xmachine_memory_Person_MAX];    /**< X-machine memory variable list timevisiting of type unsigned int.*/
 };
 
 /** struct xmachine_memory_TBAssignment_list
@@ -1149,8 +1151,9 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param lastinfectedid	agent agent variable of type int
  * @param time_step	agent agent variable of type float
  * @param lambda	agent agent variable of type float
+ * @param timevisiting	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -2121,6 +2124,15 @@ __host__ float get_Person_default_variable_time_step(unsigned int index);
  */
 __host__ float get_Person_default_variable_lambda(unsigned int index);
 
+/** unsigned int get_Person_default_variable_timevisiting(unsigned int index)
+ * Gets the value of the timevisiting variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable timevisiting
+ */
+__host__ unsigned int get_Person_default_variable_timevisiting(unsigned int index);
+
 /** unsigned int get_Person_s2_variable_id(unsigned int index)
  * Gets the value of the id variable of an Person agent in the s2 state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2426,6 +2438,15 @@ __host__ float get_Person_s2_variable_time_step(unsigned int index);
  * @return value of agent variable lambda
  */
 __host__ float get_Person_s2_variable_lambda(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_timevisiting(unsigned int index)
+ * Gets the value of the timevisiting variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable timevisiting
+ */
+__host__ unsigned int get_Person_s2_variable_timevisiting(unsigned int index);
 
 /** unsigned int get_TBAssignment_tbdefault_variable_id(unsigned int index)
  * Gets the value of the id variable of an TBAssignment agent in the tbdefault state on the host. 
@@ -4056,6 +4077,32 @@ float min_Person_default_lambda_variable();
  */
 float max_Person_default_lambda_variable();
 
+/** unsigned int reduce_Person_default_timevisiting_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_timevisiting_variable();
+
+
+
+/** unsigned int count_Person_default_timevisiting_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_timevisiting_variable(int count_value);
+
+/** unsigned int min_Person_default_timevisiting_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_timevisiting_variable();
+/** unsigned int max_Person_default_timevisiting_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_timevisiting_variable();
+
 /** unsigned int reduce_Person_s2_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -4904,6 +4951,32 @@ float min_Person_s2_lambda_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 float max_Person_s2_lambda_variable();
+
+/** unsigned int reduce_Person_s2_timevisiting_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_timevisiting_variable();
+
+
+
+/** unsigned int count_Person_s2_timevisiting_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_timevisiting_variable(int count_value);
+
+/** unsigned int min_Person_s2_timevisiting_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_timevisiting_variable();
+/** unsigned int max_Person_s2_timevisiting_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_timevisiting_variable();
 
 /** unsigned int reduce_TBAssignment_tbdefault_id_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5821,6 +5894,8 @@ __constant__ unsigned int WORKPLACE_SIZE;
 
 __constant__ float WORKPLACE_V;
 
+__constant__ unsigned int HOUSEHOLDS;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -6348,6 +6423,17 @@ extern const float* get_WORKPLACE_V();
 
 
 extern float h_env_WORKPLACE_V;
+
+/** set_HOUSEHOLDS
+ * Sets the constant variable HOUSEHOLDS on the device which can then be used in the agent functions.
+ * @param h_HOUSEHOLDS value to set the variable
+ */
+extern void set_HOUSEHOLDS(unsigned int* h_HOUSEHOLDS);
+
+extern const unsigned int* get_HOUSEHOLDS();
+
+
+extern unsigned int h_env_HOUSEHOLDS;
 
 
 /** getMaximumBound

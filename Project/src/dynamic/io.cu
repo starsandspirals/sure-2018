@@ -401,6 +401,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_WORKPLACE_V()));
     fputs(data, file);
     fputs("</WORKPLACE_V>\n", file);
+    fputs("\t<HOUSEHOLDS>", file);
+    sprintf(data, "%u", (*get_HOUSEHOLDS()));
+    fputs(data, file);
+    fputs("</HOUSEHOLDS>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -578,6 +582,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</lambda>\n", file);
         
+		fputs("<timevisiting>", file);
+        sprintf(data, "%u", h_Persons_default->timevisiting[i]);
+		fputs(data, file);
+		fputs("</timevisiting>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -754,6 +763,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%f", h_Persons_s2->lambda[i]);
 		fputs(data, file);
 		fputs("</lambda>\n", file);
+        
+		fputs("<timevisiting>", file);
+        sprintf(data, "%u", h_Persons_s2->timevisiting[i]);
+		fputs(data, file);
+		fputs("</timevisiting>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1102,6 +1116,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_WORKPLACE_SIZE(&t_WORKPLACE_SIZE);
     float t_WORKPLACE_V = (float)20;
     set_WORKPLACE_V(&t_WORKPLACE_V);
+    unsigned int t_HOUSEHOLDS = (unsigned int)0;
+    set_HOUSEHOLDS(&t_HOUSEHOLDS);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count)
@@ -1157,6 +1173,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_lastinfectedid;
     int in_Person_time_step;
     int in_Person_lambda;
+    int in_Person_timevisiting;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_step;
@@ -1289,6 +1306,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_WORKPLACE_V;
     
+    int in_env_HOUSEHOLDS;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1337,6 +1356,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int Person_lastinfectedid;
 	float Person_time_step;
 	float Person_lambda;
+	unsigned int Person_timevisiting;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	unsigned int Household_step;
@@ -1420,6 +1440,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     unsigned int env_WORKPLACE_DUR;
     unsigned int env_WORKPLACE_SIZE;
     float env_WORKPLACE_V;
+    unsigned int env_HOUSEHOLDS;
     
 
 
@@ -1471,6 +1492,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_lastinfectedid = 0;
 	in_Person_time_step = 0;
 	in_Person_lambda = 0;
+	in_Person_timevisiting = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
@@ -1552,6 +1574,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_WORKPLACE_DUR = 0;
     in_env_WORKPLACE_SIZE = 0;
     in_env_WORKPLACE_V = 0;
+    in_env_HOUSEHOLDS = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1590,6 +1613,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->lastinfectedid[k] = 0;
 		h_Persons->time_step[k] = 0;
 		h_Persons->lambda[k] = 0;
+		h_Persons->timevisiting[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1721,6 +1745,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_lastinfectedid = 0;
     Person_time_step = 0;
     Person_lambda = 0;
+    Person_timevisiting = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_step = 0;
@@ -1804,6 +1829,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_WORKPLACE_DUR = 0;
     env_WORKPLACE_SIZE = 0;
     env_WORKPLACE_V = 0;
+    env_HOUSEHOLDS = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1899,6 +1925,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
 					h_Persons->time_step[*h_xmachine_memory_Person_count] = Person_time_step;
 					h_Persons->lambda[*h_xmachine_memory_Person_count] = Person_lambda;
+					h_Persons->timevisiting[*h_xmachine_memory_Person_count] = Person_timevisiting;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -2086,6 +2113,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_lastinfectedid = 0;
                 Person_time_step = 0;
                 Person_lambda = 0;
+                Person_timevisiting = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_step = 0;
@@ -2190,6 +2218,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/time_step") == 0) in_Person_time_step = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Person_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Person_lambda = 0;
+			if(strcmp(buffer, "timevisiting") == 0) in_Person_timevisiting = 1;
+			if(strcmp(buffer, "/timevisiting") == 0) in_Person_timevisiting = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2354,6 +2384,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/WORKPLACE_SIZE") == 0) in_env_WORKPLACE_SIZE = 0;
 			if(strcmp(buffer, "WORKPLACE_V") == 0) in_env_WORKPLACE_V = 1;
             if(strcmp(buffer, "/WORKPLACE_V") == 0) in_env_WORKPLACE_V = 0;
+			if(strcmp(buffer, "HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 1;
+            if(strcmp(buffer, "/HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2473,6 +2505,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_lambda){
                     Person_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_Person_timevisiting){
+                    Person_timevisiting = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 
@@ -2910,6 +2945,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_WORKPLACE_V = (float) fgpu_atof(buffer);
                     
                     set_WORKPLACE_V(&env_WORKPLACE_V);
+                  
+              }
+            if(in_env_HOUSEHOLDS){
+              
+                    env_HOUSEHOLDS = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_HOUSEHOLDS(&env_HOUSEHOLDS);
                   
               }
             

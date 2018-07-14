@@ -245,6 +245,11 @@
         <name>WORKPLACE_V</name>
         <defaultValue>20</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>HOUSEHOLDS</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -417,6 +422,10 @@
         <gpu:variable>
           <type>float</type>
           <name>lambda</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>timevisiting</name>
         </gpu:variable>
       </memory>
 
@@ -942,7 +951,6 @@
 
     <gpu:xagent>
       <name>Clinic</name>
-      
 
       <memory>
         <gpu:variable>
