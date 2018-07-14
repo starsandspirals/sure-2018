@@ -211,11 +211,6 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 		{	//copy agent data to newstate list
 			nextState->id[index] = currentState->id[index];
 			nextState->step[index] = currentState->step[index];
-			nextState->size[index] = currentState->size[index];
-			nextState->people[index] = currentState->people[index];
-			nextState->churchgoing[index] = currentState->churchgoing[index];
-			nextState->churchfreq[index] = currentState->churchfreq[index];
-			nextState->adults[index] = currentState->adults[index];
 			nextState->lambda[index] = currentState->lambda[index];
 			nextState->active[index] = currentState->active[index];
 			//set scan input flag to 1
@@ -249,8 +244,6 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 			nextState->id[index] = currentState->id[index];
 			nextState->step[index] = currentState->step[index];
 			nextState->size[index] = currentState->size[index];
-			nextState->duration[index] = currentState->duration[index];
-			nextState->households[index] = currentState->households[index];
 			nextState->lambda[index] = currentState->lambda[index];
 			nextState->active[index] = currentState->active[index];
 			//set scan input flag to 1
@@ -283,9 +276,6 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 		{	//copy agent data to newstate list
 			nextState->id[index] = currentState->id[index];
 			nextState->step[index] = currentState->step[index];
-			nextState->duration[index] = currentState->duration[index];
-			nextState->day[index] = currentState->day[index];
-			nextState->people[index] = currentState->people[index];
 			nextState->lambda[index] = currentState->lambda[index];
 			nextState->active[index] = currentState->active[index];
 			//set scan input flag to 1
@@ -706,13 +696,6 @@ __global__ void scatter_Household_Agents(xmachine_memory_Household_list* agents_
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->step[output_index] = agents_src->step[index];        
-		agents_dst->size[output_index] = agents_src->size[index];
-	    for (int i=0; i<32; i++){
-	      agents_dst->people[(i*xmachine_memory_Household_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Household_MAX)+index];
-	    }        
-		agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];        
-		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];        
-		agents_dst->adults[output_index] = agents_src->adults[index];        
 		agents_dst->lambda[output_index] = agents_src->lambda[index];        
 		agents_dst->active[output_index] = agents_src->active[index];
 	}
@@ -736,13 +719,6 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->step[output_index] = agents_src->step[index];
-	    agents_dst->size[output_index] = agents_src->size[index];
-	    for (int i=0; i<32; i++){
-	      agents_dst->people[(i*xmachine_memory_Household_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Household_MAX)+index];
-	    }
-	    agents_dst->churchgoing[output_index] = agents_src->churchgoing[index];
-	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
-	    agents_dst->adults[output_index] = agents_src->adults[index];
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
 	    agents_dst->active[output_index] = agents_src->active[index];
     }
@@ -753,16 +729,11 @@ __global__ void append_Household_Agents(xmachine_memory_Household_list* agents_d
  * @param agents xmachine_memory_Household_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param step agent variable of type unsigned int
- * @param size agent variable of type unsigned int
- * @param people agent variable of type int
- * @param churchgoing agent variable of type unsigned int
- * @param churchfreq agent variable of type unsigned int
- * @param adults agent variable of type unsigned int
  * @param lambda agent variable of type float
  * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda, unsigned int active){
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, float lambda, unsigned int active){
 	
 	int index;
     
@@ -783,18 +754,14 @@ __device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsi
 	//write data to new buffer
 	agents->id[index] = id;
 	agents->step[index] = step;
-	agents->size[index] = size;
-	agents->churchgoing[index] = churchgoing;
-	agents->churchfreq[index] = churchfreq;
-	agents->adults[index] = adults;
 	agents->lambda[index] = lambda;
 	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, unsigned int size, unsigned int churchgoing, unsigned int churchfreq, unsigned int adults, float lambda, unsigned int active){
-    add_Household_agent<DISCRETE_2D>(agents, id, step, size, churchgoing, churchfreq, adults, lambda, active);
+__device__ void add_Household_agent(xmachine_memory_Household_list* agents, unsigned int id, unsigned int step, float lambda, unsigned int active){
+    add_Household_agent<DISCRETE_2D>(agents, id, step, lambda, active);
 }
 
 /** reorder_Household_agents
@@ -812,46 +779,8 @@ __global__ void reorder_Household_agents(unsigned int* values, xmachine_memory_H
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->step[index] = unordered_agents->step[old_pos];
-	ordered_agents->size[index] = unordered_agents->size[old_pos];
-	for (int i=0; i<32; i++){
-	  ordered_agents->people[(i*xmachine_memory_Household_MAX)+index] = unordered_agents->people[(i*xmachine_memory_Household_MAX)+old_pos];
-	}
-	ordered_agents->churchgoing[index] = unordered_agents->churchgoing[old_pos];
-	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
-	ordered_agents->adults[index] = unordered_agents->adults[old_pos];
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 	ordered_agents->active[index] = unordered_agents->active[old_pos];
-}
-
-/** get_Household_agent_array_value
- *  Template function for accessing Household agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @return return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ T get_Household_agent_array_value(T *array, uint index){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    return array[index*xmachine_memory_Household_MAX];
-    } else {
-    	// Return the default value for this data type 
-	    return 0;
-    }
-}
-
-/** set_Household_agent_array_value
- *  Template function for setting Household agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @param return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ void set_Household_agent_array_value(T *array, uint index, T value){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    array[index*xmachine_memory_Household_MAX] = value;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1025,10 +954,6 @@ __global__ void scatter_Church_Agents(xmachine_memory_Church_list* agents_dst, x
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->step[output_index] = agents_src->step[index];        
 		agents_dst->size[output_index] = agents_src->size[index];        
-		agents_dst->duration[output_index] = agents_src->duration[index];
-	    for (int i=0; i<128; i++){
-	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
-	    }        
 		agents_dst->lambda[output_index] = agents_src->lambda[index];        
 		agents_dst->active[output_index] = agents_src->active[index];
 	}
@@ -1053,10 +978,6 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->step[output_index] = agents_src->step[index];
 	    agents_dst->size[output_index] = agents_src->size[index];
-	    agents_dst->duration[output_index] = agents_src->duration[index];
-	    for (int i=0; i<128; i++){
-	      agents_dst->households[(i*xmachine_memory_Church_MAX)+output_index] = agents_src->households[(i*xmachine_memory_Church_MAX)+index];
-	    }
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
 	    agents_dst->active[output_index] = agents_src->active[index];
     }
@@ -1068,13 +989,11 @@ __global__ void append_Church_Agents(xmachine_memory_Church_list* agents_dst, xm
  * @param id agent variable of type unsigned int
  * @param step agent variable of type unsigned int
  * @param size agent variable of type unsigned int
- * @param duration agent variable of type float
- * @param households agent variable of type int
  * @param lambda agent variable of type float
  * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda, unsigned int active){
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float lambda, unsigned int active){
 	
 	int index;
     
@@ -1096,15 +1015,14 @@ __device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned i
 	agents->id[index] = id;
 	agents->step[index] = step;
 	agents->size[index] = size;
-	agents->duration[index] = duration;
 	agents->lambda[index] = lambda;
 	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float duration, float lambda, unsigned int active){
-    add_Church_agent<DISCRETE_2D>(agents, id, step, size, duration, lambda, active);
+__device__ void add_Church_agent(xmachine_memory_Church_list* agents, unsigned int id, unsigned int step, unsigned int size, float lambda, unsigned int active){
+    add_Church_agent<DISCRETE_2D>(agents, id, step, size, lambda, active);
 }
 
 /** reorder_Church_agents
@@ -1123,43 +1041,8 @@ __global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Chur
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->step[index] = unordered_agents->step[old_pos];
 	ordered_agents->size[index] = unordered_agents->size[old_pos];
-	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
-	for (int i=0; i<128; i++){
-	  ordered_agents->households[(i*xmachine_memory_Church_MAX)+index] = unordered_agents->households[(i*xmachine_memory_Church_MAX)+old_pos];
-	}
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 	ordered_agents->active[index] = unordered_agents->active[old_pos];
-}
-
-/** get_Church_agent_array_value
- *  Template function for accessing Church agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @return return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ T get_Church_agent_array_value(T *array, uint index){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    return array[index*xmachine_memory_Church_MAX];
-    } else {
-    	// Return the default value for this data type 
-	    return 0;
-    }
-}
-
-/** set_Church_agent_array_value
- *  Template function for setting Church agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @param return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ void set_Church_agent_array_value(T *array, uint index, T value){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    array[index*xmachine_memory_Church_MAX] = value;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1322,11 +1205,6 @@ __global__ void scatter_Transport_Agents(xmachine_memory_Transport_list* agents_
         agents_dst->_position[output_index] = output_index;        
 		agents_dst->id[output_index] = agents_src->id[index];        
 		agents_dst->step[output_index] = agents_src->step[index];        
-		agents_dst->duration[output_index] = agents_src->duration[index];        
-		agents_dst->day[output_index] = agents_src->day[index];
-	    for (int i=0; i<16; i++){
-	      agents_dst->people[(i*xmachine_memory_Transport_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Transport_MAX)+index];
-	    }        
 		agents_dst->lambda[output_index] = agents_src->lambda[index];        
 		agents_dst->active[output_index] = agents_src->active[index];
 	}
@@ -1350,11 +1228,6 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
 	    agents_dst->_position[output_index] = output_index;
 	    agents_dst->id[output_index] = agents_src->id[index];
 	    agents_dst->step[output_index] = agents_src->step[index];
-	    agents_dst->duration[output_index] = agents_src->duration[index];
-	    agents_dst->day[output_index] = agents_src->day[index];
-	    for (int i=0; i<16; i++){
-	      agents_dst->people[(i*xmachine_memory_Transport_MAX)+output_index] = agents_src->people[(i*xmachine_memory_Transport_MAX)+index];
-	    }
 	    agents_dst->lambda[output_index] = agents_src->lambda[index];
 	    agents_dst->active[output_index] = agents_src->active[index];
     }
@@ -1365,14 +1238,11 @@ __global__ void append_Transport_Agents(xmachine_memory_Transport_list* agents_d
  * @param agents xmachine_memory_Transport_list to add agents to 
  * @param id agent variable of type unsigned int
  * @param step agent variable of type unsigned int
- * @param duration agent variable of type unsigned int
- * @param day agent variable of type unsigned int
- * @param people agent variable of type int
  * @param lambda agent variable of type float
  * @param active agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda, unsigned int active){
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, float lambda, unsigned int active){
 	
 	int index;
     
@@ -1393,16 +1263,14 @@ __device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsi
 	//write data to new buffer
 	agents->id[index] = id;
 	agents->step[index] = step;
-	agents->duration[index] = duration;
-	agents->day[index] = day;
 	agents->lambda[index] = lambda;
 	agents->active[index] = active;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, unsigned int duration, unsigned int day, float lambda, unsigned int active){
-    add_Transport_agent<DISCRETE_2D>(agents, id, step, duration, day, lambda, active);
+__device__ void add_Transport_agent(xmachine_memory_Transport_list* agents, unsigned int id, unsigned int step, float lambda, unsigned int active){
+    add_Transport_agent<DISCRETE_2D>(agents, id, step, lambda, active);
 }
 
 /** reorder_Transport_agents
@@ -1420,44 +1288,8 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
 	//reorder agent data
 	ordered_agents->id[index] = unordered_agents->id[old_pos];
 	ordered_agents->step[index] = unordered_agents->step[old_pos];
-	ordered_agents->duration[index] = unordered_agents->duration[old_pos];
-	ordered_agents->day[index] = unordered_agents->day[old_pos];
-	for (int i=0; i<16; i++){
-	  ordered_agents->people[(i*xmachine_memory_Transport_MAX)+index] = unordered_agents->people[(i*xmachine_memory_Transport_MAX)+old_pos];
-	}
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 	ordered_agents->active[index] = unordered_agents->active[old_pos];
-}
-
-/** get_Transport_agent_array_value
- *  Template function for accessing Transport agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @return return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ T get_Transport_agent_array_value(T *array, uint index){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    return array[index*xmachine_memory_Transport_MAX];
-    } else {
-    	// Return the default value for this data type 
-	    return 0;
-    }
-}
-
-/** set_Transport_agent_array_value
- *  Template function for setting Transport agent array memory variables. Assumes array points to the first element of the agents array values (offset by agent index)
- *  @param array Agent memory array
- *  @param index to lookup
- *  @param return value
- */
-template<typename T>
-__FLAME_GPU_FUNC__ void set_Transport_agent_array_value(T *array, uint index, T value){
-	// Null check for out of bounds agents (brute force communication. )
-	if(array != nullptr){
-	    array[index*xmachine_memory_Transport_MAX] = value;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3329,22 +3161,12 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
     
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
-	agent.size = agents->size[index];
-    agent.people = &(agents->people[index]);
-	agent.churchgoing = agents->churchgoing[index];
-	agent.churchfreq = agents->churchfreq[index];
-	agent.adults = agents->adults[index];
 	agent.lambda = agents->lambda[index];
 	agent.active = agents->active[index];
 	} else {
 	
 	agent.id = 0;
 	agent.step = 0;
-	agent.size = 0;
-    agent.people = nullptr;
-	agent.churchgoing = 0;
-	agent.churchfreq = 0;
-	agent.adults = 0;
 	agent.lambda = 0;
 	agent.active = 0;
 	}
@@ -3362,10 +3184,6 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	//AoS to SoA - xmachine_memory_hhupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
-	agents->size[index] = agent.size;
-	agents->churchgoing[index] = agent.churchgoing;
-	agents->churchfreq[index] = agent.churchfreq;
-	agents->adults[index] = agent.adults;
 	agents->lambda[index] = agent.lambda;
 	agents->active[index] = agent.active;
 	}
@@ -3441,8 +3259,6 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
 	agent.size = agents->size[index];
-	agent.duration = agents->duration[index];
-    agent.households = &(agents->households[index]);
 	agent.lambda = agents->lambda[index];
 	agent.active = agents->active[index];
 	} else {
@@ -3450,8 +3266,6 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agent.id = 0;
 	agent.step = 0;
 	agent.size = 0;
-	agent.duration = 0;
-    agent.households = nullptr;
 	agent.lambda = 0;
 	agent.active = 0;
 	}
@@ -3470,7 +3284,6 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
 	agents->size[index] = agent.size;
-	agents->duration[index] = agent.duration;
 	agents->lambda[index] = agent.lambda;
 	agents->active[index] = agent.active;
 	}
@@ -3530,18 +3343,12 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
     
 	agent.id = agents->id[index];
 	agent.step = agents->step[index];
-	agent.duration = agents->duration[index];
-	agent.day = agents->day[index];
-    agent.people = &(agents->people[index]);
 	agent.lambda = agents->lambda[index];
 	agent.active = agents->active[index];
 	} else {
 	
 	agent.id = 0;
 	agent.step = 0;
-	agent.duration = 0;
-	agent.day = 0;
-    agent.people = nullptr;
 	agent.lambda = 0;
 	agent.active = 0;
 	}
@@ -3559,8 +3366,6 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	//AoS to SoA - xmachine_memory_trupdate Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
-	agents->duration[index] = agent.duration;
-	agents->day[index] = agent.day;
 	agents->lambda[index] = agent.lambda;
 	agents->active[index] = agent.active;
 	}

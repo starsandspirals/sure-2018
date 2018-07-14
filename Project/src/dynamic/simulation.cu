@@ -272,11 +272,6 @@ unsigned int h_Persons_s2_variable_lastinfectedid_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_step_data_iteration;
-unsigned int h_Households_hhdefault_variable_size_data_iteration;
-unsigned int h_Households_hhdefault_variable_people_data_iteration;
-unsigned int h_Households_hhdefault_variable_churchgoing_data_iteration;
-unsigned int h_Households_hhdefault_variable_churchfreq_data_iteration;
-unsigned int h_Households_hhdefault_variable_adults_data_iteration;
 unsigned int h_Households_hhdefault_variable_lambda_data_iteration;
 unsigned int h_Households_hhdefault_variable_active_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration;
@@ -287,8 +282,6 @@ unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data
 unsigned int h_Churchs_chudefault_variable_id_data_iteration;
 unsigned int h_Churchs_chudefault_variable_step_data_iteration;
 unsigned int h_Churchs_chudefault_variable_size_data_iteration;
-unsigned int h_Churchs_chudefault_variable_duration_data_iteration;
-unsigned int h_Churchs_chudefault_variable_households_data_iteration;
 unsigned int h_Churchs_chudefault_variable_lambda_data_iteration;
 unsigned int h_Churchs_chudefault_variable_active_data_iteration;
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration;
@@ -296,9 +289,6 @@ unsigned int h_ChurchMemberships_chumembershipdefault_variable_household_id_data
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration;
 unsigned int h_Transports_trdefault_variable_id_data_iteration;
 unsigned int h_Transports_trdefault_variable_step_data_iteration;
-unsigned int h_Transports_trdefault_variable_duration_data_iteration;
-unsigned int h_Transports_trdefault_variable_day_data_iteration;
-unsigned int h_Transports_trdefault_variable_people_data_iteration;
 unsigned int h_Transports_trdefault_variable_lambda_data_iteration;
 unsigned int h_Transports_trdefault_variable_active_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration;
@@ -635,11 +625,6 @@ void initialise(char * inputfile){
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
-    h_Households_hhdefault_variable_size_data_iteration = 0;
-    h_Households_hhdefault_variable_people_data_iteration = 0;
-    h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
-    h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
-    h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
     h_Households_hhdefault_variable_active_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
@@ -650,8 +635,6 @@ void initialise(char * inputfile){
     h_Churchs_chudefault_variable_id_data_iteration = 0;
     h_Churchs_chudefault_variable_step_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
-    h_Churchs_chudefault_variable_duration_data_iteration = 0;
-    h_Churchs_chudefault_variable_households_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
     h_Churchs_chudefault_variable_active_data_iteration = 0;
     h_ChurchMemberships_chumembershipdefault_variable_church_id_data_iteration = 0;
@@ -659,9 +642,6 @@ void initialise(char * inputfile){
     h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration = 0;
     h_Transports_trdefault_variable_id_data_iteration = 0;
     h_Transports_trdefault_variable_step_data_iteration = 0;
-    h_Transports_trdefault_variable_duration_data_iteration = 0;
-    h_Transports_trdefault_variable_day_data_iteration = 0;
-    h_Transports_trdefault_variable_people_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
     h_Transports_trdefault_variable_active_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration = 0;
@@ -5075,205 +5055,6 @@ __host__ unsigned int get_Household_hhdefault_variable_step(unsigned int index){
     }
 }
 
-/** unsigned int get_Household_hhdefault_variable_size(unsigned int index)
- * Gets the value of the size variable of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable size
- */
-__host__ unsigned int get_Household_hhdefault_variable_size(unsigned int index){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_size_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Households_hhdefault->size,
-                    d_Households_hhdefault->size,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Households_hhdefault_variable_size_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->size[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access size for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element)
- * Gets the element-th value of the people variable array of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @param element the element index within the variable array
- * @return element-th value of agent variable people
- */
-__host__ int get_Household_hhdefault_variable_people(unsigned int index, unsigned int element){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int numElements = 32;
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count && element < numElements ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_people_data_iteration != currentIteration){
-            
-            for(unsigned int e = 0; e < numElements; e++){
-                gpuErrchk(
-                    cudaMemcpy(
-                        h_Households_hhdefault->people + (e * xmachine_memory_Household_MAX),
-                        d_Households_hhdefault->people + (e * xmachine_memory_Household_MAX), 
-                        count * sizeof(int), 
-                        cudaMemcpyDeviceToHost
-                    )
-                );
-                // Update some global value indicating what data is currently present in that host array.
-                h_Households_hhdefault_variable_people_data_iteration = currentIteration;
-            }
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->people[index + (element * xmachine_memory_Household_MAX)];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access the %u-th element of people for the %u th member of Household_hhdefault. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index)
- * Gets the value of the churchgoing variable of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable churchgoing
- */
-__host__ unsigned int get_Household_hhdefault_variable_churchgoing(unsigned int index){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_churchgoing_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Households_hhdefault->churchgoing,
-                    d_Households_hhdefault->churchgoing,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Households_hhdefault_variable_churchgoing_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->churchgoing[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access churchgoing for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index)
- * Gets the value of the churchfreq variable of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable churchfreq
- */
-__host__ unsigned int get_Household_hhdefault_variable_churchfreq(unsigned int index){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_churchfreq_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Households_hhdefault->churchfreq,
-                    d_Households_hhdefault->churchfreq,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Households_hhdefault_variable_churchfreq_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->churchfreq[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access churchfreq for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Household_hhdefault_variable_adults(unsigned int index)
- * Gets the value of the adults variable of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable adults
- */
-__host__ unsigned int get_Household_hhdefault_variable_adults(unsigned int index){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_adults_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Households_hhdefault->adults,
-                    d_Households_hhdefault->adults,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Households_hhdefault_variable_adults_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->adults[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access adults for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** float get_Household_hhdefault_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -5664,88 +5445,6 @@ __host__ unsigned int get_Church_chudefault_variable_size(unsigned int index){
     }
 }
 
-/** float get_Church_chudefault_variable_duration(unsigned int index)
- * Gets the value of the duration variable of an Church agent in the chudefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable duration
- */
-__host__ float get_Church_chudefault_variable_duration(unsigned int index){
-    unsigned int count = get_agent_Church_chudefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Churchs_chudefault_variable_duration_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Churchs_chudefault->duration,
-                    d_Churchs_chudefault->duration,
-                    count * sizeof(float),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Churchs_chudefault_variable_duration_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Churchs_chudefault->duration[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access duration for the %u th member of Church_chudefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** int get_Church_chudefault_variable_households(unsigned int index, unsigned int element)
- * Gets the element-th value of the households variable array of an Church agent in the chudefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @param element the element index within the variable array
- * @return element-th value of agent variable households
- */
-__host__ int get_Church_chudefault_variable_households(unsigned int index, unsigned int element){
-    unsigned int count = get_agent_Church_chudefault_count();
-    unsigned int numElements = 128;
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count && element < numElements ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Churchs_chudefault_variable_households_data_iteration != currentIteration){
-            
-            for(unsigned int e = 0; e < numElements; e++){
-                gpuErrchk(
-                    cudaMemcpy(
-                        h_Churchs_chudefault->households + (e * xmachine_memory_Church_MAX),
-                        d_Churchs_chudefault->households + (e * xmachine_memory_Church_MAX), 
-                        count * sizeof(int), 
-                        cudaMemcpyDeviceToHost
-                    )
-                );
-                // Update some global value indicating what data is currently present in that host array.
-                h_Churchs_chudefault_variable_households_data_iteration = currentIteration;
-            }
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Churchs_chudefault->households[index + (element * xmachine_memory_Church_MAX)];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access the %u-th element of households for the %u th member of Church_chudefault. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** float get_Church_chudefault_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6013,127 +5712,6 @@ __host__ unsigned int get_Transport_trdefault_variable_step(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access step for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Transport_trdefault_variable_duration(unsigned int index)
- * Gets the value of the duration variable of an Transport agent in the trdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable duration
- */
-__host__ unsigned int get_Transport_trdefault_variable_duration(unsigned int index){
-    unsigned int count = get_agent_Transport_trdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Transports_trdefault_variable_duration_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Transports_trdefault->duration,
-                    d_Transports_trdefault->duration,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Transports_trdefault_variable_duration_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Transports_trdefault->duration[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access duration for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Transport_trdefault_variable_day(unsigned int index)
- * Gets the value of the day variable of an Transport agent in the trdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable day
- */
-__host__ unsigned int get_Transport_trdefault_variable_day(unsigned int index){
-    unsigned int count = get_agent_Transport_trdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Transports_trdefault_variable_day_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Transports_trdefault->day,
-                    d_Transports_trdefault->day,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Transports_trdefault_variable_day_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Transports_trdefault->day[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access day for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** int get_Transport_trdefault_variable_people(unsigned int index, unsigned int element)
- * Gets the element-th value of the people variable array of an Transport agent in the trdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @param element the element index within the variable array
- * @return element-th value of agent variable people
- */
-__host__ int get_Transport_trdefault_variable_people(unsigned int index, unsigned int element){
-    unsigned int count = get_agent_Transport_trdefault_count();
-    unsigned int numElements = 16;
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count && element < numElements ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Transports_trdefault_variable_people_data_iteration != currentIteration){
-            
-            for(unsigned int e = 0; e < numElements; e++){
-                gpuErrchk(
-                    cudaMemcpy(
-                        h_Transports_trdefault->people + (e * xmachine_memory_Transport_MAX),
-                        d_Transports_trdefault->people + (e * xmachine_memory_Transport_MAX), 
-                        count * sizeof(int), 
-                        cudaMemcpyDeviceToHost
-                    )
-                );
-                // Update some global value indicating what data is currently present in that host array.
-                h_Transports_trdefault_variable_people_data_iteration = currentIteration;
-            }
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Transports_trdefault->people[index + (element * xmachine_memory_Transport_MAX)];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access the %u-th element of people for the %u th member of Transport_trdefault. count is %u at iteration %u\n", element, index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -6646,18 +6224,6 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
  
 		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-	for(unsigned int i = 0; i < 32; i++){
-		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_agent->people + i, sizeof(int), cudaMemcpyHostToDevice));
-    }
- 
-		gpuErrchk(cudaMemcpy(d_dst->churchgoing, &h_agent->churchgoing, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->churchfreq, &h_agent->churchfreq, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->adults, &h_agent->adults, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -6680,19 +6246,6 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		for(unsigned int i = 0; i < 32; i++){
-			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Household_MAX), h_src->people + (i * xmachine_memory_Household_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
-        }
-
- 
-		gpuErrchk(cudaMemcpy(d_dst->churchgoing, h_src->churchgoing, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->churchfreq, h_src->churchfreq, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->adults, h_src->adults, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
  
@@ -6761,12 +6314,6 @@ void copy_single_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_list
  
 		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->duration, &h_agent->duration, sizeof(float), cudaMemcpyHostToDevice));
- 
-	for(unsigned int i = 0; i < 128; i++){
-		gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_agent->households + i, sizeof(int), cudaMemcpyHostToDevice));
-    }
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -6791,13 +6338,6 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
 		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(float), cudaMemcpyHostToDevice));
- 
-		for(unsigned int i = 0; i < 128; i++){
-			gpuErrchk(cudaMemcpy(d_dst->households + (i * xmachine_memory_Church_MAX), h_src->households + (i * xmachine_memory_Church_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
-        }
-
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
  
@@ -6856,14 +6396,6 @@ void copy_single_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpor
  
 		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->duration, &h_agent->duration, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->day, &h_agent->day, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-	for(unsigned int i = 0; i < 16; i++){
-		gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Transport_MAX), h_agent->people + i, sizeof(int), cudaMemcpyHostToDevice));
-    }
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -6886,15 +6418,6 @@ void copy_partial_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpo
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->duration, h_src->duration, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->day, h_src->day, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		for(unsigned int i = 0; i < 16; i++){
-			gpuErrchk(cudaMemcpy(d_dst->people + (i * xmachine_memory_Transport_MAX), h_src->people + (i * xmachine_memory_Transport_MAX), count * sizeof(int), cudaMemcpyHostToDevice));
-        }
-
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
  
@@ -7425,17 +6948,10 @@ xmachine_memory_Household* h_allocate_agent_Household(){
 	xmachine_memory_Household* agent = (xmachine_memory_Household*)malloc(sizeof(xmachine_memory_Household));
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Household));
-	// Agent variable arrays must be allocated
-    agent->people = (int*)malloc(32 * sizeof(int));
-	// If we have a default value, set each element correctly.
-	for(unsigned int index = 0; index < 32; index++){
-		agent->people[index] = -1;
-	}
+
 	return agent;
 }
 void h_free_agent_Household(xmachine_memory_Household** agent){
-
-    free((*agent)->people);
  
 	free((*agent));
 	(*agent) = NULL;
@@ -7462,18 +6978,6 @@ void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, 
 			dst->id[i] = src[i]->id;
 			 
 			dst->step[i] = src[i]->step;
-			 
-			dst->size[i] = src[i]->size;
-			 
-			for(unsigned int j = 0; j < 32; j++){
-				dst->people[(j * xmachine_memory_Household_MAX) + i] = src[i]->people[j];
-			}
-			 
-			dst->churchgoing[i] = src[i]->churchgoing;
-			 
-			dst->churchfreq[i] = src[i]->churchfreq;
-			 
-			dst->adults[i] = src[i]->adults;
 			 
 			dst->lambda[i] = src[i]->lambda;
 			 
@@ -7511,11 +7015,6 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Households_hhdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_step_data_iteration = 0;
-    h_Households_hhdefault_variable_size_data_iteration = 0;
-    h_Households_hhdefault_variable_people_data_iteration = 0;
-    h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
-    h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
-    h_Households_hhdefault_variable_adults_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
     h_Households_hhdefault_variable_active_data_iteration = 0;
     
@@ -7551,11 +7050,6 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Households_hhdefault_variable_id_data_iteration = 0;
         h_Households_hhdefault_variable_step_data_iteration = 0;
-        h_Households_hhdefault_variable_size_data_iteration = 0;
-        h_Households_hhdefault_variable_people_data_iteration = 0;
-        h_Households_hhdefault_variable_churchgoing_data_iteration = 0;
-        h_Households_hhdefault_variable_churchfreq_data_iteration = 0;
-        h_Households_hhdefault_variable_adults_data_iteration = 0;
         h_Households_hhdefault_variable_lambda_data_iteration = 0;
         h_Households_hhdefault_variable_active_data_iteration = 0;
         
@@ -7684,17 +7178,10 @@ xmachine_memory_Church* h_allocate_agent_Church(){
 	xmachine_memory_Church* agent = (xmachine_memory_Church*)malloc(sizeof(xmachine_memory_Church));
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Church));
-	// Agent variable arrays must be allocated
-    agent->households = (int*)malloc(128 * sizeof(int));
-	// If we have a default value, set each element correctly.
-	for(unsigned int index = 0; index < 128; index++){
-		agent->households[index] = -1;
-	}
+
 	return agent;
 }
 void h_free_agent_Church(xmachine_memory_Church** agent){
-
-    free((*agent)->households);
  
 	free((*agent));
 	(*agent) = NULL;
@@ -7723,12 +7210,6 @@ void h_unpack_agents_Church_AoS_to_SoA(xmachine_memory_Church_list * dst, xmachi
 			dst->step[i] = src[i]->step;
 			 
 			dst->size[i] = src[i]->size;
-			 
-			dst->duration[i] = src[i]->duration;
-			 
-			for(unsigned int j = 0; j < 128; j++){
-				dst->households[(j * xmachine_memory_Church_MAX) + i] = src[i]->households[j];
-			}
 			 
 			dst->lambda[i] = src[i]->lambda;
 			 
@@ -7767,8 +7248,6 @@ void h_add_agent_Church_chudefault(xmachine_memory_Church* agent){
     h_Churchs_chudefault_variable_id_data_iteration = 0;
     h_Churchs_chudefault_variable_step_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
-    h_Churchs_chudefault_variable_duration_data_iteration = 0;
-    h_Churchs_chudefault_variable_households_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
     h_Churchs_chudefault_variable_active_data_iteration = 0;
     
@@ -7805,8 +7284,6 @@ void h_add_agents_Church_chudefault(xmachine_memory_Church** agents, unsigned in
         h_Churchs_chudefault_variable_id_data_iteration = 0;
         h_Churchs_chudefault_variable_step_data_iteration = 0;
         h_Churchs_chudefault_variable_size_data_iteration = 0;
-        h_Churchs_chudefault_variable_duration_data_iteration = 0;
-        h_Churchs_chudefault_variable_households_data_iteration = 0;
         h_Churchs_chudefault_variable_lambda_data_iteration = 0;
         h_Churchs_chudefault_variable_active_data_iteration = 0;
         
@@ -7927,17 +7404,10 @@ xmachine_memory_Transport* h_allocate_agent_Transport(){
 	xmachine_memory_Transport* agent = (xmachine_memory_Transport*)malloc(sizeof(xmachine_memory_Transport));
 	// Memset the whole agent strcuture
     memset(agent, 0, sizeof(xmachine_memory_Transport));
-	// Agent variable arrays must be allocated
-    agent->people = (int*)malloc(16 * sizeof(int));
-	// If we have a default value, set each element correctly.
-	for(unsigned int index = 0; index < 16; index++){
-		agent->people[index] = -1;
-	}
+
 	return agent;
 }
 void h_free_agent_Transport(xmachine_memory_Transport** agent){
-
-    free((*agent)->people);
  
 	free((*agent));
 	(*agent) = NULL;
@@ -7964,14 +7434,6 @@ void h_unpack_agents_Transport_AoS_to_SoA(xmachine_memory_Transport_list * dst, 
 			dst->id[i] = src[i]->id;
 			 
 			dst->step[i] = src[i]->step;
-			 
-			dst->duration[i] = src[i]->duration;
-			 
-			dst->day[i] = src[i]->day;
-			 
-			for(unsigned int j = 0; j < 16; j++){
-				dst->people[(j * xmachine_memory_Transport_MAX) + i] = src[i]->people[j];
-			}
 			 
 			dst->lambda[i] = src[i]->lambda;
 			 
@@ -8009,9 +7471,6 @@ void h_add_agent_Transport_trdefault(xmachine_memory_Transport* agent){
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Transports_trdefault_variable_id_data_iteration = 0;
     h_Transports_trdefault_variable_step_data_iteration = 0;
-    h_Transports_trdefault_variable_duration_data_iteration = 0;
-    h_Transports_trdefault_variable_day_data_iteration = 0;
-    h_Transports_trdefault_variable_people_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
     h_Transports_trdefault_variable_active_data_iteration = 0;
     
@@ -8047,9 +7506,6 @@ void h_add_agents_Transport_trdefault(xmachine_memory_Transport** agents, unsign
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Transports_trdefault_variable_id_data_iteration = 0;
         h_Transports_trdefault_variable_step_data_iteration = 0;
-        h_Transports_trdefault_variable_duration_data_iteration = 0;
-        h_Transports_trdefault_variable_day_data_iteration = 0;
-        h_Transports_trdefault_variable_people_data_iteration = 0;
         h_Transports_trdefault_variable_lambda_data_iteration = 0;
         h_Transports_trdefault_variable_active_data_iteration = 0;
         
@@ -9577,90 +9033,6 @@ unsigned int max_Household_hhdefault_step_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Household_hhdefault_size_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->size),  thrust::device_pointer_cast(d_Households_hhdefault->size) + h_xmachine_memory_Household_hhdefault_count);
-}
-
-unsigned int count_Household_hhdefault_size_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->size),  thrust::device_pointer_cast(d_Households_hhdefault->size) + h_xmachine_memory_Household_hhdefault_count, count_value);
-}
-unsigned int min_Household_hhdefault_size_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->size);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Household_hhdefault_size_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->size);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Household_hhdefault_churchgoing_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->churchgoing),  thrust::device_pointer_cast(d_Households_hhdefault->churchgoing) + h_xmachine_memory_Household_hhdefault_count);
-}
-
-unsigned int count_Household_hhdefault_churchgoing_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->churchgoing),  thrust::device_pointer_cast(d_Households_hhdefault->churchgoing) + h_xmachine_memory_Household_hhdefault_count, count_value);
-}
-unsigned int min_Household_hhdefault_churchgoing_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchgoing);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Household_hhdefault_churchgoing_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchgoing);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Household_hhdefault_churchfreq_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->churchfreq),  thrust::device_pointer_cast(d_Households_hhdefault->churchfreq) + h_xmachine_memory_Household_hhdefault_count);
-}
-
-unsigned int count_Household_hhdefault_churchfreq_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->churchfreq),  thrust::device_pointer_cast(d_Households_hhdefault->churchfreq) + h_xmachine_memory_Household_hhdefault_count, count_value);
-}
-unsigned int min_Household_hhdefault_churchfreq_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchfreq);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Household_hhdefault_churchfreq_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->churchfreq);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Household_hhdefault_adults_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->adults),  thrust::device_pointer_cast(d_Households_hhdefault->adults) + h_xmachine_memory_Household_hhdefault_count);
-}
-
-unsigned int count_Household_hhdefault_adults_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->adults),  thrust::device_pointer_cast(d_Households_hhdefault->adults) + h_xmachine_memory_Household_hhdefault_count, count_value);
-}
-unsigned int min_Household_hhdefault_adults_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->adults);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Household_hhdefault_adults_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->adults);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 float reduce_Household_hhdefault_lambda_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->lambda),  thrust::device_pointer_cast(d_Households_hhdefault->lambda) + h_xmachine_memory_Household_hhdefault_count);
@@ -9867,23 +9239,6 @@ unsigned int max_Church_chudefault_size_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-float reduce_Church_chudefault_duration_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->duration),  thrust::device_pointer_cast(d_Churchs_chudefault->duration) + h_xmachine_memory_Church_chudefault_count);
-}
-
-float min_Church_chudefault_duration_variable(){
-    //min in default stream
-    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-float max_Church_chudefault_duration_variable(){
-    //max in default stream
-    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->duration);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 float reduce_Church_chudefault_lambda_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->lambda),  thrust::device_pointer_cast(d_Churchs_chudefault->lambda) + h_xmachine_memory_Church_chudefault_count);
@@ -10020,48 +9375,6 @@ unsigned int min_Transport_trdefault_step_variable(){
 unsigned int max_Transport_trdefault_step_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->step);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Transport_trdefault_duration_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Transports_trdefault->duration),  thrust::device_pointer_cast(d_Transports_trdefault->duration) + h_xmachine_memory_Transport_trdefault_count);
-}
-
-unsigned int count_Transport_trdefault_duration_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Transports_trdefault->duration),  thrust::device_pointer_cast(d_Transports_trdefault->duration) + h_xmachine_memory_Transport_trdefault_count, count_value);
-}
-unsigned int min_Transport_trdefault_duration_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->duration);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Transport_trdefault_duration_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->duration);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Transport_trdefault_day_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Transports_trdefault->day),  thrust::device_pointer_cast(d_Transports_trdefault->day) + h_xmachine_memory_Transport_trdefault_count);
-}
-
-unsigned int count_Transport_trdefault_day_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Transports_trdefault->day),  thrust::device_pointer_cast(d_Transports_trdefault->day) + h_xmachine_memory_Transport_trdefault_count, count_value);
-}
-unsigned int min_Transport_trdefault_day_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->day);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Transport_trdefault_day_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->day);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

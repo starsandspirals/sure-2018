@@ -479,6 +479,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
   unsigned int activehouseholds[h_household_AoS_MAX];
 
+  unsigned int churchfreq;
+  unsigned int churchgoing;
+
   for (unsigned int i = 0; i < h_household_AoS_MAX; i++) {
     activehouseholds[i] = 0;        
   }
@@ -497,7 +500,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       // Set the household's id and size.
       h_household->id = getNextHouseholdID();
-      h_household->size = i;
       h_household->active = 0;
 
       // Decide if the household is a churchgoing household, based on given
@@ -505,34 +507,34 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       float random = ((float)rand() / (RAND_MAX));
 
       if (random < churchprob) {
-        h_household->churchgoing = 1;
+        churchgoing = 1;
       } else {
-        h_household->churchgoing = 0;
+        churchgoing = 0;
       }
 
       // If the household is churchgoing, decide how frequently they go based on
       // input probabilities; if not, set this variable to a dummy value.
-      if (h_household->churchgoing) {
+      if (churchgoing) {
         random = ((float)rand() / (RAND_MAX));
         if (random < church_prob0) {
-          h_household->churchfreq = 0;
+          churchfreq = 0;
         } else if (random < church_prob1) {
-          h_household->churchfreq = 1;
+          churchfreq = 1;
         } else if (random < church_prob2) {
-          h_household->churchfreq = 2;
+          churchfreq = 2;
         } else if (random < church_prob3) {
-          h_household->churchfreq = 3;
+          churchfreq = 3;
         } else if (random < church_prob4) {
-          h_household->churchfreq = 4;
+          churchfreq = 4;
         } else if (random < church_prob5) {
-          h_household->churchfreq = 5;
+          churchfreq = 5;
         } else if (random < church_prob6) {
-          h_household->churchfreq = 6;
+          churchfreq = 6;
         } else {
-          h_household->churchfreq = 7;
+          churchfreq = 7;
         }
       } else {
-        h_household->churchfreq = 0;
+        churchfreq = 0;
       }
 
       // Allocate individual people to the household until it is full, keeping
@@ -542,10 +544,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
             h_allocate_agent_HouseholdMembership();
         h_hhmembership->household_id = h_household->id;
         h_hhmembership->person_id = order[count];
-        h_hhmembership->churchgoing = h_household->churchgoing;
-        h_hhmembership->churchfreq = h_household->churchfreq;
-        h_hhmembership->household_size = h_household->size;
-        h_household->people[k] = order[count];
+        h_hhmembership->churchgoing = churchgoing;
+        h_hhmembership->churchfreq = churchfreq;
+        h_hhmembership->household_size = i;
         count++;
 
         if (ages[count] >= 15) {
@@ -563,15 +564,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
       // Set the variable for how many adults belong in the household, generate
       // the agent and then free it from memory on the host.
-      h_household->adults = adultcount;
       adult[h_household->id] = adultcount;
 
       if (h_household->active) {
         activehouseholds[h_household->id] = 1;
       }
 
-      h_household->step = 0;
-      h_household->lambda = 0;
       h_add_agent_Household_hhdefault(h_household);
 
       h_free_agent_Household(&h_household);
@@ -592,6 +590,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   // Set a variable to keep track of our current position in this array.
   unsigned int hhposition = 0;
   unsigned int capacity;
+
+  float duration;
 
   // This loop runs until all households have been assigned to a church.
   while (hhposition < hhtotal) {
@@ -619,9 +619,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     random = ((float)rand() / (RAND_MAX));
 
     if (random < church_duration) {
-      h_church->duration = 1.5;
+      duration = 1.5;
     } else {
-      h_church->duration = 3.5;
+      duration = 3.5;
     }
 
     // Allocate households to the church until it has reached its capacity of
@@ -633,9 +633,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
           h_allocate_agent_ChurchMembership();
       h_chumembership->church_id = h_church->id;
       h_chumembership->household_id = hhorder[hhposition];
-      h_chumembership->churchdur = h_church->duration;
-
-      h_church->households[count] = hhorder[hhposition];
+      h_chumembership->churchdur = duration;
 
       if (activehouseholds[hhorder[hhposition]] == 1) {
         h_church->active = 1;
@@ -651,8 +649,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
     }
 
     // Generate the church agent and free it from memory on the host.
-    h_church->step = 0;
-    h_church->lambda = 0;
     h_add_agent_Church_chudefault(h_church);
 
     h_free_agent_Church(&h_church);
@@ -678,21 +674,18 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
       capacity = 0;
 
       h_transport->id = getNextTransportID();
-      h_transport->day = i;
 
       float random = ((float)rand() / (RAND_MAX));
 
       if (random < transport_dur20) {
-        h_transport->duration = 20;
+        duration = 20;
       } else if (random < transport_dur45) {
-        h_transport->duration = 45;
+        duration = 45;
       } else {
-        h_transport->duration = 60;
+        duration = 60;
       }
 
       while (capacity < transport_size && countdone < currentday) {
-
-        h_transport->people[capacity] = currentpeople[countdone];
 
         if (activepeople[currentpeople[countdone]] == 1) {
           h_transport->active = 1;
@@ -700,9 +693,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
 
         xmachine_memory_TransportMembership *h_trmembership =
             h_allocate_agent_TransportMembership();
-        h_trmembership->person_id = h_transport->people[capacity];
+        h_trmembership->person_id = currentpeople[countdone];
         h_trmembership->transport_id = h_transport->id;
-        h_trmembership->duration = h_transport->duration;
+        h_trmembership->duration = duration;
 
         h_add_agent_TransportMembership_trmembershipdefault(h_trmembership);
 
@@ -712,8 +705,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         countdone++;
       }
 
-      h_transport->step = 0;
-      h_transport->lambda = 0;
       h_add_agent_Transport_trdefault(h_transport);
 
       h_free_agent_Transport(&h_transport);
@@ -729,13 +720,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
   h_add_agent_Clinic_cldefault(h_clinic);
 
   h_free_agent_Clinic(&h_clinic);
-
-  while (fgets(line, sizeof(line), file)) {
-    printf("%s", line);
-  }
-
-  printf("Sizes = %u\n", sizes);
-  printf("Categories = %u\n", categories);
 
   fclose(file);
 }

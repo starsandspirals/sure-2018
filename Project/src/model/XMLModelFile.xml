@@ -506,28 +506,6 @@
           <name>step</name>
         </gpu:variable>
         <gpu:variable>
-          <type>unsigned int</type>
-          <name>size</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>int</type>
-          <name>people</name>
-          <arrayLength>32</arrayLength>
-          <defaultValue>-1</defaultValue>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>churchgoing</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>churchfreq</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>adults</name>
-        </gpu:variable>
-        <gpu:variable>
           <type>float</type>
           <name>lambda</name>
         </gpu:variable>
@@ -656,16 +634,6 @@
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
-          <name>duration</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>int</type>
-          <name>households</name>
-          <arrayLength>128</arrayLength>
-          <defaultValue>-1</defaultValue>
-        </gpu:variable>
-        <gpu:variable>
-          <type>float</type>
           <name>lambda</name>
         </gpu:variable>
         <gpu:variable>
@@ -773,20 +741,6 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>step</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>duration</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>day</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>int</type>
-          <name>people</name>
-          <arrayLength>16</arrayLength>
-          <defaultValue>-1</defaultValue>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
