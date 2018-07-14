@@ -514,6 +514,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
         
+		fputs("<time_step>", file);
+        sprintf(data, "%f", h_Persons_default->time_step[i]);
+		fputs(data, file);
+		fputs("</time_step>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -670,6 +675,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->lastinfectedid[i]);
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
+        
+		fputs("<time_step>", file);
+        sprintf(data, "%f", h_Persons_s2->time_step[i]);
+		fputs(data, file);
+		fputs("</time_step>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1014,6 +1024,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_infections;
     int in_Person_lastinfected;
     int in_Person_lastinfectedid;
+    int in_Person_time_step;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_step;
@@ -1167,6 +1178,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_infections;
 	int Person_lastinfected;
 	int Person_lastinfectedid;
+	float Person_time_step;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	unsigned int Household_step;
@@ -1284,6 +1296,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_infections = 0;
 	in_Person_lastinfected = 0;
 	in_Person_lastinfectedid = 0;
+	in_Person_time_step = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_step = 0;
@@ -1386,6 +1399,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->infections[k] = 0;
 		h_Persons->lastinfected[k] = 0;
 		h_Persons->lastinfectedid[k] = 0;
+		h_Persons->time_step[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1496,6 +1510,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_infections = 0;
     Person_lastinfected = 0;
     Person_lastinfectedid = 0;
+    Person_time_step = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_step = 0;
@@ -1657,6 +1672,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->infections[*h_xmachine_memory_Person_count] = Person_infections;
 					h_Persons->lastinfected[*h_xmachine_memory_Person_count] = Person_lastinfected;
 					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
+					h_Persons->time_step[*h_xmachine_memory_Person_count] = Person_time_step;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -1813,6 +1829,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_infections = 0;
                 Person_lastinfected = 0;
                 Person_lastinfectedid = 0;
+                Person_time_step = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_step = 0;
@@ -1904,6 +1921,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/lastinfected") == 0) in_Person_lastinfected = 0;
 			if(strcmp(buffer, "lastinfectedid") == 0) in_Person_lastinfectedid = 1;
 			if(strcmp(buffer, "/lastinfectedid") == 0) in_Person_lastinfectedid = 0;
+			if(strcmp(buffer, "time_step") == 0) in_Person_time_step = 1;
+			if(strcmp(buffer, "/time_step") == 0) in_Person_time_step = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2149,6 +2168,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_lastinfectedid){
                     Person_lastinfectedid = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_time_step){
+                    Person_time_step = (float) fgpu_atof(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 

@@ -404,6 +404,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost() {
         // Generate the agent and free them from memory on the host.
         h_person->lastinfected = -1;
         h_person->lastinfectedid = -1;
+
+        h_person->time_step = time_step;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -882,13 +884,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   }
 
   if (person->location == 0) {
-    person->householdtime += 5 * TIME_STEP;
+    person->householdtime += 5 * person->time_step;
   } else if (person->location == 1) {
-    person->churchtime += 5 * TIME_STEP;
+    person->churchtime += 5 * person->time_step;
   } else if (person->location == 2) {
-    person->transporttime += 5 * TIME_STEP;
+    person->transporttime += 5 * person->time_step;
   } else if (person->location == 3) {
-    person->clinictime += 5 * TIME_STEP;
+    person->clinictime += 5 * person->time_step;
   }
 
   if (person->activetb == 1) {
@@ -918,8 +920,7 @@ infect(xmachine_memory_Person *person,
         get_next_infection_message(infection_message, infection_messages);
   }
 
-  // float prob = 1 - device_exp(-person->p * lambda * (TIME_STEP / 12));
-  float prob = 0.5;
+  float prob = 1 - device_exp(-person->p * lambda * (person->time_step / 12));
   float random = rnd<CONTINUOUS>(rand48);
 
   if (random < prob && lambda != 0 && person->activetb != 1) {
@@ -928,7 +929,7 @@ infect(xmachine_memory_Person *person,
     person->lastinfectedid = person->locationid;
   }
 
-  person->step += TIME_STEP;
+  person->step += person->time_step;
 
   return 0;
 }

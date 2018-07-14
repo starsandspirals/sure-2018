@@ -363,6 +363,10 @@
           <type>int</type>
           <name>lastinfectedid</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>time_step</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
