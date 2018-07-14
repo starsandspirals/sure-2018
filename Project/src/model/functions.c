@@ -189,6 +189,13 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int workplace_size = *get_WORKPLACE_SIZE();
 
+  float rr_as_f_46 = *get_RR_AS_F_46();
+  float rr_as_f_26 = *get_RR_AS_F_26();
+  float rr_as_f_18 = *get_RR_AS_F_18();
+  float rr_as_m_46 = *get_RR_AS_M_46();
+  float rr_as_m_26 = *get_RR_AS_M_26();
+  float rr_as_m_18 = *get_RR_AS_M_18();
+
   srand(0);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
@@ -337,15 +344,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         {
           if (age >= 46)
           {
-            rr_as = 0.50;
+            rr_as = rr_as_f_46;
           }
           else if (age >= 26)
           {
-            rr_as = 1.25;
+            rr_as = rr_as_f_26;
           }
           else if (age >= 18)
           {
-            rr_as = 1.00;
+            rr_as = rr_as_f_18;
           }
           else
           {
@@ -356,15 +363,15 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         {
           if (age >= 46)
           {
-            rr_as = 1.25;
+            rr_as = rr_as_m_46;
           }
           else if (age >= 26)
           {
-            rr_as = 3.75;
+            rr_as = rr_as_m_26;
           }
           else if (age >= 18)
           {
-            rr_as = 1.00;
+            rr_as = rr_as_m_18;
           }
           else
           {

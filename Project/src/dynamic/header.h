@@ -5896,6 +5896,18 @@ __constant__ float WORKPLACE_V;
 
 __constant__ unsigned int HOUSEHOLDS;
 
+__constant__ float RR_AS_F_46;
+
+__constant__ float RR_AS_F_26;
+
+__constant__ float RR_AS_F_18;
+
+__constant__ float RR_AS_M_46;
+
+__constant__ float RR_AS_M_26;
+
+__constant__ float RR_AS_M_18;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -6434,6 +6446,72 @@ extern const unsigned int* get_HOUSEHOLDS();
 
 
 extern unsigned int h_env_HOUSEHOLDS;
+
+/** set_RR_AS_F_46
+ * Sets the constant variable RR_AS_F_46 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_F_46 value to set the variable
+ */
+extern void set_RR_AS_F_46(float* h_RR_AS_F_46);
+
+extern const float* get_RR_AS_F_46();
+
+
+extern float h_env_RR_AS_F_46;
+
+/** set_RR_AS_F_26
+ * Sets the constant variable RR_AS_F_26 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_F_26 value to set the variable
+ */
+extern void set_RR_AS_F_26(float* h_RR_AS_F_26);
+
+extern const float* get_RR_AS_F_26();
+
+
+extern float h_env_RR_AS_F_26;
+
+/** set_RR_AS_F_18
+ * Sets the constant variable RR_AS_F_18 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_F_18 value to set the variable
+ */
+extern void set_RR_AS_F_18(float* h_RR_AS_F_18);
+
+extern const float* get_RR_AS_F_18();
+
+
+extern float h_env_RR_AS_F_18;
+
+/** set_RR_AS_M_46
+ * Sets the constant variable RR_AS_M_46 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_M_46 value to set the variable
+ */
+extern void set_RR_AS_M_46(float* h_RR_AS_M_46);
+
+extern const float* get_RR_AS_M_46();
+
+
+extern float h_env_RR_AS_M_46;
+
+/** set_RR_AS_M_26
+ * Sets the constant variable RR_AS_M_26 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_M_26 value to set the variable
+ */
+extern void set_RR_AS_M_26(float* h_RR_AS_M_26);
+
+extern const float* get_RR_AS_M_26();
+
+
+extern float h_env_RR_AS_M_26;
+
+/** set_RR_AS_M_18
+ * Sets the constant variable RR_AS_M_18 on the device which can then be used in the agent functions.
+ * @param h_RR_AS_M_18 value to set the variable
+ */
+extern void set_RR_AS_M_18(float* h_RR_AS_M_18);
+
+extern const float* get_RR_AS_M_18();
+
+
+extern float h_env_RR_AS_M_18;
 
 
 /** getMaximumBound

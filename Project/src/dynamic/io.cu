@@ -405,6 +405,30 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_HOUSEHOLDS()));
     fputs(data, file);
     fputs("</HOUSEHOLDS>\n", file);
+    fputs("\t<RR_AS_F_46>", file);
+    sprintf(data, "%f", (*get_RR_AS_F_46()));
+    fputs(data, file);
+    fputs("</RR_AS_F_46>\n", file);
+    fputs("\t<RR_AS_F_26>", file);
+    sprintf(data, "%f", (*get_RR_AS_F_26()));
+    fputs(data, file);
+    fputs("</RR_AS_F_26>\n", file);
+    fputs("\t<RR_AS_F_18>", file);
+    sprintf(data, "%f", (*get_RR_AS_F_18()));
+    fputs(data, file);
+    fputs("</RR_AS_F_18>\n", file);
+    fputs("\t<RR_AS_M_46>", file);
+    sprintf(data, "%f", (*get_RR_AS_M_46()));
+    fputs(data, file);
+    fputs("</RR_AS_M_46>\n", file);
+    fputs("\t<RR_AS_M_26>", file);
+    sprintf(data, "%f", (*get_RR_AS_M_26()));
+    fputs(data, file);
+    fputs("</RR_AS_M_26>\n", file);
+    fputs("\t<RR_AS_M_18>", file);
+    sprintf(data, "%f", (*get_RR_AS_M_18()));
+    fputs(data, file);
+    fputs("</RR_AS_M_18>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1118,6 +1142,18 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_WORKPLACE_V(&t_WORKPLACE_V);
     unsigned int t_HOUSEHOLDS = (unsigned int)0;
     set_HOUSEHOLDS(&t_HOUSEHOLDS);
+    float t_RR_AS_F_46 = (float)0.50;
+    set_RR_AS_F_46(&t_RR_AS_F_46);
+    float t_RR_AS_F_26 = (float)1.25;
+    set_RR_AS_F_26(&t_RR_AS_F_26);
+    float t_RR_AS_F_18 = (float)1.00;
+    set_RR_AS_F_18(&t_RR_AS_F_18);
+    float t_RR_AS_M_46 = (float)1.25;
+    set_RR_AS_M_46(&t_RR_AS_M_46);
+    float t_RR_AS_M_26 = (float)3.75;
+    set_RR_AS_M_26(&t_RR_AS_M_26);
+    float t_RR_AS_M_18 = (float)1.00;
+    set_RR_AS_M_18(&t_RR_AS_M_18);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count)
@@ -1308,6 +1344,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_HOUSEHOLDS;
     
+    int in_env_RR_AS_F_46;
+    
+    int in_env_RR_AS_F_26;
+    
+    int in_env_RR_AS_F_18;
+    
+    int in_env_RR_AS_M_46;
+    
+    int in_env_RR_AS_M_26;
+    
+    int in_env_RR_AS_M_18;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1441,6 +1489,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     unsigned int env_WORKPLACE_SIZE;
     float env_WORKPLACE_V;
     unsigned int env_HOUSEHOLDS;
+    float env_RR_AS_F_46;
+    float env_RR_AS_F_26;
+    float env_RR_AS_F_18;
+    float env_RR_AS_M_46;
+    float env_RR_AS_M_26;
+    float env_RR_AS_M_18;
     
 
 
@@ -1575,6 +1629,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_WORKPLACE_SIZE = 0;
     in_env_WORKPLACE_V = 0;
     in_env_HOUSEHOLDS = 0;
+    in_env_RR_AS_F_46 = 0;
+    in_env_RR_AS_F_26 = 0;
+    in_env_RR_AS_F_18 = 0;
+    in_env_RR_AS_M_46 = 0;
+    in_env_RR_AS_M_26 = 0;
+    in_env_RR_AS_M_18 = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1830,6 +1890,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_WORKPLACE_SIZE = 0;
     env_WORKPLACE_V = 0;
     env_HOUSEHOLDS = 0;
+    env_RR_AS_F_46 = 0;
+    env_RR_AS_F_26 = 0;
+    env_RR_AS_F_18 = 0;
+    env_RR_AS_M_46 = 0;
+    env_RR_AS_M_26 = 0;
+    env_RR_AS_M_18 = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2386,6 +2452,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/WORKPLACE_V") == 0) in_env_WORKPLACE_V = 0;
 			if(strcmp(buffer, "HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 1;
             if(strcmp(buffer, "/HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 0;
+			if(strcmp(buffer, "RR_AS_F_46") == 0) in_env_RR_AS_F_46 = 1;
+            if(strcmp(buffer, "/RR_AS_F_46") == 0) in_env_RR_AS_F_46 = 0;
+			if(strcmp(buffer, "RR_AS_F_26") == 0) in_env_RR_AS_F_26 = 1;
+            if(strcmp(buffer, "/RR_AS_F_26") == 0) in_env_RR_AS_F_26 = 0;
+			if(strcmp(buffer, "RR_AS_F_18") == 0) in_env_RR_AS_F_18 = 1;
+            if(strcmp(buffer, "/RR_AS_F_18") == 0) in_env_RR_AS_F_18 = 0;
+			if(strcmp(buffer, "RR_AS_M_46") == 0) in_env_RR_AS_M_46 = 1;
+            if(strcmp(buffer, "/RR_AS_M_46") == 0) in_env_RR_AS_M_46 = 0;
+			if(strcmp(buffer, "RR_AS_M_26") == 0) in_env_RR_AS_M_26 = 1;
+            if(strcmp(buffer, "/RR_AS_M_26") == 0) in_env_RR_AS_M_26 = 0;
+			if(strcmp(buffer, "RR_AS_M_18") == 0) in_env_RR_AS_M_18 = 1;
+            if(strcmp(buffer, "/RR_AS_M_18") == 0) in_env_RR_AS_M_18 = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2952,6 +3030,48 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_HOUSEHOLDS = (unsigned int) fpgu_strtoul(buffer);
                     
                     set_HOUSEHOLDS(&env_HOUSEHOLDS);
+                  
+              }
+            if(in_env_RR_AS_F_46){
+              
+                    env_RR_AS_F_46 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_F_46(&env_RR_AS_F_46);
+                  
+              }
+            if(in_env_RR_AS_F_26){
+              
+                    env_RR_AS_F_26 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_F_26(&env_RR_AS_F_26);
+                  
+              }
+            if(in_env_RR_AS_F_18){
+              
+                    env_RR_AS_F_18 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_F_18(&env_RR_AS_F_18);
+                  
+              }
+            if(in_env_RR_AS_M_46){
+              
+                    env_RR_AS_M_46 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_M_46(&env_RR_AS_M_46);
+                  
+              }
+            if(in_env_RR_AS_M_26){
+              
+                    env_RR_AS_M_26 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_M_26(&env_RR_AS_M_26);
+                  
+              }
+            if(in_env_RR_AS_M_18){
+              
+                    env_RR_AS_M_18 = (float) fgpu_atof(buffer);
+                    
+                    set_RR_AS_M_18(&env_RR_AS_M_18);
                   
               }
             

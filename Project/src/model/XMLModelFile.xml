@@ -250,6 +250,36 @@
         <name>HOUSEHOLDS</name>
         <defaultValue>0</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_F_46</name>
+        <defaultValue>0.50</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_F_26</name>
+        <defaultValue>1.25</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_F_18</name>
+        <defaultValue>1.00</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_M_46</name>
+        <defaultValue>1.25</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_M_26</name>
+        <defaultValue>3.75</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>RR_AS_M_18</name>
+        <defaultValue>1.00</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

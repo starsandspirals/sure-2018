@@ -2164,6 +2164,12 @@ unsigned int h_env_WORKPLACE_DUR;
 unsigned int h_env_WORKPLACE_SIZE;
 float h_env_WORKPLACE_V;
 unsigned int h_env_HOUSEHOLDS;
+float h_env_RR_AS_F_46;
+float h_env_RR_AS_F_26;
+float h_env_RR_AS_F_18;
+float h_env_RR_AS_M_46;
+float h_env_RR_AS_M_26;
+float h_env_RR_AS_M_18;
 
 
 //constant setter
@@ -2799,6 +2805,84 @@ void set_HOUSEHOLDS(unsigned int* h_HOUSEHOLDS){
 //constant getter
 const unsigned int* get_HOUSEHOLDS(){
     return &h_env_HOUSEHOLDS;
+}
+
+
+
+//constant setter
+void set_RR_AS_F_46(float* h_RR_AS_F_46){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_F_46, h_RR_AS_F_46, sizeof(float)));
+    memcpy(&h_env_RR_AS_F_46, h_RR_AS_F_46,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_F_46(){
+    return &h_env_RR_AS_F_46;
+}
+
+
+
+//constant setter
+void set_RR_AS_F_26(float* h_RR_AS_F_26){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_F_26, h_RR_AS_F_26, sizeof(float)));
+    memcpy(&h_env_RR_AS_F_26, h_RR_AS_F_26,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_F_26(){
+    return &h_env_RR_AS_F_26;
+}
+
+
+
+//constant setter
+void set_RR_AS_F_18(float* h_RR_AS_F_18){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_F_18, h_RR_AS_F_18, sizeof(float)));
+    memcpy(&h_env_RR_AS_F_18, h_RR_AS_F_18,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_F_18(){
+    return &h_env_RR_AS_F_18;
+}
+
+
+
+//constant setter
+void set_RR_AS_M_46(float* h_RR_AS_M_46){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_M_46, h_RR_AS_M_46, sizeof(float)));
+    memcpy(&h_env_RR_AS_M_46, h_RR_AS_M_46,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_M_46(){
+    return &h_env_RR_AS_M_46;
+}
+
+
+
+//constant setter
+void set_RR_AS_M_26(float* h_RR_AS_M_26){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_M_26, h_RR_AS_M_26, sizeof(float)));
+    memcpy(&h_env_RR_AS_M_26, h_RR_AS_M_26,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_M_26(){
+    return &h_env_RR_AS_M_26;
+}
+
+
+
+//constant setter
+void set_RR_AS_M_18(float* h_RR_AS_M_18){
+    gpuErrchk(cudaMemcpyToSymbol(RR_AS_M_18, h_RR_AS_M_18, sizeof(float)));
+    memcpy(&h_env_RR_AS_M_18, h_RR_AS_M_18,sizeof(float));
+}
+
+//constant getter
+const float* get_RR_AS_M_18(){
+    return &h_env_RR_AS_M_18;
 }
 
 
