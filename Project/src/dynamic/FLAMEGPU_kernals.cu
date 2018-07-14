@@ -348,8 +348,6 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->householdsize[output_index] = agents_src->householdsize[index];        
 		agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];        
 		agents_dst->churchdur[output_index] = agents_src->churchdur[index];        
-		agents_dst->transportuser[output_index] = agents_src->transportuser[index];        
-		agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];        
 		agents_dst->transportdur[output_index] = agents_src->transportdur[index];        
 		agents_dst->transportday1[output_index] = agents_src->transportday1[index];        
 		agents_dst->transportday2[output_index] = agents_src->transportday2[index];        
@@ -399,8 +397,6 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->householdsize[output_index] = agents_src->householdsize[index];
 	    agents_dst->churchfreq[output_index] = agents_src->churchfreq[index];
 	    agents_dst->churchdur[output_index] = agents_src->churchdur[index];
-	    agents_dst->transportuser[output_index] = agents_src->transportuser[index];
-	    agents_dst->transportfreq[output_index] = agents_src->transportfreq[index];
 	    agents_dst->transportdur[output_index] = agents_src->transportdur[index];
 	    agents_dst->transportday1[output_index] = agents_src->transportday1[index];
 	    agents_dst->transportday2[output_index] = agents_src->transportday2[index];
@@ -437,8 +433,6 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param householdsize agent variable of type unsigned int
  * @param churchfreq agent variable of type unsigned int
  * @param churchdur agent variable of type float
- * @param transportuser agent variable of type unsigned int
- * @param transportfreq agent variable of type int
  * @param transportdur agent variable of type unsigned int
  * @param transportday1 agent variable of type int
  * @param transportday2 agent variable of type int
@@ -460,7 +454,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param lastinfectedid agent variable of type int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
 	
 	int index;
     
@@ -490,8 +484,6 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->householdsize[index] = householdsize;
 	agents->churchfreq[index] = churchfreq;
 	agents->churchdur[index] = churchdur;
-	agents->transportuser[index] = transportuser;
-	agents->transportfreq[index] = transportfreq;
 	agents->transportdur[index] = transportdur;
 	agents->transportday1[index] = transportday1;
 	agents->transportday2[index] = transportday2;
@@ -515,8 +507,8 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportuser, int transportfreq, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportuser, transportfreq, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid);
 }
 
 /** reorder_Person_agents
@@ -543,8 +535,6 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->householdsize[index] = unordered_agents->householdsize[old_pos];
 	ordered_agents->churchfreq[index] = unordered_agents->churchfreq[old_pos];
 	ordered_agents->churchdur[index] = unordered_agents->churchdur[old_pos];
-	ordered_agents->transportuser[index] = unordered_agents->transportuser[old_pos];
-	ordered_agents->transportfreq[index] = unordered_agents->transportfreq[old_pos];
 	ordered_agents->transportdur[index] = unordered_agents->transportdur[old_pos];
 	ordered_agents->transportday1[index] = unordered_agents->transportday1[old_pos];
 	ordered_agents->transportday2[index] = unordered_agents->transportday2[old_pos];
@@ -2729,8 +2719,6 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.householdsize = agents->householdsize[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.churchdur = agents->churchdur[index];
-	agent.transportuser = agents->transportuser[index];
-	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
@@ -2770,8 +2758,6 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->householdsize[index] = agent.householdsize;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->churchdur[index] = agent.churchdur;
-	agents->transportuser[index] = agent.transportuser;
-	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
@@ -2821,8 +2807,6 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, xmachine_me
 	agent.householdsize = agents->householdsize[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.churchdur = agents->churchdur[index];
-	agent.transportuser = agents->transportuser[index];
-	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
@@ -2855,8 +2839,6 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, xmachine_me
 	agent.householdsize = 0;
 	agent.churchfreq = 0;
 	agent.churchdur = 0;
-	agent.transportuser = 0;
-	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.transportday1 = 0;
 	agent.transportday2 = 0;
@@ -2900,8 +2882,6 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, xmachine_me
 	agents->householdsize[index] = agent.householdsize;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->churchdur[index] = agent.churchdur;
-	agents->transportuser[index] = agent.transportuser;
-	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
@@ -2952,8 +2932,6 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = agents->householdsize[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.churchdur = agents->churchdur[index];
-	agent.transportuser = agents->transportuser[index];
-	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
@@ -2986,8 +2964,6 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = 0;
 	agent.churchfreq = 0;
 	agent.churchdur = 0;
-	agent.transportuser = 0;
-	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.transportday1 = 0;
 	agent.transportday2 = 0;
@@ -3031,8 +3007,6 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agents->householdsize[index] = agent.householdsize;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->churchdur[index] = agent.churchdur;
-	agents->transportuser[index] = agent.transportuser;
-	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
@@ -3083,8 +3057,6 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = agents->householdsize[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.churchdur = agents->churchdur[index];
-	agent.transportuser = agents->transportuser[index];
-	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
@@ -3117,8 +3089,6 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = 0;
 	agent.churchfreq = 0;
 	agent.churchdur = 0;
-	agent.transportuser = 0;
-	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.transportday1 = 0;
 	agent.transportday2 = 0;
@@ -3162,8 +3132,6 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agents->householdsize[index] = agent.householdsize;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->churchdur[index] = agent.churchdur;
-	agents->transportuser[index] = agent.transportuser;
-	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;
@@ -3214,8 +3182,6 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = agents->householdsize[index];
 	agent.churchfreq = agents->churchfreq[index];
 	agent.churchdur = agents->churchdur[index];
-	agent.transportuser = agents->transportuser[index];
-	agent.transportfreq = agents->transportfreq[index];
 	agent.transportdur = agents->transportdur[index];
 	agent.transportday1 = agents->transportday1[index];
 	agent.transportday2 = agents->transportday2[index];
@@ -3248,8 +3214,6 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.householdsize = 0;
 	agent.churchfreq = 0;
 	agent.churchdur = 0;
-	agent.transportuser = 0;
-	agent.transportfreq = 0;
 	agent.transportdur = 0;
 	agent.transportday1 = 0;
 	agent.transportday2 = 0;
@@ -3293,8 +3257,6 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->householdsize[index] = agent.householdsize;
 	agents->churchfreq[index] = agent.churchfreq;
 	agents->churchdur[index] = agent.churchdur;
-	agents->transportuser[index] = agent.transportuser;
-	agents->transportfreq[index] = agent.transportfreq;
 	agents->transportdur[index] = agent.transportdur;
 	agents->transportday1[index] = agent.transportday1;
 	agents->transportday2[index] = agent.transportday2;

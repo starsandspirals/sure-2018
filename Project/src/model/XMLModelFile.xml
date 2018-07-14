@@ -296,14 +296,6 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
-          <name>transportuser</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>int</type>
-          <name>transportfreq</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>unsigned int</type>
           <name>transportdur</name>
         </gpu:variable>
         <gpu:variable>
