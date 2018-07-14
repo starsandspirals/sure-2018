@@ -87,24 +87,6 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n)
   }
 }
 
-__host__ void shufflefloat(unsigned int *array1, float *array2, size_t n)
-{
-  if (n > 1)
-  {
-    size_t i;
-    for (i = 0; i < n - 1; i++)
-    {
-      size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-      unsigned int t1 = array1[j];
-      float t2 = array2[j];
-      array1[j] = array1[i];
-      array2[j] = array2[i];
-      array1[i] = t1;
-      array2[i] = t2;
-    }
-  }
-}
-
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
 __device__ unsigned int dayofweek(unsigned int step)
@@ -500,8 +482,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   {
     tbarray[i] = i;
   }
-
-  shufflefloat(tbarray, weights, total);
 
   float weightsum = 0;
 
