@@ -15,11 +15,22 @@ xmachine_memory_Household **h_household_AoS;
 xmachine_memory_Church **h_church_AoS;
 xmachine_memory_Transport **h_transport_AoS;
 xmachine_memory_Clinic **h_clinic_AoS;
+
+xmachine_memory_TBAssignment **h_tbassignment_AoS;
+xmachine_memory_HouseholdMembership **h_hhmembership_AoS;
+xmachine_memory_ChurchMembership **h_chumembership_AoS;
+xmachine_memory_TransportMembership **h_trmembership_AoS;
+
 const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
 const unsigned int h_church_AoS_MAX = 256;
 const unsigned int h_transport_AoS_MAX = 2048;
 const unsigned int h_clinic_AoS_MAX = 2;
+
+const unsigned int h_tbassignment_AoS_MAX = 32768;
+const unsigned int h_hhmembership_AoS_MAX = 32768;
+const unsigned int h_chumembership_AoS_MAX = 8192;
+const unsigned int h_trmembership_AoS_MAX = 32768;
 
 // Create variables for the next unused ID for each agent type, so that they
 // remain unique, and also get functions to update the ID each time.
@@ -513,7 +524,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int activepeople[total];
 
-  for (unsigned int i = 0; i < total; i++) {
+  for (unsigned int i = 0; i < total; i++)
+  {
     activepeople[i] = 0;
   }
 
@@ -552,7 +564,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int activehouseholds[h_household_AoS_MAX];
 
-  for (unsigned int i = 0; i < h_household_AoS_MAX; i++) {
+  for (unsigned int i = 0; i < h_household_AoS_MAX; i++)
+  {
     activehouseholds[i] = 0;
   }
 
@@ -650,7 +663,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
           adultcount++;
         }
 
-        if (activepeople[order[count]] == 1) {
+        if (activepeople[order[count]] == 1)
+        {
           h_household->active = 1;
         }
 
@@ -664,7 +678,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
       h_household->adults = adultcount;
       adult[h_household->id] = adultcount;
 
-      if (h_household->active) {
+      if (h_household->active)
+      {
         activehouseholds[h_household->id] = 1;
       }
 
@@ -746,7 +761,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
       h_church->households[count] = hhorder[hhposition];
 
-      if (activehouseholds[hhorder[hhposition]] == 1) {
+      if (activehouseholds[hhorder[hhposition]] == 1)
+      {
         h_church->active = 1;
       }
 
@@ -813,7 +829,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
         h_transport->people[capacity] = currentpeople[countdone];
 
-        if (activepeople[currentpeople[countdone]] == 1) {
+        if (activepeople[currentpeople[countdone]] == 1)
+        {
           h_transport->active = 1;
         }
 
@@ -898,27 +915,32 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(fp, "ID, gender, age, household_size, hiv, art, active_tb, "
+    fprintf(fp, "ID, gender, age, household_size, household, church, hiv, art, "
+                "active_tb, "
                 "time_home, time_church, "
-                "time_transport, time_clinic, infections, last_infected\n");
+                "time_transport, time_clinic, infections, last_infected_type, "
+                "last_infected_id\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(fp, "%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i\n",
-              get_Person_s2_variable_id(index),
-              get_Person_s2_variable_gender(index),
-              get_Person_s2_variable_age(index),
-              get_Person_s2_variable_householdsize(index),
-              get_Person_s2_variable_hiv(index),
-              get_Person_s2_variable_art(index),
-              get_Person_s2_variable_activetb(index),
-              get_Person_s2_variable_householdtime(index),
-              get_Person_s2_variable_churchtime(index),
-              get_Person_s2_variable_transporttime(index),
-              get_Person_s2_variable_clinictime(index),
-              get_Person_s2_variable_infections(index),
-              get_Person_s2_variable_lastinfected(index));
+      fprintf(
+          fp, "%u, %u, %u, %u, %u, %i, %u, %u, %u, %u, %u, %u, %u, %u, %i, %i\n",
+          get_Person_s2_variable_id(index),
+          get_Person_s2_variable_gender(index),
+          get_Person_s2_variable_age(index),
+          get_Person_s2_variable_householdsize(index),
+          get_Person_s2_variable_household(index),
+          get_Person_s2_variable_church(index),
+          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
+          get_Person_s2_variable_activetb(index),
+          get_Person_s2_variable_householdtime(index),
+          get_Person_s2_variable_churchtime(index),
+          get_Person_s2_variable_transporttime(index),
+          get_Person_s2_variable_clinictime(index),
+          get_Person_s2_variable_infections(index),
+          get_Person_s2_variable_lastinfected(index),
+          get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
@@ -944,6 +966,9 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction()
 {
 
   h_free_agent_Person_array(&h_agent_AoS, h_agent_AoS_MAX);
+  h_free_agent_Household_array(&h_household_AoS, h_household_AoS_MAX);
+  h_free_agent_Church_array(&h_church_AoS, h_church_AoS_MAX);
+  h_free_agent_Transport_array(&h_transport_AoS, h_transport_AoS_MAX);
 
   printf("Population for exit function: %u\n", get_agent_Person_s2_count());
 }
@@ -1097,7 +1122,8 @@ infect(xmachine_memory_Person *person,
         get_next_infection_message(infection_message, infection_messages);
   }
 
-  float prob = 1 - device_exp(-person->p * lambda * (TIME_STEP / 12));
+  //float prob = 1 - device_exp(-person->p * lambda * (TIME_STEP / 12));
+  float prob = 0.5;
   float random = rnd<CONTINUOUS>(rand48);
 
   if (random < prob && lambda != 0 && person->activetb != 1)
@@ -1382,7 +1408,7 @@ __FLAME_GPU_FUNC__ int personhhinit(
     if (household_membership_message->person_id == personid)
     {
       person->household = household_membership_message->household_id;
-      // person->householdsize = household_membership_message->household_size;
+      person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;
       person->churchfreq = household_membership_message->churchfreq;
       person->churchdur = household_membership_message->churchdur;
