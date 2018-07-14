@@ -84,6 +84,12 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_memory_Clinic
 #define xmachine_memory_Clinic_MAX 2
 
+//Maximum population size of xmachine_memory_Workplace
+#define xmachine_memory_Workplace_MAX 8192
+
+//Maximum population size of xmachine_memory_WorkplaceMembership
+#define xmachine_memory_WorkplaceMembership_MAX 32768
+
 
   
   
@@ -100,6 +106,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_mmessage_transport_membership
 #define xmachine_message_transport_membership_MAX 32768
 
+//Maximum population size of xmachine_mmessage_workplace_membership
+#define xmachine_message_workplace_membership_MAX 32768
+
 //Maximum population size of xmachine_mmessage_location
 #define xmachine_message_location_MAX 32768
 
@@ -113,6 +122,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_household_membership_partitioningNone
 #define xmachine_message_church_membership_partitioningNone
 #define xmachine_message_transport_membership_partitioningNone
+#define xmachine_message_workplace_membership_partitioningNone
 #define xmachine_message_location_partitioningNone
 #define xmachine_message_infection_partitioningNone
 
@@ -175,6 +185,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int household;    /**< X-machine memory variable household of type unsigned int.*/
     int church;    /**< X-machine memory variable church of type int.*/
     int transport;    /**< X-machine memory variable transport of type int.*/
+    int workplace;    /**< X-machine memory variable workplace of type int.*/
     unsigned int busy;    /**< X-machine memory variable busy of type unsigned int.*/
     unsigned int startstep;    /**< X-machine memory variable startstep of type unsigned int.*/
     unsigned int location;    /**< X-machine memory variable location of type unsigned int.*/
@@ -284,6 +295,27 @@ struct __align__(16) xmachine_memory_Clinic
     float lambda;    /**< X-machine memory variable lambda of type float.*/
 };
 
+/** struct xmachine_memory_Workplace
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_Workplace
+{
+    unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    unsigned int step;    /**< X-machine memory variable step of type unsigned int.*/
+    float lambda;    /**< X-machine memory variable lambda of type float.*/
+};
+
+/** struct xmachine_memory_WorkplaceMembership
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_WorkplaceMembership
+{
+    unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
+    unsigned int workplace_id;    /**< X-machine memory variable workplace_id of type unsigned int.*/
+};
+
 
 
 /* Message structures */
@@ -343,6 +375,19 @@ struct __align__(16) xmachine_message_transport_membership
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
     unsigned int transport_id;        /**< Message variable transport_id of type unsigned int.*/  
     unsigned int duration;        /**< Message variable duration of type unsigned int.*/
+};
+
+/** struct xmachine_message_workplace_membership
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_workplace_membership
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
+    unsigned int workplace_id;        /**< Message variable workplace_id of type unsigned int.*/
 };
 
 /** struct xmachine_message_location
@@ -406,6 +451,7 @@ struct xmachine_memory_Person_list
     unsigned int household [xmachine_memory_Person_MAX];    /**< X-machine memory variable list household of type unsigned int.*/
     int church [xmachine_memory_Person_MAX];    /**< X-machine memory variable list church of type int.*/
     int transport [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transport of type int.*/
+    int workplace [xmachine_memory_Person_MAX];    /**< X-machine memory variable list workplace of type int.*/
     unsigned int busy [xmachine_memory_Person_MAX];    /**< X-machine memory variable list busy of type unsigned int.*/
     unsigned int startstep [xmachine_memory_Person_MAX];    /**< X-machine memory variable list startstep of type unsigned int.*/
     unsigned int location [xmachine_memory_Person_MAX];    /**< X-machine memory variable list location of type unsigned int.*/
@@ -547,6 +593,35 @@ struct xmachine_memory_Clinic_list
     float lambda [xmachine_memory_Clinic_MAX];    /**< X-machine memory variable list lambda of type float.*/
 };
 
+/** struct xmachine_memory_Workplace_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_Workplace_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_Workplace_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_Workplace_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_memory_Workplace_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    unsigned int step [xmachine_memory_Workplace_MAX];    /**< X-machine memory variable list step of type unsigned int.*/
+    float lambda [xmachine_memory_Workplace_MAX];    /**< X-machine memory variable list lambda of type float.*/
+};
+
+/** struct xmachine_memory_WorkplaceMembership_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_WorkplaceMembership_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_WorkplaceMembership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_WorkplaceMembership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_memory_WorkplaceMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
+    unsigned int workplace_id [xmachine_memory_WorkplaceMembership_MAX];    /**< X-machine memory variable list workplace_id of type unsigned int.*/
+};
+
 
 
 /* Message lists. Structure of Array (SoA) for memory coalescing on GPU */
@@ -613,6 +688,21 @@ struct xmachine_message_transport_membership_list
     unsigned int person_id [xmachine_message_transport_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
     unsigned int transport_id [xmachine_message_transport_membership_MAX];    /**< Message memory variable list transport_id of type unsigned int.*/
     unsigned int duration [xmachine_message_transport_membership_MAX];    /**< Message memory variable list duration of type unsigned int.*/
+    
+};
+
+/** struct xmachine_message_workplace_membership_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_workplace_membership_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_workplace_membership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_workplace_membership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_message_workplace_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
+    unsigned int workplace_id [xmachine_message_workplace_membership_MAX];    /**< Message memory variable list workplace_id of type unsigned int.*/
     
 };
 
@@ -735,6 +825,13 @@ __FLAME_GPU_FUNC__ int persontbinit(xmachine_memory_Person* agent, xmachine_mess
 __FLAME_GPU_FUNC__ int persontrinit(xmachine_memory_Person* agent, xmachine_message_transport_membership_list* transport_membership_messages);
 
 /**
+ * personwpinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param workplace_membership_messages  workplace_membership_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_workplace_membership_message and get_next_workplace_membership_message functions.
+ */
+__FLAME_GPU_FUNC__ int personwpinit(xmachine_memory_Person* agent, xmachine_message_workplace_membership_list* workplace_membership_messages);
+
+/**
  * tbinit FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_TBAssignment. This represents a single agent instance and can be modified directly.
  * @param tb_assignment_messages Pointer to output message list of type xmachine_message_tb_assignment_list. Must be passed as an argument to the add_tb_assignment_message function ??.
@@ -789,6 +886,20 @@ __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachi
  * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
  */
 __FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+
+/**
+ * wpupdate FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Workplace. This represents a single agent instance and can be modified directly.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ */
+__FLAME_GPU_FUNC__ int wpupdate(xmachine_memory_Workplace* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+
+/**
+ * wpinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_WorkplaceMembership. This represents a single agent instance and can be modified directly.
+ * @param workplace_membership_messages Pointer to output message list of type xmachine_message_workplace_membership_list. Must be passed as an argument to the add_workplace_membership_message function ??.
+ */
+__FLAME_GPU_FUNC__ int wpinit(xmachine_memory_WorkplaceMembership* agent, xmachine_message_workplace_membership_list* workplace_membership_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */
@@ -908,6 +1019,34 @@ __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_first_transport_m
 __FLAME_GPU_FUNC__ xmachine_message_transport_membership * get_next_transport_membership_message(xmachine_message_transport_membership* current, xmachine_message_transport_membership_list* transport_membership_messages);
 
   
+/* Message Function Prototypes for Brute force (No Partitioning) workplace_membership message implemented in FLAMEGPU_Kernels */
+
+/** add_workplace_membership_message
+ * Function for all types of message partitioning
+ * Adds a new workplace_membership agent to the xmachine_memory_workplace_membership_list list using a linear mapping
+ * @param agents	xmachine_memory_workplace_membership_list agent list
+ * @param person_id	message variable of type unsigned int
+ * @param workplace_id	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_workplace_membership_message(xmachine_message_workplace_membership_list* workplace_membership_messages, unsigned int person_id, unsigned int workplace_id);
+ 
+/** get_first_workplace_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param workplace_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_workplace_membership * get_first_workplace_membership_message(xmachine_message_workplace_membership_list* workplace_membership_messages);
+
+/** get_next_workplace_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param workplace_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_workplace_membership * get_next_workplace_membership_message(xmachine_message_workplace_membership* current, xmachine_message_workplace_membership_list* workplace_membership_messages);
+
+  
 /* Message Function Prototypes for Brute force (No Partitioning) location message implemented in FLAMEGPU_Kernels */
 
 /** add_location_message
@@ -991,6 +1130,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param household	agent agent variable of type unsigned int
  * @param church	agent agent variable of type int
  * @param transport	agent agent variable of type int
+ * @param workplace	agent agent variable of type int
  * @param busy	agent agent variable of type unsigned int
  * @param startstep	agent agent variable of type unsigned int
  * @param location	agent agent variable of type unsigned int
@@ -1007,7 +1147,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param time_step	agent agent variable of type float
  * @param lambda	agent agent variable of type float
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1085,6 +1225,23 @@ __FLAME_GPU_FUNC__ void add_TransportMembership_agent(xmachine_memory_TransportM
  */
 __FLAME_GPU_FUNC__ void add_Clinic_agent(xmachine_memory_Clinic_list* agents, unsigned int id, unsigned int step, float lambda);
 
+/** add_Workplace_agent
+ * Adds a new continuous valued Workplace agent to the xmachine_memory_Workplace_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_Workplace_list agent list
+ * @param id	agent agent variable of type unsigned int
+ * @param step	agent agent variable of type unsigned int
+ * @param lambda	agent agent variable of type float
+ */
+__FLAME_GPU_FUNC__ void add_Workplace_agent(xmachine_memory_Workplace_list* agents, unsigned int id, unsigned int step, float lambda);
+
+/** add_WorkplaceMembership_agent
+ * Adds a new continuous valued WorkplaceMembership agent to the xmachine_memory_WorkplaceMembership_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_WorkplaceMembership_list agent list
+ * @param person_id	agent agent variable of type unsigned int
+ * @param workplace_id	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_WorkplaceMembership_agent(xmachine_memory_WorkplaceMembership_list* agents, unsigned int person_id, unsigned int workplace_id);
+
 
   
 /* Simulation function prototypes implemented in simulation.cu */
@@ -1140,8 +1297,14 @@ extern void singleIteration();
  * @param h_Clinics Pointer to agent list on the host
  * @param d_Clinics Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Clinic_count Pointer to agent counter
+ * @param h_Workplaces Pointer to agent list on the host
+ * @param d_Workplaces Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_Workplace_count Pointer to agent counter
+ * @param h_WorkplaceMemberships Pointer to agent list on the host
+ * @param d_WorkplaceMemberships Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_WorkplaceMembership_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count);
 
 
 /** readInitialStates
@@ -1165,8 +1328,12 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_TransportMembership_count Pointer to agent counter
  * @param h_Clinics Pointer to agent list on the host
  * @param h_xmachine_memory_Clinic_count Pointer to agent counter
+ * @param h_Workplaces Pointer to agent list on the host
+ * @param h_xmachine_memory_Workplace_count Pointer to agent counter
+ * @param h_WorkplaceMemberships Pointer to agent list on the host
+ * @param h_xmachine_memory_WorkplaceMembership_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -1562,6 +1729,86 @@ extern xmachine_memory_Clinic_list* get_host_Clinic_cldefault_agents();
 void sort_Clinics_cldefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Clinic_list* agents));
 
 
+    
+/** get_agent_Workplace_MAX_count
+ * Gets the max agent count for the Workplace agent type 
+ * @return		the maximum Workplace agent count
+ */
+extern int get_agent_Workplace_MAX_count();
+
+
+
+/** get_agent_Workplace_wpdefault_count
+ * Gets the agent count for the Workplace agent type in state wpdefault
+ * @return		the current Workplace agent count in state wpdefault
+ */
+extern int get_agent_Workplace_wpdefault_count();
+
+/** reset_wpdefault_count
+ * Resets the agent count of the Workplace in state wpdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_Workplace_wpdefault_count();
+
+/** get_device_Workplace_wpdefault_agents
+ * Gets a pointer to xmachine_memory_Workplace_list on the GPU device
+ * @return		a xmachine_memory_Workplace_list on the GPU device
+ */
+extern xmachine_memory_Workplace_list* get_device_Workplace_wpdefault_agents();
+
+/** get_host_Workplace_wpdefault_agents
+ * Gets a pointer to xmachine_memory_Workplace_list on the CPU host
+ * @return		a xmachine_memory_Workplace_list on the CPU host
+ */
+extern xmachine_memory_Workplace_list* get_host_Workplace_wpdefault_agents();
+
+
+/** sort_Workplaces_wpdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_Workplaces_wpdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Workplace_list* agents));
+
+
+    
+/** get_agent_WorkplaceMembership_MAX_count
+ * Gets the max agent count for the WorkplaceMembership agent type 
+ * @return		the maximum WorkplaceMembership agent count
+ */
+extern int get_agent_WorkplaceMembership_MAX_count();
+
+
+
+/** get_agent_WorkplaceMembership_wpmembershipdefault_count
+ * Gets the agent count for the WorkplaceMembership agent type in state wpmembershipdefault
+ * @return		the current WorkplaceMembership agent count in state wpmembershipdefault
+ */
+extern int get_agent_WorkplaceMembership_wpmembershipdefault_count();
+
+/** reset_wpmembershipdefault_count
+ * Resets the agent count of the WorkplaceMembership in state wpmembershipdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_WorkplaceMembership_wpmembershipdefault_count();
+
+/** get_device_WorkplaceMembership_wpmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_WorkplaceMembership_list on the GPU device
+ * @return		a xmachine_memory_WorkplaceMembership_list on the GPU device
+ */
+extern xmachine_memory_WorkplaceMembership_list* get_device_WorkplaceMembership_wpmembershipdefault_agents();
+
+/** get_host_WorkplaceMembership_wpmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_WorkplaceMembership_list on the CPU host
+ * @return		a xmachine_memory_WorkplaceMembership_list on the CPU host
+ */
+extern xmachine_memory_WorkplaceMembership_list* get_host_WorkplaceMembership_wpmembershipdefault_agents();
+
+
+/** sort_WorkplaceMemberships_wpmembershipdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_WorkplaceMemberships_wpmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_WorkplaceMembership_list* agents));
+
+
 
 /* Host based access of agent variables*/
 
@@ -1717,6 +1964,15 @@ __host__ int get_Person_default_variable_church(unsigned int index);
  * @return value of agent variable transport
  */
 __host__ int get_Person_default_variable_transport(unsigned int index);
+
+/** int get_Person_default_variable_workplace(unsigned int index)
+ * Gets the value of the workplace variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace
+ */
+__host__ int get_Person_default_variable_workplace(unsigned int index);
 
 /** unsigned int get_Person_default_variable_busy(unsigned int index)
  * Gets the value of the busy variable of an Person agent in the default state on the host. 
@@ -2005,6 +2261,15 @@ __host__ int get_Person_s2_variable_church(unsigned int index);
  * @return value of agent variable transport
  */
 __host__ int get_Person_s2_variable_transport(unsigned int index);
+
+/** int get_Person_s2_variable_workplace(unsigned int index)
+ * Gets the value of the workplace variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace
+ */
+__host__ int get_Person_s2_variable_workplace(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_busy(unsigned int index)
  * Gets the value of the busy variable of an Person agent in the s2 state on the host. 
@@ -2392,6 +2657,51 @@ __host__ unsigned int get_Clinic_cldefault_variable_step(unsigned int index);
  * @return value of agent variable lambda
  */
 __host__ float get_Clinic_cldefault_variable_lambda(unsigned int index);
+
+/** unsigned int get_Workplace_wpdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Workplace_wpdefault_variable_id(unsigned int index);
+
+/** unsigned int get_Workplace_wpdefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Workplace_wpdefault_variable_step(unsigned int index);
+
+/** float get_Workplace_wpdefault_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_Workplace_wpdefault_variable_lambda(unsigned int index);
+
+/** unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an WorkplaceMembership agent in the wpmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_person_id(unsigned int index);
+
+/** unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_workplace_id(unsigned int index)
+ * Gets the value of the workplace_id variable of an WorkplaceMembership agent in the wpmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace_id
+ */
+__host__ unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_workplace_id(unsigned int index);
 
 
 
@@ -2783,6 +3093,88 @@ void h_add_agent_Clinic_cldefault(xmachine_memory_Clinic* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Clinic_cldefault(xmachine_memory_Clinic** agents, unsigned int count);
+
+/** h_allocate_agent_Workplace
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated Workplace struct.
+ */
+xmachine_memory_Workplace* h_allocate_agent_Workplace();
+/** h_free_agent_Workplace
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_Workplace(xmachine_memory_Workplace** agent);
+/** h_allocate_agent_Workplace_array
+ * Utility function to allocate an array of structs for  Workplace agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_Workplace** h_allocate_agent_Workplace_array(unsigned int count);
+/** h_free_agent_Workplace_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_Workplace_array(xmachine_memory_Workplace*** agents, unsigned int count);
+
+
+/** h_add_agent_Workplace_wpdefault
+ * Host function to add a single agent of type Workplace to the wpdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_Workplace_wpdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_Workplace_wpdefault(xmachine_memory_Workplace* agent);
+
+/** h_add_agents_Workplace_wpdefault(
+ * Host function to add multiple agents of type Workplace to the wpdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of Workplace agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_Workplace_wpdefault(xmachine_memory_Workplace** agents, unsigned int count);
+
+/** h_allocate_agent_WorkplaceMembership
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated WorkplaceMembership struct.
+ */
+xmachine_memory_WorkplaceMembership* h_allocate_agent_WorkplaceMembership();
+/** h_free_agent_WorkplaceMembership
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_WorkplaceMembership(xmachine_memory_WorkplaceMembership** agent);
+/** h_allocate_agent_WorkplaceMembership_array
+ * Utility function to allocate an array of structs for  WorkplaceMembership agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_WorkplaceMembership** h_allocate_agent_WorkplaceMembership_array(unsigned int count);
+/** h_free_agent_WorkplaceMembership_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_WorkplaceMembership_array(xmachine_memory_WorkplaceMembership*** agents, unsigned int count);
+
+
+/** h_add_agent_WorkplaceMembership_wpmembershipdefault
+ * Host function to add a single agent of type WorkplaceMembership to the wpmembershipdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_WorkplaceMembership_wpmembershipdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_WorkplaceMembership_wpmembershipdefault(xmachine_memory_WorkplaceMembership* agent);
+
+/** h_add_agents_WorkplaceMembership_wpmembershipdefault(
+ * Host function to add multiple agents of type WorkplaceMembership to the wpmembershipdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of WorkplaceMembership agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_WorkplaceMembership_wpmembershipdefault(xmachine_memory_WorkplaceMembership** agents, unsigned int count);
 
   
   
@@ -3228,6 +3620,32 @@ int min_Person_default_transport_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 int max_Person_default_transport_variable();
+
+/** int reduce_Person_default_workplace_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_default_workplace_variable();
+
+
+
+/** int count_Person_default_workplace_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_default_workplace_variable(int count_value);
+
+/** int min_Person_default_workplace_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_default_workplace_variable();
+/** int max_Person_default_workplace_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_default_workplace_variable();
 
 /** unsigned int reduce_Person_default_busy_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4025,6 +4443,32 @@ int min_Person_s2_transport_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 int max_Person_s2_transport_variable();
+
+/** int reduce_Person_s2_workplace_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_s2_workplace_variable();
+
+
+
+/** int count_Person_s2_workplace_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_s2_workplace_variable(int count_value);
+
+/** int min_Person_s2_workplace_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_s2_workplace_variable();
+/** int max_Person_s2_workplace_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_s2_workplace_variable();
 
 /** unsigned int reduce_Person_s2_busy_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5081,6 +5525,129 @@ float min_Clinic_cldefault_lambda_variable();
  */
 float max_Clinic_cldefault_lambda_variable();
 
+/** unsigned int reduce_Workplace_wpdefault_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Workplace_wpdefault_id_variable();
+
+
+
+/** unsigned int count_Workplace_wpdefault_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Workplace_wpdefault_id_variable(int count_value);
+
+/** unsigned int min_Workplace_wpdefault_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Workplace_wpdefault_id_variable();
+/** unsigned int max_Workplace_wpdefault_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Workplace_wpdefault_id_variable();
+
+/** unsigned int reduce_Workplace_wpdefault_step_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Workplace_wpdefault_step_variable();
+
+
+
+/** unsigned int count_Workplace_wpdefault_step_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Workplace_wpdefault_step_variable(int count_value);
+
+/** unsigned int min_Workplace_wpdefault_step_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Workplace_wpdefault_step_variable();
+/** unsigned int max_Workplace_wpdefault_step_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Workplace_wpdefault_step_variable();
+
+/** float reduce_Workplace_wpdefault_lambda_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_Workplace_wpdefault_lambda_variable();
+
+
+
+/** float min_Workplace_wpdefault_lambda_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_Workplace_wpdefault_lambda_variable();
+/** float max_Workplace_wpdefault_lambda_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_Workplace_wpdefault_lambda_variable();
+
+/** unsigned int reduce_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+
+
+
+/** unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(int count_value);
+
+/** unsigned int min_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+/** unsigned int max_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_WorkplaceMembership_wpmembershipdefault_person_id_variable();
+
+/** unsigned int reduce_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+
+
+
+/** unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(int count_value);
+
+/** unsigned int min_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+/** unsigned int max_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
+
 
   
 /* global constant variables */
@@ -5174,6 +5741,12 @@ __constant__ float WORKPLACE_BETAS;
 __constant__ float WORKPLACE_BETAAS;
 
 __constant__ float WORKPLACE_A;
+
+__constant__ unsigned int WORKPLACE_DUR;
+
+__constant__ unsigned int WORKPLACE_SIZE;
+
+__constant__ float WORKPLACE_V;
 
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
@@ -5669,6 +6242,39 @@ extern const float* get_WORKPLACE_A();
 
 
 extern float h_env_WORKPLACE_A;
+
+/** set_WORKPLACE_DUR
+ * Sets the constant variable WORKPLACE_DUR on the device which can then be used in the agent functions.
+ * @param h_WORKPLACE_DUR value to set the variable
+ */
+extern void set_WORKPLACE_DUR(unsigned int* h_WORKPLACE_DUR);
+
+extern const unsigned int* get_WORKPLACE_DUR();
+
+
+extern unsigned int h_env_WORKPLACE_DUR;
+
+/** set_WORKPLACE_SIZE
+ * Sets the constant variable WORKPLACE_SIZE on the device which can then be used in the agent functions.
+ * @param h_WORKPLACE_SIZE value to set the variable
+ */
+extern void set_WORKPLACE_SIZE(unsigned int* h_WORKPLACE_SIZE);
+
+extern const unsigned int* get_WORKPLACE_SIZE();
+
+
+extern unsigned int h_env_WORKPLACE_SIZE;
+
+/** set_WORKPLACE_V
+ * Sets the constant variable WORKPLACE_V on the device which can then be used in the agent functions.
+ * @param h_WORKPLACE_V value to set the variable
+ */
+extern void set_WORKPLACE_V(float* h_WORKPLACE_V);
+
+extern const float* get_WORKPLACE_V();
+
+
+extern float h_env_WORKPLACE_V;
 
 
 /** getMaximumBound

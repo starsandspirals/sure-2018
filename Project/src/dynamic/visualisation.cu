@@ -79,6 +79,14 @@ cudaGraphicsResource_t Clinic_cldefault_cgr;
 GLuint Clinic_cldefault_tbo;
 GLuint Clinic_cldefault_displacementTex;
 
+cudaGraphicsResource_t Workplace_wpdefault_cgr;
+GLuint Workplace_wpdefault_tbo;
+GLuint Workplace_wpdefault_displacementTex;
+
+cudaGraphicsResource_t WorkplaceMembership_wpmembershipdefault_cgr;
+GLuint WorkplaceMembership_wpmembershipdefault_tbo;
+GLuint WorkplaceMembership_wpmembershipdefault_displacementTex;
+
 
 // mouse controls
 int mouse_old_x, mouse_old_y;
@@ -352,6 +360,36 @@ __global__ void output_Clinic_agent_to_VBO(xmachine_memory_Clinic_list* agents, 
     vbo[index].w = 1.0;
 }
 
+__global__ void output_Workplace_agent_to_VBO(xmachine_memory_Workplace_list* agents, glm::vec4* vbo, glm::vec3 centralise){
+
+	//global thread index
+	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+
+	vbo[index].x = 0.0;
+	vbo[index].y = 0.0;
+	vbo[index].z = 0.0;
+	
+    vbo[index].x = 0.0;
+    vbo[index].y = 0.0;
+    vbo[index].z = 0.0;
+    vbo[index].w = 1.0;
+}
+
+__global__ void output_WorkplaceMembership_agent_to_VBO(xmachine_memory_WorkplaceMembership_list* agents, glm::vec4* vbo, glm::vec3 centralise){
+
+	//global thread index
+	int index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
+
+	vbo[index].x = 0.0;
+	vbo[index].y = 0.0;
+	vbo[index].z = 0.0;
+	
+    vbo[index].x = 0.0;
+    vbo[index].y = 0.0;
+    vbo[index].z = 0.0;
+    vbo[index].w = 1.0;
+}
+
 
 void initVisualisation()
 {
@@ -404,6 +442,10 @@ void initVisualisation()
 	createTBO(&TransportMembership_trmembershipdefault_cgr, &TransportMembership_trmembershipdefault_tbo, &TransportMembership_trmembershipdefault_displacementTex, xmachine_memory_TransportMembership_MAX * sizeof( glm::vec4));
 	
 	createTBO(&Clinic_cldefault_cgr, &Clinic_cldefault_tbo, &Clinic_cldefault_displacementTex, xmachine_memory_Clinic_MAX * sizeof( glm::vec4));
+	
+	createTBO(&Workplace_wpdefault_cgr, &Workplace_wpdefault_tbo, &Workplace_wpdefault_displacementTex, xmachine_memory_Workplace_MAX * sizeof( glm::vec4));
+	
+	createTBO(&WorkplaceMembership_wpmembershipdefault_cgr, &WorkplaceMembership_wpmembershipdefault_tbo, &WorkplaceMembership_wpmembershipdefault_displacementTex, xmachine_memory_WorkplaceMembership_MAX * sizeof( glm::vec4));
 	
 
 	//set shader uniforms
@@ -655,6 +697,48 @@ void runCuda()
 		gpuErrchkLaunch();
 		// unmap buffer object
         gpuErrchk(cudaGraphicsUnmapResources(1, &Clinic_cldefault_cgr));
+	}
+	
+	if (get_agent_Workplace_wpdefault_count() > 0)
+	{
+		// map OpenGL buffer object for writing from CUDA
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &Workplace_wpdefault_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, Workplace_wpdefault_cgr));
+		//cuda block size
+		tile_size = (int) ceil((float)get_agent_Workplace_wpdefault_count()/threads_per_tile);
+		grid = dim3(tile_size, 1, 1);
+		threads = dim3(threads_per_tile, 1, 1);
+        
+        //continuous variables  
+        centralise = getMaximumBounds() + getMinimumBounds();
+        centralise /= 2;
+        
+		output_Workplace_agent_to_VBO<<< grid, threads>>>(get_device_Workplace_wpdefault_agents(), dptr, centralise);
+		gpuErrchkLaunch();
+		// unmap buffer object
+        gpuErrchk(cudaGraphicsUnmapResources(1, &Workplace_wpdefault_cgr));
+	}
+	
+	if (get_agent_WorkplaceMembership_wpmembershipdefault_count() > 0)
+	{
+		// map OpenGL buffer object for writing from CUDA
+        size_t accessibleBufferSize = 0;
+        gpuErrchk(cudaGraphicsMapResources(1, &WorkplaceMembership_wpmembershipdefault_cgr));
+		gpuErrchk(cudaGraphicsResourceGetMappedPointer( (void**)&dptr, &accessibleBufferSize, WorkplaceMembership_wpmembershipdefault_cgr));
+		//cuda block size
+		tile_size = (int) ceil((float)get_agent_WorkplaceMembership_wpmembershipdefault_count()/threads_per_tile);
+		grid = dim3(tile_size, 1, 1);
+		threads = dim3(threads_per_tile, 1, 1);
+        
+        //continuous variables  
+        centralise = getMaximumBounds() + getMinimumBounds();
+        centralise /= 2;
+        
+		output_WorkplaceMembership_agent_to_VBO<<< grid, threads>>>(get_device_WorkplaceMembership_wpmembershipdefault_agents(), dptr, centralise);
+		gpuErrchkLaunch();
+		// unmap buffer object
+        gpuErrchk(cudaGraphicsUnmapResources(1, &WorkplaceMembership_wpmembershipdefault_cgr));
 	}
 	
 }
@@ -1151,6 +1235,52 @@ void display()
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	
+	//Draw Workplace Agents in wpdefault state
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, Workplace_wpdefault_displacementTex);
+	//loop
+	for (int i=0; i< get_agent_Workplace_wpdefault_count(); i++){
+		glVertexAttrib1f(vs_mapIndex, (float)i);
+		
+		//draw using vertex and attribute data on the gpu (fast)
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereVerts);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereNormals);
+		glNormalPointer(GL_FLOAT, 0, 0);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, SPHERE_SLICES * (SPHERE_STACKS+1));
+
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	
+	//Draw WorkplaceMembership Agents in wpmembershipdefault state
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER_EXT, WorkplaceMembership_wpmembershipdefault_displacementTex);
+	//loop
+	for (int i=0; i< get_agent_WorkplaceMembership_wpmembershipdefault_count(); i++){
+		glVertexAttrib1f(vs_mapIndex, (float)i);
+		
+		//draw using vertex and attribute data on the gpu (fast)
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereVerts);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, sphereNormals);
+		glNormalPointer(GL_FLOAT, 0, 0);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, SPHERE_SLICES * (SPHERE_STACKS+1));
+
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	
 
 	//CUDA stop timing
 	cudaEventRecord(stop);
@@ -1211,6 +1341,10 @@ void keyboard( unsigned char key, int /*x*/, int /*y*/)
 		deleteTBO( &TransportMembership_trmembershipdefault_cgr, &TransportMembership_trmembershipdefault_tbo);
 		
 		deleteTBO( &Clinic_cldefault_cgr, &Clinic_cldefault_tbo);
+		
+		deleteTBO( &Workplace_wpdefault_cgr, &Workplace_wpdefault_tbo);
+		
+		deleteTBO( &WorkplaceMembership_wpmembershipdefault_cgr, &WorkplaceMembership_wpmembershipdefault_tbo);
 		
 		cudaEventDestroy(start);
 		cudaEventDestroy(stop);

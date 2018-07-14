@@ -43,6 +43,10 @@ __constant__ int d_xmachine_memory_TransportMembership_count;
 
 __constant__ int d_xmachine_memory_Clinic_count;
 
+__constant__ int d_xmachine_memory_Workplace_count;
+
+__constant__ int d_xmachine_memory_WorkplaceMembership_count;
+
 /* Agent state count constants */
 
 __constant__ int d_xmachine_memory_Person_default_count;
@@ -64,6 +68,10 @@ __constant__ int d_xmachine_memory_Transport_trdefault_count;
 __constant__ int d_xmachine_memory_TransportMembership_trmembershipdefault_count;
 
 __constant__ int d_xmachine_memory_Clinic_cldefault_count;
+
+__constant__ int d_xmachine_memory_Workplace_wpdefault_count;
+
+__constant__ int d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
 
 
 /* Message constants */
@@ -88,6 +96,11 @@ __constant__ int d_message_church_membership_output_type;   /**< message output 
 __constant__ int d_message_transport_membership_count;         /**< message list counter*/
 __constant__ int d_message_transport_membership_output_type;   /**< message output type (single or optional)*/
 
+/* workplace_membership Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_workplace_membership_count;         /**< message list counter*/
+__constant__ int d_message_workplace_membership_output_type;   /**< message output type (single or optional)*/
+
 /* location Message variables */
 /* Non partitioned and spatial partitioned message variables  */
 __constant__ int d_message_location_count;         /**< message list counter*/
@@ -105,6 +118,7 @@ __constant__ int d_message_infection_output_type;   /**< message output type (si
 #include "functions.c"
     
 /* Texture bindings */
+
 
 
 
@@ -226,6 +240,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 			nextState->household[index] = currentState->household[index];
 			nextState->church[index] = currentState->church[index];
 			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
 			nextState->busy[index] = currentState->busy[index];
 			nextState->startstep[index] = currentState->startstep[index];
 			nextState->location[index] = currentState->location[index];
@@ -404,6 +419,7 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->household[output_index] = agents_src->household[index];        
 		agents_dst->church[output_index] = agents_src->church[index];        
 		agents_dst->transport[output_index] = agents_src->transport[index];        
+		agents_dst->workplace[output_index] = agents_src->workplace[index];        
 		agents_dst->busy[output_index] = agents_src->busy[index];        
 		agents_dst->startstep[output_index] = agents_src->startstep[index];        
 		agents_dst->location[output_index] = agents_src->location[index];        
@@ -455,6 +471,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->household[output_index] = agents_src->household[index];
 	    agents_dst->church[output_index] = agents_src->church[index];
 	    agents_dst->transport[output_index] = agents_src->transport[index];
+	    agents_dst->workplace[output_index] = agents_src->workplace[index];
 	    agents_dst->busy[output_index] = agents_src->busy[index];
 	    agents_dst->startstep[output_index] = agents_src->startstep[index];
 	    agents_dst->location[output_index] = agents_src->location[index];
@@ -493,6 +510,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param household agent variable of type unsigned int
  * @param church agent variable of type int
  * @param transport agent variable of type int
+ * @param workplace agent variable of type int
  * @param busy agent variable of type unsigned int
  * @param startstep agent variable of type unsigned int
  * @param location agent variable of type unsigned int
@@ -510,7 +528,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param lambda agent variable of type float
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda){
 	
 	int index;
     
@@ -546,6 +564,7 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->household[index] = household;
 	agents->church[index] = church;
 	agents->transport[index] = transport;
+	agents->workplace[index] = workplace;
 	agents->busy[index] = busy;
 	agents->startstep[index] = startstep;
 	agents->location[index] = location;
@@ -565,8 +584,8 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, workplace, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda);
 }
 
 /** reorder_Person_agents
@@ -599,6 +618,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->household[index] = unordered_agents->household[old_pos];
 	ordered_agents->church[index] = unordered_agents->church[old_pos];
 	ordered_agents->transport[index] = unordered_agents->transport[old_pos];
+	ordered_agents->workplace[index] = unordered_agents->workplace[old_pos];
 	ordered_agents->busy[index] = unordered_agents->busy[old_pos];
 	ordered_agents->startstep[index] = unordered_agents->startstep[old_pos];
 	ordered_agents->location[index] = unordered_agents->location[old_pos];
@@ -1604,6 +1624,243 @@ __global__ void reorder_Clinic_agents(unsigned int* values, xmachine_memory_Clin
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created Workplace agent functions */
+
+/** reset_Workplace_scan_input
+ * Workplace agent reset scan input function
+ * @param agents The xmachine_memory_Workplace_list agent list
+ */
+__global__ void reset_Workplace_scan_input(xmachine_memory_Workplace_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_Workplace_Agents
+ * Workplace scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Workplace_list agent list destination
+ * @param agents_src xmachine_memory_Workplace_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_Workplace_Agents(xmachine_memory_Workplace_list* agents_dst, xmachine_memory_Workplace_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->step[output_index] = agents_src->step[index];        
+		agents_dst->lambda[output_index] = agents_src->lambda[index];
+	}
+}
+
+/** append_Workplace_Agents
+ * Workplace scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Workplace_list agent list destination
+ * @param agents_src xmachine_memory_Workplace_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_Workplace_Agents(xmachine_memory_Workplace_list* agents_dst, xmachine_memory_Workplace_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->step[output_index] = agents_src->step[index];
+	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+    }
+}
+
+/** add_Workplace_agent
+ * Continuous Workplace agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_Workplace_list to add agents to 
+ * @param id agent variable of type unsigned int
+ * @param step agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+template <int AGENT_TYPE>
+__device__ void add_Workplace_agent(xmachine_memory_Workplace_list* agents, unsigned int id, unsigned int step, float lambda){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+	agents->step[index] = step;
+	agents->lambda[index] = lambda;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_Workplace_agent(xmachine_memory_Workplace_list* agents, unsigned int id, unsigned int step, float lambda){
+    add_Workplace_agent<DISCRETE_2D>(agents, id, step, lambda);
+}
+
+/** reorder_Workplace_agents
+ * Continuous Workplace agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_Workplace_agents(unsigned int* values, xmachine_memory_Workplace_list* unordered_agents, xmachine_memory_Workplace_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->step[index] = unordered_agents->step[old_pos];
+	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created WorkplaceMembership agent functions */
+
+/** reset_WorkplaceMembership_scan_input
+ * WorkplaceMembership agent reset scan input function
+ * @param agents The xmachine_memory_WorkplaceMembership_list agent list
+ */
+__global__ void reset_WorkplaceMembership_scan_input(xmachine_memory_WorkplaceMembership_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_WorkplaceMembership_Agents
+ * WorkplaceMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_WorkplaceMembership_list agent list destination
+ * @param agents_src xmachine_memory_WorkplaceMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_WorkplaceMembership_Agents(xmachine_memory_WorkplaceMembership_list* agents_dst, xmachine_memory_WorkplaceMembership_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->person_id[output_index] = agents_src->person_id[index];        
+		agents_dst->workplace_id[output_index] = agents_src->workplace_id[index];
+	}
+}
+
+/** append_WorkplaceMembership_Agents
+ * WorkplaceMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_WorkplaceMembership_list agent list destination
+ * @param agents_src xmachine_memory_WorkplaceMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_WorkplaceMembership_Agents(xmachine_memory_WorkplaceMembership_list* agents_dst, xmachine_memory_WorkplaceMembership_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->person_id[output_index] = agents_src->person_id[index];
+	    agents_dst->workplace_id[output_index] = agents_src->workplace_id[index];
+    }
+}
+
+/** add_WorkplaceMembership_agent
+ * Continuous WorkplaceMembership agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_WorkplaceMembership_list to add agents to 
+ * @param person_id agent variable of type unsigned int
+ * @param workplace_id agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_WorkplaceMembership_agent(xmachine_memory_WorkplaceMembership_list* agents, unsigned int person_id, unsigned int workplace_id){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->person_id[index] = person_id;
+	agents->workplace_id[index] = workplace_id;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_WorkplaceMembership_agent(xmachine_memory_WorkplaceMembership_list* agents, unsigned int person_id, unsigned int workplace_id){
+    add_WorkplaceMembership_agent<DISCRETE_2D>(agents, person_id, workplace_id);
+}
+
+/** reorder_WorkplaceMembership_agents
+ * Continuous WorkplaceMembership agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_WorkplaceMembership_agents(unsigned int* values, xmachine_memory_WorkplaceMembership_list* unordered_agents, xmachine_memory_WorkplaceMembership_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
+	ordered_agents->workplace_id[index] = unordered_agents->workplace_id[old_pos];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dyanamically created tb_assignment message functions */
 
@@ -2234,6 +2491,157 @@ __device__ xmachine_message_transport_membership* get_next_transport_membership_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created workplace_membership message functions */
+
+
+/** add_workplace_membership_message
+ * Add non partitioned or spatially partitioned workplace_membership message
+ * @param messages xmachine_message_workplace_membership_list message list to add too
+ * @param person_id agent variable of type unsigned int
+ * @param workplace_id agent variable of type unsigned int
+ */
+__device__ void add_workplace_membership_message(xmachine_message_workplace_membership_list* messages, unsigned int person_id, unsigned int workplace_id){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_workplace_membership_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_workplace_membership_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_workplace_membership_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_workplace_membership Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->person_id[index] = person_id;
+	messages->workplace_id[index] = workplace_id;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned workplace_membership message (for optional messages)
+ * @param messages scatter_optional_workplace_membership_messages Sparse xmachine_message_workplace_membership_list message list
+ * @param message_swap temp xmachine_message_workplace_membership_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_workplace_membership_messages(xmachine_message_workplace_membership_list* messages, xmachine_message_workplace_membership_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_workplace_membership_count;
+
+		//AoS - xmachine_message_workplace_membership Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->person_id[output_index] = messages_swap->person_id[index];
+		messages->workplace_id[output_index] = messages_swap->workplace_id[index];				
+	}
+}
+
+/** reset_workplace_membership_swaps
+ * Reset non partitioned or spatially partitioned workplace_membership message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_workplace_membership_swaps(xmachine_message_workplace_membership_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_workplace_membership* get_first_workplace_membership_message(xmachine_message_workplace_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_workplace_membership_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_workplace_membership Coalesced memory read
+	xmachine_message_workplace_membership temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.person_id = messages->person_id[index];
+	temp_message.workplace_id = messages->workplace_id[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_workplace_membership));
+	xmachine_message_workplace_membership* sm_message = ((xmachine_message_workplace_membership*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_workplace_membership*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_workplace_membership* get_next_workplace_membership_message(xmachine_message_workplace_membership* message, xmachine_message_workplace_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_workplace_membership_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_workplace_membership_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_workplace_membership Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_workplace_membership temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.person_id = messages->person_id[index];
+		temp_message.workplace_id = messages->workplace_id[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_workplace_membership));
+		xmachine_message_workplace_membership* sm_message = ((xmachine_message_workplace_membership*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_workplace_membership));
+	return ((xmachine_message_workplace_membership*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dyanamically created location message functions */
 
 
@@ -2597,6 +3005,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -2638,6 +3047,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -2689,6 +3099,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -2723,6 +3134,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.household = 0;
 	agent.church = 0;
 	agent.transport = 0;
+	agent.workplace = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
 	agent.location = 0;
@@ -2768,6 +3180,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -2821,6 +3234,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -2862,6 +3276,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -2913,6 +3328,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -2947,6 +3363,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = 0;
 	agent.church = 0;
 	agent.transport = 0;
+	agent.workplace = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
 	agent.location = 0;
@@ -2992,6 +3409,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -3044,6 +3462,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -3078,6 +3497,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = 0;
 	agent.church = 0;
 	agent.transport = 0;
+	agent.workplace = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
 	agent.location = 0;
@@ -3123,6 +3543,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -3175,6 +3596,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = agents->household[index];
 	agent.church = agents->church[index];
 	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
 	agent.busy = agents->busy[index];
 	agent.startstep = agents->startstep[index];
 	agent.location = agents->location[index];
@@ -3209,6 +3631,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.household = 0;
 	agent.church = 0;
 	agent.transport = 0;
+	agent.workplace = 0;
 	agent.busy = 0;
 	agent.startstep = 0;
 	agent.location = 0;
@@ -3254,6 +3677,141 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->household[index] = agent.household;
 	agents->church[index] = agent.church;
 	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmachine_message_workplace_membership_list* workplace_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_personwpinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	}
+
+	//FLAME function call
+	int dead = !personwpinit(&agent, workplace_membership_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_personwpinit Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
 	agents->busy[index] = agent.busy;
 	agents->startstep[index] = agent.startstep;
 	agents->location[index] = agent.location;
@@ -3609,6 +4167,83 @@ __global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_
 	agents->step[index] = agent.step;
 	agents->lambda[index] = agent.lambda;
 	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_wpupdate(xmachine_memory_Workplace_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_wpupdate Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Workplace agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Workplace_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.lambda = agents->lambda[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.lambda = 0;
+	}
+
+	//FLAME function call
+	int dead = !wpupdate(&agent, location_messages, infection_messages	);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Workplace_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_wpupdate Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->lambda[index] = agent.lambda;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_wpinit(xmachine_memory_WorkplaceMembership_list* agents, xmachine_message_workplace_membership_list* workplace_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_WorkplaceMembership_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_wpinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_WorkplaceMembership agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.person_id = agents->person_id[index];
+	agent.workplace_id = agents->workplace_id[index];
+
+	//FLAME function call
+	int dead = !wpinit(&agent, workplace_membership_messages	);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_wpinit Coalesced memory write (ignore arrays)
+	agents->person_id[index] = agent.person_id;
+	agents->workplace_id[index] = agent.workplace_id;
 }
 
 	

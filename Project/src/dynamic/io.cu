@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -177,6 +177,18 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying Clinic Agent cldefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Workplaces_wpdefault, d_Workplaces_wpdefault, sizeof(xmachine_memory_Workplace_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying Workplace Agent wpdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_WorkplaceMemberships_wpmembershipdefault, d_WorkplaceMemberships_wpmembershipdefault, sizeof(xmachine_memory_WorkplaceMembership_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying WorkplaceMembership Agent wpmembershipdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -377,6 +389,18 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_WORKPLACE_A()));
     fputs(data, file);
     fputs("</WORKPLACE_A>\n", file);
+    fputs("\t<WORKPLACE_DUR>", file);
+    sprintf(data, "%u", (*get_WORKPLACE_DUR()));
+    fputs(data, file);
+    fputs("</WORKPLACE_DUR>\n", file);
+    fputs("\t<WORKPLACE_SIZE>", file);
+    sprintf(data, "%u", (*get_WORKPLACE_SIZE()));
+    fputs(data, file);
+    fputs("</WORKPLACE_SIZE>\n", file);
+    fputs("\t<WORKPLACE_V>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_V()));
+    fputs(data, file);
+    fputs("</WORKPLACE_V>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -468,6 +492,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_default->transport[i]);
 		fputs(data, file);
 		fputs("</transport>\n", file);
+        
+		fputs("<workplace>", file);
+        sprintf(data, "%d", h_Persons_default->workplace[i]);
+		fputs(data, file);
+		fputs("</workplace>\n", file);
         
 		fputs("<busy>", file);
         sprintf(data, "%u", h_Persons_default->busy[i]);
@@ -635,6 +664,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->transport[i]);
 		fputs(data, file);
 		fputs("</transport>\n", file);
+        
+		fputs("<workplace>", file);
+        sprintf(data, "%d", h_Persons_s2->workplace[i]);
+		fputs(data, file);
+		fputs("</workplace>\n", file);
         
 		fputs("<busy>", file);
         sprintf(data, "%u", h_Persons_s2->busy[i]);
@@ -909,6 +943,45 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each Workplace agent to xml
+	for (int i=0; i<h_xmachine_memory_Workplace_wpdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>Workplace</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Workplaces_wpdefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<step>", file);
+        sprintf(data, "%u", h_Workplaces_wpdefault->step[i]);
+		fputs(data, file);
+		fputs("</step>\n", file);
+        
+		fputs("<lambda>", file);
+        sprintf(data, "%f", h_Workplaces_wpdefault->lambda[i]);
+		fputs(data, file);
+		fputs("</lambda>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
+	//Write each WorkplaceMembership agent to xml
+	for (int i=0; i<h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>WorkplaceMembership</name>\n", file);
+        
+		fputs("<person_id>", file);
+        sprintf(data, "%u", h_WorkplaceMemberships_wpmembershipdefault->person_id[i]);
+		fputs(data, file);
+		fputs("</person_id>\n", file);
+        
+		fputs("<workplace_id>", file);
+        sprintf(data, "%u", h_WorkplaceMemberships_wpmembershipdefault->workplace_id[i]);
+		fputs(data, file);
+		fputs("</workplace_id>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -1013,9 +1086,15 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_WORKPLACE_BETAAS(&t_WORKPLACE_BETAAS);
     float t_WORKPLACE_A = (float)3;
     set_WORKPLACE_A(&t_WORKPLACE_A);
+    unsigned int t_WORKPLACE_DUR = (unsigned int)8;
+    set_WORKPLACE_DUR(&t_WORKPLACE_DUR);
+    unsigned int t_WORKPLACE_SIZE = (unsigned int)20;
+    set_WORKPLACE_SIZE(&t_WORKPLACE_SIZE);
+    float t_WORKPLACE_V = (float)20;
+    set_WORKPLACE_V(&t_WORKPLACE_V);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -1051,6 +1130,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_household;
     int in_Person_church;
     int in_Person_transport;
+    int in_Person_workplace;
     int in_Person_busy;
     int in_Person_startstep;
     int in_Person_location;
@@ -1094,6 +1174,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Clinic_id;
     int in_Clinic_step;
     int in_Clinic_lambda;
+    int in_Workplace_id;
+    int in_Workplace_step;
+    int in_Workplace_lambda;
+    int in_WorkplaceMembership_person_id;
+    int in_WorkplaceMembership_workplace_id;
     
     /* tags for environment global variables */
     int in_env;
@@ -1187,6 +1272,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_WORKPLACE_A;
     
+    int in_env_WORKPLACE_DUR;
+    
+    int in_env_WORKPLACE_SIZE;
+    
+    int in_env_WORKPLACE_V;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1197,6 +1288,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	*h_xmachine_memory_Transport_count = 0;
 	*h_xmachine_memory_TransportMembership_count = 0;
 	*h_xmachine_memory_Clinic_count = 0;
+	*h_xmachine_memory_Workplace_count = 0;
+	*h_xmachine_memory_WorkplaceMembership_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
@@ -1216,6 +1309,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_household;
 	int Person_church;
 	int Person_transport;
+	int Person_workplace;
 	unsigned int Person_busy;
 	unsigned int Person_startstep;
 	unsigned int Person_location;
@@ -1259,6 +1353,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Clinic_id;
 	unsigned int Clinic_step;
 	float Clinic_lambda;
+	unsigned int Workplace_id;
+	unsigned int Workplace_step;
+	float Workplace_lambda;
+	unsigned int WorkplaceMembership_person_id;
+	unsigned int WorkplaceMembership_workplace_id;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -1306,6 +1405,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_WORKPLACE_BETAS;
     float env_WORKPLACE_BETAAS;
     float env_WORKPLACE_A;
+    unsigned int env_WORKPLACE_DUR;
+    unsigned int env_WORKPLACE_SIZE;
+    float env_WORKPLACE_V;
     
 
 
@@ -1340,6 +1442,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_household = 0;
 	in_Person_church = 0;
 	in_Person_transport = 0;
+	in_Person_workplace = 0;
 	in_Person_busy = 0;
 	in_Person_startstep = 0;
 	in_Person_location = 0;
@@ -1383,6 +1486,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Clinic_id = 0;
 	in_Clinic_step = 0;
 	in_Clinic_lambda = 0;
+	in_Workplace_id = 0;
+	in_Workplace_step = 0;
+	in_Workplace_lambda = 0;
+	in_WorkplaceMembership_person_id = 0;
+	in_WorkplaceMembership_workplace_id = 0;
     in_env_TIME_STEP = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
@@ -1428,6 +1536,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_WORKPLACE_BETAS = 0;
     in_env_WORKPLACE_BETAAS = 0;
     in_env_WORKPLACE_A = 0;
+    in_env_WORKPLACE_DUR = 0;
+    in_env_WORKPLACE_SIZE = 0;
+    in_env_WORKPLACE_V = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1449,6 +1560,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->household[k] = 0;
 		h_Persons->church[k] = 0;
 		h_Persons->transport[k] = 0;
+		h_Persons->workplace[k] = 0;
 		h_Persons->busy[k] = 0;
 		h_Persons->startstep[k] = 0;
 		h_Persons->location[k] = 0;
@@ -1542,6 +1654,23 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Clinics->lambda[k] = 0;
 	}
 	
+	//set all Workplace values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_Workplace_MAX; k++)
+	{	
+		h_Workplaces->id[k] = 0;
+		h_Workplaces->step[k] = 0;
+		h_Workplaces->lambda[k] = 0;
+	}
+	
+	//set all WorkplaceMembership values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_WorkplaceMembership_MAX; k++)
+	{	
+		h_WorkplaceMemberships->person_id[k] = 0;
+		h_WorkplaceMemberships->workplace_id[k] = 0;
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
@@ -1561,6 +1690,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_household = 0;
     Person_church = 0;
     Person_transport = 0;
+    Person_workplace = 0;
     Person_busy = 0;
     Person_startstep = 0;
     Person_location = 0;
@@ -1604,6 +1734,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Clinic_id = 0;
     Clinic_step = 0;
     Clinic_lambda = 0;
+    Workplace_id = 0;
+    Workplace_step = 0;
+    Workplace_lambda = 0;
+    WorkplaceMembership_person_id = 0;
+    WorkplaceMembership_workplace_id = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -1651,6 +1786,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_WORKPLACE_BETAS = 0;
     env_WORKPLACE_BETAAS = 0;
     env_WORKPLACE_A = 0;
+    env_WORKPLACE_DUR = 0;
+    env_WORKPLACE_SIZE = 0;
+    env_WORKPLACE_V = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1729,6 +1867,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->household[*h_xmachine_memory_Person_count] = Person_household;
 					h_Persons->church[*h_xmachine_memory_Person_count] = Person_church;
 					h_Persons->transport[*h_xmachine_memory_Person_count] = Person_transport;
+					h_Persons->workplace[*h_xmachine_memory_Person_count] = Person_workplace;
 					h_Persons->busy[*h_xmachine_memory_Person_count] = Person_busy;
 					h_Persons->startstep[*h_xmachine_memory_Person_count] = Person_startstep;
 					h_Persons->location[*h_xmachine_memory_Person_count] = Person_location;
@@ -1862,6 +2001,33 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Clinics->lambda[*h_xmachine_memory_Clinic_count] = Clinic_lambda;
 					(*h_xmachine_memory_Clinic_count) ++;	
 				}
+				else if(strcmp(agentname, "Workplace") == 0)
+				{
+					if (*h_xmachine_memory_Workplace_count > xmachine_memory_Workplace_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Workplace exceeded whilst reading data\n", xmachine_memory_Workplace_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Workplaces->id[*h_xmachine_memory_Workplace_count] = Workplace_id;
+					h_Workplaces->step[*h_xmachine_memory_Workplace_count] = Workplace_step;
+					h_Workplaces->lambda[*h_xmachine_memory_Workplace_count] = Workplace_lambda;
+					(*h_xmachine_memory_Workplace_count) ++;	
+				}
+				else if(strcmp(agentname, "WorkplaceMembership") == 0)
+				{
+					if (*h_xmachine_memory_WorkplaceMembership_count > xmachine_memory_WorkplaceMembership_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent WorkplaceMembership exceeded whilst reading data\n", xmachine_memory_WorkplaceMembership_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_WorkplaceMemberships->person_id[*h_xmachine_memory_WorkplaceMembership_count] = WorkplaceMembership_person_id;
+					h_WorkplaceMemberships->workplace_id[*h_xmachine_memory_WorkplaceMembership_count] = WorkplaceMembership_workplace_id;
+					(*h_xmachine_memory_WorkplaceMembership_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -1887,6 +2053,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_household = 0;
                 Person_church = 0;
                 Person_transport = 0;
+                Person_workplace = 0;
                 Person_busy = 0;
                 Person_startstep = 0;
                 Person_location = 0;
@@ -1930,6 +2097,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Clinic_id = 0;
                 Clinic_step = 0;
                 Clinic_lambda = 0;
+                Workplace_id = 0;
+                Workplace_step = 0;
+                Workplace_lambda = 0;
+                WorkplaceMembership_person_id = 0;
+                WorkplaceMembership_workplace_id = 0;
                 
                 in_xagent = 0;
 			}
@@ -1967,6 +2139,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/church") == 0) in_Person_church = 0;
 			if(strcmp(buffer, "transport") == 0) in_Person_transport = 1;
 			if(strcmp(buffer, "/transport") == 0) in_Person_transport = 0;
+			if(strcmp(buffer, "workplace") == 0) in_Person_workplace = 1;
+			if(strcmp(buffer, "/workplace") == 0) in_Person_workplace = 0;
 			if(strcmp(buffer, "busy") == 0) in_Person_busy = 1;
 			if(strcmp(buffer, "/busy") == 0) in_Person_busy = 0;
 			if(strcmp(buffer, "startstep") == 0) in_Person_startstep = 1;
@@ -2053,6 +2227,16 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/step") == 0) in_Clinic_step = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Clinic_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Clinic_lambda = 0;
+			if(strcmp(buffer, "id") == 0) in_Workplace_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Workplace_id = 0;
+			if(strcmp(buffer, "step") == 0) in_Workplace_step = 1;
+			if(strcmp(buffer, "/step") == 0) in_Workplace_step = 0;
+			if(strcmp(buffer, "lambda") == 0) in_Workplace_lambda = 1;
+			if(strcmp(buffer, "/lambda") == 0) in_Workplace_lambda = 0;
+			if(strcmp(buffer, "person_id") == 0) in_WorkplaceMembership_person_id = 1;
+			if(strcmp(buffer, "/person_id") == 0) in_WorkplaceMembership_person_id = 0;
+			if(strcmp(buffer, "workplace_id") == 0) in_WorkplaceMembership_workplace_id = 1;
+			if(strcmp(buffer, "/workplace_id") == 0) in_WorkplaceMembership_workplace_id = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -2145,6 +2329,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/WORKPLACE_BETAAS") == 0) in_env_WORKPLACE_BETAAS = 0;
 			if(strcmp(buffer, "WORKPLACE_A") == 0) in_env_WORKPLACE_A = 1;
             if(strcmp(buffer, "/WORKPLACE_A") == 0) in_env_WORKPLACE_A = 0;
+			if(strcmp(buffer, "WORKPLACE_DUR") == 0) in_env_WORKPLACE_DUR = 1;
+            if(strcmp(buffer, "/WORKPLACE_DUR") == 0) in_env_WORKPLACE_DUR = 0;
+			if(strcmp(buffer, "WORKPLACE_SIZE") == 0) in_env_WORKPLACE_SIZE = 1;
+            if(strcmp(buffer, "/WORKPLACE_SIZE") == 0) in_env_WORKPLACE_SIZE = 0;
+			if(strcmp(buffer, "WORKPLACE_V") == 0) in_env_WORKPLACE_V = 1;
+            if(strcmp(buffer, "/WORKPLACE_V") == 0) in_env_WORKPLACE_V = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2213,6 +2403,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_transport){
                     Person_transport = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_workplace){
+                    Person_workplace = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_busy){
                     Person_busy = (unsigned int) fpgu_strtoul(buffer); 
@@ -2342,6 +2535,21 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Clinic_lambda){
                     Clinic_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_Workplace_id){
+                    Workplace_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Workplace_step){
+                    Workplace_step = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Workplace_lambda){
+                    Workplace_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_WorkplaceMembership_person_id){
+                    WorkplaceMembership_person_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_WorkplaceMembership_workplace_id){
+                    WorkplaceMembership_workplace_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }
@@ -2659,6 +2867,27 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_WORKPLACE_A = (float) fgpu_atof(buffer);
                     
                     set_WORKPLACE_A(&env_WORKPLACE_A);
+                  
+              }
+            if(in_env_WORKPLACE_DUR){
+              
+                    env_WORKPLACE_DUR = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_WORKPLACE_DUR(&env_WORKPLACE_DUR);
+                  
+              }
+            if(in_env_WORKPLACE_SIZE){
+              
+                    env_WORKPLACE_SIZE = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_WORKPLACE_SIZE(&env_WORKPLACE_SIZE);
+                  
+              }
+            if(in_env_WORKPLACE_V){
+              
+                    env_WORKPLACE_V = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_V(&env_WORKPLACE_V);
                   
               }
             

@@ -205,6 +205,32 @@ xmachine_memory_Clinic_list* h_Clinics_cldefault;      /**< Pointer to agent lis
 xmachine_memory_Clinic_list* d_Clinics_cldefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Clinic_cldefault_count;   /**< Agent population size counter */ 
 
+/* Workplace Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_Workplace_list* d_Workplaces;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_Workplace_list* d_Workplaces_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_Workplace_list* d_Workplaces_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_Workplace_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_Workplace_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_Workplace_values;  /**< Agent sort identifiers value */
+
+/* Workplace state variables */
+xmachine_memory_Workplace_list* h_Workplaces_wpdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_Workplace_list* d_Workplaces_wpdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_Workplace_wpdefault_count;   /**< Agent population size counter */ 
+
+/* WorkplaceMembership Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_WorkplaceMembership_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_WorkplaceMembership_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_WorkplaceMembership_values;  /**< Agent sort identifiers value */
+
+/* WorkplaceMembership state variables */
+xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;   /**< Agent population size counter */ 
+
 
 /* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
@@ -226,6 +252,7 @@ unsigned int h_Persons_default_variable_transportday2_data_iteration;
 unsigned int h_Persons_default_variable_household_data_iteration;
 unsigned int h_Persons_default_variable_church_data_iteration;
 unsigned int h_Persons_default_variable_transport_data_iteration;
+unsigned int h_Persons_default_variable_workplace_data_iteration;
 unsigned int h_Persons_default_variable_busy_data_iteration;
 unsigned int h_Persons_default_variable_startstep_data_iteration;
 unsigned int h_Persons_default_variable_location_data_iteration;
@@ -258,6 +285,7 @@ unsigned int h_Persons_s2_variable_transportday2_data_iteration;
 unsigned int h_Persons_s2_variable_household_data_iteration;
 unsigned int h_Persons_s2_variable_church_data_iteration;
 unsigned int h_Persons_s2_variable_transport_data_iteration;
+unsigned int h_Persons_s2_variable_workplace_data_iteration;
 unsigned int h_Persons_s2_variable_busy_data_iteration;
 unsigned int h_Persons_s2_variable_startstep_data_iteration;
 unsigned int h_Persons_s2_variable_location_data_iteration;
@@ -301,6 +329,11 @@ unsigned int h_TransportMemberships_trmembershipdefault_variable_duration_data_i
 unsigned int h_Clinics_cldefault_variable_id_data_iteration;
 unsigned int h_Clinics_cldefault_variable_step_data_iteration;
 unsigned int h_Clinics_cldefault_variable_lambda_data_iteration;
+unsigned int h_Workplaces_wpdefault_variable_id_data_iteration;
+unsigned int h_Workplaces_wpdefault_variable_step_data_iteration;
+unsigned int h_Workplaces_wpdefault_variable_lambda_data_iteration;
+unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration;
+unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration;
 
 
 /* Message Memory */
@@ -336,6 +369,14 @@ xmachine_message_transport_membership_list* d_transport_memberships_swap;    /**
 /* Non partitioned and spatial partitioned message variables  */
 int h_message_transport_membership_count;         /**< message list counter*/
 int h_message_transport_membership_output_type;   /**< message output type (single or optional)*/
+
+/* workplace_membership Message variables */
+xmachine_message_workplace_membership_list* h_workplace_memberships;         /**< Pointer to message list on host*/
+xmachine_message_workplace_membership_list* d_workplace_memberships;         /**< Pointer to message list on device*/
+xmachine_message_workplace_membership_list* d_workplace_memberships_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_workplace_membership_count;         /**< message list counter*/
+int h_message_workplace_membership_output_type;   /**< message output type (single or optional)*/
 
 /* location Message variables */
 xmachine_message_location_list* h_locations;         /**< Pointer to message list on host*/
@@ -385,6 +426,12 @@ size_t temp_scan_storage_bytes_TransportMembership;
 
 void * d_temp_scan_storage_Clinic;
 size_t temp_scan_storage_bytes_Clinic;
+
+void * d_temp_scan_storage_Workplace;
+size_t temp_scan_storage_bytes_Workplace;
+
+void * d_temp_scan_storage_WorkplaceMembership;
+size_t temp_scan_storage_bytes_WorkplaceMembership;
 
 
 /*Global condition counts*/
@@ -439,6 +486,11 @@ void Person_persontbinit(cudaStream_t &stream);
  */
 void Person_persontrinit(cudaStream_t &stream);
 
+/** Person_personwpinit
+ * Agent function prototype for personwpinit function of Person agent
+ */
+void Person_personwpinit(cudaStream_t &stream);
+
 /** TBAssignment_tbinit
  * Agent function prototype for tbinit function of TBAssignment agent
  */
@@ -478,6 +530,16 @@ void TransportMembership_trinit(cudaStream_t &stream);
  * Agent function prototype for clupdate function of Clinic agent
  */
 void Clinic_clupdate(cudaStream_t &stream);
+
+/** Workplace_wpupdate
+ * Agent function prototype for wpupdate function of Workplace agent
+ */
+void Workplace_wpupdate(cudaStream_t &stream);
+
+/** WorkplaceMembership_wpinit
+ * Agent function prototype for wpinit function of WorkplaceMembership agent
+ */
+void WorkplaceMembership_wpinit(cudaStream_t &stream);
 
   
 void setPaddingAndOffset()
@@ -588,6 +650,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_household_data_iteration = 0;
     h_Persons_default_variable_church_data_iteration = 0;
     h_Persons_default_variable_transport_data_iteration = 0;
+    h_Persons_default_variable_workplace_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -620,6 +683,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_household_data_iteration = 0;
     h_Persons_s2_variable_church_data_iteration = 0;
     h_Persons_s2_variable_transport_data_iteration = 0;
+    h_Persons_s2_variable_workplace_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -663,6 +727,11 @@ void initialise(char * inputfile){
     h_Clinics_cldefault_variable_id_data_iteration = 0;
     h_Clinics_cldefault_variable_step_data_iteration = 0;
     h_Clinics_cldefault_variable_lambda_data_iteration = 0;
+    h_Workplaces_wpdefault_variable_id_data_iteration = 0;
+    h_Workplaces_wpdefault_variable_step_data_iteration = 0;
+    h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
+    h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
+    h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
     
 
 
@@ -689,6 +758,10 @@ void initialise(char * inputfile){
 	h_TransportMemberships_trmembershipdefault = (xmachine_memory_TransportMembership_list*)malloc(xmachine_TransportMembership_SoA_size);
 	int xmachine_Clinic_SoA_size = sizeof(xmachine_memory_Clinic_list);
 	h_Clinics_cldefault = (xmachine_memory_Clinic_list*)malloc(xmachine_Clinic_SoA_size);
+	int xmachine_Workplace_SoA_size = sizeof(xmachine_memory_Workplace_list);
+	h_Workplaces_wpdefault = (xmachine_memory_Workplace_list*)malloc(xmachine_Workplace_SoA_size);
+	int xmachine_WorkplaceMembership_SoA_size = sizeof(xmachine_memory_WorkplaceMembership_list);
+	h_WorkplaceMemberships_wpmembershipdefault = (xmachine_memory_WorkplaceMembership_list*)malloc(xmachine_WorkplaceMembership_SoA_size);
 
 	/* Message memory allocation (CPU) */
 	int message_tb_assignment_SoA_size = sizeof(xmachine_message_tb_assignment_list);
@@ -699,6 +772,8 @@ void initialise(char * inputfile){
 	h_church_memberships = (xmachine_message_church_membership_list*)malloc(message_church_membership_SoA_size);
 	int message_transport_membership_SoA_size = sizeof(xmachine_message_transport_membership_list);
 	h_transport_memberships = (xmachine_message_transport_membership_list*)malloc(message_transport_membership_SoA_size);
+	int message_workplace_membership_SoA_size = sizeof(xmachine_message_workplace_membership_list);
+	h_workplace_memberships = (xmachine_message_workplace_membership_list*)malloc(message_workplace_membership_SoA_size);
 	int message_location_SoA_size = sizeof(xmachine_message_location_list);
 	h_locations = (xmachine_message_location_list*)malloc(message_location_SoA_size);
 	int message_infection_SoA_size = sizeof(xmachine_message_infection_list);
@@ -709,7 +784,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count, h_Workplaces_wpdefault, &h_xmachine_memory_Workplace_wpdefault_count, h_WorkplaceMemberships_wpmembershipdefault, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -817,6 +892,28 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_Clinics_cldefault, xmachine_Clinic_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Clinics_cldefault, h_Clinics_cldefault, xmachine_Clinic_SoA_size, cudaMemcpyHostToDevice));
     
+	/* Workplace Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Workplaces, xmachine_Workplace_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Workplaces_swap, xmachine_Workplace_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Workplaces_new, xmachine_Workplace_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Workplace_keys, xmachine_memory_Workplace_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Workplace_values, xmachine_memory_Workplace_MAX* sizeof(uint)));
+	/* wpdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Workplaces_wpdefault, xmachine_Workplace_SoA_size));
+	gpuErrchk( cudaMemcpy( d_Workplaces_wpdefault, h_Workplaces_wpdefault, xmachine_Workplace_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* WorkplaceMembership Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_WorkplaceMemberships, xmachine_WorkplaceMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_WorkplaceMemberships_swap, xmachine_WorkplaceMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_WorkplaceMemberships_new, xmachine_WorkplaceMembership_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_WorkplaceMembership_keys, xmachine_memory_WorkplaceMembership_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_WorkplaceMembership_values, xmachine_memory_WorkplaceMembership_MAX* sizeof(uint)));
+	/* wpmembershipdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_WorkplaceMemberships_wpmembershipdefault, xmachine_WorkplaceMembership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_WorkplaceMemberships_wpmembershipdefault, h_WorkplaceMemberships_wpmembershipdefault, xmachine_WorkplaceMembership_SoA_size, cudaMemcpyHostToDevice));
+    
 	/* tb_assignment Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments, message_tb_assignment_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments_swap, message_tb_assignment_SoA_size));
@@ -836,6 +933,11 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_transport_memberships, message_transport_membership_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_transport_memberships_swap, message_transport_membership_SoA_size));
 	gpuErrchk( cudaMemcpy( d_transport_memberships, h_transport_memberships, message_transport_membership_SoA_size, cudaMemcpyHostToDevice));
+	
+	/* workplace_membership Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_workplace_memberships, message_workplace_membership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_workplace_memberships_swap, message_workplace_membership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_workplace_memberships, h_workplace_memberships, message_workplace_membership_SoA_size, cudaMemcpyHostToDevice));
 	
 	/* location Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_locations, message_location_SoA_size));
@@ -950,6 +1052,28 @@ void initialise(char * inputfile){
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Clinic, temp_scan_storage_bytes_Clinic));
     
+    d_temp_scan_storage_Workplace = nullptr;
+    temp_scan_storage_bytes_Workplace = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Workplace, 
+        temp_scan_storage_bytes_Workplace, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_Workplace_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_Workplace, temp_scan_storage_bytes_Workplace));
+    
+    d_temp_scan_storage_WorkplaceMembership = nullptr;
+    temp_scan_storage_bytes_WorkplaceMembership = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_WorkplaceMembership, 
+        temp_scan_storage_bytes_WorkplaceMembership, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_WorkplaceMembership_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_WorkplaceMembership, temp_scan_storage_bytes_WorkplaceMembership));
+    
 
 	/*Set global condition counts*/
 
@@ -1049,6 +1173,10 @@ void initialise(char * inputfile){
 		printf("Init agent_TransportMembership_trmembershipdefault_count: %u\n",get_agent_TransportMembership_trmembershipdefault_count());
 	
 		printf("Init agent_Clinic_cldefault_count: %u\n",get_agent_Clinic_cldefault_count());
+	
+		printf("Init agent_Workplace_wpdefault_count: %u\n",get_agent_Workplace_wpdefault_count());
+	
+		printf("Init agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
 	
 #endif
 } 
@@ -1334,6 +1462,62 @@ void sort_Clinics_cldefault(void (*generate_key_value_pairs)(unsigned int* keys,
 	d_Clinics_swap = d_Clinics_temp;	
 }
 
+void sort_Workplaces_wpdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Workplace_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_Workplace_wpdefault_count); 
+	gridSize = (h_xmachine_memory_Workplace_wpdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_Workplace_keys, d_xmachine_memory_Workplace_values, d_Workplaces_wpdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_Workplace_keys),  thrust::device_pointer_cast(d_xmachine_memory_Workplace_keys) + h_xmachine_memory_Workplace_wpdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_Workplace_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_Workplace_agents, no_sm, h_xmachine_memory_Workplace_wpdefault_count); 
+	gridSize = (h_xmachine_memory_Workplace_wpdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_Workplace_agents<<<gridSize, blockSize>>>(d_xmachine_memory_Workplace_values, d_Workplaces_wpdefault, d_Workplaces_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_Workplace_list* d_Workplaces_temp = d_Workplaces_wpdefault;
+	d_Workplaces_wpdefault = d_Workplaces_swap;
+	d_Workplaces_swap = d_Workplaces_temp;	
+}
+
+void sort_WorkplaceMemberships_wpmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_WorkplaceMembership_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_WorkplaceMembership_keys, d_xmachine_memory_WorkplaceMembership_values, d_WorkplaceMemberships_wpmembershipdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_WorkplaceMembership_keys),  thrust::device_pointer_cast(d_xmachine_memory_WorkplaceMembership_keys) + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_WorkplaceMembership_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_WorkplaceMembership_agents, no_sm, h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_WorkplaceMembership_agents<<<gridSize, blockSize>>>(d_xmachine_memory_WorkplaceMembership_values, d_WorkplaceMemberships_wpmembershipdefault, d_WorkplaceMemberships_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_temp = d_WorkplaceMemberships_wpmembershipdefault;
+	d_WorkplaceMemberships_wpmembershipdefault = d_WorkplaceMemberships_swap;
+	d_WorkplaceMemberships_swap = d_WorkplaceMemberships_temp;	
+}
+
 
 void cleanup(){
     PROFILE_SCOPED_RANGE("cleanup");
@@ -1448,6 +1632,22 @@ void cleanup(){
 	free( h_Clinics_cldefault);
 	gpuErrchk(cudaFree(d_Clinics_cldefault));
 	
+	/* Workplace Agent variables */
+	gpuErrchk(cudaFree(d_Workplaces));
+	gpuErrchk(cudaFree(d_Workplaces_swap));
+	gpuErrchk(cudaFree(d_Workplaces_new));
+	
+	free( h_Workplaces_wpdefault);
+	gpuErrchk(cudaFree(d_Workplaces_wpdefault));
+	
+	/* WorkplaceMembership Agent variables */
+	gpuErrchk(cudaFree(d_WorkplaceMemberships));
+	gpuErrchk(cudaFree(d_WorkplaceMemberships_swap));
+	gpuErrchk(cudaFree(d_WorkplaceMemberships_new));
+	
+	free( h_WorkplaceMemberships_wpmembershipdefault);
+	gpuErrchk(cudaFree(d_WorkplaceMemberships_wpmembershipdefault));
+	
 
 	/* Message data free */
 	
@@ -1470,6 +1670,11 @@ void cleanup(){
 	free( h_transport_memberships);
 	gpuErrchk(cudaFree(d_transport_memberships));
 	gpuErrchk(cudaFree(d_transport_memberships_swap));
+	
+	/* workplace_membership Message variables */
+	free( h_workplace_memberships);
+	gpuErrchk(cudaFree(d_workplace_memberships));
+	gpuErrchk(cudaFree(d_workplace_memberships_swap));
 	
 	/* location Message variables */
 	free( h_locations);
@@ -1520,6 +1725,14 @@ void cleanup(){
     d_temp_scan_storage_Clinic = nullptr;
     temp_scan_storage_bytes_Clinic = 0;
     
+    gpuErrchk(cudaFree(d_temp_scan_storage_Workplace));
+    d_temp_scan_storage_Workplace = nullptr;
+    temp_scan_storage_bytes_Workplace = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_WorkplaceMembership));
+    d_temp_scan_storage_WorkplaceMembership = nullptr;
+    temp_scan_storage_bytes_WorkplaceMembership = 0;
+    
   
   /* CUDA Streams for function layers */
   
@@ -1563,6 +1776,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_transport_membership_count, &h_message_transport_membership_count, sizeof(int)));
 	
+	h_message_workplace_membership_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_workplace_membership_count, &h_message_workplace_membership_count, sizeof(int)));
+	
 	h_message_location_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_location_count, &h_message_location_count, sizeof(int)));
@@ -1597,6 +1814,23 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("WorkplaceMembership_wpinit");
+	WorkplaceMembership_wpinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: WorkplaceMembership_wpinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 3*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("TransportMembership_trinit");
 	TransportMembership_trinit(stream1);
     PROFILE_POP_RANGE();
@@ -1608,7 +1842,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 3*/
+	/* Layer 4*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1625,7 +1859,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 4*/
+	/* Layer 5*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1642,7 +1876,24 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 5*/
+	/* Layer 6*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_personwpinit");
+	Person_personwpinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_personwpinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 7*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1659,7 +1910,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 6*/
+	/* Layer 8*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1676,7 +1927,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 7*/
+	/* Layer 9*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1693,7 +1944,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 8*/
+	/* Layer 10*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1710,7 +1961,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 9*/
+	/* Layer 11*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1727,7 +1978,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 10*/
+	/* Layer 12*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1744,7 +1995,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 11*/
+	/* Layer 13*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1761,7 +2012,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 12*/
+	/* Layer 14*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1778,24 +2029,24 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 13*/
+	/* Layer 15*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("Person_updatelambda");
-	Person_updatelambda(stream1);
+    PROFILE_PUSH_RANGE("Workplace_wpupdate");
+	Workplace_wpupdate(stream1);
     PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_updatelambda = %f (ms)\n", instrument_milliseconds);
+	printf("Instrumentation: Workplace_wpupdate = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 14*/
+	/* Layer 16*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1838,6 +2089,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_TransportMembership_trmembershipdefault_count: %u\n",get_agent_TransportMembership_trmembershipdefault_count());
 	
 		printf("agent_Clinic_cldefault_count: %u\n",get_agent_Clinic_cldefault_count());
+	
+		printf("agent_Workplace_wpdefault_count: %u\n",get_agent_Workplace_wpdefault_count());
+	
+		printf("agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
 	
 #endif
 
@@ -1897,6 +2152,9 @@ float h_env_WORKPLACE_BETAA;
 float h_env_WORKPLACE_BETAS;
 float h_env_WORKPLACE_BETAAS;
 float h_env_WORKPLACE_A;
+unsigned int h_env_WORKPLACE_DUR;
+unsigned int h_env_WORKPLACE_SIZE;
+float h_env_WORKPLACE_V;
 
 
 //constant setter
@@ -2484,6 +2742,45 @@ const float* get_WORKPLACE_A(){
 
 
 
+//constant setter
+void set_WORKPLACE_DUR(unsigned int* h_WORKPLACE_DUR){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_DUR, h_WORKPLACE_DUR, sizeof(unsigned int)));
+    memcpy(&h_env_WORKPLACE_DUR, h_WORKPLACE_DUR,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_WORKPLACE_DUR(){
+    return &h_env_WORKPLACE_DUR;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_SIZE(unsigned int* h_WORKPLACE_SIZE){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_SIZE, h_WORKPLACE_SIZE, sizeof(unsigned int)));
+    memcpy(&h_env_WORKPLACE_SIZE, h_WORKPLACE_SIZE,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_WORKPLACE_SIZE(){
+    return &h_env_WORKPLACE_SIZE;
+}
+
+
+
+//constant setter
+void set_WORKPLACE_V(float* h_WORKPLACE_V){
+    gpuErrchk(cudaMemcpyToSymbol(WORKPLACE_V, h_WORKPLACE_V, sizeof(float)));
+    memcpy(&h_env_WORKPLACE_V, h_WORKPLACE_V,sizeof(float));
+}
+
+//constant getter
+const float* get_WORKPLACE_V(){
+    return &h_env_WORKPLACE_V;
+}
+
+
+
 
 /* Agent data access functions*/
 
@@ -2679,6 +2976,46 @@ xmachine_memory_Clinic_list* get_device_Clinic_cldefault_agents(){
 
 xmachine_memory_Clinic_list* get_host_Clinic_cldefault_agents(){
 	return h_Clinics_cldefault;
+}
+
+    
+int get_agent_Workplace_MAX_count(){
+    return xmachine_memory_Workplace_MAX;
+}
+
+
+int get_agent_Workplace_wpdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_Workplace_wpdefault_count;
+	
+}
+
+xmachine_memory_Workplace_list* get_device_Workplace_wpdefault_agents(){
+	return d_Workplaces_wpdefault;
+}
+
+xmachine_memory_Workplace_list* get_host_Workplace_wpdefault_agents(){
+	return h_Workplaces_wpdefault;
+}
+
+    
+int get_agent_WorkplaceMembership_MAX_count(){
+    return xmachine_memory_WorkplaceMembership_MAX;
+}
+
+
+int get_agent_WorkplaceMembership_wpmembershipdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
+	
+}
+
+xmachine_memory_WorkplaceMembership_list* get_device_WorkplaceMembership_wpmembershipdefault_agents(){
+	return d_WorkplaceMemberships_wpmembershipdefault;
+}
+
+xmachine_memory_WorkplaceMembership_list* get_host_WorkplaceMembership_wpmembershipdefault_agents(){
+	return h_WorkplaceMemberships_wpmembershipdefault;
 }
 
 
@@ -3342,6 +3679,45 @@ __host__ int get_Person_default_variable_transport(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access transport for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_default_variable_workplace(unsigned int index)
+ * Gets the value of the workplace variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace
+ */
+__host__ int get_Person_default_variable_workplace(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_workplace_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->workplace,
+                    d_Persons_default->workplace,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_workplace_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->workplace[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access workplace for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -4590,6 +4966,45 @@ __host__ int get_Person_s2_variable_transport(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access transport for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_s2_variable_workplace(unsigned int index)
+ * Gets the value of the workplace variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace
+ */
+__host__ int get_Person_s2_variable_workplace(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_workplace_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->workplace,
+                    d_Persons_s2->workplace,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_workplace_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->workplace[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access workplace for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -6273,6 +6688,201 @@ __host__ float get_Clinic_cldefault_variable_lambda(unsigned int index){
     }
 }
 
+/** unsigned int get_Workplace_wpdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Workplace_wpdefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_Workplace_wpdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Workplaces_wpdefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Workplaces_wpdefault->id,
+                    d_Workplaces_wpdefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Workplaces_wpdefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Workplaces_wpdefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of Workplace_wpdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Workplace_wpdefault_variable_step(unsigned int index)
+ * Gets the value of the step variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable step
+ */
+__host__ unsigned int get_Workplace_wpdefault_variable_step(unsigned int index){
+    unsigned int count = get_agent_Workplace_wpdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Workplaces_wpdefault_variable_step_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Workplaces_wpdefault->step,
+                    d_Workplaces_wpdefault->step,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Workplaces_wpdefault_variable_step_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Workplaces_wpdefault->step[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Workplace_wpdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_Workplace_wpdefault_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an Workplace agent in the wpdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_Workplace_wpdefault_variable_lambda(unsigned int index){
+    unsigned int count = get_agent_Workplace_wpdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Workplaces_wpdefault_variable_lambda_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Workplaces_wpdefault->lambda,
+                    d_Workplaces_wpdefault->lambda,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Workplaces_wpdefault_variable_lambda_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Workplaces_wpdefault->lambda[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of Workplace_wpdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an WorkplaceMembership agent in the wpmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_person_id(unsigned int index){
+    unsigned int count = get_agent_WorkplaceMembership_wpmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_WorkplaceMemberships_wpmembershipdefault->person_id,
+                    d_WorkplaceMemberships_wpmembershipdefault->person_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_WorkplaceMemberships_wpmembershipdefault->person_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access person_id for the %u th member of WorkplaceMembership_wpmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_workplace_id(unsigned int index)
+ * Gets the value of the workplace_id variable of an WorkplaceMembership agent in the wpmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable workplace_id
+ */
+__host__ unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_workplace_id(unsigned int index){
+    unsigned int count = get_agent_WorkplaceMembership_wpmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_WorkplaceMemberships_wpmembershipdefault->workplace_id,
+                    d_WorkplaceMemberships_wpmembershipdefault->workplace_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_WorkplaceMemberships_wpmembershipdefault->workplace_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access workplace_id for the %u th member of WorkplaceMembership_wpmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -6320,6 +6930,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
 		gpuErrchk(cudaMemcpy(d_dst->church, &h_agent->church, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transport, &h_agent->transport, sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->workplace, &h_agent->workplace, sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->busy, &h_agent->busy, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -6399,6 +7011,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->church, h_src->church, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->transport, h_src->transport, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->workplace, h_src->workplace, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->busy, h_src->busy, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -6753,6 +7367,78 @@ void copy_partial_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_lis
     }
 }
 
+
+/* copy_single_xmachine_memory_Workplace_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_Workplace_hostToDevice(xmachine_memory_Workplace_list * d_dst, xmachine_memory_Workplace * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_Workplace_hostToDevice(xmachine_memory_Workplace_list * d_dst, xmachine_memory_Workplace_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_WorkplaceMembership_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_WorkplaceMembership_hostToDevice(xmachine_memory_WorkplaceMembership_list * d_dst, xmachine_memory_WorkplaceMembership * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->workplace_id, &h_agent->workplace_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_WorkplaceMembership_hostToDevice(xmachine_memory_WorkplaceMembership_list * d_dst, xmachine_memory_WorkplaceMembership_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->workplace_id, h_src->workplace_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
 xmachine_memory_Person* h_allocate_agent_Person(){
 	xmachine_memory_Person* agent = (xmachine_memory_Person*)malloc(sizeof(xmachine_memory_Person));
 	// Memset the whole agent strcuture
@@ -6819,6 +7505,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			dst->church[i] = src[i]->church;
 			 
 			dst->transport[i] = src[i]->transport;
+			 
+			dst->workplace[i] = src[i]->workplace;
 			 
 			dst->busy[i] = src[i]->busy;
 			 
@@ -6897,6 +7585,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_household_data_iteration = 0;
     h_Persons_default_variable_church_data_iteration = 0;
     h_Persons_default_variable_transport_data_iteration = 0;
+    h_Persons_default_variable_workplace_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -6960,6 +7649,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_household_data_iteration = 0;
         h_Persons_default_variable_church_data_iteration = 0;
         h_Persons_default_variable_transport_data_iteration = 0;
+        h_Persons_default_variable_workplace_data_iteration = 0;
         h_Persons_default_variable_busy_data_iteration = 0;
         h_Persons_default_variable_startstep_data_iteration = 0;
         h_Persons_default_variable_location_data_iteration = 0;
@@ -7023,6 +7713,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_household_data_iteration = 0;
     h_Persons_s2_variable_church_data_iteration = 0;
     h_Persons_s2_variable_transport_data_iteration = 0;
+    h_Persons_s2_variable_workplace_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -7086,6 +7777,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_household_data_iteration = 0;
         h_Persons_s2_variable_church_data_iteration = 0;
         h_Persons_s2_variable_transport_data_iteration = 0;
+        h_Persons_s2_variable_workplace_data_iteration = 0;
         h_Persons_s2_variable_busy_data_iteration = 0;
         h_Persons_s2_variable_startstep_data_iteration = 0;
         h_Persons_s2_variable_location_data_iteration = 0;
@@ -7994,6 +8686,220 @@ void h_add_agents_Clinic_cldefault(xmachine_memory_Clinic** agents, unsigned int
 	}
 }
 
+xmachine_memory_Workplace* h_allocate_agent_Workplace(){
+	xmachine_memory_Workplace* agent = (xmachine_memory_Workplace*)malloc(sizeof(xmachine_memory_Workplace));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_Workplace));
+
+	return agent;
+}
+void h_free_agent_Workplace(xmachine_memory_Workplace** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_Workplace** h_allocate_agent_Workplace_array(unsigned int count){
+	xmachine_memory_Workplace ** agents = (xmachine_memory_Workplace**)malloc(count * sizeof(xmachine_memory_Workplace*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_Workplace();
+	}
+	return agents;
+}
+void h_free_agent_Workplace_array(xmachine_memory_Workplace*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_Workplace(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_Workplace_AoS_to_SoA(xmachine_memory_Workplace_list * dst, xmachine_memory_Workplace** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			 
+			dst->step[i] = src[i]->step;
+			 
+			dst->lambda[i] = src[i]->lambda;
+			
+		}
+	}
+}
+
+
+void h_add_agent_Workplace_wpdefault(xmachine_memory_Workplace* agent){
+	if (h_xmachine_memory_Workplace_count + 1 > xmachine_memory_Workplace_MAX){
+		printf("Error: Buffer size of Workplace agents in state wpdefault will be exceeded by h_add_agent_Workplace_wpdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_Workplace_hostToDevice(d_Workplaces_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Workplace_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_Workplace_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Workplaces_wpdefault, d_Workplaces_new, h_xmachine_memory_Workplace_wpdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_Workplace_wpdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Workplace_wpdefault_count, &h_xmachine_memory_Workplace_wpdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_Workplaces_wpdefault_variable_id_data_iteration = 0;
+    h_Workplaces_wpdefault_variable_step_data_iteration = 0;
+    h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
+    
+
+}
+void h_add_agents_Workplace_wpdefault(xmachine_memory_Workplace** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_Workplace_count + count > xmachine_memory_Workplace_MAX){
+			printf("Error: Buffer size of Workplace agents in state wpdefault will be exceeded by h_add_agents_Workplace_wpdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_Workplace_AoS_to_SoA(h_Workplaces_wpdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_Workplace_hostToDevice(d_Workplaces_new, h_Workplaces_wpdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Workplace_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_Workplace_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Workplaces_wpdefault, d_Workplaces_new, h_xmachine_memory_Workplace_wpdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_Workplace_wpdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Workplace_wpdefault_count, &h_xmachine_memory_Workplace_wpdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_Workplaces_wpdefault_variable_id_data_iteration = 0;
+        h_Workplaces_wpdefault_variable_step_data_iteration = 0;
+        h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_WorkplaceMembership* h_allocate_agent_WorkplaceMembership(){
+	xmachine_memory_WorkplaceMembership* agent = (xmachine_memory_WorkplaceMembership*)malloc(sizeof(xmachine_memory_WorkplaceMembership));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_WorkplaceMembership));
+
+	return agent;
+}
+void h_free_agent_WorkplaceMembership(xmachine_memory_WorkplaceMembership** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_WorkplaceMembership** h_allocate_agent_WorkplaceMembership_array(unsigned int count){
+	xmachine_memory_WorkplaceMembership ** agents = (xmachine_memory_WorkplaceMembership**)malloc(count * sizeof(xmachine_memory_WorkplaceMembership*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_WorkplaceMembership();
+	}
+	return agents;
+}
+void h_free_agent_WorkplaceMembership_array(xmachine_memory_WorkplaceMembership*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_WorkplaceMembership(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_WorkplaceMembership_AoS_to_SoA(xmachine_memory_WorkplaceMembership_list * dst, xmachine_memory_WorkplaceMembership** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->person_id[i] = src[i]->person_id;
+			 
+			dst->workplace_id[i] = src[i]->workplace_id;
+			
+		}
+	}
+}
+
+
+void h_add_agent_WorkplaceMembership_wpmembershipdefault(xmachine_memory_WorkplaceMembership* agent){
+	if (h_xmachine_memory_WorkplaceMembership_count + 1 > xmachine_memory_WorkplaceMembership_MAX){
+		printf("Error: Buffer size of WorkplaceMembership agents in state wpmembershipdefault will be exceeded by h_add_agent_WorkplaceMembership_wpmembershipdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_WorkplaceMembership_hostToDevice(d_WorkplaceMemberships_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_WorkplaceMembership_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_WorkplaceMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_WorkplaceMemberships_wpmembershipdefault, d_WorkplaceMemberships_new, h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
+    h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
+    
+
+}
+void h_add_agents_WorkplaceMembership_wpmembershipdefault(xmachine_memory_WorkplaceMembership** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_WorkplaceMembership_count + count > xmachine_memory_WorkplaceMembership_MAX){
+			printf("Error: Buffer size of WorkplaceMembership agents in state wpmembershipdefault will be exceeded by h_add_agents_WorkplaceMembership_wpmembershipdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_WorkplaceMembership_AoS_to_SoA(h_WorkplaceMemberships_wpmembershipdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_WorkplaceMembership_hostToDevice(d_WorkplaceMemberships_new, h_WorkplaceMemberships_wpmembershipdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_WorkplaceMembership_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_WorkplaceMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_WorkplaceMemberships_wpmembershipdefault, d_WorkplaceMemberships_new, h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
+        h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
+        
+
+	}
+}
+
 
 /*  Analytics Functions */
 
@@ -8347,6 +9253,27 @@ int min_Person_default_transport_variable(){
 int max_Person_default_transport_variable(){
     //max in default stream
     thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->transport);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_default_workplace_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->workplace),  thrust::device_pointer_cast(d_Persons_default->workplace) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_workplace_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->workplace),  thrust::device_pointer_cast(d_Persons_default->workplace) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_workplace_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->workplace);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_workplace_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->workplace);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -8999,6 +9926,27 @@ int min_Person_s2_transport_variable(){
 int max_Person_s2_transport_variable(){
     //max in default stream
     thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->transport);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_s2_workplace_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->workplace),  thrust::device_pointer_cast(d_Persons_s2->workplace) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_workplace_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->workplace),  thrust::device_pointer_cast(d_Persons_s2->workplace) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_workplace_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->workplace);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_workplace_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->workplace);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -9869,6 +10817,107 @@ float max_Clinic_cldefault_lambda_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Workplace_wpdefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Workplaces_wpdefault->id),  thrust::device_pointer_cast(d_Workplaces_wpdefault->id) + h_xmachine_memory_Workplace_wpdefault_count);
+}
+
+unsigned int count_Workplace_wpdefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Workplaces_wpdefault->id),  thrust::device_pointer_cast(d_Workplaces_wpdefault->id) + h_xmachine_memory_Workplace_wpdefault_count, count_value);
+}
+unsigned int min_Workplace_wpdefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Workplace_wpdefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Workplace_wpdefault_step_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Workplaces_wpdefault->step),  thrust::device_pointer_cast(d_Workplaces_wpdefault->step) + h_xmachine_memory_Workplace_wpdefault_count);
+}
+
+unsigned int count_Workplace_wpdefault_step_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Workplaces_wpdefault->step),  thrust::device_pointer_cast(d_Workplaces_wpdefault->step) + h_xmachine_memory_Workplace_wpdefault_count, count_value);
+}
+unsigned int min_Workplace_wpdefault_step_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->step);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Workplace_wpdefault_step_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->step);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Workplace_wpdefault_lambda_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Workplaces_wpdefault->lambda),  thrust::device_pointer_cast(d_Workplaces_wpdefault->lambda) + h_xmachine_memory_Workplace_wpdefault_count);
+}
+
+float min_Workplace_wpdefault_lambda_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->lambda);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Workplace_wpdefault_lambda_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->lambda);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_WorkplaceMembership_wpmembershipdefault_person_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id),  thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id) + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count);
+}
+
+unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id),  thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id) + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, count_value);
+}
+unsigned int min_WorkplaceMembership_wpmembershipdefault_person_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_WorkplaceMembership_wpmembershipdefault_person_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->person_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id),  thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id) + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count);
+}
+
+unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id),  thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id) + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, count_value);
+}
+unsigned int min_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 
 
 
@@ -10619,6 +11668,114 @@ void Person_persontrinit(cudaStream_t &stream){
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
 		printf("Error: Buffer size of persontrinit agents in state default will be exceeded moving working agents to next state in function persontrinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Persons_default_temp = d_Persons;
+  d_Persons = d_Persons_default;
+  d_Persons_default = Persons_default_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_default_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_personwpinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_workplace_membership));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_personwpinit
+ * Agent function prototype for personwpinit function of Person agent
+ */
+void Person_personwpinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_default_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_default_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
+	d_Persons = d_Persons_default;
+	d_Persons_default = Persons_default_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_default_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_personwpinit, Person_personwpinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_personwpinit_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (personwpinit)
+	//Reallocate   : false
+	//Input        : workplace_membership
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_personwpinit<<<g, b, sm_size, stream>>>(d_Persons, d_workplace_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of personwpinit agents in state default will be exceeded moving working agents to next state in function personwpinit\n");
       exit(EXIT_FAILURE);
       }
       
@@ -12030,6 +13187,318 @@ void Clinic_clupdate(cudaStream_t &stream){
 }
 
 
+
+	
+/* Shared memory size calculator for agent function */
+int Workplace_wpupdate_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Workplace_wpupdate
+ * Agent function prototype for wpupdate function of Workplace agent
+ */
+void Workplace_wpupdate(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Workplace_wpdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Workplace_wpdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Workplace_list* Workplaces_wpdefault_temp = d_Workplaces;
+	d_Workplaces = d_Workplaces_wpdefault;
+	d_Workplaces_wpdefault = Workplaces_wpdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_Workplace_count = h_xmachine_memory_Workplace_wpdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Workplace_count, &h_xmachine_memory_Workplace_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Workplace_wpdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Workplace_wpdefault_count, &h_xmachine_memory_Workplace_wpdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Workplace_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function wpupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_wpupdate, Workplace_wpupdate_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Workplace_wpupdate_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = optional_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	//message is optional so reset the swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_infection_swaps, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_infection_swaps<<<gridSize, blockSize, 0, stream>>>(d_infections); 
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (wpupdate)
+	//Reallocate   : false
+	//Input        : location
+	//Output       : infection
+	//Agent Output : 
+	GPUFLAME_wpupdate<<<g, b, sm_size, stream>>>(d_Workplaces, d_locations, d_infections);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	//infection Message Type Prefix Sum
+	
+	//swap output
+	xmachine_message_infection_list* d_infections_scanswap_temp = d_infections;
+	d_infections = d_infections_swap;
+	d_infections_swap = d_infections_scanswap_temp;
+	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Workplace, 
+        temp_scan_storage_bytes_Workplace, 
+        d_infections_swap->_scan_input,
+        d_infections_swap->_position,
+        h_xmachine_memory_Workplace_count, 
+        stream
+    );
+
+	//Scatter
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_optional_infection_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_optional_infection_messages<<<gridSize, blockSize, 0, stream>>>(d_infections, d_infections_swap);
+	gpuErrchkLaunch();
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_infections_swap->_position[h_xmachine_memory_Workplace_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_infections_swap->_scan_input[h_xmachine_memory_Workplace_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//If last item in prefix sum was 1 then increase its index to get the count
+	if (scan_last_included == 1){
+		h_message_infection_count += scan_last_sum+1;
+	}else{
+		h_message_infection_count += scan_last_sum;
+	}
+    //Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Workplace_wpdefault_count+h_xmachine_memory_Workplace_count > xmachine_memory_Workplace_MAX){
+		printf("Error: Buffer size of wpupdate agents in state wpdefault will be exceeded moving working agents to next state in function wpupdate\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Workplaces_wpdefault_temp = d_Workplaces;
+  d_Workplaces = d_Workplaces_wpdefault;
+  d_Workplaces_wpdefault = Workplaces_wpdefault_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Workplace_wpdefault_count += h_xmachine_memory_Workplace_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Workplace_wpdefault_count, &h_xmachine_memory_Workplace_wpdefault_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int WorkplaceMembership_wpinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** WorkplaceMembership_wpinit
+ * Agent function prototype for wpinit function of WorkplaceMembership agent
+ */
+void WorkplaceMembership_wpinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_WorkplaceMembership_list* WorkplaceMemberships_wpmembershipdefault_temp = d_WorkplaceMemberships;
+	d_WorkplaceMemberships = d_WorkplaceMemberships_wpmembershipdefault;
+	d_WorkplaceMemberships_wpmembershipdefault = WorkplaceMemberships_wpmembershipdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_WorkplaceMembership_count = h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_WorkplaceMembership_count, &h_xmachine_memory_WorkplaceMembership_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_workplace_membership_count + h_xmachine_memory_WorkplaceMembership_count > xmachine_message_workplace_membership_MAX){
+		printf("Error: Buffer size of workplace_membership message will be exceeded in function wpinit\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_wpinit, WorkplaceMembership_wpinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = WorkplaceMembership_wpinit_sm_size(blockSize);
+	
+	
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_workplace_membership_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_workplace_membership_output_type, &h_message_workplace_membership_output_type, sizeof(int)));
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_WorkplaceMembership_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_WorkplaceMembership_scan_input<<<gridSize, blockSize, 0, stream>>>(d_WorkplaceMemberships);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (wpinit)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : workplace_membership
+	//Agent Output : 
+	GPUFLAME_wpinit<<<g, b, sm_size, stream>>>(d_WorkplaceMemberships, d_workplace_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_workplace_membership_count += h_xmachine_memory_WorkplaceMembership_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_workplace_membership_count, &h_message_workplace_membership_count, sizeof(int)));	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_WorkplaceMembership, 
+        temp_scan_storage_bytes_WorkplaceMembership, 
+        d_WorkplaceMemberships->_scan_input,
+        d_WorkplaceMemberships->_position,
+        h_xmachine_memory_WorkplaceMembership_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_WorkplaceMembership_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_WorkplaceMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_WorkplaceMemberships_swap, d_WorkplaceMemberships, 0, h_xmachine_memory_WorkplaceMembership_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_WorkplaceMembership_list* wpinit_WorkplaceMemberships_temp = d_WorkplaceMemberships;
+	d_WorkplaceMemberships = d_WorkplaceMemberships_swap;
+	d_WorkplaceMemberships_swap = wpinit_WorkplaceMemberships_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_WorkplaceMemberships_swap->_position[h_xmachine_memory_WorkplaceMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_WorkplaceMemberships_swap->_scan_input[h_xmachine_memory_WorkplaceMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_WorkplaceMembership_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_WorkplaceMembership_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_WorkplaceMembership_count, &h_xmachine_memory_WorkplaceMembership_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count+h_xmachine_memory_WorkplaceMembership_count > xmachine_memory_WorkplaceMembership_MAX){
+		printf("Error: Buffer size of wpinit agents in state wpmembershipdefault will be exceeded moving working agents to next state in function wpinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_WorkplaceMembership_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_WorkplaceMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_WorkplaceMemberships_wpmembershipdefault, d_WorkplaceMemberships, h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, h_xmachine_memory_WorkplaceMembership_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count += h_xmachine_memory_WorkplaceMembership_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, sizeof(int)));	
+	
+	
+}
+
+
  
 extern void reset_Person_default_count()
 {
@@ -12079,4 +13548,14 @@ extern void reset_TransportMembership_trmembershipdefault_count()
 extern void reset_Clinic_cldefault_count()
 {
     h_xmachine_memory_Clinic_cldefault_count = 0;
+}
+ 
+extern void reset_Workplace_wpdefault_count()
+{
+    h_xmachine_memory_Workplace_wpdefault_count = 0;
+}
+ 
+extern void reset_WorkplaceMembership_wpmembershipdefault_count()
+{
+    h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count = 0;
 }

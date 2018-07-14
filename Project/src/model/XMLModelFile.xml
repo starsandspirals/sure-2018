@@ -230,6 +230,21 @@
         <name>WORKPLACE_A</name>
         <defaultValue>3</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>WORKPLACE_DUR</name>
+        <defaultValue>8</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>WORKPLACE_SIZE</name>
+        <defaultValue>20</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_V</name>
+        <defaultValue>20</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -334,6 +349,10 @@
         <gpu:variable>
           <type>int</type>
           <name>transport</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>int</type>
+          <name>workplace</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
@@ -495,6 +514,18 @@
           <inputs>
             <gpu:input>
               <messageName>transport_membership</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>personwpinit</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>workplace_membership</messageName>
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
@@ -957,6 +988,99 @@
       <gpu:bufferSize>2</gpu:bufferSize>
     </gpu:xagent>
 
+    <gpu:xagent>
+      <name>Workplace</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>step</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>wpupdate</name>
+          <currentState>wpdefault</currentState>
+          <nextState>wpdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>optional_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>wpdefault</name>
+        </gpu:state>
+        <initialState>wpdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>WorkplaceMembership</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>workplace_id</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>wpinit</name>
+          <currentState>wpmembershipdefault</currentState>
+          <nextState>wpmembershipdefault</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>workplace_membership</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>wpmembershipdefault</name>
+        </gpu:state>
+        <initialState>wpmembershipdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:xagent>
+
   </xagents>
 
   <!-- Messages sent by agents which can be read by other agents -->
@@ -1051,6 +1175,23 @@
     </gpu:message>
 
     <gpu:message>
+      <name>workplace_membership</name>
+      <description>A message declaring that a person is employed at a workplace</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>workplace_id</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
       <name>location</name>
       <description>A message declaring that a person is in a given location at a given time</description>
       <variables>
@@ -1112,6 +1253,12 @@
 
     <layer>
       <gpu:layerFunction>
+        <name>wpinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
         <name>trinit</name>
       </gpu:layerFunction>
     </layer>
@@ -1125,6 +1272,12 @@
     <layer>
       <gpu:layerFunction>
         <name>hhinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>personwpinit</name>
       </gpu:layerFunction>
     </layer>
 
@@ -1176,11 +1329,17 @@
       </gpu:layerFunction>
     </layer>
 
-   <layer>
+    <layer>
+      <gpu:layerFunction>
+        <name>wpupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+   <!--<layer>
       <gpu:layerFunction>
         <name>updatelambda</name>
       </gpu:layerFunction>
-    </layer>
+    </layer>-->
 
     <layer>
       <gpu:layerFunction>
