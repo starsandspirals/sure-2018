@@ -307,7 +307,6 @@ unsigned int h_Persons_s2_variable_lambda_data_iteration;
 unsigned int h_Persons_s2_variable_timevisiting_data_iteration;
 unsigned int h_TBAssignments_tbdefault_variable_id_data_iteration;
 unsigned int h_Households_hhdefault_variable_id_data_iteration;
-unsigned int h_Households_hhdefault_variable_step_data_iteration;
 unsigned int h_Households_hhdefault_variable_lambda_data_iteration;
 unsigned int h_Households_hhdefault_variable_active_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration;
@@ -316,7 +315,6 @@ unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_household_size_
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration;
 unsigned int h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration;
 unsigned int h_Churchs_chudefault_variable_id_data_iteration;
-unsigned int h_Churchs_chudefault_variable_step_data_iteration;
 unsigned int h_Churchs_chudefault_variable_size_data_iteration;
 unsigned int h_Churchs_chudefault_variable_lambda_data_iteration;
 unsigned int h_Churchs_chudefault_variable_active_data_iteration;
@@ -324,17 +322,14 @@ unsigned int h_ChurchMemberships_chumembershipdefault_variable_church_id_data_it
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration;
 unsigned int h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration;
 unsigned int h_Transports_trdefault_variable_id_data_iteration;
-unsigned int h_Transports_trdefault_variable_step_data_iteration;
 unsigned int h_Transports_trdefault_variable_lambda_data_iteration;
 unsigned int h_Transports_trdefault_variable_active_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration;
 unsigned int h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration;
 unsigned int h_Clinics_cldefault_variable_id_data_iteration;
-unsigned int h_Clinics_cldefault_variable_step_data_iteration;
 unsigned int h_Clinics_cldefault_variable_lambda_data_iteration;
 unsigned int h_Workplaces_wpdefault_variable_id_data_iteration;
-unsigned int h_Workplaces_wpdefault_variable_step_data_iteration;
 unsigned int h_Workplaces_wpdefault_variable_lambda_data_iteration;
 unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration;
@@ -709,7 +704,6 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_timevisiting_data_iteration = 0;
     h_TBAssignments_tbdefault_variable_id_data_iteration = 0;
     h_Households_hhdefault_variable_id_data_iteration = 0;
-    h_Households_hhdefault_variable_step_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
     h_Households_hhdefault_variable_active_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_household_id_data_iteration = 0;
@@ -718,7 +712,6 @@ void initialise(char * inputfile){
     h_HouseholdMemberships_hhmembershipdefault_variable_churchgoing_data_iteration = 0;
     h_HouseholdMemberships_hhmembershipdefault_variable_churchfreq_data_iteration = 0;
     h_Churchs_chudefault_variable_id_data_iteration = 0;
-    h_Churchs_chudefault_variable_step_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
     h_Churchs_chudefault_variable_active_data_iteration = 0;
@@ -726,17 +719,14 @@ void initialise(char * inputfile){
     h_ChurchMemberships_chumembershipdefault_variable_household_id_data_iteration = 0;
     h_ChurchMemberships_chumembershipdefault_variable_churchdur_data_iteration = 0;
     h_Transports_trdefault_variable_id_data_iteration = 0;
-    h_Transports_trdefault_variable_step_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
     h_Transports_trdefault_variable_active_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_person_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_transport_id_data_iteration = 0;
     h_TransportMemberships_trmembershipdefault_variable_duration_data_iteration = 0;
     h_Clinics_cldefault_variable_id_data_iteration = 0;
-    h_Clinics_cldefault_variable_step_data_iteration = 0;
     h_Clinics_cldefault_variable_lambda_data_iteration = 0;
     h_Workplaces_wpdefault_variable_id_data_iteration = 0;
-    h_Workplaces_wpdefault_variable_step_data_iteration = 0;
     h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
     h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
     h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
@@ -1805,159 +1795,6 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
-    PROFILE_PUSH_RANGE("TBAssignment_tbinit");
-	TBAssignment_tbinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: TBAssignment_tbinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 2*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("WorkplaceMembership_wpinit");
-	WorkplaceMembership_wpinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: WorkplaceMembership_wpinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 3*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("TransportMembership_trinit");
-	TransportMembership_trinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: TransportMembership_trinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 4*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("ChurchMembership_chuinit");
-	ChurchMembership_chuinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: ChurchMembership_chuinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 5*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("HouseholdMembership_hhinit");
-	HouseholdMembership_hhinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: HouseholdMembership_hhinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 6*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("Person_personwpinit");
-	Person_personwpinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_personwpinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 7*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("Person_persontrinit");
-	Person_persontrinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_persontrinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 8*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("Person_persontbinit");
-	Person_persontbinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_persontbinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 9*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
-    PROFILE_PUSH_RANGE("Person_personhhinit");
-	Person_personhhinit(stream1);
-    PROFILE_POP_RANGE();
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_stop);
-	cudaEventSynchronize(instrument_stop);
-	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
-	printf("Instrumentation: Person_personhhinit = %f (ms)\n", instrument_milliseconds);
-#endif
-	cudaDeviceSynchronize();
-  
-	/* Layer 10*/
-	
-#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
-	cudaEventRecord(instrument_start);
-#endif
-	
     PROFILE_PUSH_RANGE("Person_update");
 	Person_update(stream1);
     PROFILE_POP_RANGE();
@@ -1969,7 +1806,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 11*/
+	/* Layer 2*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -1986,7 +1823,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 12*/
+	/* Layer 3*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2003,7 +1840,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 13*/
+	/* Layer 4*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2020,7 +1857,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 14*/
+	/* Layer 5*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2037,7 +1874,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 15*/
+	/* Layer 6*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2054,7 +1891,24 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 16*/
+	/* Layer 7*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_updatelambda");
+	Person_updatelambda(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_updatelambda = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 8*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2068,6 +1922,159 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventSynchronize(instrument_stop);
 	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
 	printf("Instrumentation: Person_infect = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 9*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("TBAssignment_tbinit");
+	TBAssignment_tbinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: TBAssignment_tbinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 10*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("WorkplaceMembership_wpinit");
+	WorkplaceMembership_wpinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: WorkplaceMembership_wpinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 11*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("TransportMembership_trinit");
+	TransportMembership_trinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: TransportMembership_trinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 12*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("ChurchMembership_chuinit");
+	ChurchMembership_chuinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: ChurchMembership_chuinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 13*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("HouseholdMembership_hhinit");
+	HouseholdMembership_hhinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: HouseholdMembership_hhinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 14*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_personwpinit");
+	Person_personwpinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_personwpinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 15*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_persontrinit");
+	Person_persontrinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_persontrinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 16*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_persontbinit");
+	Person_persontbinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_persontbinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 17*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("Person_personhhinit");
+	Person_personhhinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Person_personhhinit = %f (ms)\n", instrument_milliseconds);
 #endif
 	cudaDeviceSynchronize();
   
@@ -5936,45 +5943,6 @@ __host__ unsigned int get_Household_hhdefault_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Household_hhdefault_variable_step(unsigned int index)
- * Gets the value of the step variable of an Household agent in the hhdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable step
- */
-__host__ unsigned int get_Household_hhdefault_variable_step(unsigned int index){
-    unsigned int count = get_agent_Household_hhdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Households_hhdefault_variable_step_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Households_hhdefault->step,
-                    d_Households_hhdefault->step,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Households_hhdefault_variable_step_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Households_hhdefault->step[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Household_hhdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** float get_Household_hhdefault_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Household agent in the hhdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6287,45 +6255,6 @@ __host__ unsigned int get_Church_chudefault_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Church_chudefault_variable_step(unsigned int index)
- * Gets the value of the step variable of an Church agent in the chudefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable step
- */
-__host__ unsigned int get_Church_chudefault_variable_step(unsigned int index){
-    unsigned int count = get_agent_Church_chudefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Churchs_chudefault_variable_step_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Churchs_chudefault->step,
-                    d_Churchs_chudefault->step,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Churchs_chudefault_variable_step_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Churchs_chudefault->step[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Church_chudefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** unsigned int get_Church_chudefault_variable_size(unsigned int index)
  * Gets the value of the size variable of an Church agent in the chudefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6599,45 +6528,6 @@ __host__ unsigned int get_Transport_trdefault_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Transport_trdefault_variable_step(unsigned int index)
- * Gets the value of the step variable of an Transport agent in the trdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable step
- */
-__host__ unsigned int get_Transport_trdefault_variable_step(unsigned int index){
-    unsigned int count = get_agent_Transport_trdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Transports_trdefault_variable_step_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Transports_trdefault->step,
-                    d_Transports_trdefault->step,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Transports_trdefault_variable_step_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Transports_trdefault->step[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Transport_trdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** float get_Transport_trdefault_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Transport agent in the trdefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6872,45 +6762,6 @@ __host__ unsigned int get_Clinic_cldefault_variable_id(unsigned int index){
     }
 }
 
-/** unsigned int get_Clinic_cldefault_variable_step(unsigned int index)
- * Gets the value of the step variable of an Clinic agent in the cldefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable step
- */
-__host__ unsigned int get_Clinic_cldefault_variable_step(unsigned int index){
-    unsigned int count = get_agent_Clinic_cldefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Clinics_cldefault_variable_step_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Clinics_cldefault->step,
-                    d_Clinics_cldefault->step,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Clinics_cldefault_variable_step_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Clinics_cldefault->step[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Clinic_cldefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
 /** float get_Clinic_cldefault_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Clinic agent in the cldefault state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6983,45 +6834,6 @@ __host__ unsigned int get_Workplace_wpdefault_variable_id(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access id for the %u th member of Workplace_wpdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
-        // Otherwise we return a default value
-        return 0;
-
-    }
-}
-
-/** unsigned int get_Workplace_wpdefault_variable_step(unsigned int index)
- * Gets the value of the step variable of an Workplace agent in the wpdefault state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable step
- */
-__host__ unsigned int get_Workplace_wpdefault_variable_step(unsigned int index){
-    unsigned int count = get_agent_Workplace_wpdefault_count();
-    unsigned int currentIteration = getIterationNumber();
-    
-    // If the index is within bounds - no need to check >= 0 due to unsigned.
-    if(count > 0 && index < count ){
-        // If necessary, copy agent data from the device to the host in the default stream
-        if(h_Workplaces_wpdefault_variable_step_data_iteration != currentIteration){
-            
-            gpuErrchk(
-                cudaMemcpy(
-                    h_Workplaces_wpdefault->step,
-                    d_Workplaces_wpdefault->step,
-                    count * sizeof(unsigned int),
-                    cudaMemcpyDeviceToHost
-                )
-            );
-            // Update some global value indicating what data is currently present in that host array.
-            h_Workplaces_wpdefault_variable_step_data_iteration = currentIteration;
-        }
-
-        // Return the value of the index-th element of the relevant host array.
-        return h_Workplaces_wpdefault->step[index];
-
-    } else {
-        fprintf(stderr, "Warning: Attempting to access step for the %u th member of Workplace_wpdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -7357,8 +7169,6 @@ void copy_single_xmachine_memory_Household_hostToDevice(xmachine_memory_Househol
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -7379,8 +7189,6 @@ void copy_partial_xmachine_memory_Household_hostToDevice(xmachine_memory_Househo
     if (count > 0){
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
  
@@ -7445,8 +7253,6 @@ void copy_single_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_list
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->size, &h_agent->size, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
@@ -7469,8 +7275,6 @@ void copy_partial_xmachine_memory_Church_hostToDevice(xmachine_memory_Church_lis
     if (count > 0){
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->size, h_src->size, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -7529,8 +7333,6 @@ void copy_single_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpor
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->active, &h_agent->active, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -7551,8 +7353,6 @@ void copy_partial_xmachine_memory_Transport_hostToDevice(xmachine_memory_Transpo
     if (count > 0){
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
  
@@ -7609,8 +7409,6 @@ void copy_single_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_list
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
 
 }
@@ -7630,8 +7428,6 @@ void copy_partial_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_lis
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
-		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
 
     }
@@ -7646,8 +7442,6 @@ void copy_partial_xmachine_memory_Clinic_hostToDevice(xmachine_memory_Clinic_lis
 void copy_single_xmachine_memory_Workplace_hostToDevice(xmachine_memory_Workplace_list * d_dst, xmachine_memory_Workplace * h_agent){
  
 		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->step, &h_agent->step, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
 
@@ -7667,8 +7461,6 @@ void copy_partial_xmachine_memory_Workplace_hostToDevice(xmachine_memory_Workpla
     if (count > 0){
 	 
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
- 
-		gpuErrchk(cudaMemcpy(d_dst->step, h_src->step, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
 
@@ -8214,8 +8006,6 @@ void h_unpack_agents_Household_AoS_to_SoA(xmachine_memory_Household_list * dst, 
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->step[i] = src[i]->step;
-			 
 			dst->lambda[i] = src[i]->lambda;
 			 
 			dst->active[i] = src[i]->active;
@@ -8251,7 +8041,6 @@ void h_add_agent_Household_hhdefault(xmachine_memory_Household* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Households_hhdefault_variable_id_data_iteration = 0;
-    h_Households_hhdefault_variable_step_data_iteration = 0;
     h_Households_hhdefault_variable_lambda_data_iteration = 0;
     h_Households_hhdefault_variable_active_data_iteration = 0;
     
@@ -8286,7 +8075,6 @@ void h_add_agents_Household_hhdefault(xmachine_memory_Household** agents, unsign
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Households_hhdefault_variable_id_data_iteration = 0;
-        h_Households_hhdefault_variable_step_data_iteration = 0;
         h_Households_hhdefault_variable_lambda_data_iteration = 0;
         h_Households_hhdefault_variable_active_data_iteration = 0;
         
@@ -8444,8 +8232,6 @@ void h_unpack_agents_Church_AoS_to_SoA(xmachine_memory_Church_list * dst, xmachi
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->step[i] = src[i]->step;
-			 
 			dst->size[i] = src[i]->size;
 			 
 			dst->lambda[i] = src[i]->lambda;
@@ -8483,7 +8269,6 @@ void h_add_agent_Church_chudefault(xmachine_memory_Church* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Churchs_chudefault_variable_id_data_iteration = 0;
-    h_Churchs_chudefault_variable_step_data_iteration = 0;
     h_Churchs_chudefault_variable_size_data_iteration = 0;
     h_Churchs_chudefault_variable_lambda_data_iteration = 0;
     h_Churchs_chudefault_variable_active_data_iteration = 0;
@@ -8519,7 +8304,6 @@ void h_add_agents_Church_chudefault(xmachine_memory_Church** agents, unsigned in
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Churchs_chudefault_variable_id_data_iteration = 0;
-        h_Churchs_chudefault_variable_step_data_iteration = 0;
         h_Churchs_chudefault_variable_size_data_iteration = 0;
         h_Churchs_chudefault_variable_lambda_data_iteration = 0;
         h_Churchs_chudefault_variable_active_data_iteration = 0;
@@ -8670,8 +8454,6 @@ void h_unpack_agents_Transport_AoS_to_SoA(xmachine_memory_Transport_list * dst, 
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->step[i] = src[i]->step;
-			 
 			dst->lambda[i] = src[i]->lambda;
 			 
 			dst->active[i] = src[i]->active;
@@ -8707,7 +8489,6 @@ void h_add_agent_Transport_trdefault(xmachine_memory_Transport* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Transports_trdefault_variable_id_data_iteration = 0;
-    h_Transports_trdefault_variable_step_data_iteration = 0;
     h_Transports_trdefault_variable_lambda_data_iteration = 0;
     h_Transports_trdefault_variable_active_data_iteration = 0;
     
@@ -8742,7 +8523,6 @@ void h_add_agents_Transport_trdefault(xmachine_memory_Transport** agents, unsign
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Transports_trdefault_variable_id_data_iteration = 0;
-        h_Transports_trdefault_variable_step_data_iteration = 0;
         h_Transports_trdefault_variable_lambda_data_iteration = 0;
         h_Transports_trdefault_variable_active_data_iteration = 0;
         
@@ -8892,8 +8672,6 @@ void h_unpack_agents_Clinic_AoS_to_SoA(xmachine_memory_Clinic_list * dst, xmachi
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->step[i] = src[i]->step;
-			 
 			dst->lambda[i] = src[i]->lambda;
 			
 		}
@@ -8927,7 +8705,6 @@ void h_add_agent_Clinic_cldefault(xmachine_memory_Clinic* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Clinics_cldefault_variable_id_data_iteration = 0;
-    h_Clinics_cldefault_variable_step_data_iteration = 0;
     h_Clinics_cldefault_variable_lambda_data_iteration = 0;
     
 
@@ -8961,7 +8738,6 @@ void h_add_agents_Clinic_cldefault(xmachine_memory_Clinic** agents, unsigned int
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Clinics_cldefault_variable_id_data_iteration = 0;
-        h_Clinics_cldefault_variable_step_data_iteration = 0;
         h_Clinics_cldefault_variable_lambda_data_iteration = 0;
         
 
@@ -9001,8 +8777,6 @@ void h_unpack_agents_Workplace_AoS_to_SoA(xmachine_memory_Workplace_list * dst, 
 			 
 			dst->id[i] = src[i]->id;
 			 
-			dst->step[i] = src[i]->step;
-			 
 			dst->lambda[i] = src[i]->lambda;
 			
 		}
@@ -9036,7 +8810,6 @@ void h_add_agent_Workplace_wpdefault(xmachine_memory_Workplace* agent){
 
     // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
     h_Workplaces_wpdefault_variable_id_data_iteration = 0;
-    h_Workplaces_wpdefault_variable_step_data_iteration = 0;
     h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
     
 
@@ -9070,7 +8843,6 @@ void h_add_agents_Workplace_wpdefault(xmachine_memory_Workplace** agents, unsign
 
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Workplaces_wpdefault_variable_id_data_iteration = 0;
-        h_Workplaces_wpdefault_variable_step_data_iteration = 0;
         h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
         
 
@@ -10657,27 +10429,6 @@ unsigned int max_Household_hhdefault_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Household_hhdefault_step_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->step),  thrust::device_pointer_cast(d_Households_hhdefault->step) + h_xmachine_memory_Household_hhdefault_count);
-}
-
-unsigned int count_Household_hhdefault_step_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Households_hhdefault->step),  thrust::device_pointer_cast(d_Households_hhdefault->step) + h_xmachine_memory_Household_hhdefault_count, count_value);
-}
-unsigned int min_Household_hhdefault_step_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->step);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Household_hhdefault_step_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Households_hhdefault->step);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Household_hhdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 float reduce_Household_hhdefault_lambda_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Households_hhdefault->lambda),  thrust::device_pointer_cast(d_Households_hhdefault->lambda) + h_xmachine_memory_Household_hhdefault_count);
@@ -10842,27 +10593,6 @@ unsigned int max_Church_chudefault_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Church_chudefault_step_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->step),  thrust::device_pointer_cast(d_Churchs_chudefault->step) + h_xmachine_memory_Church_chudefault_count);
-}
-
-unsigned int count_Church_chudefault_step_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Churchs_chudefault->step),  thrust::device_pointer_cast(d_Churchs_chudefault->step) + h_xmachine_memory_Church_chudefault_count, count_value);
-}
-unsigned int min_Church_chudefault_step_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->step);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Church_chudefault_step_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Churchs_chudefault->step);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Church_chudefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 unsigned int reduce_Church_chudefault_size_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Churchs_chudefault->size),  thrust::device_pointer_cast(d_Churchs_chudefault->size) + h_xmachine_memory_Church_chudefault_count);
@@ -11002,27 +10732,6 @@ unsigned int max_Transport_trdefault_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Transport_trdefault_step_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Transports_trdefault->step),  thrust::device_pointer_cast(d_Transports_trdefault->step) + h_xmachine_memory_Transport_trdefault_count);
-}
-
-unsigned int count_Transport_trdefault_step_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Transports_trdefault->step),  thrust::device_pointer_cast(d_Transports_trdefault->step) + h_xmachine_memory_Transport_trdefault_count, count_value);
-}
-unsigned int min_Transport_trdefault_step_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->step);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Transport_trdefault_step_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Transports_trdefault->step);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Transport_trdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 float reduce_Transport_trdefault_lambda_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Transports_trdefault->lambda),  thrust::device_pointer_cast(d_Transports_trdefault->lambda) + h_xmachine_memory_Transport_trdefault_count);
@@ -11145,27 +10854,6 @@ unsigned int max_Clinic_cldefault_id_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
-unsigned int reduce_Clinic_cldefault_step_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Clinics_cldefault->step),  thrust::device_pointer_cast(d_Clinics_cldefault->step) + h_xmachine_memory_Clinic_cldefault_count);
-}
-
-unsigned int count_Clinic_cldefault_step_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Clinics_cldefault->step),  thrust::device_pointer_cast(d_Clinics_cldefault->step) + h_xmachine_memory_Clinic_cldefault_count, count_value);
-}
-unsigned int min_Clinic_cldefault_step_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->step);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Clinic_cldefault_step_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Clinics_cldefault->step);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Clinic_cldefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
 float reduce_Clinic_cldefault_lambda_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Clinics_cldefault->lambda),  thrust::device_pointer_cast(d_Clinics_cldefault->lambda) + h_xmachine_memory_Clinic_cldefault_count);
@@ -11201,27 +10889,6 @@ unsigned int min_Workplace_wpdefault_id_variable(){
 unsigned int max_Workplace_wpdefault_id_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->id);
-    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int reduce_Workplace_wpdefault_step_variable(){
-    //reduce in default stream
-    return thrust::reduce(thrust::device_pointer_cast(d_Workplaces_wpdefault->step),  thrust::device_pointer_cast(d_Workplaces_wpdefault->step) + h_xmachine_memory_Workplace_wpdefault_count);
-}
-
-unsigned int count_Workplace_wpdefault_step_variable(int count_value){
-    //count in default stream
-    return (int)thrust::count(thrust::device_pointer_cast(d_Workplaces_wpdefault->step),  thrust::device_pointer_cast(d_Workplaces_wpdefault->step) + h_xmachine_memory_Workplace_wpdefault_count, count_value);
-}
-unsigned int min_Workplace_wpdefault_step_variable(){
-    //min in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->step);
-    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
-    return *(thrust_ptr + result_offset);
-}
-unsigned int max_Workplace_wpdefault_step_variable(){
-    //max in default stream
-    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Workplaces_wpdefault->step);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Workplace_wpdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

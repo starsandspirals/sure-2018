@@ -1321,7 +1321,6 @@ hhupdate(xmachine_memory_Household *household,
   add_infection_message(infection_messages, 0, household->id,
                         household->lambda);
 
-  household->step += TIME_STEP;
   return 0;
 }
 
@@ -1353,7 +1352,6 @@ chuupdate(xmachine_memory_Church *church,
 
   add_infection_message(infection_messages, 1, church->id, church->lambda);
 
-  church->step += TIME_STEP;
   return 0;
 }
 
@@ -1387,7 +1385,6 @@ trupdate(xmachine_memory_Transport *transport,
   add_infection_message(infection_messages, 2, transport->id,
                         transport->lambda);
 
-  transport->step += TIME_STEP;
   return 0;
 }
 
@@ -1419,7 +1416,6 @@ clupdate(xmachine_memory_Clinic *clinic,
 
   add_infection_message(infection_messages, 3, clinic->id, clinic->lambda);
 
-  clinic->step += TIME_STEP;
   return 0;
 }
 
@@ -1453,7 +1449,6 @@ wpupdate(xmachine_memory_Workplace *workplace,
   add_infection_message(infection_messages, 4, workplace->id,
                         workplace->lambda);
 
-  workplace->step += TIME_STEP;
   return 0;
 }
 
