@@ -280,6 +280,26 @@
         <name>RR_AS_M_18</name>
         <defaultValue>1.00</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_BETA0</name>
+        <defaultValue>-1.80628</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_BETAA</name>
+        <defaultValue>-0.02073</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_BETAS</name>
+        <defaultValue>-0.02073</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_BETAAS</name>
+        <defaultValue>0.02204</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -460,6 +480,14 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>timevisiting</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>bargoing</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>barday</name>
         </gpu:variable>
       </memory>
 

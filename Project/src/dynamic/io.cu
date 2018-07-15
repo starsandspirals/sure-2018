@@ -429,6 +429,22 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_RR_AS_M_18()));
     fputs(data, file);
     fputs("</RR_AS_M_18>\n", file);
+    fputs("\t<BAR_BETA0>", file);
+    sprintf(data, "%f", (*get_BAR_BETA0()));
+    fputs(data, file);
+    fputs("</BAR_BETA0>\n", file);
+    fputs("\t<BAR_BETAA>", file);
+    sprintf(data, "%f", (*get_BAR_BETAA()));
+    fputs(data, file);
+    fputs("</BAR_BETAA>\n", file);
+    fputs("\t<BAR_BETAS>", file);
+    sprintf(data, "%f", (*get_BAR_BETAS()));
+    fputs(data, file);
+    fputs("</BAR_BETAS>\n", file);
+    fputs("\t<BAR_BETAAS>", file);
+    sprintf(data, "%f", (*get_BAR_BETAAS()));
+    fputs(data, file);
+    fputs("</BAR_BETAAS>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -616,6 +632,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</timevisiting>\n", file);
         
+		fputs("<bargoing>", file);
+        sprintf(data, "%u", h_Persons_default->bargoing[i]);
+		fputs(data, file);
+		fputs("</bargoing>\n", file);
+        
+		fputs("<barday>", file);
+        sprintf(data, "%u", h_Persons_default->barday[i]);
+		fputs(data, file);
+		fputs("</barday>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -802,6 +828,16 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->timevisiting[i]);
 		fputs(data, file);
 		fputs("</timevisiting>\n", file);
+        
+		fputs("<bargoing>", file);
+        sprintf(data, "%u", h_Persons_s2->bargoing[i]);
+		fputs(data, file);
+		fputs("</bargoing>\n", file);
+        
+		fputs("<barday>", file);
+        sprintf(data, "%u", h_Persons_s2->barday[i]);
+		fputs(data, file);
+		fputs("</barday>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1139,6 +1175,14 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RR_AS_M_26(&t_RR_AS_M_26);
     float t_RR_AS_M_18 = (float)1.00;
     set_RR_AS_M_18(&t_RR_AS_M_18);
+    float t_BAR_BETA0 = (float)-1.80628;
+    set_BAR_BETA0(&t_BAR_BETA0);
+    float t_BAR_BETAA = (float)-0.02073;
+    set_BAR_BETAA(&t_BAR_BETAA);
+    float t_BAR_BETAS = (float)-0.02073;
+    set_BAR_BETAS(&t_BAR_BETAS);
+    float t_BAR_BETAAS = (float)0.02204;
+    set_BAR_BETAAS(&t_BAR_BETAAS);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count)
@@ -1196,6 +1240,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_time_step;
     int in_Person_lambda;
     int in_Person_timevisiting;
+    int in_Person_bargoing;
+    int in_Person_barday;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_lambda;
@@ -1337,6 +1383,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_RR_AS_M_18;
     
+    int in_env_BAR_BETA0;
+    
+    int in_env_BAR_BETAA;
+    
+    int in_env_BAR_BETAS;
+    
+    int in_env_BAR_BETAAS;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1387,6 +1441,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	float Person_time_step;
 	float Person_lambda;
 	unsigned int Person_timevisiting;
+	unsigned int Person_bargoing;
+	unsigned int Person_barday;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	float Household_lambda;
@@ -1472,6 +1528,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_RR_AS_M_46;
     float env_RR_AS_M_26;
     float env_RR_AS_M_18;
+    float env_BAR_BETA0;
+    float env_BAR_BETAA;
+    float env_BAR_BETAS;
+    float env_BAR_BETAAS;
     
 
 
@@ -1525,6 +1585,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_time_step = 0;
 	in_Person_lambda = 0;
 	in_Person_timevisiting = 0;
+	in_Person_bargoing = 0;
+	in_Person_barday = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_lambda = 0;
@@ -1608,6 +1670,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_RR_AS_M_46 = 0;
     in_env_RR_AS_M_26 = 0;
     in_env_RR_AS_M_18 = 0;
+    in_env_BAR_BETA0 = 0;
+    in_env_BAR_BETAA = 0;
+    in_env_BAR_BETAS = 0;
+    in_env_BAR_BETAAS = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1648,6 +1714,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->time_step[k] = 0;
 		h_Persons->lambda[k] = 0;
 		h_Persons->timevisiting[k] = 0;
+		h_Persons->bargoing[k] = 0;
+		h_Persons->barday[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -1776,6 +1844,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_time_step = 0;
     Person_lambda = 0;
     Person_timevisiting = 0;
+    Person_bargoing = 0;
+    Person_barday = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_lambda = 0;
@@ -1861,6 +1931,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_RR_AS_M_46 = 0;
     env_RR_AS_M_26 = 0;
     env_RR_AS_M_18 = 0;
+    env_BAR_BETA0 = 0;
+    env_BAR_BETAA = 0;
+    env_BAR_BETAS = 0;
+    env_BAR_BETAAS = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -1958,6 +2032,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->time_step[*h_xmachine_memory_Person_count] = Person_time_step;
 					h_Persons->lambda[*h_xmachine_memory_Person_count] = Person_lambda;
 					h_Persons->timevisiting[*h_xmachine_memory_Person_count] = Person_timevisiting;
+					h_Persons->bargoing[*h_xmachine_memory_Person_count] = Person_bargoing;
+					h_Persons->barday[*h_xmachine_memory_Person_count] = Person_barday;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -2142,6 +2218,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_time_step = 0;
                 Person_lambda = 0;
                 Person_timevisiting = 0;
+                Person_bargoing = 0;
+                Person_barday = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_lambda = 0;
@@ -2245,6 +2323,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/lambda") == 0) in_Person_lambda = 0;
 			if(strcmp(buffer, "timevisiting") == 0) in_Person_timevisiting = 1;
 			if(strcmp(buffer, "/timevisiting") == 0) in_Person_timevisiting = 0;
+			if(strcmp(buffer, "bargoing") == 0) in_Person_bargoing = 1;
+			if(strcmp(buffer, "/bargoing") == 0) in_Person_bargoing = 0;
+			if(strcmp(buffer, "barday") == 0) in_Person_barday = 1;
+			if(strcmp(buffer, "/barday") == 0) in_Person_barday = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2413,6 +2495,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/RR_AS_M_26") == 0) in_env_RR_AS_M_26 = 0;
 			if(strcmp(buffer, "RR_AS_M_18") == 0) in_env_RR_AS_M_18 = 1;
             if(strcmp(buffer, "/RR_AS_M_18") == 0) in_env_RR_AS_M_18 = 0;
+			if(strcmp(buffer, "BAR_BETA0") == 0) in_env_BAR_BETA0 = 1;
+            if(strcmp(buffer, "/BAR_BETA0") == 0) in_env_BAR_BETA0 = 0;
+			if(strcmp(buffer, "BAR_BETAA") == 0) in_env_BAR_BETAA = 1;
+            if(strcmp(buffer, "/BAR_BETAA") == 0) in_env_BAR_BETAA = 0;
+			if(strcmp(buffer, "BAR_BETAS") == 0) in_env_BAR_BETAS = 1;
+            if(strcmp(buffer, "/BAR_BETAS") == 0) in_env_BAR_BETAS = 0;
+			if(strcmp(buffer, "BAR_BETAAS") == 0) in_env_BAR_BETAAS = 1;
+            if(strcmp(buffer, "/BAR_BETAAS") == 0) in_env_BAR_BETAAS = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2538,6 +2628,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_timevisiting){
                     Person_timevisiting = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_bargoing){
+                    Person_bargoing = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_barday){
+                    Person_barday = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 
@@ -3009,6 +3105,34 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_RR_AS_M_18 = (float) fgpu_atof(buffer);
                     
                     set_RR_AS_M_18(&env_RR_AS_M_18);
+                  
+              }
+            if(in_env_BAR_BETA0){
+              
+                    env_BAR_BETA0 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_BETA0(&env_BAR_BETA0);
+                  
+              }
+            if(in_env_BAR_BETAA){
+              
+                    env_BAR_BETAA = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_BETAA(&env_BAR_BETAA);
+                  
+              }
+            if(in_env_BAR_BETAS){
+              
+                    env_BAR_BETAS = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_BETAS(&env_BAR_BETAS);
+                  
+              }
+            if(in_env_BAR_BETAAS){
+              
+                    env_BAR_BETAAS = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_BETAAS(&env_BAR_BETAAS);
                   
               }
             

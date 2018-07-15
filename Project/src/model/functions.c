@@ -248,6 +248,11 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   float rr_as_m_26 = *get_RR_AS_M_26();
   float rr_as_m_18 = *get_RR_AS_M_18();
 
+  float bar_beta0 = *get_BAR_BETA0();
+  float bar_betaa = *get_BAR_BETAA();
+  float bar_betas = *get_BAR_BETAS();
+  float bar_betaas = *get_BAR_BETAAS();
+
   srand(0);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
