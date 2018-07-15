@@ -457,6 +457,10 @@
           <name>workplace</name>
         </gpu:variable>
         <gpu:variable>
+          <type>int</type>
+          <name>school</name>
+        </gpu:variable>
+        <gpu:variable>
           <type>unsigned int</type>
           <name>busy</name>
         </gpu:variable>
@@ -656,6 +660,18 @@
           <inputs>
             <gpu:input>
               <messageName>workplace_membership</messageName>
+            </gpu:input>
+          </inputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>personschinit</name>
+          <currentState>default</currentState>
+          <nextState>default</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>school_membership</messageName>
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>

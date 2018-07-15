@@ -603,6 +603,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</workplace>\n", file);
         
+		fputs("<school>", file);
+        sprintf(data, "%d", h_Persons_default->school[i]);
+		fputs(data, file);
+		fputs("</school>\n", file);
+        
 		fputs("<busy>", file);
         sprintf(data, "%u", h_Persons_default->busy[i]);
 		fputs(data, file);
@@ -804,6 +809,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->workplace[i]);
 		fputs(data, file);
 		fputs("</workplace>\n", file);
+        
+		fputs("<school>", file);
+        sprintf(data, "%d", h_Persons_s2->school[i]);
+		fputs(data, file);
+		fputs("</school>\n", file);
         
 		fputs("<busy>", file);
         sprintf(data, "%u", h_Persons_s2->busy[i]);
@@ -1346,6 +1356,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_church;
     int in_Person_transport;
     int in_Person_workplace;
+    int in_Person_school;
     int in_Person_busy;
     int in_Person_startstep;
     int in_Person_location;
@@ -1571,6 +1582,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	int Person_church;
 	int Person_transport;
 	int Person_workplace;
+	int Person_school;
 	unsigned int Person_busy;
 	unsigned int Person_startstep;
 	unsigned int Person_location;
@@ -1729,6 +1741,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_church = 0;
 	in_Person_transport = 0;
 	in_Person_workplace = 0;
+	in_Person_school = 0;
 	in_Person_busy = 0;
 	in_Person_startstep = 0;
 	in_Person_location = 0;
@@ -1872,6 +1885,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->church[k] = 0;
 		h_Persons->transport[k] = 0;
 		h_Persons->workplace[k] = 0;
+		h_Persons->school[k] = 0;
 		h_Persons->busy[k] = 0;
 		h_Persons->startstep[k] = 0;
 		h_Persons->location[k] = 0;
@@ -2027,6 +2041,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_church = 0;
     Person_transport = 0;
     Person_workplace = 0;
+    Person_school = 0;
     Person_busy = 0;
     Person_startstep = 0;
     Person_location = 0;
@@ -2229,6 +2244,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->church[*h_xmachine_memory_Person_count] = Person_church;
 					h_Persons->transport[*h_xmachine_memory_Person_count] = Person_transport;
 					h_Persons->workplace[*h_xmachine_memory_Person_count] = Person_workplace;
+					h_Persons->school[*h_xmachine_memory_Person_count] = Person_school;
 					h_Persons->busy[*h_xmachine_memory_Person_count] = Person_busy;
 					h_Persons->startstep[*h_xmachine_memory_Person_count] = Person_startstep;
 					h_Persons->location[*h_xmachine_memory_Person_count] = Person_location;
@@ -2455,6 +2471,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_church = 0;
                 Person_transport = 0;
                 Person_workplace = 0;
+                Person_school = 0;
                 Person_busy = 0;
                 Person_startstep = 0;
                 Person_location = 0;
@@ -2552,6 +2569,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/transport") == 0) in_Person_transport = 0;
 			if(strcmp(buffer, "workplace") == 0) in_Person_workplace = 1;
 			if(strcmp(buffer, "/workplace") == 0) in_Person_workplace = 0;
+			if(strcmp(buffer, "school") == 0) in_Person_school = 1;
+			if(strcmp(buffer, "/school") == 0) in_Person_school = 0;
 			if(strcmp(buffer, "busy") == 0) in_Person_busy = 1;
 			if(strcmp(buffer, "/busy") == 0) in_Person_busy = 0;
 			if(strcmp(buffer, "startstep") == 0) in_Person_startstep = 1;
@@ -2870,6 +2889,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_workplace){
                     Person_workplace = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_school){
+                    Person_school = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_busy){
                     Person_busy = (unsigned int) fpgu_strtoul(buffer); 

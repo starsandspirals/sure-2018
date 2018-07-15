@@ -295,6 +295,7 @@ unsigned int h_Persons_default_variable_household_data_iteration;
 unsigned int h_Persons_default_variable_church_data_iteration;
 unsigned int h_Persons_default_variable_transport_data_iteration;
 unsigned int h_Persons_default_variable_workplace_data_iteration;
+unsigned int h_Persons_default_variable_school_data_iteration;
 unsigned int h_Persons_default_variable_busy_data_iteration;
 unsigned int h_Persons_default_variable_startstep_data_iteration;
 unsigned int h_Persons_default_variable_location_data_iteration;
@@ -334,6 +335,7 @@ unsigned int h_Persons_s2_variable_household_data_iteration;
 unsigned int h_Persons_s2_variable_church_data_iteration;
 unsigned int h_Persons_s2_variable_transport_data_iteration;
 unsigned int h_Persons_s2_variable_workplace_data_iteration;
+unsigned int h_Persons_s2_variable_school_data_iteration;
 unsigned int h_Persons_s2_variable_busy_data_iteration;
 unsigned int h_Persons_s2_variable_startstep_data_iteration;
 unsigned int h_Persons_s2_variable_location_data_iteration;
@@ -560,6 +562,11 @@ void Person_persontrinit(cudaStream_t &stream);
  */
 void Person_personwpinit(cudaStream_t &stream);
 
+/** Person_personschinit
+ * Agent function prototype for personschinit function of Person agent
+ */
+void Person_personschinit(cudaStream_t &stream);
+
 /** TBAssignment_tbinit
  * Agent function prototype for tbinit function of TBAssignment agent
  */
@@ -738,6 +745,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_church_data_iteration = 0;
     h_Persons_default_variable_transport_data_iteration = 0;
     h_Persons_default_variable_workplace_data_iteration = 0;
+    h_Persons_default_variable_school_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -777,6 +785,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_church_data_iteration = 0;
     h_Persons_s2_variable_transport_data_iteration = 0;
     h_Persons_s2_variable_workplace_data_iteration = 0;
+    h_Persons_s2_variable_school_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -4538,6 +4547,45 @@ __host__ int get_Person_default_variable_workplace(unsigned int index){
     }
 }
 
+/** int get_Person_default_variable_school(unsigned int index)
+ * Gets the value of the school variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school
+ */
+__host__ int get_Person_default_variable_school(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_school_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->school,
+                    d_Persons_default->school,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_school_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->school[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access school for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_default_variable_busy(unsigned int index)
  * Gets the value of the busy variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -6053,6 +6101,45 @@ __host__ int get_Person_s2_variable_workplace(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access workplace for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** int get_Person_s2_variable_school(unsigned int index)
+ * Gets the value of the school variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school
+ */
+__host__ int get_Person_s2_variable_school(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_school_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->school,
+                    d_Persons_s2->school,
+                    count * sizeof(int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_school_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->school[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access school for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -8143,6 +8230,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->workplace, &h_agent->workplace, sizeof(int), cudaMemcpyHostToDevice));
  
+		gpuErrchk(cudaMemcpy(d_dst->school, &h_agent->school, sizeof(int), cudaMemcpyHostToDevice));
+ 
 		gpuErrchk(cudaMemcpy(d_dst->busy, &h_agent->busy, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->startstep, &h_agent->startstep, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -8235,6 +8324,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->transport, h_src->transport, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->workplace, h_src->workplace, count * sizeof(int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->school, h_src->school, count * sizeof(int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->busy, h_src->busy, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -8824,6 +8915,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			 
 			dst->workplace[i] = src[i]->workplace;
 			 
+			dst->school[i] = src[i]->school;
+			 
 			dst->busy[i] = src[i]->busy;
 			 
 			dst->startstep[i] = src[i]->startstep;
@@ -8911,6 +9004,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_church_data_iteration = 0;
     h_Persons_default_variable_transport_data_iteration = 0;
     h_Persons_default_variable_workplace_data_iteration = 0;
+    h_Persons_default_variable_school_data_iteration = 0;
     h_Persons_default_variable_busy_data_iteration = 0;
     h_Persons_default_variable_startstep_data_iteration = 0;
     h_Persons_default_variable_location_data_iteration = 0;
@@ -8981,6 +9075,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_church_data_iteration = 0;
         h_Persons_default_variable_transport_data_iteration = 0;
         h_Persons_default_variable_workplace_data_iteration = 0;
+        h_Persons_default_variable_school_data_iteration = 0;
         h_Persons_default_variable_busy_data_iteration = 0;
         h_Persons_default_variable_startstep_data_iteration = 0;
         h_Persons_default_variable_location_data_iteration = 0;
@@ -9051,6 +9146,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_church_data_iteration = 0;
     h_Persons_s2_variable_transport_data_iteration = 0;
     h_Persons_s2_variable_workplace_data_iteration = 0;
+    h_Persons_s2_variable_school_data_iteration = 0;
     h_Persons_s2_variable_busy_data_iteration = 0;
     h_Persons_s2_variable_startstep_data_iteration = 0;
     h_Persons_s2_variable_location_data_iteration = 0;
@@ -9121,6 +9217,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_church_data_iteration = 0;
         h_Persons_s2_variable_transport_data_iteration = 0;
         h_Persons_s2_variable_workplace_data_iteration = 0;
+        h_Persons_s2_variable_school_data_iteration = 0;
         h_Persons_s2_variable_busy_data_iteration = 0;
         h_Persons_s2_variable_startstep_data_iteration = 0;
         h_Persons_s2_variable_location_data_iteration = 0;
@@ -10981,6 +11078,27 @@ int max_Person_default_workplace_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+int reduce_Person_default_school_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->school),  thrust::device_pointer_cast(d_Persons_default->school) + h_xmachine_memory_Person_default_count);
+}
+
+int count_Person_default_school_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->school),  thrust::device_pointer_cast(d_Persons_default->school) + h_xmachine_memory_Person_default_count, count_value);
+}
+int min_Person_default_school_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->school);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_default_school_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->school);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_default_busy_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->busy),  thrust::device_pointer_cast(d_Persons_default->busy) + h_xmachine_memory_Person_default_count);
@@ -11777,6 +11895,27 @@ int min_Person_s2_workplace_variable(){
 int max_Person_s2_workplace_variable(){
     //max in default stream
     thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->workplace);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int reduce_Person_s2_school_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->school),  thrust::device_pointer_cast(d_Persons_s2->school) + h_xmachine_memory_Person_s2_count);
+}
+
+int count_Person_s2_school_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->school),  thrust::device_pointer_cast(d_Persons_s2->school) + h_xmachine_memory_Person_s2_count, count_value);
+}
+int min_Person_s2_school_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->school);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_Person_s2_school_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->school);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
@@ -13682,6 +13821,114 @@ void Person_personwpinit(cudaStream_t &stream){
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
 		printf("Error: Buffer size of personwpinit agents in state default will be exceeded moving working agents to next state in function personwpinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Persons_default_temp = d_Persons;
+  d_Persons = d_Persons_default;
+  d_Persons_default = Persons_default_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Person_default_count += h_xmachine_memory_Person_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int Person_personschinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_school_membership));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Person_personschinit
+ * Agent function prototype for personschinit function of Person agent
+ */
+void Person_personschinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Person_default_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Person_default_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Person_list* Persons_default_temp = d_Persons;
+	d_Persons = d_Persons_default;
+	d_Persons_default = Persons_default_temp;
+	//set working count to current state count
+	h_xmachine_memory_Person_count = h_xmachine_memory_Person_default_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_count, &h_xmachine_memory_Person_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Person_default_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Person_default_count, &h_xmachine_memory_Person_default_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_personschinit, Person_personschinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Person_personschinit_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (personschinit)
+	//Reallocate   : false
+	//Input        : school_membership
+	//Output       : 
+	//Agent Output : 
+	GPUFLAME_personschinit<<<g, b, sm_size, stream>>>(d_Persons, d_school_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Person_default_count+h_xmachine_memory_Person_count > xmachine_memory_Person_MAX){
+		printf("Error: Buffer size of personschinit agents in state default will be exceeded moving working agents to next state in function personschinit\n");
       exit(EXIT_FAILURE);
       }
       

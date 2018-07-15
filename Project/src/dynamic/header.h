@@ -202,6 +202,7 @@ struct __align__(16) xmachine_memory_Person
     int church;    /**< X-machine memory variable church of type int.*/
     int transport;    /**< X-machine memory variable transport of type int.*/
     int workplace;    /**< X-machine memory variable workplace of type int.*/
+    int school;    /**< X-machine memory variable school of type int.*/
     unsigned int busy;    /**< X-machine memory variable busy of type unsigned int.*/
     unsigned int startstep;    /**< X-machine memory variable startstep of type unsigned int.*/
     unsigned int location;    /**< X-machine memory variable location of type unsigned int.*/
@@ -512,6 +513,7 @@ struct xmachine_memory_Person_list
     int church [xmachine_memory_Person_MAX];    /**< X-machine memory variable list church of type int.*/
     int transport [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transport of type int.*/
     int workplace [xmachine_memory_Person_MAX];    /**< X-machine memory variable list workplace of type int.*/
+    int school [xmachine_memory_Person_MAX];    /**< X-machine memory variable list school of type int.*/
     unsigned int busy [xmachine_memory_Person_MAX];    /**< X-machine memory variable list busy of type unsigned int.*/
     unsigned int startstep [xmachine_memory_Person_MAX];    /**< X-machine memory variable list startstep of type unsigned int.*/
     unsigned int location [xmachine_memory_Person_MAX];    /**< X-machine memory variable list location of type unsigned int.*/
@@ -947,6 +949,13 @@ __FLAME_GPU_FUNC__ int persontrinit(xmachine_memory_Person* agent, xmachine_mess
 __FLAME_GPU_FUNC__ int personwpinit(xmachine_memory_Person* agent, xmachine_message_workplace_membership_list* workplace_membership_messages);
 
 /**
+ * personschinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param school_membership_messages  school_membership_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_school_membership_message and get_next_school_membership_message functions.
+ */
+__FLAME_GPU_FUNC__ int personschinit(xmachine_memory_Person* agent, xmachine_message_school_membership_list* school_membership_messages);
+
+/**
  * tbinit FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_TBAssignment. This represents a single agent instance and can be modified directly.
  * @param tb_assignment_messages Pointer to output message list of type xmachine_message_tb_assignment_list. Must be passed as an argument to the add_tb_assignment_message function ??.
@@ -1298,6 +1307,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param church	agent agent variable of type int
  * @param transport	agent agent variable of type int
  * @param workplace	agent agent variable of type int
+ * @param school	agent agent variable of type int
  * @param busy	agent agent variable of type unsigned int
  * @param startstep	agent agent variable of type unsigned int
  * @param location	agent agent variable of type unsigned int
@@ -1317,7 +1327,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param bargoing	agent agent variable of type unsigned int
  * @param barday	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -2325,6 +2335,15 @@ __host__ int get_Person_default_variable_transport(unsigned int index);
  */
 __host__ int get_Person_default_variable_workplace(unsigned int index);
 
+/** int get_Person_default_variable_school(unsigned int index)
+ * Gets the value of the school variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school
+ */
+__host__ int get_Person_default_variable_school(unsigned int index);
+
 /** unsigned int get_Person_default_variable_busy(unsigned int index)
  * Gets the value of the busy variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2675,6 +2694,15 @@ __host__ int get_Person_s2_variable_transport(unsigned int index);
  * @return value of agent variable workplace
  */
 __host__ int get_Person_s2_variable_workplace(unsigned int index);
+
+/** int get_Person_s2_variable_school(unsigned int index)
+ * Gets the value of the school variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school
+ */
+__host__ int get_Person_s2_variable_school(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_busy(unsigned int index)
  * Gets the value of the busy variable of an Person agent in the s2 state on the host. 
@@ -4289,6 +4317,32 @@ int min_Person_default_workplace_variable();
  */
 int max_Person_default_workplace_variable();
 
+/** int reduce_Person_default_school_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_default_school_variable();
+
+
+
+/** int count_Person_default_school_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_default_school_variable(int count_value);
+
+/** int min_Person_default_school_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_default_school_variable();
+/** int max_Person_default_school_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_default_school_variable();
+
 /** unsigned int reduce_Person_default_busy_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -5267,6 +5321,32 @@ int min_Person_s2_workplace_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 int max_Person_s2_workplace_variable();
+
+/** int reduce_Person_s2_school_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_s2_school_variable();
+
+
+
+/** int count_Person_s2_school_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_s2_school_variable(int count_value);
+
+/** int min_Person_s2_school_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_s2_school_variable();
+/** int max_Person_s2_school_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_s2_school_variable();
 
 /** unsigned int reduce_Person_s2_busy_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

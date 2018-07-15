@@ -1388,6 +1388,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->locationid = person->household;
       }
     }
+    else if (person->school != -1 && hour == 9 && hour == 0)
+    {
+      person->startstep = person->step;
+      person->busy = 1;
+      person->location = 6;
+      person->locationid = person->school;
+    }
     else if (hour >= 20 || hour <= 6)
     {
       person->location = 0;
@@ -1437,6 +1444,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
+    }
+    else if (person->location == 6 &&
+             (float)(person->step - person->startstep) >= 96)
+    {
+      person->busy = 0;
+      person->location = 7;
+      person->locationid = 0;
     }
     else if (person->location == 0 &&
              (float)(person->step - person->startstep) >= 8)
@@ -1854,6 +1868,28 @@ persontbinit(xmachine_memory_Person *person,
     }
     tb_assignment_message = get_next_tb_assignment_message(
         tb_assignment_message, tb_assignment_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int personschinit(
+    xmachine_memory_Person *person,
+    xmachine_message_school_membership_list *school_membership_messages)
+{
+  unsigned int personid = person->id;
+  person->school = -1;
+  xmachine_message_school_membership *school_membership_message =
+      get_first_school_membership_message(school_membership_messages);
+
+  while (school_membership_message)
+  {
+    if (school_membership_message->person_id == personid)
+    {
+      person->school = school_membership_message->school_id;
+    }
+    school_membership_message = get_next_school_membership_message(
+        school_membership_message, school_membership_messages);
   }
 
   return 0;
