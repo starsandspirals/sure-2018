@@ -325,6 +325,16 @@
         <name>BAR_V</name>
         <defaultValue>40</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>SCHOOL_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>SCHOOL_V</name>
+        <defaultValue>40</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -1227,6 +1237,95 @@
       <gpu:bufferSize>4096</gpu:bufferSize>
     </gpu:xagent>
 
+    <gpu:xagent>
+      <name>School</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>schupdate</name>
+          <currentState>schdefault</currentState>
+          <nextState>schdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>optional_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>schdefault</name>
+        </gpu:state>
+        <initialState>schdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>SchoolMembership</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>school_id</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>schinit</name>
+          <currentState>schmembershipdefault</currentState>
+          <nextState>schmembershipdefault</nextState>
+          <outputs>
+            <gpu:output>
+              <messageName>school_membership</messageName>
+              <gpu:type>single_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>true</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>schmembershipdefault</name>
+        </gpu:state>
+        <initialState>schmembershipdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>16384</gpu:bufferSize>
+    </gpu:xagent>
+
   </xagents>
 
   <!-- Messages sent by agents which can be read by other agents -->
@@ -1338,6 +1437,23 @@
     </gpu:message>
 
     <gpu:message>
+      <name>school_membership</name>
+      <description>A message declaring that a person studies at a school</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>person_id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>school_id</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>16384</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
       <name>location</name>
       <description>A message declaring that a person is in a given location at a given time</description>
       <variables>
@@ -1429,6 +1545,18 @@
 
     <layer>
       <gpu:layerFunction>
+        <name>bupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>schupdate</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
         <name>updatelambda</name>
       </gpu:layerFunction>
     </layer>
@@ -1443,6 +1571,12 @@
     <layer>
       <gpu:layerFunction>
         <name>tbinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>schinit</name>
       </gpu:layerFunction>
     </layer>
 

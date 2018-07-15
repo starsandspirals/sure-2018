@@ -49,6 +49,10 @@ __constant__ int d_xmachine_memory_WorkplaceMembership_count;
 
 __constant__ int d_xmachine_memory_Bar_count;
 
+__constant__ int d_xmachine_memory_School_count;
+
+__constant__ int d_xmachine_memory_SchoolMembership_count;
+
 /* Agent state count constants */
 
 __constant__ int d_xmachine_memory_Person_default_count;
@@ -76,6 +80,10 @@ __constant__ int d_xmachine_memory_Workplace_wpdefault_count;
 __constant__ int d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
 
 __constant__ int d_xmachine_memory_Bar_bdefault_count;
+
+__constant__ int d_xmachine_memory_School_schdefault_count;
+
+__constant__ int d_xmachine_memory_SchoolMembership_schmembershipdefault_count;
 
 
 /* Message constants */
@@ -105,6 +113,11 @@ __constant__ int d_message_transport_membership_output_type;   /**< message outp
 __constant__ int d_message_workplace_membership_count;         /**< message list counter*/
 __constant__ int d_message_workplace_membership_output_type;   /**< message output type (single or optional)*/
 
+/* school_membership Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_school_membership_count;         /**< message list counter*/
+__constant__ int d_message_school_membership_output_type;   /**< message output type (single or optional)*/
+
 /* location Message variables */
 /* Non partitioned and spatial partitioned message variables  */
 __constant__ int d_message_location_count;         /**< message list counter*/
@@ -122,6 +135,7 @@ __constant__ int d_message_infection_output_type;   /**< message output type (si
 #include "functions.c"
     
 /* Texture bindings */
+
 
 
 
@@ -1989,6 +2003,238 @@ __global__ void reorder_Bar_agents(unsigned int* values, xmachine_memory_Bar_lis
 	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created School agent functions */
+
+/** reset_School_scan_input
+ * School agent reset scan input function
+ * @param agents The xmachine_memory_School_list agent list
+ */
+__global__ void reset_School_scan_input(xmachine_memory_School_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_School_Agents
+ * School scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_School_list agent list destination
+ * @param agents_src xmachine_memory_School_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_School_Agents(xmachine_memory_School_list* agents_dst, xmachine_memory_School_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->lambda[output_index] = agents_src->lambda[index];
+	}
+}
+
+/** append_School_Agents
+ * School scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_School_list agent list destination
+ * @param agents_src xmachine_memory_School_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_School_Agents(xmachine_memory_School_list* agents_dst, xmachine_memory_School_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+    }
+}
+
+/** add_School_agent
+ * Continuous School agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_School_list to add agents to 
+ * @param id agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+template <int AGENT_TYPE>
+__device__ void add_School_agent(xmachine_memory_School_list* agents, unsigned int id, float lambda){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+	agents->lambda[index] = lambda;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_School_agent(xmachine_memory_School_list* agents, unsigned int id, float lambda){
+    add_School_agent<DISCRETE_2D>(agents, id, lambda);
+}
+
+/** reorder_School_agents
+ * Continuous School agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_School_agents(unsigned int* values, xmachine_memory_School_list* unordered_agents, xmachine_memory_School_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created SchoolMembership agent functions */
+
+/** reset_SchoolMembership_scan_input
+ * SchoolMembership agent reset scan input function
+ * @param agents The xmachine_memory_SchoolMembership_list agent list
+ */
+__global__ void reset_SchoolMembership_scan_input(xmachine_memory_SchoolMembership_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_SchoolMembership_Agents
+ * SchoolMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_SchoolMembership_list agent list destination
+ * @param agents_src xmachine_memory_SchoolMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_SchoolMembership_Agents(xmachine_memory_SchoolMembership_list* agents_dst, xmachine_memory_SchoolMembership_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->person_id[output_index] = agents_src->person_id[index];        
+		agents_dst->school_id[output_index] = agents_src->school_id[index];
+	}
+}
+
+/** append_SchoolMembership_Agents
+ * SchoolMembership scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_SchoolMembership_list agent list destination
+ * @param agents_src xmachine_memory_SchoolMembership_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_SchoolMembership_Agents(xmachine_memory_SchoolMembership_list* agents_dst, xmachine_memory_SchoolMembership_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->person_id[output_index] = agents_src->person_id[index];
+	    agents_dst->school_id[output_index] = agents_src->school_id[index];
+    }
+}
+
+/** add_SchoolMembership_agent
+ * Continuous SchoolMembership agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_SchoolMembership_list to add agents to 
+ * @param person_id agent variable of type unsigned int
+ * @param school_id agent variable of type unsigned int
+ */
+template <int AGENT_TYPE>
+__device__ void add_SchoolMembership_agent(xmachine_memory_SchoolMembership_list* agents, unsigned int person_id, unsigned int school_id){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->person_id[index] = person_id;
+	agents->school_id[index] = school_id;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_SchoolMembership_agent(xmachine_memory_SchoolMembership_list* agents, unsigned int person_id, unsigned int school_id){
+    add_SchoolMembership_agent<DISCRETE_2D>(agents, person_id, school_id);
+}
+
+/** reorder_SchoolMembership_agents
+ * Continuous SchoolMembership agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_SchoolMembership_agents(unsigned int* values, xmachine_memory_SchoolMembership_list* unordered_agents, xmachine_memory_SchoolMembership_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
+	ordered_agents->school_id[index] = unordered_agents->school_id[old_pos];
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Dyanamically created tb_assignment message functions */
 
@@ -2767,6 +3013,157 @@ __device__ xmachine_message_workplace_membership* get_next_workplace_membership_
 
 	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_workplace_membership));
 	return ((xmachine_message_workplace_membership*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created school_membership message functions */
+
+
+/** add_school_membership_message
+ * Add non partitioned or spatially partitioned school_membership message
+ * @param messages xmachine_message_school_membership_list message list to add too
+ * @param person_id agent variable of type unsigned int
+ * @param school_id agent variable of type unsigned int
+ */
+__device__ void add_school_membership_message(xmachine_message_school_membership_list* messages, unsigned int person_id, unsigned int school_id){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_school_membership_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_school_membership_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_school_membership_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_school_membership Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->person_id[index] = person_id;
+	messages->school_id[index] = school_id;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned school_membership message (for optional messages)
+ * @param messages scatter_optional_school_membership_messages Sparse xmachine_message_school_membership_list message list
+ * @param message_swap temp xmachine_message_school_membership_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_school_membership_messages(xmachine_message_school_membership_list* messages, xmachine_message_school_membership_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_school_membership_count;
+
+		//AoS - xmachine_message_school_membership Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->person_id[output_index] = messages_swap->person_id[index];
+		messages->school_id[output_index] = messages_swap->school_id[index];				
+	}
+}
+
+/** reset_school_membership_swaps
+ * Reset non partitioned or spatially partitioned school_membership message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_school_membership_swaps(xmachine_message_school_membership_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_school_membership* get_first_school_membership_message(xmachine_message_school_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_school_membership_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_school_membership Coalesced memory read
+	xmachine_message_school_membership temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.person_id = messages->person_id[index];
+	temp_message.school_id = messages->school_id[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_school_membership));
+	xmachine_message_school_membership* sm_message = ((xmachine_message_school_membership*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_school_membership*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_school_membership* get_next_school_membership_message(xmachine_message_school_membership* message, xmachine_message_school_membership_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_school_membership_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_school_membership_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_school_membership Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_school_membership temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.person_id = messages->person_id[index];
+		temp_message.school_id = messages->school_id[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_school_membership));
+		xmachine_message_school_membership* sm_message = ((xmachine_message_school_membership*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_school_membership));
+	return ((xmachine_message_school_membership*)&message_share[message_index]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4512,6 +4909,80 @@ __global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_mess
 	agents->id[index] = agent.id;
 	agents->lambda[index] = agent.lambda;
 	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_schupdate(xmachine_memory_School_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_schupdate Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_School agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_School_count){
+    
+	agent.id = agents->id[index];
+	agent.lambda = agents->lambda[index];
+	} else {
+	
+	agent.id = 0;
+	agent.lambda = 0;
+	}
+
+	//FLAME function call
+	int dead = !schupdate(&agent, location_messages, infection_messages	);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_School_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_schupdate Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->lambda[index] = agent.lambda;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_schinit(xmachine_memory_SchoolMembership_list* agents, xmachine_message_school_membership_list* school_membership_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    //For agents not using non partitioned message input check the agent bounds
+    if (index >= d_xmachine_memory_SchoolMembership_count)
+        return;
+    
+
+	//SoA to AoS - xmachine_memory_schinit Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_SchoolMembership agent;
+    
+    // Thread bounds already checked, but the agent function will still execute. load default values?
+	
+	agent.person_id = agents->person_id[index];
+	agent.school_id = agents->school_id[index];
+
+	//FLAME function call
+	int dead = !schinit(&agent, school_membership_messages	);
+	
+
+	//continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_schinit Coalesced memory write (ignore arrays)
+	agents->person_id[index] = agent.person_id;
+	agents->school_id[index] = agent.school_id;
 }
 
 	

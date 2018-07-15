@@ -93,6 +93,12 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_memory_Bar
 #define xmachine_memory_Bar_MAX 4096
 
+//Maximum population size of xmachine_memory_School
+#define xmachine_memory_School_MAX 2048
+
+//Maximum population size of xmachine_memory_SchoolMembership
+#define xmachine_memory_SchoolMembership_MAX 16384
+
 
   
   
@@ -112,6 +118,9 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_mmessage_workplace_membership
 #define xmachine_message_workplace_membership_MAX 32768
 
+//Maximum population size of xmachine_mmessage_school_membership
+#define xmachine_message_school_membership_MAX 16384
+
 //Maximum population size of xmachine_mmessage_location
 #define xmachine_message_location_MAX 32768
 
@@ -126,6 +135,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_church_membership_partitioningNone
 #define xmachine_message_transport_membership_partitioningNone
 #define xmachine_message_workplace_membership_partitioningNone
+#define xmachine_message_school_membership_partitioningNone
 #define xmachine_message_location_partitioningNone
 #define xmachine_message_infection_partitioningNone
 
@@ -330,6 +340,26 @@ struct __align__(16) xmachine_memory_Bar
     float lambda;    /**< X-machine memory variable lambda of type float.*/
 };
 
+/** struct xmachine_memory_School
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_School
+{
+    unsigned int id;    /**< X-machine memory variable id of type unsigned int.*/
+    float lambda;    /**< X-machine memory variable lambda of type float.*/
+};
+
+/** struct xmachine_memory_SchoolMembership
+ * continuous valued agent
+ * Holds all agent variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_memory_SchoolMembership
+{
+    unsigned int person_id;    /**< X-machine memory variable person_id of type unsigned int.*/
+    unsigned int school_id;    /**< X-machine memory variable school_id of type unsigned int.*/
+};
+
 
 
 /* Message structures */
@@ -402,6 +432,19 @@ struct __align__(16) xmachine_message_workplace_membership
       
     unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
     unsigned int workplace_id;        /**< Message variable workplace_id of type unsigned int.*/
+};
+
+/** struct xmachine_message_school_membership
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_school_membership
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int person_id;        /**< Message variable person_id of type unsigned int.*/  
+    unsigned int school_id;        /**< Message variable school_id of type unsigned int.*/
 };
 
 /** struct xmachine_message_location
@@ -651,6 +694,34 @@ struct xmachine_memory_Bar_list
     float lambda [xmachine_memory_Bar_MAX];    /**< X-machine memory variable list lambda of type float.*/
 };
 
+/** struct xmachine_memory_School_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_School_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_School_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_School_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int id [xmachine_memory_School_MAX];    /**< X-machine memory variable list id of type unsigned int.*/
+    float lambda [xmachine_memory_School_MAX];    /**< X-machine memory variable list lambda of type float.*/
+};
+
+/** struct xmachine_memory_SchoolMembership_list
+ * continuous valued agent
+ * Variables lists for all agent variables
+ */
+struct xmachine_memory_SchoolMembership_list
+{	
+    /* Temp variables for agents. Used for parallel operations such as prefix sum */
+    int _position [xmachine_memory_SchoolMembership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_memory_SchoolMembership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_memory_SchoolMembership_MAX];    /**< X-machine memory variable list person_id of type unsigned int.*/
+    unsigned int school_id [xmachine_memory_SchoolMembership_MAX];    /**< X-machine memory variable list school_id of type unsigned int.*/
+};
+
 
 
 /* Message lists. Structure of Array (SoA) for memory coalescing on GPU */
@@ -732,6 +803,21 @@ struct xmachine_message_workplace_membership_list
     
     unsigned int person_id [xmachine_message_workplace_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
     unsigned int workplace_id [xmachine_message_workplace_membership_MAX];    /**< Message memory variable list workplace_id of type unsigned int.*/
+    
+};
+
+/** struct xmachine_message_school_membership_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_school_membership_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_school_membership_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_school_membership_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int person_id [xmachine_message_school_membership_MAX];    /**< Message memory variable list person_id of type unsigned int.*/
+    unsigned int school_id [xmachine_message_school_membership_MAX];    /**< Message memory variable list school_id of type unsigned int.*/
     
 };
 
@@ -937,6 +1023,20 @@ __FLAME_GPU_FUNC__ int wpinit(xmachine_memory_WorkplaceMembership* agent, xmachi
  */
 __FLAME_GPU_FUNC__ int bupdate(xmachine_memory_Bar* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
 
+/**
+ * schupdate FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_School. This represents a single agent instance and can be modified directly.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ */
+__FLAME_GPU_FUNC__ int schupdate(xmachine_memory_School* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+
+/**
+ * schinit FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_SchoolMembership. This represents a single agent instance and can be modified directly.
+ * @param school_membership_messages Pointer to output message list of type xmachine_message_school_membership_list. Must be passed as an argument to the add_school_membership_message function ??.
+ */
+__FLAME_GPU_FUNC__ int schinit(xmachine_memory_SchoolMembership* agent, xmachine_message_school_membership_list* school_membership_messages);
+
   
 /* Message Function Prototypes for Brute force (No Partitioning) tb_assignment message implemented in FLAMEGPU_Kernels */
 
@@ -1081,6 +1181,34 @@ __FLAME_GPU_FUNC__ xmachine_message_workplace_membership * get_first_workplace_m
  * @return        returns the first message from the message list (offset depending on agent block)
  */
 __FLAME_GPU_FUNC__ xmachine_message_workplace_membership * get_next_workplace_membership_message(xmachine_message_workplace_membership* current, xmachine_message_workplace_membership_list* workplace_membership_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) school_membership message implemented in FLAMEGPU_Kernels */
+
+/** add_school_membership_message
+ * Function for all types of message partitioning
+ * Adds a new school_membership agent to the xmachine_memory_school_membership_list list using a linear mapping
+ * @param agents	xmachine_memory_school_membership_list agent list
+ * @param person_id	message variable of type unsigned int
+ * @param school_id	message variable of type unsigned int
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_school_membership_message(xmachine_message_school_membership_list* school_membership_messages, unsigned int person_id, unsigned int school_id);
+ 
+/** get_first_school_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param school_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_school_membership * get_first_school_membership_message(xmachine_message_school_membership_list* school_membership_messages);
+
+/** get_next_school_membership_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param school_membership_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_school_membership * get_next_school_membership_message(xmachine_message_school_membership* current, xmachine_message_school_membership_list* school_membership_messages);
 
   
 /* Message Function Prototypes for Brute force (No Partitioning) location message implemented in FLAMEGPU_Kernels */
@@ -1287,6 +1415,22 @@ __FLAME_GPU_FUNC__ void add_WorkplaceMembership_agent(xmachine_memory_WorkplaceM
  */
 __FLAME_GPU_FUNC__ void add_Bar_agent(xmachine_memory_Bar_list* agents, unsigned int id, float lambda);
 
+/** add_School_agent
+ * Adds a new continuous valued School agent to the xmachine_memory_School_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_School_list agent list
+ * @param id	agent agent variable of type unsigned int
+ * @param lambda	agent agent variable of type float
+ */
+__FLAME_GPU_FUNC__ void add_School_agent(xmachine_memory_School_list* agents, unsigned int id, float lambda);
+
+/** add_SchoolMembership_agent
+ * Adds a new continuous valued SchoolMembership agent to the xmachine_memory_SchoolMembership_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
+ * @param agents xmachine_memory_SchoolMembership_list agent list
+ * @param person_id	agent agent variable of type unsigned int
+ * @param school_id	agent agent variable of type unsigned int
+ */
+__FLAME_GPU_FUNC__ void add_SchoolMembership_agent(xmachine_memory_SchoolMembership_list* agents, unsigned int person_id, unsigned int school_id);
+
 
   
 /* Simulation function prototypes implemented in simulation.cu */
@@ -1351,8 +1495,14 @@ extern void singleIteration();
  * @param h_Bars Pointer to agent list on the host
  * @param d_Bars Pointer to agent list on the GPU device
  * @param h_xmachine_memory_Bar_count Pointer to agent counter
+ * @param h_Schools Pointer to agent list on the host
+ * @param d_Schools Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_School_count Pointer to agent counter
+ * @param h_SchoolMemberships Pointer to agent list on the host
+ * @param d_SchoolMemberships Pointer to agent list on the GPU device
+ * @param h_xmachine_memory_SchoolMembership_count Pointer to agent counter
  */
-extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,xmachine_memory_Bar_list* h_Bars_bdefault, xmachine_memory_Bar_list* d_Bars_bdefault, int h_xmachine_memory_Bar_bdefault_count);
+extern void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,xmachine_memory_Bar_list* h_Bars_bdefault, xmachine_memory_Bar_list* d_Bars_bdefault, int h_xmachine_memory_Bar_bdefault_count,xmachine_memory_School_list* h_Schools_schdefault, xmachine_memory_School_list* d_Schools_schdefault, int h_xmachine_memory_School_schdefault_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships_schmembershipdefault, xmachine_memory_SchoolMembership_list* d_SchoolMemberships_schmembershipdefault, int h_xmachine_memory_SchoolMembership_schmembershipdefault_count);
 
 
 /** readInitialStates
@@ -1382,8 +1532,12 @@ extern void saveIterationData(char* outputpath, int iteration_number, xmachine_m
  * @param h_xmachine_memory_WorkplaceMembership_count Pointer to agent counter
  * @param h_Bars Pointer to agent list on the host
  * @param h_xmachine_memory_Bar_count Pointer to agent counter
+ * @param h_Schools Pointer to agent list on the host
+ * @param h_xmachine_memory_School_count Pointer to agent counter
+ * @param h_SchoolMemberships Pointer to agent list on the host
+ * @param h_xmachine_memory_SchoolMembership_count Pointer to agent counter
  */
-extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count);
+extern void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count);
 
 
 /* Return functions used by external code to get agent data from device */
@@ -1897,6 +2051,86 @@ extern xmachine_memory_Bar_list* get_host_Bar_bdefault_agents();
  * @param		a pointer CUDA kernal function to generate key value pairs
  */
 void sort_Bars_bdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Bar_list* agents));
+
+
+    
+/** get_agent_School_MAX_count
+ * Gets the max agent count for the School agent type 
+ * @return		the maximum School agent count
+ */
+extern int get_agent_School_MAX_count();
+
+
+
+/** get_agent_School_schdefault_count
+ * Gets the agent count for the School agent type in state schdefault
+ * @return		the current School agent count in state schdefault
+ */
+extern int get_agent_School_schdefault_count();
+
+/** reset_schdefault_count
+ * Resets the agent count of the School in state schdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_School_schdefault_count();
+
+/** get_device_School_schdefault_agents
+ * Gets a pointer to xmachine_memory_School_list on the GPU device
+ * @return		a xmachine_memory_School_list on the GPU device
+ */
+extern xmachine_memory_School_list* get_device_School_schdefault_agents();
+
+/** get_host_School_schdefault_agents
+ * Gets a pointer to xmachine_memory_School_list on the CPU host
+ * @return		a xmachine_memory_School_list on the CPU host
+ */
+extern xmachine_memory_School_list* get_host_School_schdefault_agents();
+
+
+/** sort_Schools_schdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_Schools_schdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_School_list* agents));
+
+
+    
+/** get_agent_SchoolMembership_MAX_count
+ * Gets the max agent count for the SchoolMembership agent type 
+ * @return		the maximum SchoolMembership agent count
+ */
+extern int get_agent_SchoolMembership_MAX_count();
+
+
+
+/** get_agent_SchoolMembership_schmembershipdefault_count
+ * Gets the agent count for the SchoolMembership agent type in state schmembershipdefault
+ * @return		the current SchoolMembership agent count in state schmembershipdefault
+ */
+extern int get_agent_SchoolMembership_schmembershipdefault_count();
+
+/** reset_schmembershipdefault_count
+ * Resets the agent count of the SchoolMembership in state schmembershipdefault to 0. This is useful for interacting with some visualisations.
+ */
+extern void reset_SchoolMembership_schmembershipdefault_count();
+
+/** get_device_SchoolMembership_schmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_SchoolMembership_list on the GPU device
+ * @return		a xmachine_memory_SchoolMembership_list on the GPU device
+ */
+extern xmachine_memory_SchoolMembership_list* get_device_SchoolMembership_schmembershipdefault_agents();
+
+/** get_host_SchoolMembership_schmembershipdefault_agents
+ * Gets a pointer to xmachine_memory_SchoolMembership_list on the CPU host
+ * @return		a xmachine_memory_SchoolMembership_list on the CPU host
+ */
+extern xmachine_memory_SchoolMembership_list* get_host_SchoolMembership_schmembershipdefault_agents();
+
+
+/** sort_SchoolMemberships_schmembershipdefault
+ * Sorts an agent state list by providing a CUDA kernal to generate key value pairs
+ * @param		a pointer CUDA kernal function to generate key value pairs
+ */
+void sort_SchoolMemberships_schmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_SchoolMembership_list* agents));
 
 
 
@@ -2874,6 +3108,42 @@ __host__ unsigned int get_Bar_bdefault_variable_id(unsigned int index);
  */
 __host__ float get_Bar_bdefault_variable_lambda(unsigned int index);
 
+/** unsigned int get_School_schdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an School agent in the schdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_School_schdefault_variable_id(unsigned int index);
+
+/** float get_School_schdefault_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an School agent in the schdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_School_schdefault_variable_lambda(unsigned int index);
+
+/** unsigned int get_SchoolMembership_schmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an SchoolMembership agent in the schmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_SchoolMembership_schmembershipdefault_variable_person_id(unsigned int index);
+
+/** unsigned int get_SchoolMembership_schmembershipdefault_variable_school_id(unsigned int index)
+ * Gets the value of the school_id variable of an SchoolMembership agent in the schmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school_id
+ */
+__host__ unsigned int get_SchoolMembership_schmembershipdefault_variable_school_id(unsigned int index);
+
 
 
 
@@ -3387,6 +3657,88 @@ void h_add_agent_Bar_bdefault(xmachine_memory_Bar* agent);
  * @param count the number of agents to copy from the host to the device.
  */
 void h_add_agents_Bar_bdefault(xmachine_memory_Bar** agents, unsigned int count);
+
+/** h_allocate_agent_School
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated School struct.
+ */
+xmachine_memory_School* h_allocate_agent_School();
+/** h_free_agent_School
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_School(xmachine_memory_School** agent);
+/** h_allocate_agent_School_array
+ * Utility function to allocate an array of structs for  School agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_School** h_allocate_agent_School_array(unsigned int count);
+/** h_free_agent_School_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_School_array(xmachine_memory_School*** agents, unsigned int count);
+
+
+/** h_add_agent_School_schdefault
+ * Host function to add a single agent of type School to the schdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_School_schdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_School_schdefault(xmachine_memory_School* agent);
+
+/** h_add_agents_School_schdefault(
+ * Host function to add multiple agents of type School to the schdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of School agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_School_schdefault(xmachine_memory_School** agents, unsigned int count);
+
+/** h_allocate_agent_SchoolMembership
+ * Utility function to allocate and initialise an agent struct on the host.
+ * @return address of a host-allocated SchoolMembership struct.
+ */
+xmachine_memory_SchoolMembership* h_allocate_agent_SchoolMembership();
+/** h_free_agent_SchoolMembership
+ * Utility function to free a host-allocated agent struct.
+ * This also deallocates any agent variable arrays, and sets the pointer to null
+ * @param agent address of pointer to the host allocated struct
+ */
+void h_free_agent_SchoolMembership(xmachine_memory_SchoolMembership** agent);
+/** h_allocate_agent_SchoolMembership_array
+ * Utility function to allocate an array of structs for  SchoolMembership agents.
+ * @param count the number of structs to allocate memory for.
+ * @return pointer to the allocated array of structs
+ */
+xmachine_memory_SchoolMembership** h_allocate_agent_SchoolMembership_array(unsigned int count);
+/** h_free_agent_SchoolMembership_array(
+ * Utility function to deallocate a host array of agent structs, including agent variables, and set pointer values to NULL.
+ * @param agents the address of the pointer to the host array of structs.
+ * @param count the number of elements in the AoS, to deallocate individual elements.
+ */
+void h_free_agent_SchoolMembership_array(xmachine_memory_SchoolMembership*** agents, unsigned int count);
+
+
+/** h_add_agent_SchoolMembership_schmembershipdefault
+ * Host function to add a single agent of type SchoolMembership to the schmembershipdefault state on the device.
+ * This invokes many cudaMempcy, and an append kernel launch. 
+ * If multiple agents are to be created in a single iteration, consider h_add_agent_SchoolMembership_schmembershipdefault instead.
+ * @param agent pointer to agent struct on the host. Agent member arrays are supported.
+ */
+void h_add_agent_SchoolMembership_schmembershipdefault(xmachine_memory_SchoolMembership* agent);
+
+/** h_add_agents_SchoolMembership_schmembershipdefault(
+ * Host function to add multiple agents of type SchoolMembership to the schmembershipdefault state on the device if possible.
+ * This includes the transparent conversion from AoS to SoA, many calls to cudaMemcpy and an append kernel.
+ * @param agents pointer to host struct of arrays of SchoolMembership agents
+ * @param count the number of agents to copy from the host to the device.
+ */
+void h_add_agents_SchoolMembership_schmembershipdefault(xmachine_memory_SchoolMembership** agents, unsigned int count);
 
   
   
@@ -6087,6 +6439,103 @@ float min_Bar_bdefault_lambda_variable();
  */
 float max_Bar_bdefault_lambda_variable();
 
+/** unsigned int reduce_School_schdefault_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_School_schdefault_id_variable();
+
+
+
+/** unsigned int count_School_schdefault_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_School_schdefault_id_variable(int count_value);
+
+/** unsigned int min_School_schdefault_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_School_schdefault_id_variable();
+/** unsigned int max_School_schdefault_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_School_schdefault_id_variable();
+
+/** float reduce_School_schdefault_lambda_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+float reduce_School_schdefault_lambda_variable();
+
+
+
+/** float min_School_schdefault_lambda_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float min_School_schdefault_lambda_variable();
+/** float max_School_schdefault_lambda_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+float max_School_schdefault_lambda_variable();
+
+/** unsigned int reduce_SchoolMembership_schmembershipdefault_person_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_SchoolMembership_schmembershipdefault_person_id_variable();
+
+
+
+/** unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(int count_value);
+
+/** unsigned int min_SchoolMembership_schmembershipdefault_person_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_SchoolMembership_schmembershipdefault_person_id_variable();
+/** unsigned int max_SchoolMembership_schmembershipdefault_person_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_SchoolMembership_schmembershipdefault_person_id_variable();
+
+/** unsigned int reduce_SchoolMembership_schmembershipdefault_school_id_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_SchoolMembership_schmembershipdefault_school_id_variable();
+
+
+
+/** unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(int count_value);
+
+/** unsigned int min_SchoolMembership_schmembershipdefault_school_id_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_SchoolMembership_schmembershipdefault_school_id_variable();
+/** unsigned int max_SchoolMembership_schmembershipdefault_school_id_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_SchoolMembership_schmembershipdefault_school_id_variable();
+
 
   
 /* global constant variables */
@@ -6218,6 +6667,10 @@ __constant__ unsigned int SCHOOL_SIZE;
 __constant__ float BAR_A;
 
 __constant__ float BAR_V;
+
+__constant__ float SCHOOL_A;
+
+__constant__ float SCHOOL_V;
 
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
@@ -6922,6 +7375,28 @@ extern const float* get_BAR_V();
 
 
 extern float h_env_BAR_V;
+
+/** set_SCHOOL_A
+ * Sets the constant variable SCHOOL_A on the device which can then be used in the agent functions.
+ * @param h_SCHOOL_A value to set the variable
+ */
+extern void set_SCHOOL_A(float* h_SCHOOL_A);
+
+extern const float* get_SCHOOL_A();
+
+
+extern float h_env_SCHOOL_A;
+
+/** set_SCHOOL_V
+ * Sets the constant variable SCHOOL_V on the device which can then be used in the agent functions.
+ * @param h_SCHOOL_V value to set the variable
+ */
+extern void set_SCHOOL_V(float* h_SCHOOL_V);
+
+extern const float* get_SCHOOL_V();
+
+
+extern float h_env_SCHOOL_V;
 
 
 /** getMaximumBound

@@ -244,6 +244,32 @@ xmachine_memory_Bar_list* h_Bars_bdefault;      /**< Pointer to agent list (popu
 xmachine_memory_Bar_list* d_Bars_bdefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_Bar_bdefault_count;   /**< Agent population size counter */ 
 
+/* School Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_School_list* d_Schools;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_School_list* d_Schools_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_School_list* d_Schools_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_School_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_School_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_School_values;  /**< Agent sort identifiers value */
+
+/* School state variables */
+xmachine_memory_School_list* h_Schools_schdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_School_list* d_Schools_schdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_School_schdefault_count;   /**< Agent population size counter */ 
+
+/* SchoolMembership Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_SchoolMembership_list* d_SchoolMemberships;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_SchoolMembership_list* d_SchoolMemberships_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_SchoolMembership_list* d_SchoolMemberships_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_SchoolMembership_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_SchoolMembership_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_SchoolMembership_values;  /**< Agent sort identifiers value */
+
+/* SchoolMembership state variables */
+xmachine_memory_SchoolMembership_list* h_SchoolMemberships_schmembershipdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_SchoolMembership_list* d_SchoolMemberships_schmembershipdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_SchoolMembership_schmembershipdefault_count;   /**< Agent population size counter */ 
+
 
 /* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
@@ -356,6 +382,10 @@ unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_
 unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration;
 unsigned int h_Bars_bdefault_variable_id_data_iteration;
 unsigned int h_Bars_bdefault_variable_lambda_data_iteration;
+unsigned int h_Schools_schdefault_variable_id_data_iteration;
+unsigned int h_Schools_schdefault_variable_lambda_data_iteration;
+unsigned int h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration;
+unsigned int h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration;
 
 
 /* Message Memory */
@@ -399,6 +429,14 @@ xmachine_message_workplace_membership_list* d_workplace_memberships_swap;    /**
 /* Non partitioned and spatial partitioned message variables  */
 int h_message_workplace_membership_count;         /**< message list counter*/
 int h_message_workplace_membership_output_type;   /**< message output type (single or optional)*/
+
+/* school_membership Message variables */
+xmachine_message_school_membership_list* h_school_memberships;         /**< Pointer to message list on host*/
+xmachine_message_school_membership_list* d_school_memberships;         /**< Pointer to message list on device*/
+xmachine_message_school_membership_list* d_school_memberships_swap;    /**< Pointer to message swap list on device (used for holding optional messages)*/
+/* Non partitioned and spatial partitioned message variables  */
+int h_message_school_membership_count;         /**< message list counter*/
+int h_message_school_membership_output_type;   /**< message output type (single or optional)*/
 
 /* location Message variables */
 xmachine_message_location_list* h_locations;         /**< Pointer to message list on host*/
@@ -457,6 +495,12 @@ size_t temp_scan_storage_bytes_WorkplaceMembership;
 
 void * d_temp_scan_storage_Bar;
 size_t temp_scan_storage_bytes_Bar;
+
+void * d_temp_scan_storage_School;
+size_t temp_scan_storage_bytes_School;
+
+void * d_temp_scan_storage_SchoolMembership;
+size_t temp_scan_storage_bytes_SchoolMembership;
 
 
 /*Global condition counts*/
@@ -570,6 +614,16 @@ void WorkplaceMembership_wpinit(cudaStream_t &stream);
  * Agent function prototype for bupdate function of Bar agent
  */
 void Bar_bupdate(cudaStream_t &stream);
+
+/** School_schupdate
+ * Agent function prototype for schupdate function of School agent
+ */
+void School_schupdate(cudaStream_t &stream);
+
+/** SchoolMembership_schinit
+ * Agent function prototype for schinit function of SchoolMembership agent
+ */
+void SchoolMembership_schinit(cudaStream_t &stream);
 
   
 void setPaddingAndOffset()
@@ -771,6 +825,10 @@ void initialise(char * inputfile){
     h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
     h_Bars_bdefault_variable_id_data_iteration = 0;
     h_Bars_bdefault_variable_lambda_data_iteration = 0;
+    h_Schools_schdefault_variable_id_data_iteration = 0;
+    h_Schools_schdefault_variable_lambda_data_iteration = 0;
+    h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration = 0;
+    h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration = 0;
     
 
 
@@ -803,6 +861,10 @@ void initialise(char * inputfile){
 	h_WorkplaceMemberships_wpmembershipdefault = (xmachine_memory_WorkplaceMembership_list*)malloc(xmachine_WorkplaceMembership_SoA_size);
 	int xmachine_Bar_SoA_size = sizeof(xmachine_memory_Bar_list);
 	h_Bars_bdefault = (xmachine_memory_Bar_list*)malloc(xmachine_Bar_SoA_size);
+	int xmachine_School_SoA_size = sizeof(xmachine_memory_School_list);
+	h_Schools_schdefault = (xmachine_memory_School_list*)malloc(xmachine_School_SoA_size);
+	int xmachine_SchoolMembership_SoA_size = sizeof(xmachine_memory_SchoolMembership_list);
+	h_SchoolMemberships_schmembershipdefault = (xmachine_memory_SchoolMembership_list*)malloc(xmachine_SchoolMembership_SoA_size);
 
 	/* Message memory allocation (CPU) */
 	int message_tb_assignment_SoA_size = sizeof(xmachine_message_tb_assignment_list);
@@ -815,6 +877,8 @@ void initialise(char * inputfile){
 	h_transport_memberships = (xmachine_message_transport_membership_list*)malloc(message_transport_membership_SoA_size);
 	int message_workplace_membership_SoA_size = sizeof(xmachine_message_workplace_membership_list);
 	h_workplace_memberships = (xmachine_message_workplace_membership_list*)malloc(message_workplace_membership_SoA_size);
+	int message_school_membership_SoA_size = sizeof(xmachine_message_school_membership_list);
+	h_school_memberships = (xmachine_message_school_membership_list*)malloc(message_school_membership_SoA_size);
 	int message_location_SoA_size = sizeof(xmachine_message_location_list);
 	h_locations = (xmachine_message_location_list*)malloc(message_location_SoA_size);
 	int message_infection_SoA_size = sizeof(xmachine_message_infection_list);
@@ -825,7 +889,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count, h_Workplaces_wpdefault, &h_xmachine_memory_Workplace_wpdefault_count, h_WorkplaceMemberships_wpmembershipdefault, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, h_Bars_bdefault, &h_xmachine_memory_Bar_bdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count, h_Workplaces_wpdefault, &h_xmachine_memory_Workplace_wpdefault_count, h_WorkplaceMemberships_wpmembershipdefault, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, h_Bars_bdefault, &h_xmachine_memory_Bar_bdefault_count, h_Schools_schdefault, &h_xmachine_memory_School_schdefault_count, h_SchoolMemberships_schmembershipdefault, &h_xmachine_memory_SchoolMembership_schmembershipdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -966,6 +1030,28 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_Bars_bdefault, xmachine_Bar_SoA_size));
 	gpuErrchk( cudaMemcpy( d_Bars_bdefault, h_Bars_bdefault, xmachine_Bar_SoA_size, cudaMemcpyHostToDevice));
     
+	/* School Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Schools, xmachine_School_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Schools_swap, xmachine_School_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Schools_new, xmachine_School_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_School_keys, xmachine_memory_School_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_School_values, xmachine_memory_School_MAX* sizeof(uint)));
+	/* schdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Schools_schdefault, xmachine_School_SoA_size));
+	gpuErrchk( cudaMemcpy( d_Schools_schdefault, h_Schools_schdefault, xmachine_School_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* SchoolMembership Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_SchoolMemberships, xmachine_SchoolMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_SchoolMemberships_swap, xmachine_SchoolMembership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_SchoolMemberships_new, xmachine_SchoolMembership_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_SchoolMembership_keys, xmachine_memory_SchoolMembership_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_SchoolMembership_values, xmachine_memory_SchoolMembership_MAX* sizeof(uint)));
+	/* schmembershipdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_SchoolMemberships_schmembershipdefault, xmachine_SchoolMembership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_SchoolMemberships_schmembershipdefault, h_SchoolMemberships_schmembershipdefault, xmachine_SchoolMembership_SoA_size, cudaMemcpyHostToDevice));
+    
 	/* tb_assignment Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments, message_tb_assignment_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments_swap, message_tb_assignment_SoA_size));
@@ -990,6 +1076,11 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_workplace_memberships, message_workplace_membership_SoA_size));
 	gpuErrchk( cudaMalloc( (void**) &d_workplace_memberships_swap, message_workplace_membership_SoA_size));
 	gpuErrchk( cudaMemcpy( d_workplace_memberships, h_workplace_memberships, message_workplace_membership_SoA_size, cudaMemcpyHostToDevice));
+	
+	/* school_membership Message memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_school_memberships, message_school_membership_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_school_memberships_swap, message_school_membership_SoA_size));
+	gpuErrchk( cudaMemcpy( d_school_memberships, h_school_memberships, message_school_membership_SoA_size, cudaMemcpyHostToDevice));
 	
 	/* location Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_locations, message_location_SoA_size));
@@ -1137,6 +1228,28 @@ void initialise(char * inputfile){
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_Bar, temp_scan_storage_bytes_Bar));
     
+    d_temp_scan_storage_School = nullptr;
+    temp_scan_storage_bytes_School = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_School, 
+        temp_scan_storage_bytes_School, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_School_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_School, temp_scan_storage_bytes_School));
+    
+    d_temp_scan_storage_SchoolMembership = nullptr;
+    temp_scan_storage_bytes_SchoolMembership = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_SchoolMembership, 
+        temp_scan_storage_bytes_SchoolMembership, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_SchoolMembership_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_SchoolMembership, temp_scan_storage_bytes_SchoolMembership));
+    
 
 	/*Set global condition counts*/
 
@@ -1242,6 +1355,10 @@ void initialise(char * inputfile){
 		printf("Init agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
 	
 		printf("Init agent_Bar_bdefault_count: %u\n",get_agent_Bar_bdefault_count());
+	
+		printf("Init agent_School_schdefault_count: %u\n",get_agent_School_schdefault_count());
+	
+		printf("Init agent_SchoolMembership_schmembershipdefault_count: %u\n",get_agent_SchoolMembership_schmembershipdefault_count());
 	
 #endif
 } 
@@ -1611,6 +1728,62 @@ void sort_Bars_bdefault(void (*generate_key_value_pairs)(unsigned int* keys, uns
 	d_Bars_swap = d_Bars_temp;	
 }
 
+void sort_Schools_schdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_School_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_School_schdefault_count); 
+	gridSize = (h_xmachine_memory_School_schdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_School_keys, d_xmachine_memory_School_values, d_Schools_schdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_School_keys),  thrust::device_pointer_cast(d_xmachine_memory_School_keys) + h_xmachine_memory_School_schdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_School_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_School_agents, no_sm, h_xmachine_memory_School_schdefault_count); 
+	gridSize = (h_xmachine_memory_School_schdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_School_agents<<<gridSize, blockSize>>>(d_xmachine_memory_School_values, d_Schools_schdefault, d_Schools_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_School_list* d_Schools_temp = d_Schools_schdefault;
+	d_Schools_schdefault = d_Schools_swap;
+	d_Schools_swap = d_Schools_temp;	
+}
+
+void sort_SchoolMemberships_schmembershipdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_SchoolMembership_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_SchoolMembership_schmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_SchoolMembership_schmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_SchoolMembership_keys, d_xmachine_memory_SchoolMembership_values, d_SchoolMemberships_schmembershipdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_SchoolMembership_keys),  thrust::device_pointer_cast(d_xmachine_memory_SchoolMembership_keys) + h_xmachine_memory_SchoolMembership_schmembershipdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_SchoolMembership_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_SchoolMembership_agents, no_sm, h_xmachine_memory_SchoolMembership_schmembershipdefault_count); 
+	gridSize = (h_xmachine_memory_SchoolMembership_schmembershipdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_SchoolMembership_agents<<<gridSize, blockSize>>>(d_xmachine_memory_SchoolMembership_values, d_SchoolMemberships_schmembershipdefault, d_SchoolMemberships_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_SchoolMembership_list* d_SchoolMemberships_temp = d_SchoolMemberships_schmembershipdefault;
+	d_SchoolMemberships_schmembershipdefault = d_SchoolMemberships_swap;
+	d_SchoolMemberships_swap = d_SchoolMemberships_temp;	
+}
+
 
 void cleanup(){
     PROFILE_SCOPED_RANGE("cleanup");
@@ -1749,6 +1922,22 @@ void cleanup(){
 	free( h_Bars_bdefault);
 	gpuErrchk(cudaFree(d_Bars_bdefault));
 	
+	/* School Agent variables */
+	gpuErrchk(cudaFree(d_Schools));
+	gpuErrchk(cudaFree(d_Schools_swap));
+	gpuErrchk(cudaFree(d_Schools_new));
+	
+	free( h_Schools_schdefault);
+	gpuErrchk(cudaFree(d_Schools_schdefault));
+	
+	/* SchoolMembership Agent variables */
+	gpuErrchk(cudaFree(d_SchoolMemberships));
+	gpuErrchk(cudaFree(d_SchoolMemberships_swap));
+	gpuErrchk(cudaFree(d_SchoolMemberships_new));
+	
+	free( h_SchoolMemberships_schmembershipdefault);
+	gpuErrchk(cudaFree(d_SchoolMemberships_schmembershipdefault));
+	
 
 	/* Message data free */
 	
@@ -1776,6 +1965,11 @@ void cleanup(){
 	free( h_workplace_memberships);
 	gpuErrchk(cudaFree(d_workplace_memberships));
 	gpuErrchk(cudaFree(d_workplace_memberships_swap));
+	
+	/* school_membership Message variables */
+	free( h_school_memberships);
+	gpuErrchk(cudaFree(d_school_memberships));
+	gpuErrchk(cudaFree(d_school_memberships_swap));
 	
 	/* location Message variables */
 	free( h_locations);
@@ -1838,6 +2032,14 @@ void cleanup(){
     d_temp_scan_storage_Bar = nullptr;
     temp_scan_storage_bytes_Bar = 0;
     
+    gpuErrchk(cudaFree(d_temp_scan_storage_School));
+    d_temp_scan_storage_School = nullptr;
+    temp_scan_storage_bytes_School = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_SchoolMembership));
+    d_temp_scan_storage_SchoolMembership = nullptr;
+    temp_scan_storage_bytes_SchoolMembership = 0;
+    
   
   /* CUDA Streams for function layers */
   
@@ -1884,6 +2086,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	h_message_workplace_membership_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_workplace_membership_count, &h_message_workplace_membership_count, sizeof(int)));
+	
+	h_message_school_membership_count = 0;
+	//upload to device constant
+	gpuErrchk(cudaMemcpyToSymbol( d_message_school_membership_count, &h_message_school_membership_count, sizeof(int)));
 	
 	h_message_location_count = 0;
 	//upload to device constant
@@ -2004,6 +2210,40 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	cudaEventRecord(instrument_start);
 #endif
 	
+    PROFILE_PUSH_RANGE("Bar_bupdate");
+	Bar_bupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: Bar_bupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 8*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("School_schupdate");
+	School_schupdate(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: School_schupdate = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 9*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
     PROFILE_PUSH_RANGE("Person_updatelambda");
 	Person_updatelambda(stream1);
     PROFILE_POP_RANGE();
@@ -2015,7 +2255,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 8*/
+	/* Layer 10*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2032,7 +2272,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 9*/
+	/* Layer 11*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2049,7 +2289,24 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 10*/
+	/* Layer 12*/
+	
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+	
+    PROFILE_PUSH_RANGE("SchoolMembership_schinit");
+	SchoolMembership_schinit(stream1);
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: SchoolMembership_schinit = %f (ms)\n", instrument_milliseconds);
+#endif
+	cudaDeviceSynchronize();
+  
+	/* Layer 13*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2066,7 +2323,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 11*/
+	/* Layer 14*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2083,7 +2340,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 12*/
+	/* Layer 15*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2100,7 +2357,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 13*/
+	/* Layer 16*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2117,7 +2374,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 14*/
+	/* Layer 17*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2134,7 +2391,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 15*/
+	/* Layer 18*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2151,7 +2408,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 16*/
+	/* Layer 19*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2168,7 +2425,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
 #endif
 	cudaDeviceSynchronize();
   
-	/* Layer 17*/
+	/* Layer 20*/
 	
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
@@ -2217,6 +2474,10 @@ PROFILE_SCOPED_RANGE("singleIteration");
 		printf("agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
 	
 		printf("agent_Bar_bdefault_count: %u\n",get_agent_Bar_bdefault_count());
+	
+		printf("agent_School_schdefault_count: %u\n",get_agent_School_schdefault_count());
+	
+		printf("agent_SchoolMembership_schmembershipdefault_count: %u\n",get_agent_SchoolMembership_schmembershipdefault_count());
 	
 #endif
 
@@ -2295,6 +2556,8 @@ unsigned int h_env_BAR_SIZE;
 unsigned int h_env_SCHOOL_SIZE;
 float h_env_BAR_A;
 float h_env_BAR_V;
+float h_env_SCHOOL_A;
+float h_env_SCHOOL_V;
 
 
 //constant setter
@@ -3129,6 +3392,32 @@ const float* get_BAR_V(){
 
 
 
+//constant setter
+void set_SCHOOL_A(float* h_SCHOOL_A){
+    gpuErrchk(cudaMemcpyToSymbol(SCHOOL_A, h_SCHOOL_A, sizeof(float)));
+    memcpy(&h_env_SCHOOL_A, h_SCHOOL_A,sizeof(float));
+}
+
+//constant getter
+const float* get_SCHOOL_A(){
+    return &h_env_SCHOOL_A;
+}
+
+
+
+//constant setter
+void set_SCHOOL_V(float* h_SCHOOL_V){
+    gpuErrchk(cudaMemcpyToSymbol(SCHOOL_V, h_SCHOOL_V, sizeof(float)));
+    memcpy(&h_env_SCHOOL_V, h_SCHOOL_V,sizeof(float));
+}
+
+//constant getter
+const float* get_SCHOOL_V(){
+    return &h_env_SCHOOL_V;
+}
+
+
+
 
 /* Agent data access functions*/
 
@@ -3384,6 +3673,46 @@ xmachine_memory_Bar_list* get_device_Bar_bdefault_agents(){
 
 xmachine_memory_Bar_list* get_host_Bar_bdefault_agents(){
 	return h_Bars_bdefault;
+}
+
+    
+int get_agent_School_MAX_count(){
+    return xmachine_memory_School_MAX;
+}
+
+
+int get_agent_School_schdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_School_schdefault_count;
+	
+}
+
+xmachine_memory_School_list* get_device_School_schdefault_agents(){
+	return d_Schools_schdefault;
+}
+
+xmachine_memory_School_list* get_host_School_schdefault_agents(){
+	return h_Schools_schdefault;
+}
+
+    
+int get_agent_SchoolMembership_MAX_count(){
+    return xmachine_memory_SchoolMembership_MAX;
+}
+
+
+int get_agent_SchoolMembership_schmembershipdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_SchoolMembership_schmembershipdefault_count;
+	
+}
+
+xmachine_memory_SchoolMembership_list* get_device_SchoolMembership_schmembershipdefault_agents(){
+	return d_SchoolMemberships_schmembershipdefault;
+}
+
+xmachine_memory_SchoolMembership_list* get_host_SchoolMembership_schmembershipdefault_agents(){
+	return h_SchoolMemberships_schmembershipdefault;
 }
 
 
@@ -7602,6 +7931,162 @@ __host__ float get_Bar_bdefault_variable_lambda(unsigned int index){
     }
 }
 
+/** unsigned int get_School_schdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an School agent in the schdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_School_schdefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_School_schdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Schools_schdefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Schools_schdefault->id,
+                    d_Schools_schdefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Schools_schdefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Schools_schdefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of School_schdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_School_schdefault_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an School agent in the schdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_School_schdefault_variable_lambda(unsigned int index){
+    unsigned int count = get_agent_School_schdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Schools_schdefault_variable_lambda_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Schools_schdefault->lambda,
+                    d_Schools_schdefault->lambda,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Schools_schdefault_variable_lambda_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Schools_schdefault->lambda[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of School_schdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_SchoolMembership_schmembershipdefault_variable_person_id(unsigned int index)
+ * Gets the value of the person_id variable of an SchoolMembership agent in the schmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable person_id
+ */
+__host__ unsigned int get_SchoolMembership_schmembershipdefault_variable_person_id(unsigned int index){
+    unsigned int count = get_agent_SchoolMembership_schmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_SchoolMemberships_schmembershipdefault->person_id,
+                    d_SchoolMemberships_schmembershipdefault->person_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_SchoolMemberships_schmembershipdefault->person_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access person_id for the %u th member of SchoolMembership_schmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_SchoolMembership_schmembershipdefault_variable_school_id(unsigned int index)
+ * Gets the value of the school_id variable of an SchoolMembership agent in the schmembershipdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable school_id
+ */
+__host__ unsigned int get_SchoolMembership_schmembershipdefault_variable_school_id(unsigned int index){
+    unsigned int count = get_agent_SchoolMembership_schmembershipdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_SchoolMemberships_schmembershipdefault->school_id,
+                    d_SchoolMemberships_schmembershipdefault->school_id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_SchoolMemberships_schmembershipdefault->school_id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access school_id for the %u th member of SchoolMembership_schmembershipdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -8192,6 +8677,74 @@ void copy_partial_xmachine_memory_Bar_hostToDevice(xmachine_memory_Bar_list * d_
 		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_School_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_School_hostToDevice(xmachine_memory_School_list * d_dst, xmachine_memory_School * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_School_hostToDevice(xmachine_memory_School_list * d_dst, xmachine_memory_School_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_SchoolMembership_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_SchoolMembership_hostToDevice(xmachine_memory_SchoolMembership_list * d_dst, xmachine_memory_SchoolMembership * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, &h_agent->person_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->school_id, &h_agent->school_id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_SchoolMembership_hostToDevice(xmachine_memory_SchoolMembership_list * d_dst, xmachine_memory_SchoolMembership_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->school_id, h_src->school_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     }
 }
@@ -9773,6 +10326,216 @@ void h_add_agents_Bar_bdefault(xmachine_memory_Bar** agents, unsigned int count)
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_Bars_bdefault_variable_id_data_iteration = 0;
         h_Bars_bdefault_variable_lambda_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_School* h_allocate_agent_School(){
+	xmachine_memory_School* agent = (xmachine_memory_School*)malloc(sizeof(xmachine_memory_School));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_School));
+
+	return agent;
+}
+void h_free_agent_School(xmachine_memory_School** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_School** h_allocate_agent_School_array(unsigned int count){
+	xmachine_memory_School ** agents = (xmachine_memory_School**)malloc(count * sizeof(xmachine_memory_School*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_School();
+	}
+	return agents;
+}
+void h_free_agent_School_array(xmachine_memory_School*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_School(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_School_AoS_to_SoA(xmachine_memory_School_list * dst, xmachine_memory_School** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			 
+			dst->lambda[i] = src[i]->lambda;
+			
+		}
+	}
+}
+
+
+void h_add_agent_School_schdefault(xmachine_memory_School* agent){
+	if (h_xmachine_memory_School_count + 1 > xmachine_memory_School_MAX){
+		printf("Error: Buffer size of School agents in state schdefault will be exceeded by h_add_agent_School_schdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_School_hostToDevice(d_Schools_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_School_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_School_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Schools_schdefault, d_Schools_new, h_xmachine_memory_School_schdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_School_schdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_School_schdefault_count, &h_xmachine_memory_School_schdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_Schools_schdefault_variable_id_data_iteration = 0;
+    h_Schools_schdefault_variable_lambda_data_iteration = 0;
+    
+
+}
+void h_add_agents_School_schdefault(xmachine_memory_School** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_School_count + count > xmachine_memory_School_MAX){
+			printf("Error: Buffer size of School agents in state schdefault will be exceeded by h_add_agents_School_schdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_School_AoS_to_SoA(h_Schools_schdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_School_hostToDevice(d_Schools_new, h_Schools_schdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_School_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_School_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Schools_schdefault, d_Schools_new, h_xmachine_memory_School_schdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_School_schdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_School_schdefault_count, &h_xmachine_memory_School_schdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_Schools_schdefault_variable_id_data_iteration = 0;
+        h_Schools_schdefault_variable_lambda_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_SchoolMembership* h_allocate_agent_SchoolMembership(){
+	xmachine_memory_SchoolMembership* agent = (xmachine_memory_SchoolMembership*)malloc(sizeof(xmachine_memory_SchoolMembership));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_SchoolMembership));
+
+	return agent;
+}
+void h_free_agent_SchoolMembership(xmachine_memory_SchoolMembership** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_SchoolMembership** h_allocate_agent_SchoolMembership_array(unsigned int count){
+	xmachine_memory_SchoolMembership ** agents = (xmachine_memory_SchoolMembership**)malloc(count * sizeof(xmachine_memory_SchoolMembership*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_SchoolMembership();
+	}
+	return agents;
+}
+void h_free_agent_SchoolMembership_array(xmachine_memory_SchoolMembership*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_SchoolMembership(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_SchoolMembership_AoS_to_SoA(xmachine_memory_SchoolMembership_list * dst, xmachine_memory_SchoolMembership** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->person_id[i] = src[i]->person_id;
+			 
+			dst->school_id[i] = src[i]->school_id;
+			
+		}
+	}
+}
+
+
+void h_add_agent_SchoolMembership_schmembershipdefault(xmachine_memory_SchoolMembership* agent){
+	if (h_xmachine_memory_SchoolMembership_count + 1 > xmachine_memory_SchoolMembership_MAX){
+		printf("Error: Buffer size of SchoolMembership agents in state schmembershipdefault will be exceeded by h_add_agent_SchoolMembership_schmembershipdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_SchoolMembership_hostToDevice(d_SchoolMemberships_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_SchoolMembership_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_SchoolMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_SchoolMemberships_schmembershipdefault, d_SchoolMemberships_new, h_xmachine_memory_SchoolMembership_schmembershipdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_SchoolMembership_schmembershipdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_SchoolMembership_schmembershipdefault_count, &h_xmachine_memory_SchoolMembership_schmembershipdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration = 0;
+    h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration = 0;
+    
+
+}
+void h_add_agents_SchoolMembership_schmembershipdefault(xmachine_memory_SchoolMembership** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_SchoolMembership_count + count > xmachine_memory_SchoolMembership_MAX){
+			printf("Error: Buffer size of SchoolMembership agents in state schmembershipdefault will be exceeded by h_add_agents_SchoolMembership_schmembershipdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_SchoolMembership_AoS_to_SoA(h_SchoolMemberships_schmembershipdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_SchoolMembership_hostToDevice(d_SchoolMemberships_new, h_SchoolMemberships_schmembershipdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_SchoolMembership_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_SchoolMembership_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_SchoolMemberships_schmembershipdefault, d_SchoolMemberships_new, h_xmachine_memory_SchoolMembership_schmembershipdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_SchoolMembership_schmembershipdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_SchoolMembership_schmembershipdefault_count, &h_xmachine_memory_SchoolMembership_schmembershipdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_SchoolMemberships_schmembershipdefault_variable_person_id_data_iteration = 0;
+        h_SchoolMemberships_schmembershipdefault_variable_school_id_data_iteration = 0;
         
 
 	}
@@ -11979,6 +12742,86 @@ float max_Bar_bdefault_lambda_variable(){
     //max in default stream
     thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Bars_bdefault->lambda);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Bar_bdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_School_schdefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Schools_schdefault->id),  thrust::device_pointer_cast(d_Schools_schdefault->id) + h_xmachine_memory_School_schdefault_count);
+}
+
+unsigned int count_School_schdefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Schools_schdefault->id),  thrust::device_pointer_cast(d_Schools_schdefault->id) + h_xmachine_memory_School_schdefault_count, count_value);
+}
+unsigned int min_School_schdefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Schools_schdefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_School_schdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_School_schdefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Schools_schdefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_School_schdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_School_schdefault_lambda_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Schools_schdefault->lambda),  thrust::device_pointer_cast(d_Schools_schdefault->lambda) + h_xmachine_memory_School_schdefault_count);
+}
+
+float min_School_schdefault_lambda_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Schools_schdefault->lambda);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_School_schdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_School_schdefault_lambda_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Schools_schdefault->lambda);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_School_schdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_SchoolMembership_schmembershipdefault_person_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id),  thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id) + h_xmachine_memory_SchoolMembership_schmembershipdefault_count);
+}
+
+unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id),  thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id) + h_xmachine_memory_SchoolMembership_schmembershipdefault_count, count_value);
+}
+unsigned int min_SchoolMembership_schmembershipdefault_person_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_SchoolMembership_schmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_SchoolMembership_schmembershipdefault_person_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->person_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_SchoolMembership_schmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_SchoolMembership_schmembershipdefault_school_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id),  thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id) + h_xmachine_memory_SchoolMembership_schmembershipdefault_count);
+}
+
+unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id),  thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id) + h_xmachine_memory_SchoolMembership_schmembershipdefault_count, count_value);
+}
+unsigned int min_SchoolMembership_schmembershipdefault_school_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_SchoolMembership_schmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_SchoolMembership_schmembershipdefault_school_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_SchoolMemberships_schmembershipdefault->school_id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_SchoolMembership_schmembershipdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
 
@@ -14721,6 +15564,318 @@ void Bar_bupdate(cudaStream_t &stream){
 }
 
 
+
+	
+/* Shared memory size calculator for agent function */
+int School_schupdate_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** School_schupdate
+ * Agent function prototype for schupdate function of School agent
+ */
+void School_schupdate(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_School_schdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_School_schdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_School_list* Schools_schdefault_temp = d_Schools;
+	d_Schools = d_Schools_schdefault;
+	d_Schools_schdefault = Schools_schdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_School_count = h_xmachine_memory_School_schdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_School_count, &h_xmachine_memory_School_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_School_schdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_School_schdefault_count, &h_xmachine_memory_School_schdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_School_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function schupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_schupdate, School_schupdate_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = School_schupdate_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = optional_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	//message is optional so reset the swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_infection_swaps, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_infection_swaps<<<gridSize, blockSize, 0, stream>>>(d_infections); 
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (schupdate)
+	//Reallocate   : false
+	//Input        : location
+	//Output       : infection
+	//Agent Output : 
+	GPUFLAME_schupdate<<<g, b, sm_size, stream>>>(d_Schools, d_locations, d_infections);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	//infection Message Type Prefix Sum
+	
+	//swap output
+	xmachine_message_infection_list* d_infections_scanswap_temp = d_infections;
+	d_infections = d_infections_swap;
+	d_infections_swap = d_infections_scanswap_temp;
+	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_School, 
+        temp_scan_storage_bytes_School, 
+        d_infections_swap->_scan_input,
+        d_infections_swap->_position,
+        h_xmachine_memory_School_count, 
+        stream
+    );
+
+	//Scatter
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_optional_infection_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_optional_infection_messages<<<gridSize, blockSize, 0, stream>>>(d_infections, d_infections_swap);
+	gpuErrchkLaunch();
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_infections_swap->_position[h_xmachine_memory_School_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_infections_swap->_scan_input[h_xmachine_memory_School_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//If last item in prefix sum was 1 then increase its index to get the count
+	if (scan_last_included == 1){
+		h_message_infection_count += scan_last_sum+1;
+	}else{
+		h_message_infection_count += scan_last_sum;
+	}
+    //Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_School_schdefault_count+h_xmachine_memory_School_count > xmachine_memory_School_MAX){
+		printf("Error: Buffer size of schupdate agents in state schdefault will be exceeded moving working agents to next state in function schupdate\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Schools_schdefault_temp = d_Schools;
+  d_Schools = d_Schools_schdefault;
+  d_Schools_schdefault = Schools_schdefault_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_School_schdefault_count += h_xmachine_memory_School_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_School_schdefault_count, &h_xmachine_memory_School_schdefault_count, sizeof(int)));	
+	
+	
+}
+
+
+
+	
+/* Shared memory size calculator for agent function */
+int SchoolMembership_schinit_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  
+	return sm_size;
+}
+
+/** SchoolMembership_schinit
+ * Agent function prototype for schinit function of SchoolMembership agent
+ */
+void SchoolMembership_schinit(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_SchoolMembership_schmembershipdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_SchoolMembership_schmembershipdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_SchoolMembership_list* SchoolMemberships_schmembershipdefault_temp = d_SchoolMemberships;
+	d_SchoolMemberships = d_SchoolMemberships_schmembershipdefault;
+	d_SchoolMemberships_schmembershipdefault = SchoolMemberships_schmembershipdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_SchoolMembership_count = h_xmachine_memory_SchoolMembership_schmembershipdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_SchoolMembership_count, &h_xmachine_memory_SchoolMembership_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_SchoolMembership_schmembershipdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_SchoolMembership_schmembershipdefault_count, &h_xmachine_memory_SchoolMembership_schmembershipdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_school_membership_count + h_xmachine_memory_SchoolMembership_count > xmachine_message_school_membership_MAX){
+		printf("Error: Buffer size of school_membership message will be exceeded in function schinit\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_schinit, SchoolMembership_schinit_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = SchoolMembership_schinit_sm_size(blockSize);
+	
+	
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_school_membership_output_type = single_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_school_membership_output_type, &h_message_school_membership_output_type, sizeof(int)));
+	
+	//IF CONTINUOUS AGENT CAN REALLOCATE (process dead agents) THEN RESET AGENT SWAPS	
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_SchoolMembership_scan_input, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_SchoolMembership_scan_input<<<gridSize, blockSize, 0, stream>>>(d_SchoolMemberships);
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (schinit)
+	//Reallocate   : true
+	//Input        : 
+	//Output       : school_membership
+	//Agent Output : 
+	GPUFLAME_schinit<<<g, b, sm_size, stream>>>(d_SchoolMemberships, d_school_memberships);
+	gpuErrchkLaunch();
+	
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	h_message_school_membership_count += h_xmachine_memory_SchoolMembership_count;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_school_membership_count, &h_message_school_membership_count, sizeof(int)));	
+	
+	//FOR CONTINUOUS AGENTS WITH REALLOCATION REMOVE POSSIBLE DEAD AGENTS	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_SchoolMembership, 
+        temp_scan_storage_bytes_SchoolMembership, 
+        d_SchoolMemberships->_scan_input,
+        d_SchoolMemberships->_position,
+        h_xmachine_memory_SchoolMembership_count, 
+        stream
+    );
+
+	//Scatter into swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_SchoolMembership_Agents, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_SchoolMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_SchoolMemberships_swap, d_SchoolMemberships, 0, h_xmachine_memory_SchoolMembership_count);
+	gpuErrchkLaunch();
+	//use a temp pointer to make swap default
+	xmachine_memory_SchoolMembership_list* schinit_SchoolMemberships_temp = d_SchoolMemberships;
+	d_SchoolMemberships = d_SchoolMemberships_swap;
+	d_SchoolMemberships_swap = schinit_SchoolMemberships_temp;
+	//reset agent count
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_SchoolMemberships_swap->_position[h_xmachine_memory_SchoolMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_SchoolMemberships_swap->_scan_input[h_xmachine_memory_SchoolMembership_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	if (scan_last_included == 1)
+		h_xmachine_memory_SchoolMembership_count = scan_last_sum+1;
+	else
+		h_xmachine_memory_SchoolMembership_count = scan_last_sum;
+	//Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_SchoolMembership_count, &h_xmachine_memory_SchoolMembership_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_SchoolMembership_schmembershipdefault_count+h_xmachine_memory_SchoolMembership_count > xmachine_memory_SchoolMembership_MAX){
+		printf("Error: Buffer size of schinit agents in state schmembershipdefault will be exceeded moving working agents to next state in function schinit\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, append_SchoolMembership_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_SchoolMembership_Agents<<<gridSize, blockSize, 0, stream>>>(d_SchoolMemberships_schmembershipdefault, d_SchoolMemberships, h_xmachine_memory_SchoolMembership_schmembershipdefault_count, h_xmachine_memory_SchoolMembership_count);
+  gpuErrchkLaunch();
+        
+	//update new state agent size
+	h_xmachine_memory_SchoolMembership_schmembershipdefault_count += h_xmachine_memory_SchoolMembership_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_SchoolMembership_schmembershipdefault_count, &h_xmachine_memory_SchoolMembership_schmembershipdefault_count, sizeof(int)));	
+	
+	
+}
+
+
  
 extern void reset_Person_default_count()
 {
@@ -14785,4 +15940,14 @@ extern void reset_WorkplaceMembership_wpmembershipdefault_count()
 extern void reset_Bar_bdefault_count()
 {
     h_xmachine_memory_Bar_bdefault_count = 0;
+}
+ 
+extern void reset_School_schdefault_count()
+{
+    h_xmachine_memory_School_schdefault_count = 0;
+}
+ 
+extern void reset_SchoolMembership_schmembershipdefault_count()
+{
+    h_xmachine_memory_SchoolMembership_schmembershipdefault_count = 0;
 }

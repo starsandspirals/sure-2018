@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,xmachine_memory_Bar_list* h_Bars_bdefault, xmachine_memory_Bar_list* d_Bars_bdefault, int h_xmachine_memory_Bar_bdefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,xmachine_memory_Bar_list* h_Bars_bdefault, xmachine_memory_Bar_list* d_Bars_bdefault, int h_xmachine_memory_Bar_bdefault_count,xmachine_memory_School_list* h_Schools_schdefault, xmachine_memory_School_list* d_Schools_schdefault, int h_xmachine_memory_School_schdefault_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships_schmembershipdefault, xmachine_memory_SchoolMembership_list* d_SchoolMemberships_schmembershipdefault, int h_xmachine_memory_SchoolMembership_schmembershipdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -195,6 +195,18 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying Bar Agent bdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Schools_schdefault, d_Schools_schdefault, sizeof(xmachine_memory_School_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying School Agent schdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_SchoolMemberships_schmembershipdefault, d_SchoolMemberships_schmembershipdefault, sizeof(xmachine_memory_SchoolMembership_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying SchoolMembership Agent schmembershipdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -471,6 +483,14 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_BAR_V()));
     fputs(data, file);
     fputs("</BAR_V>\n", file);
+    fputs("\t<SCHOOL_A>", file);
+    sprintf(data, "%f", (*get_SCHOOL_A()));
+    fputs(data, file);
+    fputs("</SCHOOL_A>\n", file);
+    fputs("\t<SCHOOL_V>", file);
+    sprintf(data, "%f", (*get_SCHOOL_V()));
+    fputs(data, file);
+    fputs("</SCHOOL_V>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1104,6 +1124,40 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each School agent to xml
+	for (int i=0; i<h_xmachine_memory_School_schdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>School</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Schools_schdefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<lambda>", file);
+        sprintf(data, "%f", h_Schools_schdefault->lambda[i]);
+		fputs(data, file);
+		fputs("</lambda>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
+	//Write each SchoolMembership agent to xml
+	for (int i=0; i<h_xmachine_memory_SchoolMembership_schmembershipdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>SchoolMembership</name>\n", file);
+        
+		fputs("<person_id>", file);
+        sprintf(data, "%u", h_SchoolMemberships_schmembershipdefault->person_id[i]);
+		fputs(data, file);
+		fputs("</person_id>\n", file);
+        
+		fputs("<school_id>", file);
+        sprintf(data, "%u", h_SchoolMemberships_schmembershipdefault->school_id[i]);
+		fputs(data, file);
+		fputs("</school_id>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -1246,9 +1300,13 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_BAR_A(&t_BAR_A);
     float t_BAR_V = (float)40;
     set_BAR_V(&t_BAR_V);
+    float t_SCHOOL_A = (float)3;
+    set_SCHOOL_A(&t_SCHOOL_A);
+    float t_SCHOOL_V = (float)40;
+    set_SCHOOL_V(&t_SCHOOL_V);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -1336,6 +1394,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_WorkplaceMembership_workplace_id;
     int in_Bar_id;
     int in_Bar_lambda;
+    int in_School_id;
+    int in_School_lambda;
+    int in_SchoolMembership_person_id;
+    int in_SchoolMembership_school_id;
     
     /* tags for environment global variables */
     int in_env;
@@ -1467,6 +1529,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_BAR_V;
     
+    int in_env_SCHOOL_A;
+    
+    int in_env_SCHOOL_V;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1480,6 +1546,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	*h_xmachine_memory_Workplace_count = 0;
 	*h_xmachine_memory_WorkplaceMembership_count = 0;
 	*h_xmachine_memory_Bar_count = 0;
+	*h_xmachine_memory_School_count = 0;
+	*h_xmachine_memory_SchoolMembership_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
@@ -1551,6 +1619,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int WorkplaceMembership_workplace_id;
 	unsigned int Bar_id;
 	float Bar_lambda;
+	unsigned int School_id;
+	float School_lambda;
+	unsigned int SchoolMembership_person_id;
+	unsigned int SchoolMembership_school_id;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -1617,6 +1689,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     unsigned int env_SCHOOL_SIZE;
     float env_BAR_A;
     float env_BAR_V;
+    float env_SCHOOL_A;
+    float env_SCHOOL_V;
     
 
 
@@ -1703,6 +1777,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_WorkplaceMembership_workplace_id = 0;
 	in_Bar_id = 0;
 	in_Bar_lambda = 0;
+	in_School_id = 0;
+	in_School_lambda = 0;
+	in_SchoolMembership_person_id = 0;
+	in_SchoolMembership_school_id = 0;
     in_env_TIME_STEP = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
@@ -1767,6 +1845,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_SCHOOL_SIZE = 0;
     in_env_BAR_A = 0;
     in_env_BAR_V = 0;
+    in_env_SCHOOL_A = 0;
+    in_env_SCHOOL_V = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1908,6 +1988,22 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Bars->lambda[k] = 0;
 	}
 	
+	//set all School values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_School_MAX; k++)
+	{	
+		h_Schools->id[k] = 0;
+		h_Schools->lambda[k] = 0;
+	}
+	
+	//set all SchoolMembership values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_SchoolMembership_MAX; k++)
+	{	
+		h_SchoolMemberships->person_id[k] = 0;
+		h_SchoolMemberships->school_id[k] = 0;
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
@@ -1979,6 +2075,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     WorkplaceMembership_workplace_id = 0;
     Bar_id = 0;
     Bar_lambda = 0;
+    School_id = 0;
+    School_lambda = 0;
+    SchoolMembership_person_id = 0;
+    SchoolMembership_school_id = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -2045,6 +2145,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_SCHOOL_SIZE = 0;
     env_BAR_A = 0;
     env_BAR_V = 0;
+    env_SCHOOL_A = 0;
+    env_SCHOOL_V = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2298,6 +2400,32 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Bars->lambda[*h_xmachine_memory_Bar_count] = Bar_lambda;
 					(*h_xmachine_memory_Bar_count) ++;	
 				}
+				else if(strcmp(agentname, "School") == 0)
+				{
+					if (*h_xmachine_memory_School_count > xmachine_memory_School_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent School exceeded whilst reading data\n", xmachine_memory_School_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Schools->id[*h_xmachine_memory_School_count] = School_id;
+					h_Schools->lambda[*h_xmachine_memory_School_count] = School_lambda;
+					(*h_xmachine_memory_School_count) ++;	
+				}
+				else if(strcmp(agentname, "SchoolMembership") == 0)
+				{
+					if (*h_xmachine_memory_SchoolMembership_count > xmachine_memory_SchoolMembership_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent SchoolMembership exceeded whilst reading data\n", xmachine_memory_SchoolMembership_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_SchoolMemberships->person_id[*h_xmachine_memory_SchoolMembership_count] = SchoolMembership_person_id;
+					h_SchoolMemberships->school_id[*h_xmachine_memory_SchoolMembership_count] = SchoolMembership_school_id;
+					(*h_xmachine_memory_SchoolMembership_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -2375,6 +2503,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 WorkplaceMembership_workplace_id = 0;
                 Bar_id = 0;
                 Bar_lambda = 0;
+                School_id = 0;
+                School_lambda = 0;
+                SchoolMembership_person_id = 0;
+                SchoolMembership_school_id = 0;
                 
                 in_xagent = 0;
 			}
@@ -2516,6 +2648,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/id") == 0) in_Bar_id = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Bar_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Bar_lambda = 0;
+			if(strcmp(buffer, "id") == 0) in_School_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_School_id = 0;
+			if(strcmp(buffer, "lambda") == 0) in_School_lambda = 1;
+			if(strcmp(buffer, "/lambda") == 0) in_School_lambda = 0;
+			if(strcmp(buffer, "person_id") == 0) in_SchoolMembership_person_id = 1;
+			if(strcmp(buffer, "/person_id") == 0) in_SchoolMembership_person_id = 0;
+			if(strcmp(buffer, "school_id") == 0) in_SchoolMembership_school_id = 1;
+			if(strcmp(buffer, "/school_id") == 0) in_SchoolMembership_school_id = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -2646,6 +2786,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/BAR_A") == 0) in_env_BAR_A = 0;
 			if(strcmp(buffer, "BAR_V") == 0) in_env_BAR_V = 1;
             if(strcmp(buffer, "/BAR_V") == 0) in_env_BAR_V = 0;
+			if(strcmp(buffer, "SCHOOL_A") == 0) in_env_SCHOOL_A = 1;
+            if(strcmp(buffer, "/SCHOOL_A") == 0) in_env_SCHOOL_A = 0;
+			if(strcmp(buffer, "SCHOOL_V") == 0) in_env_SCHOOL_V = 1;
+            if(strcmp(buffer, "/SCHOOL_V") == 0) in_env_SCHOOL_V = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2870,6 +3014,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Bar_lambda){
                     Bar_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_School_id){
+                    School_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_School_lambda){
+                    School_lambda = (float) fgpu_atof(buffer); 
+                }
+				if(in_SchoolMembership_person_id){
+                    SchoolMembership_person_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_SchoolMembership_school_id){
+                    SchoolMembership_school_id = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				
             }
@@ -3320,6 +3476,20 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_BAR_V = (float) fgpu_atof(buffer);
                     
                     set_BAR_V(&env_BAR_V);
+                  
+              }
+            if(in_env_SCHOOL_A){
+              
+                    env_SCHOOL_A = (float) fgpu_atof(buffer);
+                    
+                    set_SCHOOL_A(&env_SCHOOL_A);
+                  
+              }
+            if(in_env_SCHOOL_V){
+              
+                    env_SCHOOL_V = (float) fgpu_atof(buffer);
+                    
+                    set_SCHOOL_V(&env_SCHOOL_V);
                   
               }
             

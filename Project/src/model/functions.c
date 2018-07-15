@@ -17,12 +17,14 @@ xmachine_memory_Transport **h_transport_AoS;
 xmachine_memory_Clinic **h_clinic_AoS;
 xmachine_memory_Workplace **h_workplace_AoS;
 xmachine_memory_Bar **h_bar_AoS;
+xmachine_memory_School **h_school_AoS;
 
 xmachine_memory_TBAssignment **h_tbassignment_AoS;
 xmachine_memory_HouseholdMembership **h_hhmembership_AoS;
 xmachine_memory_ChurchMembership **h_chumembership_AoS;
 xmachine_memory_TransportMembership **h_trmembership_AoS;
 xmachine_memory_WorkplaceMembership **h_wpmembership_AoS;
+xmachine_memory_SchoolMembership **h_schmembership_AoS;
 
 const unsigned int h_agent_AoS_MAX = 32768;
 const unsigned int h_household_AoS_MAX = 8192;
@@ -31,12 +33,14 @@ const unsigned int h_transport_AoS_MAX = 2048;
 const unsigned int h_clinic_AoS_MAX = 2;
 const unsigned int h_workplace_AoS_MAX = 8192;
 const unsigned int h_bar_AoS_MAX = 4096;
+const unsigned int h_school_AoS_MAX = 2048;
 
 const unsigned int h_tbassignment_AoS_MAX = 32768;
 const unsigned int h_hhmembership_AoS_MAX = 32768;
 const unsigned int h_chumembership_AoS_MAX = 8192;
 const unsigned int h_trmembership_AoS_MAX = 32768;
 const unsigned int h_wpmembership_AoS_MAX = 32768;
+const unsigned int h_schmembership_AoS_MAX = 16384;
 
 // Create variables for the next unused ID for each agent type, so that they
 // remain unique, and also get functions to update the ID each time.
@@ -47,6 +51,7 @@ unsigned int h_nextTransportID;
 unsigned int h_nextClinicID;
 unsigned int h_nextWorkplaceID;
 unsigned int h_nextBarID;
+unsigned int h_nextSchoolID;
 
 __host__ unsigned int getNextID()
 {
@@ -87,6 +92,13 @@ __host__ unsigned int getNextBarID()
 {
   unsigned int old = h_nextBarID;
   h_nextBarID++;
+  return old;
+}
+
+__host__ unsigned int getNextSchoolID()
+{
+  unsigned int old = h_nextSchoolID;
+  h_nextSchoolID++;
   return old;
 }
 
@@ -356,8 +368,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int barcount = 0;
 
-  // unsigned int childcount = 0;
-  // unsigned int schoolarray[h_agent_AoS_MAX];
+  unsigned int childcount = 0;
+  unsigned int schoolarray[h_agent_AoS_MAX];
 
   for (unsigned int i = 0; i < 32; i++)
   {
@@ -636,6 +648,12 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         else
         {
           h_person->bargoing = 0;
+        }
+
+        if (h_person->age < 18)
+        {
+          schoolarray[childcount] = h_person->id;
+          childcount++;
         }
 
         random = ((float)rand() / (RAND_MAX));
@@ -1087,7 +1105,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     }
   }
 
-  for (unsigned int i = 0; i < barcount / 20; i++)
+  for (unsigned int i = 0; i < barcount / bar_size; i++)
   {
     xmachine_memory_Bar *h_bar = h_allocate_agent_Bar();
 
@@ -1096,6 +1114,37 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     h_add_agent_Bar_bdefault(h_bar);
 
     h_free_agent_Bar(&h_bar);
+  }
+
+  shuffle(schoolarray, schoolarray, childcount);
+  unsigned int childpos = 0;
+
+  for (unsigned int i = 0; i < childcount / school_size; i++)
+  {
+    xmachine_memory_School *h_school = h_allocate_agent_School();
+
+    h_school->id = getNextSchoolID();
+
+    for (unsigned int j = 0; j < school_size; j++)
+    {
+      if (childpos <= childcount)
+      {
+        xmachine_memory_SchoolMembership *h_schmembership =
+            h_allocate_agent_SchoolMembership();
+
+        h_schmembership->school_id = h_school->id;
+        h_schmembership->person_id = schoolarray[childpos];
+        childpos++;
+
+        h_add_agent_SchoolMembership_schmembershipdefault(h_schmembership);
+
+        h_free_agent_SchoolMembership(&h_schmembership);
+      }
+    }
+
+    h_add_agent_School_schdefault(h_school);
+
+    h_free_agent_School(&h_school);
   }
 
   unsigned int householdcount = get_agent_Household_hhdefault_count();
@@ -1677,6 +1726,37 @@ bupdate(xmachine_memory_Bar *bar,
 }
 
 __FLAME_GPU_FUNC__ int
+schupdate(xmachine_memory_School *school,
+          xmachine_message_location_list *location_messages,
+          xmachine_message_infection_list *infection_messages)
+{
+
+  float qsum = 0;
+
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
+
+  while (location_message)
+  {
+    if (location_message->location == 6 &&
+        location_message->locationid == school->id)
+    {
+      qsum += location_message->q;
+    }
+    location_message =
+        get_next_location_message(location_message, location_messages);
+  }
+
+  school->lambda = (school->lambda * device_exp(-SCHOOL_A * (TIME_STEP / 12))) +
+                   ((qsum / (SCHOOL_V * SCHOOL_A)) *
+                    (1 - device_exp(-SCHOOL_A * (TIME_STEP / 12))));
+
+  add_infection_message(infection_messages, 5, school->id, school->lambda);
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
 tbinit(xmachine_memory_TBAssignment *tbassignment,
        xmachine_message_tb_assignment_list *tb_assignment_messages)
 {
@@ -1691,6 +1771,16 @@ __FLAME_GPU_FUNC__ int wpinit(
   add_workplace_membership_message(workplace_membership_messages,
                                    wpmembership->person_id,
                                    wpmembership->workplace_id);
+  return 1;
+}
+
+__FLAME_GPU_FUNC__ int
+schinit(xmachine_memory_SchoolMembership *schmembership,
+        xmachine_message_school_membership_list *school_membership_messages)
+{
+  add_school_membership_message(school_membership_messages,
+                                schmembership->person_id,
+                                schmembership->school_id);
   return 1;
 }
 
