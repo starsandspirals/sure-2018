@@ -100,6 +100,58 @@ __host__ void shuffle(unsigned int *array1, unsigned int *array2, size_t n)
   }
 }
 
+void swap(unsigned int *a, unsigned int *b)
+{
+  unsigned int t = *a;
+  *a = *b;
+  *b = t;
+}
+
+unsigned int partition(unsigned int *arr1, unsigned int *arr2, unsigned int low,
+                       unsigned int high)
+{
+  unsigned int pivot = arr1[high]; // pivot
+  unsigned int i = (low - 1);      // Index of smaller element
+
+  for (unsigned int j = low; j <= high - 1; j++)
+  {
+    // If current element is smaller than or
+    // equal to pivot
+    if (arr1[j] <= pivot)
+    {
+      i++; // increment index of smaller element
+      swap(&arr1[i], &arr1[j]);
+      swap(&arr2[i], &arr2[j]);
+    }
+  }
+  swap(&arr1[i + 1], &arr1[high]);
+  swap(&arr2[i + 1], &arr2[high]);
+  return (i + 1);
+}
+
+void quickSort(unsigned int *arr1, unsigned int *arr2, unsigned int low,
+               unsigned int high)
+{
+  if (low < high)
+  {
+    /* pi is partitioning index, arr[p] is now
+           at right place */
+    unsigned int pi = partition(arr1, arr2, low, high);
+
+    // Separately sort elements before
+    // partition and after partition
+    if (pi != 0)
+    {
+      quickSort(arr1, arr2, low, pi - 1);
+      quickSort(arr1, arr2, pi + 1, high);
+    }
+    else
+    {
+      quickSort(arr1, arr2, pi + 1, high);
+    }
+  }
+}
+
 // A function that returns the day of the week given an iteration number of
 // increments of 5 minutes, in the form Sunday = 0, Monday = 1 etc.
 __device__ unsigned int dayofweek(unsigned int step)
@@ -263,6 +315,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   // each size, and start each size at 0 people; also create an array of the
   // ages of people with given ids, used for church generation.
   unsigned int sizearray[32];
+  unsigned int sizesarray[h_agent_AoS_MAX];
 
   signed int count;
   unsigned int ages[h_agent_AoS_MAX];
@@ -502,8 +555,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
         // Update the arrays of information with this person's household size
         // and age.
+        ages[h_person->id - 1] = age;
         sizearray[currentsize]++;
-        ages[h_person->id] = age;
+        sizesarray[h_person->id - 1] = currentsize;
 
         // Generate the agent and free them from memory on the host.
         h_person->lastinfected = -1;
@@ -529,16 +583,17 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   // Populate the array of person ids with ids up to the total number of people,
   // and then shuffle it so households are assigned randomly.
-  for (unsigned int i = 0; i < total; i++)
+  for (unsigned int i = 1; i <= total; i++)
   {
     order[i] = i;
   }
 
-  shuffle(order, ages, total);
+  shuffle(order, sizesarray, total);
+  quickSort(sizesarray, order, 0, total);
 
   for (unsigned int i = 0; i < total; i++)
   {
-    tbarray[i] = i;
+    tbarray[i] = i+1;
   }
 
   float weightsum = 0;
@@ -603,12 +658,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   // This loop runs once for each possible size of household.
   for (unsigned int i = 1; i < 32; i++)
   {
-
     // This loop runs once for each individual household, as calculated from the
     // number of people living in households of each size.
-    for (unsigned int j = 0; j < (sizearray[i] / i); j++)
+    for (unsigned int j = 0; j < sizearray[i] / i; j++)
     {
-
       // Allocate memory for the household agent.
       xmachine_memory_Household *h_household = h_allocate_agent_Household();
       churchprob = 1 / (1 + exp(-church_beta0 - church_beta1 * i));
