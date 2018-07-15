@@ -242,6 +242,7 @@ unsigned int h_Persons_default_variable_churchtime_data_iteration;
 unsigned int h_Persons_default_variable_transporttime_data_iteration;
 unsigned int h_Persons_default_variable_clinictime_data_iteration;
 unsigned int h_Persons_default_variable_workplacetime_data_iteration;
+unsigned int h_Persons_default_variable_outsidetime_data_iteration;
 unsigned int h_Persons_default_variable_age_data_iteration;
 unsigned int h_Persons_default_variable_gender_data_iteration;
 unsigned int h_Persons_default_variable_householdsize_data_iteration;
@@ -277,6 +278,7 @@ unsigned int h_Persons_s2_variable_churchtime_data_iteration;
 unsigned int h_Persons_s2_variable_transporttime_data_iteration;
 unsigned int h_Persons_s2_variable_clinictime_data_iteration;
 unsigned int h_Persons_s2_variable_workplacetime_data_iteration;
+unsigned int h_Persons_s2_variable_outsidetime_data_iteration;
 unsigned int h_Persons_s2_variable_age_data_iteration;
 unsigned int h_Persons_s2_variable_gender_data_iteration;
 unsigned int h_Persons_s2_variable_householdsize_data_iteration;
@@ -639,6 +641,7 @@ void initialise(char * inputfile){
     h_Persons_default_variable_transporttime_data_iteration = 0;
     h_Persons_default_variable_clinictime_data_iteration = 0;
     h_Persons_default_variable_workplacetime_data_iteration = 0;
+    h_Persons_default_variable_outsidetime_data_iteration = 0;
     h_Persons_default_variable_age_data_iteration = 0;
     h_Persons_default_variable_gender_data_iteration = 0;
     h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -674,6 +677,7 @@ void initialise(char * inputfile){
     h_Persons_s2_variable_transporttime_data_iteration = 0;
     h_Persons_s2_variable_clinictime_data_iteration = 0;
     h_Persons_s2_variable_workplacetime_data_iteration = 0;
+    h_Persons_s2_variable_outsidetime_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
     h_Persons_s2_variable_householdsize_data_iteration = 0;
@@ -3408,6 +3412,45 @@ __host__ unsigned int get_Person_default_variable_workplacetime(unsigned int ind
     }
 }
 
+/** unsigned int get_Person_default_variable_outsidetime(unsigned int index)
+ * Gets the value of the outsidetime variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable outsidetime
+ */
+__host__ unsigned int get_Person_default_variable_outsidetime(unsigned int index){
+    unsigned int count = get_agent_Person_default_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_default_variable_outsidetime_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_default->outsidetime,
+                    d_Persons_default->outsidetime,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_default_variable_outsidetime_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_default->outsidetime[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access outsidetime for the %u th member of Person_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 /** unsigned int get_Person_default_variable_age(unsigned int index)
  * Gets the value of the age variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -4767,6 +4810,45 @@ __host__ unsigned int get_Person_s2_variable_workplacetime(unsigned int index){
 
     } else {
         fprintf(stderr, "Warning: Attempting to access workplacetime for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** unsigned int get_Person_s2_variable_outsidetime(unsigned int index)
+ * Gets the value of the outsidetime variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable outsidetime
+ */
+__host__ unsigned int get_Person_s2_variable_outsidetime(unsigned int index){
+    unsigned int count = get_agent_Person_s2_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Persons_s2_variable_outsidetime_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Persons_s2->outsidetime,
+                    d_Persons_s2->outsidetime,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Persons_s2_variable_outsidetime_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Persons_s2->outsidetime[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access outsidetime for the %u th member of Person_s2. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -6985,6 +7067,8 @@ void copy_single_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_list
  
 		gpuErrchk(cudaMemcpy(d_dst->workplacetime, &h_agent->workplacetime, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
+		gpuErrchk(cudaMemcpy(d_dst->outsidetime, &h_agent->outsidetime, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
 		gpuErrchk(cudaMemcpy(d_dst->age, &h_agent->age, sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->gender, &h_agent->gender, sizeof(unsigned int), cudaMemcpyHostToDevice));
@@ -7069,6 +7153,8 @@ void copy_partial_xmachine_memory_Person_hostToDevice(xmachine_memory_Person_lis
 		gpuErrchk(cudaMemcpy(d_dst->clinictime, h_src->clinictime, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->workplacetime, h_src->workplacetime, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->outsidetime, h_src->outsidetime, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->age, h_src->age, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
@@ -7548,6 +7634,8 @@ void h_unpack_agents_Person_AoS_to_SoA(xmachine_memory_Person_list * dst, xmachi
 			 
 			dst->workplacetime[i] = src[i]->workplacetime;
 			 
+			dst->outsidetime[i] = src[i]->outsidetime;
+			 
 			dst->age[i] = src[i]->age;
 			 
 			dst->gender[i] = src[i]->gender;
@@ -7641,6 +7729,7 @@ void h_add_agent_Person_default(xmachine_memory_Person* agent){
     h_Persons_default_variable_transporttime_data_iteration = 0;
     h_Persons_default_variable_clinictime_data_iteration = 0;
     h_Persons_default_variable_workplacetime_data_iteration = 0;
+    h_Persons_default_variable_outsidetime_data_iteration = 0;
     h_Persons_default_variable_age_data_iteration = 0;
     h_Persons_default_variable_gender_data_iteration = 0;
     h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -7707,6 +7796,7 @@ void h_add_agents_Person_default(xmachine_memory_Person** agents, unsigned int c
         h_Persons_default_variable_transporttime_data_iteration = 0;
         h_Persons_default_variable_clinictime_data_iteration = 0;
         h_Persons_default_variable_workplacetime_data_iteration = 0;
+        h_Persons_default_variable_outsidetime_data_iteration = 0;
         h_Persons_default_variable_age_data_iteration = 0;
         h_Persons_default_variable_gender_data_iteration = 0;
         h_Persons_default_variable_householdsize_data_iteration = 0;
@@ -7773,6 +7863,7 @@ void h_add_agent_Person_s2(xmachine_memory_Person* agent){
     h_Persons_s2_variable_transporttime_data_iteration = 0;
     h_Persons_s2_variable_clinictime_data_iteration = 0;
     h_Persons_s2_variable_workplacetime_data_iteration = 0;
+    h_Persons_s2_variable_outsidetime_data_iteration = 0;
     h_Persons_s2_variable_age_data_iteration = 0;
     h_Persons_s2_variable_gender_data_iteration = 0;
     h_Persons_s2_variable_householdsize_data_iteration = 0;
@@ -7839,6 +7930,7 @@ void h_add_agents_Person_s2(xmachine_memory_Person** agents, unsigned int count)
         h_Persons_s2_variable_transporttime_data_iteration = 0;
         h_Persons_s2_variable_clinictime_data_iteration = 0;
         h_Persons_s2_variable_workplacetime_data_iteration = 0;
+        h_Persons_s2_variable_outsidetime_data_iteration = 0;
         h_Persons_s2_variable_age_data_iteration = 0;
         h_Persons_s2_variable_gender_data_iteration = 0;
         h_Persons_s2_variable_householdsize_data_iteration = 0;
@@ -9104,6 +9196,27 @@ unsigned int max_Person_default_workplacetime_variable(){
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
+unsigned int reduce_Person_default_outsidetime_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->outsidetime),  thrust::device_pointer_cast(d_Persons_default->outsidetime) + h_xmachine_memory_Person_default_count);
+}
+
+unsigned int count_Person_default_outsidetime_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_default->outsidetime),  thrust::device_pointer_cast(d_Persons_default->outsidetime) + h_xmachine_memory_Person_default_count, count_value);
+}
+unsigned int min_Person_default_outsidetime_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->outsidetime);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_default_outsidetime_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_default->outsidetime);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 unsigned int reduce_Person_default_age_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_Persons_default->age),  thrust::device_pointer_cast(d_Persons_default->age) + h_xmachine_memory_Person_default_count);
@@ -9816,6 +9929,27 @@ unsigned int min_Person_s2_workplacetime_variable(){
 unsigned int max_Person_s2_workplacetime_variable(){
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->workplacetime);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Person_s2_outsidetime_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Persons_s2->outsidetime),  thrust::device_pointer_cast(d_Persons_s2->outsidetime) + h_xmachine_memory_Person_s2_count);
+}
+
+unsigned int count_Person_s2_outsidetime_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Persons_s2->outsidetime),  thrust::device_pointer_cast(d_Persons_s2->outsidetime) + h_xmachine_memory_Person_s2_count, count_value);
+}
+unsigned int min_Person_s2_outsidetime_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->outsidetime);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Person_s2_outsidetime_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Persons_s2->outsidetime);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Person_s2_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }

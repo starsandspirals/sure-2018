@@ -593,7 +593,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   for (unsigned int i = 0; i < total; i++)
   {
-    tbarray[i] = i+1;
+    tbarray[i] = i + 1;
   }
 
   float weightsum = 0;
@@ -1006,36 +1006,38 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
                 "workplace, hiv, art, "
                 "active_tb, "
                 "time_home, time_visiting, time_church, "
-                "time_transport, time_clinic, time_workplace, infections, "
+                "time_transport, time_clinic, time_workplace, time_outside, "
+                "infections, "
                 "last_infected_type, "
                 "last_infected_id\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(fp,
-              "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
-              "%u, %i, "
-              "%i\n",
-              get_Person_s2_variable_id(index),
-              get_Person_s2_variable_gender(index),
-              get_Person_s2_variable_age(index),
-              get_Person_s2_variable_householdsize(index),
-              get_Person_s2_variable_household(index),
-              get_Person_s2_variable_church(index),
-              get_Person_s2_variable_workplace(index),
-              get_Person_s2_variable_hiv(index),
-              get_Person_s2_variable_art(index),
-              get_Person_s2_variable_activetb(index),
-              get_Person_s2_variable_householdtime(index),
-              get_Person_s2_variable_timevisiting(index),
-              get_Person_s2_variable_churchtime(index),
-              get_Person_s2_variable_transporttime(index),
-              get_Person_s2_variable_clinictime(index),
-              get_Person_s2_variable_workplacetime(index),
-              get_Person_s2_variable_infections(index),
-              get_Person_s2_variable_lastinfected(index),
-              get_Person_s2_variable_lastinfectedid(index));
+      fprintf(
+          fp,
+          "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
+          "%u, %i, "
+          "%i\n",
+          get_Person_s2_variable_id(index),
+          get_Person_s2_variable_gender(index),
+          get_Person_s2_variable_age(index),
+          get_Person_s2_variable_householdsize(index),
+          get_Person_s2_variable_household(index),
+          get_Person_s2_variable_church(index),
+          get_Person_s2_variable_workplace(index),
+          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
+          get_Person_s2_variable_activetb(index),
+          get_Person_s2_variable_householdtime(index),
+          get_Person_s2_variable_timevisiting(index),
+          get_Person_s2_variable_churchtime(index),
+          get_Person_s2_variable_transporttime(index),
+          get_Person_s2_variable_clinictime(index),
+          get_Person_s2_variable_workplacetime(index),
+          get_Person_s2_variable_outsidetime(index),
+          get_Person_s2_variable_infections(index),
+          get_Person_s2_variable_lastinfected(index),
+          get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
@@ -1090,7 +1092,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 
   if (person->busy == 0)
   {
-    if (hour == 18 && minute == 0 && person->church != -1)
+    if (hour == 20 && minute == 0 && person->church != -1)
     {
       if (person->churchfreq == 0)
       {
@@ -1121,7 +1123,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
     else if (person->transportdur != 0 &&
              (day == person->transportday1 || day == person->transportday2))
     {
-      if ((hour == 7 && minute == 0) || (hour == 17 && minute == 0))
+      if ((hour == 7 && minute == 0) || (hour == 18 && minute == 0))
       {
         person->startstep = person->step;
         person->busy = 1;
@@ -1150,7 +1152,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->location = 4;
       person->locationid = person->workplace;
     }
-    else if (hour == 7 && minute == 0)
+    else if (hour == 0 && minute == 0)
     {
       float prob = 0.23;
       float random = rnd<CONTINUOUS>(rand48);
@@ -1166,10 +1168,15 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->locationid = randomhouse;
       }
     }
-    else
+    else if (hour >= 20 || hour <= 6)
     {
       person->location = 0;
       person->locationid = person->household;
+    }
+    else
+    {
+      person->location = 7;
+      person->locationid = 0;
     }
   }
   else
@@ -1186,23 +1193,23 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                  person->transportdur / 5)
     {
       person->busy = 0;
-      person->location = 0;
-      person->locationid = person->household;
+      person->location = 7;
+      person->locationid = 0;
     }
     else if (person->location == 3 &&
              (float)(person->step - person->startstep) >= 36)
     {
       person->busy = 0;
-      person->location = 0;
-      person->locationid = person->household;
+      person->location = 7;
+      person->locationid = 0;
     }
     else if (person->location == 4 &&
              (float)(person->step - person->startstep) >=
                  WORKPLACE_DUR * 12)
     {
       person->busy = 0;
-      person->location = 0;
-      person->locationid = person->household;
+      person->location = 7;
+      person->locationid = 0;
     }
     else if (person->location == 0 &&
              (float)(person->step - person->startstep) >= 8)
@@ -1235,6 +1242,10 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   else if (person->location == 4)
   {
     person->workplacetime += 5 * person->time_step;
+  }
+  else if (person->location == 7)
+  {
+    person->outsidetime += 5 * person->time_step;
   }
 
   if (person->activetb == 1)

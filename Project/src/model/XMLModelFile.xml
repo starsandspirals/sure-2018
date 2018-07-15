@@ -243,7 +243,7 @@
       <gpu:variable>
         <type>float</type>
         <name>WORKPLACE_V</name>
-        <defaultValue>20</defaultValue>
+        <defaultValue>40</defaultValue>
       </gpu:variable>
       <gpu:variable>
         <type>unsigned int</type>
@@ -343,6 +343,10 @@
         <gpu:variable>
           <type>unsigned int</type>
           <name>workplacetime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>outsidetime</name>
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
@@ -496,11 +500,27 @@
                 <lhs>
                   <condition>
                     <lhs>
-                      <agentVariable>lambda</agentVariable>
+                      <condition>
+                        <lhs>
+                          <agentVariable>lambda</agentVariable>
+                        </lhs>
+                        <operator>==</operator>
+                        <rhs>
+                          <value>0.0</value>
+                        </rhs>
+                      </condition>
                     </lhs>
-                    <operator>==</operator>
+                    <operator>||</operator>
                     <rhs>
-                      <value>0.0</value>
+                      <condition>
+                        <lhs>
+                          <agentVariable>location</agentVariable>
+                        </lhs>
+                        <operator>==</operator>
+                        <rhs>
+                          <value>7</value>
+                        </rhs>
+                      </condition>
                     </rhs>
                   </condition>
                 </lhs>
@@ -1371,5 +1391,5 @@
     </layer>
   </layers>
 
-  </gpu:xmodel>
+</gpu:xmodel>
 
