@@ -231,6 +231,19 @@ xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdef
 xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault;      /**< Pointer to agent list (population) on the device*/
 int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;   /**< Agent population size counter */ 
 
+/* Bar Agent variables these lists are used in the agent function where as the other lists are used only outside the agent functions*/
+xmachine_memory_Bar_list* d_Bars;      /**< Pointer to agent list (population) on the device*/
+xmachine_memory_Bar_list* d_Bars_swap; /**< Pointer to agent list swap on the device (used when killing agents)*/
+xmachine_memory_Bar_list* d_Bars_new;  /**< Pointer to new agent list on the device (used to hold new agents before they are appended to the population)*/
+int h_xmachine_memory_Bar_count;   /**< Agent population size counter */ 
+uint * d_xmachine_memory_Bar_keys;	  /**< Agent sort identifiers keys*/
+uint * d_xmachine_memory_Bar_values;  /**< Agent sort identifiers value */
+
+/* Bar state variables */
+xmachine_memory_Bar_list* h_Bars_bdefault;      /**< Pointer to agent list (population) on host*/
+xmachine_memory_Bar_list* d_Bars_bdefault;      /**< Pointer to agent list (population) on the device*/
+int h_xmachine_memory_Bar_bdefault_count;   /**< Agent population size counter */ 
+
 
 /* Variables to track the state of host copies of state lists, for the purposes of host agent data access.
  * @future - if the host data is current it may be possible to avoid duplicating memcpy in xml output.
@@ -339,6 +352,8 @@ unsigned int h_Workplaces_wpdefault_variable_id_data_iteration;
 unsigned int h_Workplaces_wpdefault_variable_lambda_data_iteration;
 unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration;
 unsigned int h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration;
+unsigned int h_Bars_bdefault_variable_id_data_iteration;
+unsigned int h_Bars_bdefault_variable_lambda_data_iteration;
 
 
 /* Message Memory */
@@ -437,6 +452,9 @@ size_t temp_scan_storage_bytes_Workplace;
 
 void * d_temp_scan_storage_WorkplaceMembership;
 size_t temp_scan_storage_bytes_WorkplaceMembership;
+
+void * d_temp_scan_storage_Bar;
+size_t temp_scan_storage_bytes_Bar;
 
 
 /*Global condition counts*/
@@ -545,6 +563,11 @@ void Workplace_wpupdate(cudaStream_t &stream);
  * Agent function prototype for wpinit function of WorkplaceMembership agent
  */
 void WorkplaceMembership_wpinit(cudaStream_t &stream);
+
+/** Bar_bupdate
+ * Agent function prototype for bupdate function of Bar agent
+ */
+void Bar_bupdate(cudaStream_t &stream);
 
   
 void setPaddingAndOffset()
@@ -742,6 +765,8 @@ void initialise(char * inputfile){
     h_Workplaces_wpdefault_variable_lambda_data_iteration = 0;
     h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
     h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
+    h_Bars_bdefault_variable_id_data_iteration = 0;
+    h_Bars_bdefault_variable_lambda_data_iteration = 0;
     
 
 
@@ -772,6 +797,8 @@ void initialise(char * inputfile){
 	h_Workplaces_wpdefault = (xmachine_memory_Workplace_list*)malloc(xmachine_Workplace_SoA_size);
 	int xmachine_WorkplaceMembership_SoA_size = sizeof(xmachine_memory_WorkplaceMembership_list);
 	h_WorkplaceMemberships_wpmembershipdefault = (xmachine_memory_WorkplaceMembership_list*)malloc(xmachine_WorkplaceMembership_SoA_size);
+	int xmachine_Bar_SoA_size = sizeof(xmachine_memory_Bar_list);
+	h_Bars_bdefault = (xmachine_memory_Bar_list*)malloc(xmachine_Bar_SoA_size);
 
 	/* Message memory allocation (CPU) */
 	int message_tb_assignment_SoA_size = sizeof(xmachine_message_tb_assignment_list);
@@ -794,7 +821,7 @@ void initialise(char * inputfile){
 	
 
 	//read initial states
-	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count, h_Workplaces_wpdefault, &h_xmachine_memory_Workplace_wpdefault_count, h_WorkplaceMemberships_wpmembershipdefault, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count);
+	readInitialStates(inputfile, h_Persons_default, &h_xmachine_memory_Person_default_count, h_TBAssignments_tbdefault, &h_xmachine_memory_TBAssignment_tbdefault_count, h_Households_hhdefault, &h_xmachine_memory_Household_hhdefault_count, h_HouseholdMemberships_hhmembershipdefault, &h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count, h_Churchs_chudefault, &h_xmachine_memory_Church_chudefault_count, h_ChurchMemberships_chumembershipdefault, &h_xmachine_memory_ChurchMembership_chumembershipdefault_count, h_Transports_trdefault, &h_xmachine_memory_Transport_trdefault_count, h_TransportMemberships_trmembershipdefault, &h_xmachine_memory_TransportMembership_trmembershipdefault_count, h_Clinics_cldefault, &h_xmachine_memory_Clinic_cldefault_count, h_Workplaces_wpdefault, &h_xmachine_memory_Workplace_wpdefault_count, h_WorkplaceMemberships_wpmembershipdefault, &h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count, h_Bars_bdefault, &h_xmachine_memory_Bar_bdefault_count);
 	
 
     PROFILE_PUSH_RANGE("allocate device");
@@ -923,6 +950,17 @@ void initialise(char * inputfile){
 	/* wpmembershipdefault memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_WorkplaceMemberships_wpmembershipdefault, xmachine_WorkplaceMembership_SoA_size));
 	gpuErrchk( cudaMemcpy( d_WorkplaceMemberships_wpmembershipdefault, h_WorkplaceMemberships_wpmembershipdefault, xmachine_WorkplaceMembership_SoA_size, cudaMemcpyHostToDevice));
+    
+	/* Bar Agent memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Bars, xmachine_Bar_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Bars_swap, xmachine_Bar_SoA_size));
+	gpuErrchk( cudaMalloc( (void**) &d_Bars_new, xmachine_Bar_SoA_size));
+    //continuous agent sort identifiers
+  gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Bar_keys, xmachine_memory_Bar_MAX* sizeof(uint)));
+	gpuErrchk( cudaMalloc( (void**) &d_xmachine_memory_Bar_values, xmachine_memory_Bar_MAX* sizeof(uint)));
+	/* bdefault memory allocation (GPU) */
+	gpuErrchk( cudaMalloc( (void**) &d_Bars_bdefault, xmachine_Bar_SoA_size));
+	gpuErrchk( cudaMemcpy( d_Bars_bdefault, h_Bars_bdefault, xmachine_Bar_SoA_size, cudaMemcpyHostToDevice));
     
 	/* tb_assignment Message memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_tb_assignments, message_tb_assignment_SoA_size));
@@ -1084,6 +1122,17 @@ void initialise(char * inputfile){
     );
     gpuErrchk(cudaMalloc(&d_temp_scan_storage_WorkplaceMembership, temp_scan_storage_bytes_WorkplaceMembership));
     
+    d_temp_scan_storage_Bar = nullptr;
+    temp_scan_storage_bytes_Bar = 0;
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Bar, 
+        temp_scan_storage_bytes_Bar, 
+        (int*) nullptr, 
+        (int*) nullptr, 
+        xmachine_memory_Bar_MAX
+    );
+    gpuErrchk(cudaMalloc(&d_temp_scan_storage_Bar, temp_scan_storage_bytes_Bar));
+    
 
 	/*Set global condition counts*/
 
@@ -1187,6 +1236,8 @@ void initialise(char * inputfile){
 		printf("Init agent_Workplace_wpdefault_count: %u\n",get_agent_Workplace_wpdefault_count());
 	
 		printf("Init agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
+	
+		printf("Init agent_Bar_bdefault_count: %u\n",get_agent_Bar_bdefault_count());
 	
 #endif
 } 
@@ -1528,6 +1579,34 @@ void sort_WorkplaceMemberships_wpmembershipdefault(void (*generate_key_value_pai
 	d_WorkplaceMemberships_swap = d_WorkplaceMemberships_temp;	
 }
 
+void sort_Bars_bdefault(void (*generate_key_value_pairs)(unsigned int* keys, unsigned int* values, xmachine_memory_Bar_list* agents))
+{
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+
+	//generate sort keys
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, generate_key_value_pairs, no_sm, h_xmachine_memory_Bar_bdefault_count); 
+	gridSize = (h_xmachine_memory_Bar_bdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	generate_key_value_pairs<<<gridSize, blockSize>>>(d_xmachine_memory_Bar_keys, d_xmachine_memory_Bar_values, d_Bars_bdefault);
+	gpuErrchkLaunch();
+
+	//updated Thrust sort
+	thrust::sort_by_key( thrust::device_pointer_cast(d_xmachine_memory_Bar_keys),  thrust::device_pointer_cast(d_xmachine_memory_Bar_keys) + h_xmachine_memory_Bar_bdefault_count,  thrust::device_pointer_cast(d_xmachine_memory_Bar_values));
+	gpuErrchkLaunch();
+
+	//reorder agents
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reorder_Bar_agents, no_sm, h_xmachine_memory_Bar_bdefault_count); 
+	gridSize = (h_xmachine_memory_Bar_bdefault_count + blockSize - 1) / blockSize;    // Round up according to array size 
+	reorder_Bar_agents<<<gridSize, blockSize>>>(d_xmachine_memory_Bar_values, d_Bars_bdefault, d_Bars_swap);
+	gpuErrchkLaunch();
+
+	//swap
+	xmachine_memory_Bar_list* d_Bars_temp = d_Bars_bdefault;
+	d_Bars_bdefault = d_Bars_swap;
+	d_Bars_swap = d_Bars_temp;	
+}
+
 
 void cleanup(){
     PROFILE_SCOPED_RANGE("cleanup");
@@ -1658,6 +1737,14 @@ void cleanup(){
 	free( h_WorkplaceMemberships_wpmembershipdefault);
 	gpuErrchk(cudaFree(d_WorkplaceMemberships_wpmembershipdefault));
 	
+	/* Bar Agent variables */
+	gpuErrchk(cudaFree(d_Bars));
+	gpuErrchk(cudaFree(d_Bars_swap));
+	gpuErrchk(cudaFree(d_Bars_new));
+	
+	free( h_Bars_bdefault);
+	gpuErrchk(cudaFree(d_Bars_bdefault));
+	
 
 	/* Message data free */
 	
@@ -1742,6 +1829,10 @@ void cleanup(){
     gpuErrchk(cudaFree(d_temp_scan_storage_WorkplaceMembership));
     d_temp_scan_storage_WorkplaceMembership = nullptr;
     temp_scan_storage_bytes_WorkplaceMembership = 0;
+    
+    gpuErrchk(cudaFree(d_temp_scan_storage_Bar));
+    d_temp_scan_storage_Bar = nullptr;
+    temp_scan_storage_bytes_Bar = 0;
     
   
   /* CUDA Streams for function layers */
@@ -2121,6 +2212,8 @@ PROFILE_SCOPED_RANGE("singleIteration");
 	
 		printf("agent_WorkplaceMembership_wpmembershipdefault_count: %u\n",get_agent_WorkplaceMembership_wpmembershipdefault_count());
 	
+		printf("agent_Bar_bdefault_count: %u\n",get_agent_Bar_bdefault_count());
+	
 #endif
 
 #if defined(INSTRUMENT_ITERATIONS) && INSTRUMENT_ITERATIONS
@@ -2183,6 +2276,7 @@ unsigned int h_env_WORKPLACE_DUR;
 unsigned int h_env_WORKPLACE_SIZE;
 float h_env_WORKPLACE_V;
 unsigned int h_env_HOUSEHOLDS;
+unsigned int h_env_BARS;
 float h_env_RR_AS_F_46;
 float h_env_RR_AS_F_26;
 float h_env_RR_AS_F_18;
@@ -2193,6 +2287,10 @@ float h_env_BAR_BETA0;
 float h_env_BAR_BETAA;
 float h_env_BAR_BETAS;
 float h_env_BAR_BETAAS;
+unsigned int h_env_BAR_SIZE;
+unsigned int h_env_SCHOOL_SIZE;
+float h_env_BAR_A;
+float h_env_BAR_V;
 
 
 //constant setter
@@ -2833,6 +2931,19 @@ const unsigned int* get_HOUSEHOLDS(){
 
 
 //constant setter
+void set_BARS(unsigned int* h_BARS){
+    gpuErrchk(cudaMemcpyToSymbol(BARS, h_BARS, sizeof(unsigned int)));
+    memcpy(&h_env_BARS, h_BARS,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_BARS(){
+    return &h_env_BARS;
+}
+
+
+
+//constant setter
 void set_RR_AS_F_46(float* h_RR_AS_F_46){
     gpuErrchk(cudaMemcpyToSymbol(RR_AS_F_46, h_RR_AS_F_46, sizeof(float)));
     memcpy(&h_env_RR_AS_F_46, h_RR_AS_F_46,sizeof(float));
@@ -2958,6 +3069,58 @@ void set_BAR_BETAAS(float* h_BAR_BETAAS){
 //constant getter
 const float* get_BAR_BETAAS(){
     return &h_env_BAR_BETAAS;
+}
+
+
+
+//constant setter
+void set_BAR_SIZE(unsigned int* h_BAR_SIZE){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_SIZE, h_BAR_SIZE, sizeof(unsigned int)));
+    memcpy(&h_env_BAR_SIZE, h_BAR_SIZE,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_BAR_SIZE(){
+    return &h_env_BAR_SIZE;
+}
+
+
+
+//constant setter
+void set_SCHOOL_SIZE(unsigned int* h_SCHOOL_SIZE){
+    gpuErrchk(cudaMemcpyToSymbol(SCHOOL_SIZE, h_SCHOOL_SIZE, sizeof(unsigned int)));
+    memcpy(&h_env_SCHOOL_SIZE, h_SCHOOL_SIZE,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_SCHOOL_SIZE(){
+    return &h_env_SCHOOL_SIZE;
+}
+
+
+
+//constant setter
+void set_BAR_A(float* h_BAR_A){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_A, h_BAR_A, sizeof(float)));
+    memcpy(&h_env_BAR_A, h_BAR_A,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_A(){
+    return &h_env_BAR_A;
+}
+
+
+
+//constant setter
+void set_BAR_V(float* h_BAR_V){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_V, h_BAR_V, sizeof(float)));
+    memcpy(&h_env_BAR_V, h_BAR_V,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_V(){
+    return &h_env_BAR_V;
 }
 
 
@@ -3197,6 +3360,26 @@ xmachine_memory_WorkplaceMembership_list* get_device_WorkplaceMembership_wpmembe
 
 xmachine_memory_WorkplaceMembership_list* get_host_WorkplaceMembership_wpmembershipdefault_agents(){
 	return h_WorkplaceMemberships_wpmembershipdefault;
+}
+
+    
+int get_agent_Bar_MAX_count(){
+    return xmachine_memory_Bar_MAX;
+}
+
+
+int get_agent_Bar_bdefault_count(){
+	//continuous agent
+	return h_xmachine_memory_Bar_bdefault_count;
+	
+}
+
+xmachine_memory_Bar_list* get_device_Bar_bdefault_agents(){
+	return d_Bars_bdefault;
+}
+
+xmachine_memory_Bar_list* get_host_Bar_bdefault_agents(){
+	return h_Bars_bdefault;
 }
 
 
@@ -7259,6 +7442,84 @@ __host__ unsigned int get_WorkplaceMembership_wpmembershipdefault_variable_workp
     }
 }
 
+/** unsigned int get_Bar_bdefault_variable_id(unsigned int index)
+ * Gets the value of the id variable of an Bar agent in the bdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable id
+ */
+__host__ unsigned int get_Bar_bdefault_variable_id(unsigned int index){
+    unsigned int count = get_agent_Bar_bdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Bars_bdefault_variable_id_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Bars_bdefault->id,
+                    d_Bars_bdefault->id,
+                    count * sizeof(unsigned int),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Bars_bdefault_variable_id_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Bars_bdefault->id[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access id for the %u th member of Bar_bdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
+/** float get_Bar_bdefault_variable_lambda(unsigned int index)
+ * Gets the value of the lambda variable of an Bar agent in the bdefault state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lambda
+ */
+__host__ float get_Bar_bdefault_variable_lambda(unsigned int index){
+    unsigned int count = get_agent_Bar_bdefault_count();
+    unsigned int currentIteration = getIterationNumber();
+    
+    // If the index is within bounds - no need to check >= 0 due to unsigned.
+    if(count > 0 && index < count ){
+        // If necessary, copy agent data from the device to the host in the default stream
+        if(h_Bars_bdefault_variable_lambda_data_iteration != currentIteration){
+            
+            gpuErrchk(
+                cudaMemcpy(
+                    h_Bars_bdefault->lambda,
+                    d_Bars_bdefault->lambda,
+                    count * sizeof(float),
+                    cudaMemcpyDeviceToHost
+                )
+            );
+            // Update some global value indicating what data is currently present in that host array.
+            h_Bars_bdefault_variable_lambda_data_iteration = currentIteration;
+        }
+
+        // Return the value of the index-th element of the relevant host array.
+        return h_Bars_bdefault->lambda[index];
+
+    } else {
+        fprintf(stderr, "Warning: Attempting to access lambda for the %u th member of Bar_bdefault. count is %u at iteration %u\n", index, count, currentIteration); //@todo
+        // Otherwise we return a default value
+        return 0;
+
+    }
+}
+
 
 
 /* Host based agent creation functions */
@@ -7811,6 +8072,40 @@ void copy_partial_xmachine_memory_WorkplaceMembership_hostToDevice(xmachine_memo
 		gpuErrchk(cudaMemcpy(d_dst->person_id, h_src->person_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
  
 		gpuErrchk(cudaMemcpy(d_dst->workplace_id, h_src->workplace_id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+
+    }
+}
+
+
+/* copy_single_xmachine_memory_Bar_hostToDevice
+ * Private function to copy a host agent struct into a device SoA agent list.
+ * @param d_dst destination agent state list
+ * @param h_agent agent struct
+ */
+void copy_single_xmachine_memory_Bar_hostToDevice(xmachine_memory_Bar_list * d_dst, xmachine_memory_Bar * h_agent){
+ 
+		gpuErrchk(cudaMemcpy(d_dst->id, &h_agent->id, sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, &h_agent->lambda, sizeof(float), cudaMemcpyHostToDevice));
+
+}
+/*
+ * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
+ * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
+ * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * 
+ * @param d_dst device destination SoA
+ * @oaram h_src host source SoA
+ * @param count the number of agents to transfer data for
+ */
+void copy_partial_xmachine_memory_Bar_hostToDevice(xmachine_memory_Bar_list * d_dst, xmachine_memory_Bar_list * h_src, unsigned int count){
+    // Only copy elements if there is data to move.
+    if (count > 0){
+	 
+		gpuErrchk(cudaMemcpy(d_dst->id, h_src->id, count * sizeof(unsigned int), cudaMemcpyHostToDevice));
+ 
+		gpuErrchk(cudaMemcpy(d_dst->lambda, h_src->lambda, count * sizeof(float), cudaMemcpyHostToDevice));
 
     }
 }
@@ -9281,6 +9576,111 @@ void h_add_agents_WorkplaceMembership_wpmembershipdefault(xmachine_memory_Workpl
         // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
         h_WorkplaceMemberships_wpmembershipdefault_variable_person_id_data_iteration = 0;
         h_WorkplaceMemberships_wpmembershipdefault_variable_workplace_id_data_iteration = 0;
+        
+
+	}
+}
+
+xmachine_memory_Bar* h_allocate_agent_Bar(){
+	xmachine_memory_Bar* agent = (xmachine_memory_Bar*)malloc(sizeof(xmachine_memory_Bar));
+	// Memset the whole agent strcuture
+    memset(agent, 0, sizeof(xmachine_memory_Bar));
+
+	return agent;
+}
+void h_free_agent_Bar(xmachine_memory_Bar** agent){
+ 
+	free((*agent));
+	(*agent) = NULL;
+}
+xmachine_memory_Bar** h_allocate_agent_Bar_array(unsigned int count){
+	xmachine_memory_Bar ** agents = (xmachine_memory_Bar**)malloc(count * sizeof(xmachine_memory_Bar*));
+	for (unsigned int i = 0; i < count; i++) {
+		agents[i] = h_allocate_agent_Bar();
+	}
+	return agents;
+}
+void h_free_agent_Bar_array(xmachine_memory_Bar*** agents, unsigned int count){
+	for (unsigned int i = 0; i < count; i++) {
+		h_free_agent_Bar(&((*agents)[i]));
+	}
+	free((*agents));
+	(*agents) = NULL;
+}
+
+void h_unpack_agents_Bar_AoS_to_SoA(xmachine_memory_Bar_list * dst, xmachine_memory_Bar** src, unsigned int count){
+	if(count > 0){
+		for(unsigned int i = 0; i < count; i++){
+			 
+			dst->id[i] = src[i]->id;
+			 
+			dst->lambda[i] = src[i]->lambda;
+			
+		}
+	}
+}
+
+
+void h_add_agent_Bar_bdefault(xmachine_memory_Bar* agent){
+	if (h_xmachine_memory_Bar_count + 1 > xmachine_memory_Bar_MAX){
+		printf("Error: Buffer size of Bar agents in state bdefault will be exceeded by h_add_agent_Bar_bdefault\n");
+		exit(EXIT_FAILURE);
+	}	
+
+	int blockSize;
+	int minGridSize;
+	int gridSize;
+	unsigned int count = 1;
+	
+	// Copy data from host struct to device SoA for target state
+	copy_single_xmachine_memory_Bar_hostToDevice(d_Bars_new, agent);
+
+	// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Bar_Agents, no_sm, count);
+	gridSize = (count + blockSize - 1) / blockSize;
+	append_Bar_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Bars_bdefault, d_Bars_new, h_xmachine_memory_Bar_bdefault_count, count);
+	gpuErrchkLaunch();
+	// Update the number of agents in this state.
+	h_xmachine_memory_Bar_bdefault_count += count;
+	gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Bar_bdefault_count, &h_xmachine_memory_Bar_bdefault_count, sizeof(int)));
+	cudaDeviceSynchronize();
+
+    // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+    h_Bars_bdefault_variable_id_data_iteration = 0;
+    h_Bars_bdefault_variable_lambda_data_iteration = 0;
+    
+
+}
+void h_add_agents_Bar_bdefault(xmachine_memory_Bar** agents, unsigned int count){
+	if(count > 0){
+		int blockSize;
+		int minGridSize;
+		int gridSize;
+
+		if (h_xmachine_memory_Bar_count + count > xmachine_memory_Bar_MAX){
+			printf("Error: Buffer size of Bar agents in state bdefault will be exceeded by h_add_agents_Bar_bdefault\n");
+			exit(EXIT_FAILURE);
+		}
+
+		// Unpack data from AoS into the pre-existing SoA
+		h_unpack_agents_Bar_AoS_to_SoA(h_Bars_bdefault, agents, count);
+
+		// Copy data from the host SoA to the device SoA for the target state
+		copy_partial_xmachine_memory_Bar_hostToDevice(d_Bars_new, h_Bars_bdefault, count);
+
+		// Use append kernel (@optimisation - This can be replaced with a pointer swap if the target state list is empty)
+		cudaOccupancyMaxPotentialBlockSizeVariableSMem(&minGridSize, &blockSize, append_Bar_Agents, no_sm, count);
+		gridSize = (count + blockSize - 1) / blockSize;
+		append_Bar_Agents <<<gridSize, blockSize, 0, stream1 >>>(d_Bars_bdefault, d_Bars_new, h_xmachine_memory_Bar_bdefault_count, count);
+		gpuErrchkLaunch();
+		// Update the number of agents in this state.
+		h_xmachine_memory_Bar_bdefault_count += count;
+		gpuErrchk(cudaMemcpyToSymbol(d_xmachine_memory_Bar_bdefault_count, &h_xmachine_memory_Bar_bdefault_count, sizeof(int)));
+		cudaDeviceSynchronize();
+
+        // Reset host variable status flags for the relevant agent state list as the device state list has been modified.
+        h_Bars_bdefault_variable_id_data_iteration = 0;
+        h_Bars_bdefault_variable_lambda_data_iteration = 0;
         
 
 	}
@@ -11407,6 +11807,44 @@ unsigned int max_WorkplaceMembership_wpmembershipdefault_workplace_id_variable()
     //max in default stream
     thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_WorkplaceMemberships_wpmembershipdefault->workplace_id);
     size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int reduce_Bar_bdefault_id_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Bars_bdefault->id),  thrust::device_pointer_cast(d_Bars_bdefault->id) + h_xmachine_memory_Bar_bdefault_count);
+}
+
+unsigned int count_Bar_bdefault_id_variable(int count_value){
+    //count in default stream
+    return (int)thrust::count(thrust::device_pointer_cast(d_Bars_bdefault->id),  thrust::device_pointer_cast(d_Bars_bdefault->id) + h_xmachine_memory_Bar_bdefault_count, count_value);
+}
+unsigned int min_Bar_bdefault_id_variable(){
+    //min in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Bars_bdefault->id);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Bar_bdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+unsigned int max_Bar_bdefault_id_variable(){
+    //max in default stream
+    thrust::device_ptr<unsigned int> thrust_ptr = thrust::device_pointer_cast(d_Bars_bdefault->id);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Bar_bdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float reduce_Bar_bdefault_lambda_variable(){
+    //reduce in default stream
+    return thrust::reduce(thrust::device_pointer_cast(d_Bars_bdefault->lambda),  thrust::device_pointer_cast(d_Bars_bdefault->lambda) + h_xmachine_memory_Bar_bdefault_count);
+}
+
+float min_Bar_bdefault_lambda_variable(){
+    //min in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Bars_bdefault->lambda);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Bar_bdefault_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+float max_Bar_bdefault_lambda_variable(){
+    //max in default stream
+    thrust::device_ptr<float> thrust_ptr = thrust::device_pointer_cast(d_Bars_bdefault->lambda);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_Bar_bdefault_count) - thrust_ptr;
     return *(thrust_ptr + result_offset);
 }
 
@@ -13990,6 +14428,165 @@ void WorkplaceMembership_wpinit(cudaStream_t &stream){
 }
 
 
+
+	
+/* Shared memory size calculator for agent function */
+int Bar_bupdate_sm_size(int blockSize){
+	int sm_size;
+	sm_size = SM_START;
+  //Continuous agent and message input has no partitioning
+	sm_size += (blockSize * sizeof(xmachine_message_location));
+	
+	//all continuous agent types require single 32bit word per thread offset (to avoid sm bank conflicts)
+	sm_size += (blockSize * PADDING);
+	
+	return sm_size;
+}
+
+/** Bar_bupdate
+ * Agent function prototype for bupdate function of Bar agent
+ */
+void Bar_bupdate(cudaStream_t &stream){
+
+    int sm_size;
+    int blockSize;
+    int minGridSize;
+    int gridSize;
+    int state_list_size;
+	dim3 g; //grid for agent func
+	dim3 b; //block for agent func
+
+	
+	//CHECK THE CURRENT STATE LIST COUNT IS NOT EQUAL TO 0
+	
+	if (h_xmachine_memory_Bar_bdefault_count == 0)
+	{
+		return;
+	}
+	
+	
+	//SET SM size to 0 and save state list size for occupancy calculations
+	sm_size = SM_START;
+	state_list_size = h_xmachine_memory_Bar_bdefault_count;
+
+	
+
+	//******************************** AGENT FUNCTION CONDITION *********************
+	//THERE IS NOT A FUNCTION CONDITION
+	//currentState maps to working list
+	xmachine_memory_Bar_list* Bars_bdefault_temp = d_Bars;
+	d_Bars = d_Bars_bdefault;
+	d_Bars_bdefault = Bars_bdefault_temp;
+	//set working count to current state count
+	h_xmachine_memory_Bar_count = h_xmachine_memory_Bar_bdefault_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Bar_count, &h_xmachine_memory_Bar_count, sizeof(int)));	
+	//set current state count to 0
+	h_xmachine_memory_Bar_bdefault_count = 0;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Bar_bdefault_count, &h_xmachine_memory_Bar_bdefault_count, sizeof(int)));	
+	
+ 
+
+	//******************************** AGENT FUNCTION *******************************
+
+	
+	//CONTINUOUS AGENT CHECK FUNCTION OUTPUT BUFFERS FOR OUT OF BOUNDS
+	if (h_message_infection_count + h_xmachine_memory_Bar_count > xmachine_message_infection_MAX){
+		printf("Error: Buffer size of infection message will be exceeded in function bupdate\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	
+	//calculate the grid block size for main agent function
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, GPUFLAME_bupdate, Bar_bupdate_sm_size, state_list_size);
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	b.x = blockSize;
+	g.x = gridSize;
+	
+	sm_size = Bar_bupdate_sm_size(blockSize);
+	
+	
+	
+	//BIND APPROPRIATE MESSAGE INPUT VARIABLES TO TEXTURES (to make use of the texture cache)
+	
+	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
+	//Set the message_type for non partitioned and spatially partitioned message outputs
+	h_message_infection_output_type = optional_message;
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_output_type, &h_message_infection_output_type, sizeof(int)));
+	//message is optional so reset the swap
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, reset_infection_swaps, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	reset_infection_swaps<<<gridSize, blockSize, 0, stream>>>(d_infections); 
+	gpuErrchkLaunch();
+	
+	
+	//MAIN XMACHINE FUNCTION CALL (bupdate)
+	//Reallocate   : false
+	//Input        : location
+	//Output       : infection
+	//Agent Output : 
+	GPUFLAME_bupdate<<<g, b, sm_size, stream>>>(d_Bars, d_locations, d_infections);
+	gpuErrchkLaunch();
+	
+	
+	//UNBIND MESSAGE INPUT VARIABLE TEXTURES
+	
+	//CONTINUOUS AGENTS SCATTER NON PARTITIONED OPTIONAL OUTPUT MESSAGES
+	//infection Message Type Prefix Sum
+	
+	//swap output
+	xmachine_message_infection_list* d_infections_scanswap_temp = d_infections;
+	d_infections = d_infections_swap;
+	d_infections_swap = d_infections_scanswap_temp;
+	
+    cub::DeviceScan::ExclusiveSum(
+        d_temp_scan_storage_Bar, 
+        temp_scan_storage_bytes_Bar, 
+        d_infections_swap->_scan_input,
+        d_infections_swap->_position,
+        h_xmachine_memory_Bar_count, 
+        stream
+    );
+
+	//Scatter
+	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &minGridSize, &blockSize, scatter_optional_infection_messages, no_sm, state_list_size); 
+	gridSize = (state_list_size + blockSize - 1) / blockSize;
+	scatter_optional_infection_messages<<<gridSize, blockSize, 0, stream>>>(d_infections, d_infections_swap);
+	gpuErrchkLaunch();
+	
+	//UPDATE MESSAGE COUNTS FOR CONTINUOUS AGENTS WITH NON PARTITIONED MESSAGE OUTPUT 
+	gpuErrchk( cudaMemcpy( &scan_last_sum, &d_infections_swap->_position[h_xmachine_memory_Bar_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	gpuErrchk( cudaMemcpy( &scan_last_included, &d_infections_swap->_scan_input[h_xmachine_memory_Bar_count-1], sizeof(int), cudaMemcpyDeviceToHost));
+	//If last item in prefix sum was 1 then increase its index to get the count
+	if (scan_last_included == 1){
+		h_message_infection_count += scan_last_sum+1;
+	}else{
+		h_message_infection_count += scan_last_sum;
+	}
+    //Copy count to device
+	gpuErrchk( cudaMemcpyToSymbol( d_message_infection_count, &h_message_infection_count, sizeof(int)));	
+	
+	
+	//************************ MOVE AGENTS TO NEXT STATE ****************************
+    
+	//check the working agents wont exceed the buffer size in the new state list
+	if (h_xmachine_memory_Bar_bdefault_count+h_xmachine_memory_Bar_count > xmachine_memory_Bar_MAX){
+		printf("Error: Buffer size of bupdate agents in state bdefault will be exceeded moving working agents to next state in function bupdate\n");
+      exit(EXIT_FAILURE);
+      }
+      
+  //pointer swap the updated data
+  Bars_bdefault_temp = d_Bars;
+  d_Bars = d_Bars_bdefault;
+  d_Bars_bdefault = Bars_bdefault_temp;
+        
+	//update new state agent size
+	h_xmachine_memory_Bar_bdefault_count += h_xmachine_memory_Bar_count;
+	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_Bar_bdefault_count, &h_xmachine_memory_Bar_bdefault_count, sizeof(int)));	
+	
+	
+}
+
+
  
 extern void reset_Person_default_count()
 {
@@ -14049,4 +14646,9 @@ extern void reset_Workplace_wpdefault_count()
 extern void reset_WorkplaceMembership_wpmembershipdefault_count()
 {
     h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count = 0;
+}
+ 
+extern void reset_Bar_bdefault_count()
+{
+    h_xmachine_memory_Bar_bdefault_count = 0;
 }

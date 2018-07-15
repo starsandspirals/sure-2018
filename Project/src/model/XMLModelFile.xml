@@ -251,6 +251,11 @@
         <defaultValue>0</defaultValue>
       </gpu:variable>
       <gpu:variable>
+        <type>unsigned int</type>
+        <name>BARS</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>RR_AS_F_46</name>
         <defaultValue>0.50</defaultValue>
@@ -299,6 +304,26 @@
         <type>float</type>
         <name>BAR_BETAAS</name>
         <defaultValue>0.02204</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>BAR_SIZE</name>
+        <defaultValue>20</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>SCHOOL_SIZE</name>
+        <defaultValue>40</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_A</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_V</name>
+        <defaultValue>40</defaultValue>
       </gpu:variable>
     </gpu:constants>
 
@@ -1149,6 +1174,53 @@
       <gpu:type>continuous</gpu:type>
 
       <gpu:bufferSize>32768</gpu:bufferSize>
+    </gpu:xagent>
+
+    <gpu:xagent>
+      <name>Bar</name>
+
+      <memory>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>id</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </memory>
+
+      <functions>
+        <gpu:function>
+          <name>bupdate</name>
+          <currentState>bdefault</currentState>
+          <nextState>bdefault</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>location</messageName>
+            </gpu:input>
+          </inputs>
+          <outputs>
+            <gpu:output>
+              <messageName>infection</messageName>
+              <gpu:type>optional_message</gpu:type>
+            </gpu:output>
+          </outputs>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+      </functions>
+
+      <states>
+        <gpu:state>
+          <name>bdefault</name>
+        </gpu:state>
+        <initialState>bdefault</initialState>
+      </states>
+
+      <gpu:type>continuous</gpu:type>
+
+      <gpu:bufferSize>2048</gpu:bufferSize>
     </gpu:xagent>
 
   </xagents>

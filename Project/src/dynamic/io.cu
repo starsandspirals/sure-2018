@@ -112,7 +112,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
     }
 }
 
-void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count)
+void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_Person_list* h_Persons_default, xmachine_memory_Person_list* d_Persons_default, int h_xmachine_memory_Person_default_count,xmachine_memory_Person_list* h_Persons_s2, xmachine_memory_Person_list* d_Persons_s2, int h_xmachine_memory_Person_s2_count,xmachine_memory_TBAssignment_list* h_TBAssignments_tbdefault, xmachine_memory_TBAssignment_list* d_TBAssignments_tbdefault, int h_xmachine_memory_TBAssignment_tbdefault_count,xmachine_memory_Household_list* h_Households_hhdefault, xmachine_memory_Household_list* d_Households_hhdefault, int h_xmachine_memory_Household_hhdefault_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships_hhmembershipdefault, xmachine_memory_HouseholdMembership_list* d_HouseholdMemberships_hhmembershipdefault, int h_xmachine_memory_HouseholdMembership_hhmembershipdefault_count,xmachine_memory_Church_list* h_Churchs_chudefault, xmachine_memory_Church_list* d_Churchs_chudefault, int h_xmachine_memory_Church_chudefault_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships_chumembershipdefault, xmachine_memory_ChurchMembership_list* d_ChurchMemberships_chumembershipdefault, int h_xmachine_memory_ChurchMembership_chumembershipdefault_count,xmachine_memory_Transport_list* h_Transports_trdefault, xmachine_memory_Transport_list* d_Transports_trdefault, int h_xmachine_memory_Transport_trdefault_count,xmachine_memory_TransportMembership_list* h_TransportMemberships_trmembershipdefault, xmachine_memory_TransportMembership_list* d_TransportMemberships_trmembershipdefault, int h_xmachine_memory_TransportMembership_trmembershipdefault_count,xmachine_memory_Clinic_list* h_Clinics_cldefault, xmachine_memory_Clinic_list* d_Clinics_cldefault, int h_xmachine_memory_Clinic_cldefault_count,xmachine_memory_Workplace_list* h_Workplaces_wpdefault, xmachine_memory_Workplace_list* d_Workplaces_wpdefault, int h_xmachine_memory_Workplace_wpdefault_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships_wpmembershipdefault, xmachine_memory_WorkplaceMembership_list* d_WorkplaceMemberships_wpmembershipdefault, int h_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count,xmachine_memory_Bar_list* h_Bars_bdefault, xmachine_memory_Bar_list* d_Bars_bdefault, int h_xmachine_memory_Bar_bdefault_count)
 {
     PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
@@ -189,6 +189,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 	if (cudaStatus != cudaSuccess)
 	{
 		fprintf(stderr,"Error Copying WorkplaceMembership Agent wpmembershipdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
+		exit(cudaStatus);
+	}
+	cudaStatus = cudaMemcpy( h_Bars_bdefault, d_Bars_bdefault, sizeof(xmachine_memory_Bar_list), cudaMemcpyDeviceToHost);
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr,"Error Copying Bar Agent bdefault State Memory from GPU: %s\n", cudaGetErrorString(cudaStatus));
 		exit(cudaStatus);
 	}
 	
@@ -405,6 +411,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_HOUSEHOLDS()));
     fputs(data, file);
     fputs("</HOUSEHOLDS>\n", file);
+    fputs("\t<BARS>", file);
+    sprintf(data, "%u", (*get_BARS()));
+    fputs(data, file);
+    fputs("</BARS>\n", file);
     fputs("\t<RR_AS_F_46>", file);
     sprintf(data, "%f", (*get_RR_AS_F_46()));
     fputs(data, file);
@@ -445,6 +455,22 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_BAR_BETAAS()));
     fputs(data, file);
     fputs("</BAR_BETAAS>\n", file);
+    fputs("\t<BAR_SIZE>", file);
+    sprintf(data, "%u", (*get_BAR_SIZE()));
+    fputs(data, file);
+    fputs("</BAR_SIZE>\n", file);
+    fputs("\t<SCHOOL_SIZE>", file);
+    sprintf(data, "%u", (*get_SCHOOL_SIZE()));
+    fputs(data, file);
+    fputs("</SCHOOL_SIZE>\n", file);
+    fputs("\t<BAR_A>", file);
+    sprintf(data, "%f", (*get_BAR_A()));
+    fputs(data, file);
+    fputs("</BAR_A>\n", file);
+    fputs("\t<BAR_V>", file);
+    sprintf(data, "%f", (*get_BAR_V()));
+    fputs(data, file);
+    fputs("</BAR_V>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1051,6 +1077,23 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         
 		fputs("</xagent>\n", file);
 	}
+	//Write each Bar agent to xml
+	for (int i=0; i<h_xmachine_memory_Bar_bdefault_count; i++){
+		fputs("<xagent>\n" , file);
+		fputs("<name>Bar</name>\n", file);
+        
+		fputs("<id>", file);
+        sprintf(data, "%u", h_Bars_bdefault->id[i]);
+		fputs(data, file);
+		fputs("</id>\n", file);
+        
+		fputs("<lambda>", file);
+        sprintf(data, "%f", h_Bars_bdefault->lambda[i]);
+		fputs(data, file);
+		fputs("</lambda>\n", file);
+        
+		fputs("</xagent>\n", file);
+	}
 	
 	
 
@@ -1163,6 +1206,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_WORKPLACE_V(&t_WORKPLACE_V);
     unsigned int t_HOUSEHOLDS = (unsigned int)0;
     set_HOUSEHOLDS(&t_HOUSEHOLDS);
+    unsigned int t_BARS = (unsigned int)0;
+    set_BARS(&t_BARS);
     float t_RR_AS_F_46 = (float)0.50;
     set_RR_AS_F_46(&t_RR_AS_F_46);
     float t_RR_AS_F_26 = (float)1.25;
@@ -1183,9 +1228,17 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_BAR_BETAS(&t_BAR_BETAS);
     float t_BAR_BETAAS = (float)0.02204;
     set_BAR_BETAAS(&t_BAR_BETAAS);
+    unsigned int t_BAR_SIZE = (unsigned int)20;
+    set_BAR_SIZE(&t_BAR_SIZE);
+    unsigned int t_SCHOOL_SIZE = (unsigned int)40;
+    set_SCHOOL_SIZE(&t_SCHOOL_SIZE);
+    float t_BAR_A = (float)3;
+    set_BAR_A(&t_BAR_A);
+    float t_BAR_V = (float)40;
+    set_BAR_V(&t_BAR_V);
 }
 
-void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count)
+void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count)
 {
     PROFILE_SCOPED_RANGE("readInitialStates");
 
@@ -1270,6 +1323,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Workplace_lambda;
     int in_WorkplaceMembership_person_id;
     int in_WorkplaceMembership_workplace_id;
+    int in_Bar_id;
+    int in_Bar_lambda;
     
     /* tags for environment global variables */
     int in_env;
@@ -1371,6 +1426,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_HOUSEHOLDS;
     
+    int in_env_BARS;
+    
     int in_env_RR_AS_F_46;
     
     int in_env_RR_AS_F_26;
@@ -1391,6 +1448,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_BAR_BETAAS;
     
+    int in_env_BAR_SIZE;
+    
+    int in_env_SCHOOL_SIZE;
+    
+    int in_env_BAR_A;
+    
+    int in_env_BAR_V;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1403,6 +1468,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	*h_xmachine_memory_Clinic_count = 0;
 	*h_xmachine_memory_Workplace_count = 0;
 	*h_xmachine_memory_WorkplaceMembership_count = 0;
+	*h_xmachine_memory_Bar_count = 0;
 	
 	/* Variables for initial state data */
 	unsigned int Person_id;
@@ -1471,6 +1537,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	float Workplace_lambda;
 	unsigned int WorkplaceMembership_person_id;
 	unsigned int WorkplaceMembership_workplace_id;
+	unsigned int Bar_id;
+	float Bar_lambda;
 
     /* Variables for environment variables */
     float env_TIME_STEP;
@@ -1522,6 +1590,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     unsigned int env_WORKPLACE_SIZE;
     float env_WORKPLACE_V;
     unsigned int env_HOUSEHOLDS;
+    unsigned int env_BARS;
     float env_RR_AS_F_46;
     float env_RR_AS_F_26;
     float env_RR_AS_F_18;
@@ -1532,6 +1601,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_BAR_BETAA;
     float env_BAR_BETAS;
     float env_BAR_BETAAS;
+    unsigned int env_BAR_SIZE;
+    unsigned int env_SCHOOL_SIZE;
+    float env_BAR_A;
+    float env_BAR_V;
     
 
 
@@ -1615,6 +1688,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Workplace_lambda = 0;
 	in_WorkplaceMembership_person_id = 0;
 	in_WorkplaceMembership_workplace_id = 0;
+	in_Bar_id = 0;
+	in_Bar_lambda = 0;
     in_env_TIME_STEP = 0;
     in_env_MAX_AGE = 0;
     in_env_STARTING_POPULATION = 0;
@@ -1664,6 +1739,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_WORKPLACE_SIZE = 0;
     in_env_WORKPLACE_V = 0;
     in_env_HOUSEHOLDS = 0;
+    in_env_BARS = 0;
     in_env_RR_AS_F_46 = 0;
     in_env_RR_AS_F_26 = 0;
     in_env_RR_AS_F_18 = 0;
@@ -1674,6 +1750,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_BAR_BETAA = 0;
     in_env_BAR_BETAS = 0;
     in_env_BAR_BETAAS = 0;
+    in_env_BAR_SIZE = 0;
+    in_env_SCHOOL_SIZE = 0;
+    in_env_BAR_A = 0;
+    in_env_BAR_V = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1806,6 +1886,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_WorkplaceMemberships->workplace_id[k] = 0;
 	}
 	
+	//set all Bar values to 0
+	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
+	for (int k=0; k<xmachine_memory_Bar_MAX; k++)
+	{	
+		h_Bars->id[k] = 0;
+		h_Bars->lambda[k] = 0;
+	}
+	
 
 	/* Default variables for memory */
     Person_id = 0;
@@ -1874,6 +1962,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Workplace_lambda = 0;
     WorkplaceMembership_person_id = 0;
     WorkplaceMembership_workplace_id = 0;
+    Bar_id = 0;
+    Bar_lambda = 0;
 
     /* Default variables for environment variables */
     env_TIME_STEP = 0;
@@ -1925,6 +2015,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_WORKPLACE_SIZE = 0;
     env_WORKPLACE_V = 0;
     env_HOUSEHOLDS = 0;
+    env_BARS = 0;
     env_RR_AS_F_46 = 0;
     env_RR_AS_F_26 = 0;
     env_RR_AS_F_18 = 0;
@@ -1935,6 +2026,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_BETAA = 0;
     env_BAR_BETAS = 0;
     env_BAR_BETAAS = 0;
+    env_BAR_SIZE = 0;
+    env_SCHOOL_SIZE = 0;
+    env_BAR_A = 0;
+    env_BAR_V = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2174,6 +2269,19 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_WorkplaceMemberships->workplace_id[*h_xmachine_memory_WorkplaceMembership_count] = WorkplaceMembership_workplace_id;
 					(*h_xmachine_memory_WorkplaceMembership_count) ++;	
 				}
+				else if(strcmp(agentname, "Bar") == 0)
+				{
+					if (*h_xmachine_memory_Bar_count > xmachine_memory_Bar_MAX){
+						printf("ERROR: MAX Buffer size (%i) for agent Bar exceeded whilst reading data\n", xmachine_memory_Bar_MAX);
+						// Close the file and stop reading
+						fclose(file);
+						exit(EXIT_FAILURE);
+					}
+                    
+					h_Bars->id[*h_xmachine_memory_Bar_count] = Bar_id;
+					h_Bars->lambda[*h_xmachine_memory_Bar_count] = Bar_lambda;
+					(*h_xmachine_memory_Bar_count) ++;	
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -2248,6 +2356,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Workplace_lambda = 0;
                 WorkplaceMembership_person_id = 0;
                 WorkplaceMembership_workplace_id = 0;
+                Bar_id = 0;
+                Bar_lambda = 0;
                 
                 in_xagent = 0;
 			}
@@ -2383,6 +2493,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/person_id") == 0) in_WorkplaceMembership_person_id = 0;
 			if(strcmp(buffer, "workplace_id") == 0) in_WorkplaceMembership_workplace_id = 1;
 			if(strcmp(buffer, "/workplace_id") == 0) in_WorkplaceMembership_workplace_id = 0;
+			if(strcmp(buffer, "id") == 0) in_Bar_id = 1;
+			if(strcmp(buffer, "/id") == 0) in_Bar_id = 0;
+			if(strcmp(buffer, "lambda") == 0) in_Bar_lambda = 1;
+			if(strcmp(buffer, "/lambda") == 0) in_Bar_lambda = 0;
 			
             /* environment variables */
             if(strcmp(buffer, "TIME_STEP") == 0) in_env_TIME_STEP = 1;
@@ -2483,6 +2597,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/WORKPLACE_V") == 0) in_env_WORKPLACE_V = 0;
 			if(strcmp(buffer, "HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 1;
             if(strcmp(buffer, "/HOUSEHOLDS") == 0) in_env_HOUSEHOLDS = 0;
+			if(strcmp(buffer, "BARS") == 0) in_env_BARS = 1;
+            if(strcmp(buffer, "/BARS") == 0) in_env_BARS = 0;
 			if(strcmp(buffer, "RR_AS_F_46") == 0) in_env_RR_AS_F_46 = 1;
             if(strcmp(buffer, "/RR_AS_F_46") == 0) in_env_RR_AS_F_46 = 0;
 			if(strcmp(buffer, "RR_AS_F_26") == 0) in_env_RR_AS_F_26 = 1;
@@ -2503,6 +2619,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/BAR_BETAS") == 0) in_env_BAR_BETAS = 0;
 			if(strcmp(buffer, "BAR_BETAAS") == 0) in_env_BAR_BETAAS = 1;
             if(strcmp(buffer, "/BAR_BETAAS") == 0) in_env_BAR_BETAAS = 0;
+			if(strcmp(buffer, "BAR_SIZE") == 0) in_env_BAR_SIZE = 1;
+            if(strcmp(buffer, "/BAR_SIZE") == 0) in_env_BAR_SIZE = 0;
+			if(strcmp(buffer, "SCHOOL_SIZE") == 0) in_env_SCHOOL_SIZE = 1;
+            if(strcmp(buffer, "/SCHOOL_SIZE") == 0) in_env_SCHOOL_SIZE = 0;
+			if(strcmp(buffer, "BAR_A") == 0) in_env_BAR_A = 1;
+            if(strcmp(buffer, "/BAR_A") == 0) in_env_BAR_A = 0;
+			if(strcmp(buffer, "BAR_V") == 0) in_env_BAR_V = 1;
+            if(strcmp(buffer, "/BAR_V") == 0) in_env_BAR_V = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2718,6 +2842,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_WorkplaceMembership_workplace_id){
                     WorkplaceMembership_workplace_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Bar_id){
+                    Bar_id = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Bar_lambda){
+                    Bar_lambda = (float) fgpu_atof(buffer); 
                 }
 				
             }
@@ -3065,6 +3195,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     set_HOUSEHOLDS(&env_HOUSEHOLDS);
                   
               }
+            if(in_env_BARS){
+              
+                    env_BARS = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_BARS(&env_BARS);
+                  
+              }
             if(in_env_RR_AS_F_46){
               
                     env_RR_AS_F_46 = (float) fgpu_atof(buffer);
@@ -3133,6 +3270,34 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_BAR_BETAAS = (float) fgpu_atof(buffer);
                     
                     set_BAR_BETAAS(&env_BAR_BETAAS);
+                  
+              }
+            if(in_env_BAR_SIZE){
+              
+                    env_BAR_SIZE = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_BAR_SIZE(&env_BAR_SIZE);
+                  
+              }
+            if(in_env_SCHOOL_SIZE){
+              
+                    env_SCHOOL_SIZE = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_SCHOOL_SIZE(&env_SCHOOL_SIZE);
+                  
+              }
+            if(in_env_BAR_A){
+              
+                    env_BAR_A = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_A(&env_BAR_A);
+                  
+              }
+            if(in_env_BAR_V){
+              
+                    env_BAR_V = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_V(&env_BAR_V);
                   
               }
             

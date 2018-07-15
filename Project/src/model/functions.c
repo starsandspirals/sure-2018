@@ -16,6 +16,7 @@ xmachine_memory_Church **h_church_AoS;
 xmachine_memory_Transport **h_transport_AoS;
 xmachine_memory_Clinic **h_clinic_AoS;
 xmachine_memory_Workplace **h_workplace_AoS;
+xmachine_memory_Bar **h_bar_AoS;
 
 xmachine_memory_TBAssignment **h_tbassignment_AoS;
 xmachine_memory_HouseholdMembership **h_hhmembership_AoS;
@@ -29,6 +30,7 @@ const unsigned int h_church_AoS_MAX = 256;
 const unsigned int h_transport_AoS_MAX = 2048;
 const unsigned int h_clinic_AoS_MAX = 2;
 const unsigned int h_workplace_AoS_MAX = 8192;
+const unsigned int h_bar_AoS_MAX = 2048;
 
 const unsigned int h_tbassignment_AoS_MAX = 32768;
 const unsigned int h_hhmembership_AoS_MAX = 32768;
@@ -44,6 +46,7 @@ unsigned int h_nextChurchID;
 unsigned int h_nextTransportID;
 unsigned int h_nextClinicID;
 unsigned int h_nextWorkplaceID;
+unsigned int h_nextBarID;
 
 __host__ unsigned int getNextID()
 {
@@ -77,6 +80,13 @@ __host__ unsigned int getNextWorkplaceID()
 {
   unsigned int old = h_nextWorkplaceID;
   h_nextWorkplaceID++;
+  return old;
+}
+
+__host__ unsigned int getNextBarID()
+{
+  unsigned int old = h_nextBarID;
+  h_nextBarID++;
   return old;
 }
 
@@ -253,6 +263,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   float bar_betas = *get_BAR_BETAS();
   float bar_betaas = *get_BAR_BETAAS();
 
+  unsigned int bar_size = *get_BAR_SIZE();
+  unsigned int school_size = *get_SCHOOL_SIZE();
+
   srand(0);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
@@ -278,6 +291,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   h_nextWorkplaceID = 1;
 
   h_workplace_AoS = h_allocate_agent_Workplace_array(h_workplace_AoS_MAX);
+
+  h_nextBarID = 1;
+
+  h_bar_AoS = h_allocate_agent_Bar_array(h_bar_AoS_MAX);
 
   h_tbassignment_AoS =
       h_allocate_agent_TBAssignment_array(h_tbassignment_AoS_MAX);
@@ -336,6 +353,11 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int employedcount = 0;
   unsigned int workarray[h_agent_AoS_MAX];
+
+  unsigned int barcount = 0;
+
+  //unsigned int childcount = 0;
+  //unsigned int schoolarray[h_agent_AoS_MAX];
 
   for (unsigned int i = 0; i < 32; i++)
   {
@@ -520,6 +542,100 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         {
           workarray[employedcount] = h_person->id;
           employedcount++;
+        }
+
+        float barprob =
+            1.0 /
+            (1 + exp(-bar_beta0 - (bar_betaa * h_person->age) -
+                     (bar_betas * sex) - (bar_betaas * sex * h_person->age)));
+
+        random = ((float)rand() / (RAND_MAX));
+
+        if (random < barprob && h_person->age >= 18)
+        {
+          random = ((float)rand() / (RAND_MAX));
+          h_person->bargoing = 1;
+
+          if (sex == 0)
+          {
+            if (random < 0.23)
+            {
+              h_person->barday = 1;
+              barcount++;
+            }
+            else if (random < 0.38)
+            {
+              h_person->barday = 2;
+              barcount += 2;
+            }
+            else if (random < 0.55)
+            {
+              h_person->barday = 3;
+              barcount += 3;
+            }
+            else if (random < 0.62)
+            {
+              h_person->barday = 4;
+              barcount += 4;
+            }
+            else if (random < 0.67)
+            {
+              h_person->barday = 5;
+              barcount += 5;
+            }
+            else if (random < 0.71)
+            {
+              h_person->barday = 7;
+              barcount += 7;
+            }
+            else
+            {
+              h_person->bargoing = 2;
+              h_person->barday = rand() % 28;
+            }
+          }
+          else
+          {
+            if (random < 0.22)
+            {
+              h_person->barday = 1;
+              barcount++;
+            }
+            else if (random < 0.37)
+            {
+              h_person->barday = 2;
+              barcount += 2;
+            }
+            else if (random < 0.51)
+            {
+              h_person->barday = 3;
+              barcount += 3;
+            }
+            else if (random < 0.59)
+            {
+              h_person->barday = 4;
+              barcount += 4;
+            }
+            else if (random < 0.63)
+            {
+              h_person->barday = 5;
+              barcount += 5;
+            }
+            else if (random < 0.74)
+            {
+              h_person->barday = 7;
+              barcount += 7;
+            }
+            else
+            {
+              h_person->bargoing = 2;
+              h_person->barday = rand() % 28;
+            }
+          }
+        }
+        else
+        {
+          h_person->bargoing = 0;
         }
 
         random = ((float)rand() / (RAND_MAX));
@@ -971,8 +1087,22 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     }
   }
 
+  for (unsigned int i = 0; i < barcount / 20; i++)
+  {
+    xmachine_memory_Bar *h_bar = h_allocate_agent_Bar();
+
+    h_bar->id = getNextBarID();
+
+    h_add_agent_Bar_bdefault(h_bar);
+
+    h_free_agent_Bar(&h_bar);
+  }
+
   unsigned int householdcount = get_agent_Household_hhdefault_count();
   set_HOUSEHOLDS(&householdcount);
+
+  unsigned int bars = get_agent_Bar_bdefault_count();
+  set_BARS(&barcount);
 
   fclose(file);
 }
@@ -1071,6 +1201,8 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction()
   h_free_agent_Household_array(&h_household_AoS, h_household_AoS_MAX);
   h_free_agent_Church_array(&h_church_AoS, h_church_AoS_MAX);
   h_free_agent_Transport_array(&h_transport_AoS, h_transport_AoS_MAX);
+  h_free_agent_Workplace_array(&h_workplace_AoS, h_workplace_AoS_MAX);
+  h_free_agent_Bar_array(&h_bar_AoS, h_bar_AoS_MAX);
   h_free_agent_TBAssignment_array(&h_tbassignment_AoS, h_tbassignment_AoS_MAX);
   h_free_agent_HouseholdMembership_array(&h_hhmembership_AoS,
                                          h_hhmembership_AoS_MAX);
@@ -1464,6 +1596,28 @@ wpupdate(xmachine_memory_Workplace *workplace,
 
   add_infection_message(infection_messages, 4, workplace->id,
                         workplace->lambda);
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int bupdate(xmachine_memory_Bar *bar, xmachine_message_location_list *location_messages, xmachine_message_infection_list *infection_messages)
+{
+
+  float qsum = 0;
+
+  xmachine_message_location *location_message = get_first_location_message(location_messages);
+
+  while (location_message)
+  {
+    if (location_message->location == 5 && location_message->locationid == bar->id) {
+      qsum += location_message->q;
+    }
+    location_message = get_next_location_message(location_message, location_messages);
+  }
+
+  bar->lambda = (bar->lambda * device_exp(-BAR_A * (TIME_STEP / 12))) + ((qsum / (BAR_V * BAR_A)) * (1 - device_exp(-BAR_A * (TIME_STEP / 12))));
+
+  add_infection_message(infection_messages, 5, bar->id, bar->lambda);
 
   return 0;
 }

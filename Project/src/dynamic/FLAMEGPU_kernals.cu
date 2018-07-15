@@ -47,6 +47,8 @@ __constant__ int d_xmachine_memory_Workplace_count;
 
 __constant__ int d_xmachine_memory_WorkplaceMembership_count;
 
+__constant__ int d_xmachine_memory_Bar_count;
+
 /* Agent state count constants */
 
 __constant__ int d_xmachine_memory_Person_default_count;
@@ -72,6 +74,8 @@ __constant__ int d_xmachine_memory_Clinic_cldefault_count;
 __constant__ int d_xmachine_memory_Workplace_wpdefault_count;
 
 __constant__ int d_xmachine_memory_WorkplaceMembership_wpmembershipdefault_count;
+
+__constant__ int d_xmachine_memory_Bar_bdefault_count;
 
 
 /* Message constants */
@@ -1861,6 +1865,122 @@ __global__ void reorder_WorkplaceMembership_agents(unsigned int* values, xmachin
 	//reorder agent data
 	ordered_agents->person_id[index] = unordered_agents->person_id[old_pos];
 	ordered_agents->workplace_id[index] = unordered_agents->workplace_id[old_pos];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created Bar agent functions */
+
+/** reset_Bar_scan_input
+ * Bar agent reset scan input function
+ * @param agents The xmachine_memory_Bar_list agent list
+ */
+__global__ void reset_Bar_scan_input(xmachine_memory_Bar_list* agents){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 0;
+}
+
+
+
+/** scatter_Bar_Agents
+ * Bar scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Bar_list agent list destination
+ * @param agents_src xmachine_memory_Bar_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void scatter_Bar_Agents(xmachine_memory_Bar_list* agents_dst, xmachine_memory_Bar_list* agents_src, int dst_agent_count, int number_to_scatter){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = agents_src->_scan_input[index];
+
+	//if optional message is to be written. 
+	//must check agent is within number to scatter as unused threads may have scan input = 1
+	if ((_scan_input == 1)&&(index < number_to_scatter)){
+		int output_index = agents_src->_position[index] + dst_agent_count;
+
+		//AoS - xmachine_message_location Un-Coalesced scattered memory write     
+        agents_dst->_position[output_index] = output_index;        
+		agents_dst->id[output_index] = agents_src->id[index];        
+		agents_dst->lambda[output_index] = agents_src->lambda[index];
+	}
+}
+
+/** append_Bar_Agents
+ * Bar scatter agents function (used after agent birth/death)
+ * @param agents_dst xmachine_memory_Bar_list agent list destination
+ * @param agents_src xmachine_memory_Bar_list agent list source
+ * @param dst_agent_count index to start scattering agents from
+ */
+__global__ void append_Bar_Agents(xmachine_memory_Bar_list* agents_dst, xmachine_memory_Bar_list* agents_src, int dst_agent_count, int number_to_append){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//must check agent is within number to append as unused threads may have scan input = 1
+    if (index < number_to_append){
+	    int output_index = index + dst_agent_count;
+
+	    //AoS - xmachine_message_location Un-Coalesced scattered memory write
+	    agents_dst->_position[output_index] = output_index;
+	    agents_dst->id[output_index] = agents_src->id[index];
+	    agents_dst->lambda[output_index] = agents_src->lambda[index];
+    }
+}
+
+/** add_Bar_agent
+ * Continuous Bar agent add agent function writes agent data to agent swap
+ * @param agents xmachine_memory_Bar_list to add agents to 
+ * @param id agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+template <int AGENT_TYPE>
+__device__ void add_Bar_agent(xmachine_memory_Bar_list* agents, unsigned int id, float lambda){
+	
+	int index;
+    
+    //calculate the agents index in global agent list (depends on agent type)
+	if (AGENT_TYPE == DISCRETE_2D){
+		int width = (blockDim.x* gridDim.x);
+		glm::ivec2 global_position;
+		global_position.x = (blockIdx.x*blockDim.x) + threadIdx.x;
+		global_position.y = (blockIdx.y*blockDim.y) + threadIdx.y;
+		index = global_position.x + (global_position.y* width);
+	}else//AGENT_TYPE == CONTINOUS
+		index = threadIdx.x + blockIdx.x*blockDim.x;
+
+	//for prefix sum
+	agents->_position[index] = 0;
+	agents->_scan_input[index] = 1;
+
+	//write data to new buffer
+	agents->id[index] = id;
+	agents->lambda[index] = lambda;
+
+}
+
+//non templated version assumes DISCRETE_2D but works also for CONTINUOUS
+__device__ void add_Bar_agent(xmachine_memory_Bar_list* agents, unsigned int id, float lambda){
+    add_Bar_agent<DISCRETE_2D>(agents, id, lambda);
+}
+
+/** reorder_Bar_agents
+ * Continuous Bar agent areorder function used after key value pairs have been sorted
+ * @param values sorted index values
+ * @param unordered_agents list of unordered agents
+ * @ param ordered_agents list used to output ordered agents
+ */
+__global__ void reorder_Bar_agents(unsigned int* values, xmachine_memory_Bar_list* unordered_agents, xmachine_memory_Bar_list* ordered_agents)
+{
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	uint old_pos = values[index];
+
+	//reorder agent data
+	ordered_agents->id[index] = unordered_agents->id[old_pos];
+	ordered_agents->lambda[index] = unordered_agents->lambda[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4326,6 +4446,47 @@ __global__ void GPUFLAME_wpinit(xmachine_memory_WorkplaceMembership_list* agents
 	//AoS to SoA - xmachine_memory_wpinit Coalesced memory write (ignore arrays)
 	agents->person_id[index] = agent.person_id;
 	agents->workplace_id[index] = agent.workplace_id;
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_bupdate Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Bar agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Bar_count){
+    
+	agent.id = agents->id[index];
+	agent.lambda = agents->lambda[index];
+	} else {
+	
+	agent.id = 0;
+	agent.lambda = 0;
+	}
+
+	//FLAME function call
+	int dead = !bupdate(&agent, location_messages, infection_messages	);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Bar_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_bupdate Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->lambda[index] = agent.lambda;
+	}
 }
 
 	
