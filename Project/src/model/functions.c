@@ -30,7 +30,7 @@ const unsigned int h_church_AoS_MAX = 256;
 const unsigned int h_transport_AoS_MAX = 2048;
 const unsigned int h_clinic_AoS_MAX = 2;
 const unsigned int h_workplace_AoS_MAX = 8192;
-const unsigned int h_bar_AoS_MAX = 2048;
+const unsigned int h_bar_AoS_MAX = 4096;
 
 const unsigned int h_tbassignment_AoS_MAX = 32768;
 const unsigned int h_hhmembership_AoS_MAX = 32768;
@@ -356,8 +356,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int barcount = 0;
 
-  //unsigned int childcount = 0;
-  //unsigned int schoolarray[h_agent_AoS_MAX];
+  // unsigned int childcount = 0;
+  // unsigned int schoolarray[h_agent_AoS_MAX];
 
   for (unsigned int i = 0; i < 32; i++)
   {
@@ -1137,42 +1137,46 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
     fprintf(stdout, "Outputting some Person data to %s\n",
             outputFilename.c_str());
 
-    fprintf(fp, "ID, gender, age, household_size, household, church, "
-                "workplace, hiv, art, "
-                "active_tb, "
-                "time_home, time_visiting, time_church, "
-                "time_transport, time_clinic, time_workplace, time_outside, "
-                "infections, "
-                "last_infected_type, "
-                "last_infected_id\n");
+    fprintf(
+        fp,
+        "ID, gender, age, household_size, household, church, "
+        "workplace, hiv, art, "
+        "active_tb, "
+        "time_home, time_visiting, time_church, "
+        "time_transport, time_clinic, time_workplace, time_bar, time_outside, "
+        "infections, "
+        "last_infected_type, "
+        "last_infected_id\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(
-          fp,
-          "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
-          "%u, %i, "
-          "%i\n",
-          get_Person_s2_variable_id(index),
-          get_Person_s2_variable_gender(index),
-          get_Person_s2_variable_age(index),
-          get_Person_s2_variable_householdsize(index),
-          get_Person_s2_variable_household(index),
-          get_Person_s2_variable_church(index),
-          get_Person_s2_variable_workplace(index),
-          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
-          get_Person_s2_variable_activetb(index),
-          get_Person_s2_variable_householdtime(index),
-          get_Person_s2_variable_timevisiting(index),
-          get_Person_s2_variable_churchtime(index),
-          get_Person_s2_variable_transporttime(index),
-          get_Person_s2_variable_clinictime(index),
-          get_Person_s2_variable_workplacetime(index),
-          get_Person_s2_variable_outsidetime(index),
-          get_Person_s2_variable_infections(index),
-          get_Person_s2_variable_lastinfected(index),
-          get_Person_s2_variable_lastinfectedid(index));
+      fprintf(fp,
+              "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
+              "%u, %u, "
+              "%u, %i, "
+              "%i\n",
+              get_Person_s2_variable_id(index),
+              get_Person_s2_variable_gender(index),
+              get_Person_s2_variable_age(index),
+              get_Person_s2_variable_householdsize(index),
+              get_Person_s2_variable_household(index),
+              get_Person_s2_variable_church(index),
+              get_Person_s2_variable_workplace(index),
+              get_Person_s2_variable_hiv(index),
+              get_Person_s2_variable_art(index),
+              get_Person_s2_variable_activetb(index),
+              get_Person_s2_variable_householdtime(index),
+              get_Person_s2_variable_timevisiting(index),
+              get_Person_s2_variable_churchtime(index),
+              get_Person_s2_variable_transporttime(index),
+              get_Person_s2_variable_clinictime(index),
+              get_Person_s2_variable_workplacetime(index),
+              get_Person_s2_variable_bartime(index),
+              get_Person_s2_variable_outsidetime(index),
+              get_Person_s2_variable_infections(index),
+              get_Person_s2_variable_lastinfected(index),
+              get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
@@ -1305,6 +1309,36 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->locationid = randomhouse;
       }
     }
+    else if (person->bargoing != 0 && hour == 1 && minute == 0)
+    {
+      if (person->bargoing == 1 && person->barday > day)
+      {
+        person->startstep = person->step;
+        person->busy = 1;
+        person->location = 5;
+
+        float random = rnd<CONTINUOUS>(rand48);
+        unsigned int randombar = ceil(random * BARS);
+
+        person->locationid = randombar;
+      }
+      else if (person->bargoing == 2 && person->barday == monthday)
+      {
+        person->startstep = person->step;
+        person->busy = 1;
+        person->location = 5;
+
+        float random = rnd<CONTINUOUS>(rand48);
+        unsigned int randombar = ceil(random * BARS);
+
+        person->locationid = randombar;
+      }
+      else
+      {
+        person->location = 0;
+        person->locationid = person->household;
+      }
+    }
     else if (hour >= 20 || hour <= 6)
     {
       person->location = 0;
@@ -1348,6 +1382,13 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->location = 7;
       person->locationid = 0;
     }
+    else if (person->location == 5 &&
+             (float)(person->step - person->startstep) >= 18)
+    {
+      person->busy = 0;
+      person->location = 0;
+      person->locationid = person->household;
+    }
     else if (person->location == 0 &&
              (float)(person->step - person->startstep) >= 8)
     {
@@ -1379,6 +1420,10 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
   else if (person->location == 4)
   {
     person->workplacetime += 5 * person->time_step;
+  }
+  else if (person->location == 5)
+  {
+    person->bartime += 5 * person->time_step;
   }
   else if (person->location == 7)
   {
@@ -1600,22 +1645,31 @@ wpupdate(xmachine_memory_Workplace *workplace,
   return 0;
 }
 
-__FLAME_GPU_FUNC__ int bupdate(xmachine_memory_Bar *bar, xmachine_message_location_list *location_messages, xmachine_message_infection_list *infection_messages)
+__FLAME_GPU_FUNC__ int
+bupdate(xmachine_memory_Bar *bar,
+        xmachine_message_location_list *location_messages,
+        xmachine_message_infection_list *infection_messages)
 {
 
   float qsum = 0;
 
-  xmachine_message_location *location_message = get_first_location_message(location_messages);
+  xmachine_message_location *location_message =
+      get_first_location_message(location_messages);
 
   while (location_message)
   {
-    if (location_message->location == 5 && location_message->locationid == bar->id) {
+    if (location_message->location == 5 &&
+        location_message->locationid == bar->id)
+    {
       qsum += location_message->q;
     }
-    location_message = get_next_location_message(location_message, location_messages);
+    location_message =
+        get_next_location_message(location_message, location_messages);
   }
 
-  bar->lambda = (bar->lambda * device_exp(-BAR_A * (TIME_STEP / 12))) + ((qsum / (BAR_V * BAR_A)) * (1 - device_exp(-BAR_A * (TIME_STEP / 12))));
+  bar->lambda =
+      (bar->lambda * device_exp(-BAR_A * (TIME_STEP / 12))) +
+      ((qsum / (BAR_V * BAR_A)) * (1 - device_exp(-BAR_A * (TIME_STEP / 12))));
 
   add_infection_message(infection_messages, 5, bar->id, bar->lambda);
 

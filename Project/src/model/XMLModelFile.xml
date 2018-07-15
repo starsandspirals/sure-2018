@@ -391,6 +391,10 @@
         </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
+          <name>bartime</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
           <name>outsidetime</name>
         </gpu:variable>
         <gpu:variable>
@@ -1220,7 +1224,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>4096</gpu:bufferSize>
     </gpu:xagent>
 
   </xagents>

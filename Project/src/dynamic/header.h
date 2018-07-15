@@ -91,7 +91,7 @@ typedef glm::dvec4 dvec4;
 #define xmachine_memory_WorkplaceMembership_MAX 32768
 
 //Maximum population size of xmachine_memory_Bar
-#define xmachine_memory_Bar_MAX 2048
+#define xmachine_memory_Bar_MAX 4096
 
 
   
@@ -178,6 +178,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int transporttime;    /**< X-machine memory variable transporttime of type unsigned int.*/
     unsigned int clinictime;    /**< X-machine memory variable clinictime of type unsigned int.*/
     unsigned int workplacetime;    /**< X-machine memory variable workplacetime of type unsigned int.*/
+    unsigned int bartime;    /**< X-machine memory variable bartime of type unsigned int.*/
     unsigned int outsidetime;    /**< X-machine memory variable outsidetime of type unsigned int.*/
     unsigned int age;    /**< X-machine memory variable age of type unsigned int.*/
     unsigned int gender;    /**< X-machine memory variable gender of type unsigned int.*/
@@ -454,6 +455,7 @@ struct xmachine_memory_Person_list
     unsigned int transporttime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list transporttime of type unsigned int.*/
     unsigned int clinictime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list clinictime of type unsigned int.*/
     unsigned int workplacetime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list workplacetime of type unsigned int.*/
+    unsigned int bartime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list bartime of type unsigned int.*/
     unsigned int outsidetime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list outsidetime of type unsigned int.*/
     unsigned int age [xmachine_memory_Person_MAX];    /**< X-machine memory variable list age of type unsigned int.*/
     unsigned int gender [xmachine_memory_Person_MAX];    /**< X-machine memory variable list gender of type unsigned int.*/
@@ -1154,6 +1156,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param transporttime	agent agent variable of type unsigned int
  * @param clinictime	agent agent variable of type unsigned int
  * @param workplacetime	agent agent variable of type unsigned int
+ * @param bartime	agent agent variable of type unsigned int
  * @param outsidetime	agent agent variable of type unsigned int
  * @param age	agent agent variable of type unsigned int
  * @param gender	agent agent variable of type unsigned int
@@ -1186,7 +1189,7 @@ __FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmach
  * @param bargoing	agent agent variable of type unsigned int
  * @param barday	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -1962,6 +1965,15 @@ __host__ unsigned int get_Person_default_variable_clinictime(unsigned int index)
  */
 __host__ unsigned int get_Person_default_variable_workplacetime(unsigned int index);
 
+/** unsigned int get_Person_default_variable_bartime(unsigned int index)
+ * Gets the value of the bartime variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable bartime
+ */
+__host__ unsigned int get_Person_default_variable_bartime(unsigned int index);
+
 /** unsigned int get_Person_default_variable_outsidetime(unsigned int index)
  * Gets the value of the outsidetime variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -2303,6 +2315,15 @@ __host__ unsigned int get_Person_s2_variable_clinictime(unsigned int index);
  * @return value of agent variable workplacetime
  */
 __host__ unsigned int get_Person_s2_variable_workplacetime(unsigned int index);
+
+/** unsigned int get_Person_s2_variable_bartime(unsigned int index)
+ * Gets the value of the bartime variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable bartime
+ */
+__host__ unsigned int get_Person_s2_variable_bartime(unsigned int index);
 
 /** unsigned int get_Person_s2_variable_outsidetime(unsigned int index)
  * Gets the value of the outsidetime variable of an Person agent in the s2 state on the host. 
@@ -3559,6 +3580,32 @@ unsigned int min_Person_default_workplacetime_variable();
  */
 unsigned int max_Person_default_workplacetime_variable();
 
+/** unsigned int reduce_Person_default_bartime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_default_bartime_variable();
+
+
+
+/** unsigned int count_Person_default_bartime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_default_bartime_variable(int count_value);
+
+/** unsigned int min_Person_default_bartime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_default_bartime_variable();
+/** unsigned int max_Person_default_bartime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_default_bartime_variable();
+
 /** unsigned int reduce_Person_default_outsidetime_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -4511,6 +4558,32 @@ unsigned int min_Person_s2_workplacetime_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 unsigned int max_Person_s2_workplacetime_variable();
+
+/** unsigned int reduce_Person_s2_bartime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+unsigned int reduce_Person_s2_bartime_variable();
+
+
+
+/** unsigned int count_Person_s2_bartime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+unsigned int count_Person_s2_bartime_variable(int count_value);
+
+/** unsigned int min_Person_s2_bartime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int min_Person_s2_bartime_variable();
+/** unsigned int max_Person_s2_bartime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+unsigned int max_Person_s2_bartime_variable();
 
 /** unsigned int reduce_Person_s2_outsidetime_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

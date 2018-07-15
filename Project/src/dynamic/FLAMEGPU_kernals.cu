@@ -234,6 +234,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 			nextState->transporttime[index] = currentState->transporttime[index];
 			nextState->clinictime[index] = currentState->clinictime[index];
 			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
 			nextState->outsidetime[index] = currentState->outsidetime[index];
 			nextState->age[index] = currentState->age[index];
 			nextState->gender[index] = currentState->gender[index];
@@ -415,6 +416,7 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->transporttime[output_index] = agents_src->transporttime[index];        
 		agents_dst->clinictime[output_index] = agents_src->clinictime[index];        
 		agents_dst->workplacetime[output_index] = agents_src->workplacetime[index];        
+		agents_dst->bartime[output_index] = agents_src->bartime[index];        
 		agents_dst->outsidetime[output_index] = agents_src->outsidetime[index];        
 		agents_dst->age[output_index] = agents_src->age[index];        
 		agents_dst->gender[output_index] = agents_src->gender[index];        
@@ -472,6 +474,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->transporttime[output_index] = agents_src->transporttime[index];
 	    agents_dst->clinictime[output_index] = agents_src->clinictime[index];
 	    agents_dst->workplacetime[output_index] = agents_src->workplacetime[index];
+	    agents_dst->bartime[output_index] = agents_src->bartime[index];
 	    agents_dst->outsidetime[output_index] = agents_src->outsidetime[index];
 	    agents_dst->age[output_index] = agents_src->age[index];
 	    agents_dst->gender[output_index] = agents_src->gender[index];
@@ -516,6 +519,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param transporttime agent variable of type unsigned int
  * @param clinictime agent variable of type unsigned int
  * @param workplacetime agent variable of type unsigned int
+ * @param bartime agent variable of type unsigned int
  * @param outsidetime agent variable of type unsigned int
  * @param age agent variable of type unsigned int
  * @param gender agent variable of type unsigned int
@@ -549,7 +553,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param barday agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
 	
 	int index;
     
@@ -575,6 +579,7 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->transporttime[index] = transporttime;
 	agents->clinictime[index] = clinictime;
 	agents->workplacetime[index] = workplacetime;
+	agents->bartime[index] = bartime;
 	agents->outsidetime[index] = outsidetime;
 	agents->age[index] = age;
 	agents->gender[index] = gender;
@@ -610,8 +615,8 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, workplacetime, outsidetime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, workplace, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda, timevisiting, bargoing, barday);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, workplacetime, bartime, outsidetime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, workplace, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda, timevisiting, bargoing, barday);
 }
 
 /** reorder_Person_agents
@@ -634,6 +639,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->transporttime[index] = unordered_agents->transporttime[old_pos];
 	ordered_agents->clinictime[index] = unordered_agents->clinictime[old_pos];
 	ordered_agents->workplacetime[index] = unordered_agents->workplacetime[old_pos];
+	ordered_agents->bartime[index] = unordered_agents->bartime[old_pos];
 	ordered_agents->outsidetime[index] = unordered_agents->outsidetime[old_pos];
 	ordered_agents->age[index] = unordered_agents->age[old_pos];
 	ordered_agents->gender[index] = unordered_agents->gender[old_pos];
@@ -3117,6 +3123,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3164,6 +3171,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3221,6 +3229,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3261,6 +3270,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = 0;
 	agent.clinictime = 0;
 	agent.workplacetime = 0;
+	agent.bartime = 0;
 	agent.outsidetime = 0;
 	agent.age = 0;
 	agent.gender = 0;
@@ -3312,6 +3322,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3371,6 +3382,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3418,6 +3430,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3475,6 +3488,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3515,6 +3529,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = 0;
 	agent.clinictime = 0;
 	agent.workplacetime = 0;
+	agent.bartime = 0;
 	agent.outsidetime = 0;
 	agent.age = 0;
 	agent.gender = 0;
@@ -3566,6 +3581,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3624,6 +3640,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3664,6 +3681,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = 0;
 	agent.clinictime = 0;
 	agent.workplacetime = 0;
+	agent.bartime = 0;
 	agent.outsidetime = 0;
 	agent.age = 0;
 	agent.gender = 0;
@@ -3715,6 +3733,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3773,6 +3792,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3813,6 +3833,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = 0;
 	agent.clinictime = 0;
 	agent.workplacetime = 0;
+	agent.bartime = 0;
 	agent.outsidetime = 0;
 	agent.age = 0;
 	agent.gender = 0;
@@ -3864,6 +3885,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
@@ -3922,6 +3944,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = agents->transporttime[index];
 	agent.clinictime = agents->clinictime[index];
 	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
 	agent.outsidetime = agents->outsidetime[index];
 	agent.age = agents->age[index];
 	agent.gender = agents->gender[index];
@@ -3962,6 +3985,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agent.transporttime = 0;
 	agent.clinictime = 0;
 	agent.workplacetime = 0;
+	agent.bartime = 0;
 	agent.outsidetime = 0;
 	agent.age = 0;
 	agent.gender = 0;
@@ -4013,6 +4037,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agents->transporttime[index] = agent.transporttime;
 	agents->clinictime[index] = agent.clinictime;
 	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
 	agents->outsidetime[index] = agent.outsidetime;
 	agents->age[index] = agent.age;
 	agents->gender[index] = agent.gender;
