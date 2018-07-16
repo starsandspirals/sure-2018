@@ -495,6 +495,38 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_SEED()));
     fputs(data, file);
     fputs("</SEED>\n", file);
+    fputs("\t<HOUSEHOLD_EXP>", file);
+    sprintf(data, "%f", (*get_HOUSEHOLD_EXP()));
+    fputs(data, file);
+    fputs("</HOUSEHOLD_EXP>\n", file);
+    fputs("\t<CHURCH_EXP>", file);
+    sprintf(data, "%f", (*get_CHURCH_EXP()));
+    fputs(data, file);
+    fputs("</CHURCH_EXP>\n", file);
+    fputs("\t<TRANSPORT_EXP>", file);
+    sprintf(data, "%f", (*get_TRANSPORT_EXP()));
+    fputs(data, file);
+    fputs("</TRANSPORT_EXP>\n", file);
+    fputs("\t<CLINIC_EXP>", file);
+    sprintf(data, "%f", (*get_CLINIC_EXP()));
+    fputs(data, file);
+    fputs("</CLINIC_EXP>\n", file);
+    fputs("\t<WORKPLACE_EXP>", file);
+    sprintf(data, "%f", (*get_WORKPLACE_EXP()));
+    fputs(data, file);
+    fputs("</WORKPLACE_EXP>\n", file);
+    fputs("\t<BAR_EXP>", file);
+    sprintf(data, "%f", (*get_BAR_EXP()));
+    fputs(data, file);
+    fputs("</BAR_EXP>\n", file);
+    fputs("\t<SCHOOL_EXP>", file);
+    sprintf(data, "%f", (*get_SCHOOL_EXP()));
+    fputs(data, file);
+    fputs("</SCHOOL_EXP>\n", file);
+    fputs("\t<PROB>", file);
+    sprintf(data, "%f", (*get_PROB()));
+    fputs(data, file);
+    fputs("</PROB>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -676,11 +708,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_default->lastinfectedid[i]);
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
-        
-		fputs("<time_step>", file);
-        sprintf(data, "%f", h_Persons_default->time_step[i]);
-		fputs(data, file);
-		fputs("</time_step>\n", file);
         
 		fputs("<lambda>", file);
         sprintf(data, "%f", h_Persons_default->lambda[i]);
@@ -888,11 +915,6 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->lastinfectedid[i]);
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
-        
-		fputs("<time_step>", file);
-        sprintf(data, "%f", h_Persons_s2->time_step[i]);
-		fputs(data, file);
-		fputs("</time_step>\n", file);
         
 		fputs("<lambda>", file);
         sprintf(data, "%f", h_Persons_s2->lambda[i]);
@@ -1330,6 +1352,22 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_SCHOOL_V(&t_SCHOOL_V);
     unsigned int t_SEED = (unsigned int)0;
     set_SEED(&t_SEED);
+    float t_HOUSEHOLD_EXP = (float)0;
+    set_HOUSEHOLD_EXP(&t_HOUSEHOLD_EXP);
+    float t_CHURCH_EXP = (float)0;
+    set_CHURCH_EXP(&t_CHURCH_EXP);
+    float t_TRANSPORT_EXP = (float)0;
+    set_TRANSPORT_EXP(&t_TRANSPORT_EXP);
+    float t_CLINIC_EXP = (float)0;
+    set_CLINIC_EXP(&t_CLINIC_EXP);
+    float t_WORKPLACE_EXP = (float)0;
+    set_WORKPLACE_EXP(&t_WORKPLACE_EXP);
+    float t_BAR_EXP = (float)0;
+    set_BAR_EXP(&t_BAR_EXP);
+    float t_SCHOOL_EXP = (float)0;
+    set_SCHOOL_EXP(&t_SCHOOL_EXP);
+    float t_PROB = (float)0;
+    set_PROB(&t_PROB);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1386,7 +1424,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_infections;
     int in_Person_lastinfected;
     int in_Person_lastinfectedid;
-    int in_Person_time_step;
     int in_Person_lambda;
     int in_Person_timevisiting;
     int in_Person_bargoing;
@@ -1563,6 +1600,22 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_SEED;
     
+    int in_env_HOUSEHOLD_EXP;
+    
+    int in_env_CHURCH_EXP;
+    
+    int in_env_TRANSPORT_EXP;
+    
+    int in_env_CLINIC_EXP;
+    
+    int in_env_WORKPLACE_EXP;
+    
+    int in_env_BAR_EXP;
+    
+    int in_env_SCHOOL_EXP;
+    
+    int in_env_PROB;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1615,7 +1668,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_infections;
 	int Person_lastinfected;
 	int Person_lastinfectedid;
-	float Person_time_step;
 	float Person_lambda;
 	unsigned int Person_timevisiting;
 	unsigned int Person_bargoing;
@@ -1724,6 +1776,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_SCHOOL_A;
     float env_SCHOOL_V;
     unsigned int env_SEED;
+    float env_HOUSEHOLD_EXP;
+    float env_CHURCH_EXP;
+    float env_TRANSPORT_EXP;
+    float env_CLINIC_EXP;
+    float env_WORKPLACE_EXP;
+    float env_BAR_EXP;
+    float env_SCHOOL_EXP;
+    float env_PROB;
     
 
 
@@ -1776,7 +1836,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_infections = 0;
 	in_Person_lastinfected = 0;
 	in_Person_lastinfectedid = 0;
-	in_Person_time_step = 0;
 	in_Person_lambda = 0;
 	in_Person_timevisiting = 0;
 	in_Person_bargoing = 0;
@@ -1883,6 +1942,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_SCHOOL_A = 0;
     in_env_SCHOOL_V = 0;
     in_env_SEED = 0;
+    in_env_HOUSEHOLD_EXP = 0;
+    in_env_CHURCH_EXP = 0;
+    in_env_TRANSPORT_EXP = 0;
+    in_env_CLINIC_EXP = 0;
+    in_env_WORKPLACE_EXP = 0;
+    in_env_BAR_EXP = 0;
+    in_env_SCHOOL_EXP = 0;
+    in_env_PROB = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -1922,7 +1989,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->infections[k] = 0;
 		h_Persons->lastinfected[k] = 0;
 		h_Persons->lastinfectedid[k] = 0;
-		h_Persons->time_step[k] = 0;
 		h_Persons->lambda[k] = 0;
 		h_Persons->timevisiting[k] = 0;
 		h_Persons->bargoing[k] = 0;
@@ -2079,7 +2145,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_infections = 0;
     Person_lastinfected = 0;
     Person_lastinfectedid = 0;
-    Person_time_step = 0;
     Person_lambda = 0;
     Person_timevisiting = 0;
     Person_bargoing = 0;
@@ -2188,6 +2253,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_SCHOOL_A = 0;
     env_SCHOOL_V = 0;
     env_SEED = 0;
+    env_HOUSEHOLD_EXP = 0;
+    env_CHURCH_EXP = 0;
+    env_TRANSPORT_EXP = 0;
+    env_CLINIC_EXP = 0;
+    env_WORKPLACE_EXP = 0;
+    env_BAR_EXP = 0;
+    env_SCHOOL_EXP = 0;
+    env_PROB = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2284,7 +2357,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->infections[*h_xmachine_memory_Person_count] = Person_infections;
 					h_Persons->lastinfected[*h_xmachine_memory_Person_count] = Person_lastinfected;
 					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
-					h_Persons->time_step[*h_xmachine_memory_Person_count] = Person_time_step;
 					h_Persons->lambda[*h_xmachine_memory_Person_count] = Person_lambda;
 					h_Persons->timevisiting[*h_xmachine_memory_Person_count] = Person_timevisiting;
 					h_Persons->bargoing[*h_xmachine_memory_Person_count] = Person_bargoing;
@@ -2512,7 +2584,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_infections = 0;
                 Person_lastinfected = 0;
                 Person_lastinfectedid = 0;
-                Person_time_step = 0;
                 Person_lambda = 0;
                 Person_timevisiting = 0;
                 Person_bargoing = 0;
@@ -2625,8 +2696,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/lastinfected") == 0) in_Person_lastinfected = 0;
 			if(strcmp(buffer, "lastinfectedid") == 0) in_Person_lastinfectedid = 1;
 			if(strcmp(buffer, "/lastinfectedid") == 0) in_Person_lastinfectedid = 0;
-			if(strcmp(buffer, "time_step") == 0) in_Person_time_step = 1;
-			if(strcmp(buffer, "/time_step") == 0) in_Person_time_step = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Person_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Person_lambda = 0;
 			if(strcmp(buffer, "timevisiting") == 0) in_Person_timevisiting = 1;
@@ -2841,6 +2910,22 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/SCHOOL_V") == 0) in_env_SCHOOL_V = 0;
 			if(strcmp(buffer, "SEED") == 0) in_env_SEED = 1;
             if(strcmp(buffer, "/SEED") == 0) in_env_SEED = 0;
+			if(strcmp(buffer, "HOUSEHOLD_EXP") == 0) in_env_HOUSEHOLD_EXP = 1;
+            if(strcmp(buffer, "/HOUSEHOLD_EXP") == 0) in_env_HOUSEHOLD_EXP = 0;
+			if(strcmp(buffer, "CHURCH_EXP") == 0) in_env_CHURCH_EXP = 1;
+            if(strcmp(buffer, "/CHURCH_EXP") == 0) in_env_CHURCH_EXP = 0;
+			if(strcmp(buffer, "TRANSPORT_EXP") == 0) in_env_TRANSPORT_EXP = 1;
+            if(strcmp(buffer, "/TRANSPORT_EXP") == 0) in_env_TRANSPORT_EXP = 0;
+			if(strcmp(buffer, "CLINIC_EXP") == 0) in_env_CLINIC_EXP = 1;
+            if(strcmp(buffer, "/CLINIC_EXP") == 0) in_env_CLINIC_EXP = 0;
+			if(strcmp(buffer, "WORKPLACE_EXP") == 0) in_env_WORKPLACE_EXP = 1;
+            if(strcmp(buffer, "/WORKPLACE_EXP") == 0) in_env_WORKPLACE_EXP = 0;
+			if(strcmp(buffer, "BAR_EXP") == 0) in_env_BAR_EXP = 1;
+            if(strcmp(buffer, "/BAR_EXP") == 0) in_env_BAR_EXP = 0;
+			if(strcmp(buffer, "SCHOOL_EXP") == 0) in_env_SCHOOL_EXP = 1;
+            if(strcmp(buffer, "/SCHOOL_EXP") == 0) in_env_SCHOOL_EXP = 0;
+			if(strcmp(buffer, "PROB") == 0) in_env_PROB = 1;
+            if(strcmp(buffer, "/PROB") == 0) in_env_PROB = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -2963,9 +3048,6 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_lastinfectedid){
                     Person_lastinfectedid = (int) fpgu_strtol(buffer); 
-                }
-				if(in_Person_time_step){
-                    Person_time_step = (float) fgpu_atof(buffer); 
                 }
 				if(in_Person_lambda){
                     Person_lambda = (float) fgpu_atof(buffer); 
@@ -3554,6 +3636,62 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_SEED = (unsigned int) fpgu_strtoul(buffer);
                     
                     set_SEED(&env_SEED);
+                  
+              }
+            if(in_env_HOUSEHOLD_EXP){
+              
+                    env_HOUSEHOLD_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_HOUSEHOLD_EXP(&env_HOUSEHOLD_EXP);
+                  
+              }
+            if(in_env_CHURCH_EXP){
+              
+                    env_CHURCH_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_CHURCH_EXP(&env_CHURCH_EXP);
+                  
+              }
+            if(in_env_TRANSPORT_EXP){
+              
+                    env_TRANSPORT_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_TRANSPORT_EXP(&env_TRANSPORT_EXP);
+                  
+              }
+            if(in_env_CLINIC_EXP){
+              
+                    env_CLINIC_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_CLINIC_EXP(&env_CLINIC_EXP);
+                  
+              }
+            if(in_env_WORKPLACE_EXP){
+              
+                    env_WORKPLACE_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_WORKPLACE_EXP(&env_WORKPLACE_EXP);
+                  
+              }
+            if(in_env_BAR_EXP){
+              
+                    env_BAR_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_EXP(&env_BAR_EXP);
+                  
+              }
+            if(in_env_SCHOOL_EXP){
+              
+                    env_SCHOOL_EXP = (float) fgpu_atof(buffer);
+                    
+                    set_SCHOOL_EXP(&env_SCHOOL_EXP);
+                  
+              }
+            if(in_env_PROB){
+              
+                    env_PROB = (float) fgpu_atof(buffer);
+                    
+                    set_PROB(&env_PROB);
                   
               }
             

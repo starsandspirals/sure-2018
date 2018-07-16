@@ -240,7 +240,6 @@ struct __align__(16) xmachine_memory_Person
     unsigned int infections;    /**< X-machine memory variable infections of type unsigned int.*/
     int lastinfected;    /**< X-machine memory variable lastinfected of type int.*/
     int lastinfectedid;    /**< X-machine memory variable lastinfectedid of type int.*/
-    float time_step;    /**< X-machine memory variable time_step of type float.*/
     float lambda;    /**< X-machine memory variable lambda of type float.*/
     unsigned int timevisiting;    /**< X-machine memory variable timevisiting of type unsigned int.*/
     unsigned int bargoing;    /**< X-machine memory variable bargoing of type unsigned int.*/
@@ -629,7 +628,6 @@ struct xmachine_memory_Person_list
     unsigned int infections [xmachine_memory_Person_MAX];    /**< X-machine memory variable list infections of type unsigned int.*/
     int lastinfected [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfected of type int.*/
     int lastinfectedid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfectedid of type int.*/
-    float time_step [xmachine_memory_Person_MAX];    /**< X-machine memory variable list time_step of type float.*/
     float lambda [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lambda of type float.*/
     unsigned int timevisiting [xmachine_memory_Person_MAX];    /**< X-machine memory variable list timevisiting of type unsigned int.*/
     unsigned int bargoing [xmachine_memory_Person_MAX];    /**< X-machine memory variable list bargoing of type unsigned int.*/
@@ -1722,14 +1720,13 @@ __FLAME_GPU_FUNC__ xmachine_message_school_infection * get_next_school_infection
  * @param infections	agent agent variable of type unsigned int
  * @param lastinfected	agent agent variable of type int
  * @param lastinfectedid	agent agent variable of type int
- * @param time_step	agent agent variable of type float
  * @param lambda	agent agent variable of type float
  * @param timevisiting	agent agent variable of type unsigned int
  * @param bargoing	agent agent variable of type unsigned int
  * @param barday	agent agent variable of type unsigned int
  * @param schooltime	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -2863,15 +2860,6 @@ __host__ int get_Person_default_variable_lastinfected(unsigned int index);
  */
 __host__ int get_Person_default_variable_lastinfectedid(unsigned int index);
 
-/** float get_Person_default_variable_time_step(unsigned int index)
- * Gets the value of the time_step variable of an Person agent in the default state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable time_step
- */
-__host__ float get_Person_default_variable_time_step(unsigned int index);
-
 /** float get_Person_default_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -3231,15 +3219,6 @@ __host__ int get_Person_s2_variable_lastinfected(unsigned int index);
  * @return value of agent variable lastinfectedid
  */
 __host__ int get_Person_s2_variable_lastinfectedid(unsigned int index);
-
-/** float get_Person_s2_variable_time_step(unsigned int index)
- * Gets the value of the time_step variable of an Person agent in the s2 state on the host. 
- * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
- * This has a potentially significant performance impact if used improperly.
- * @param index the index of the agent within the list.
- * @return value of agent variable time_step
- */
-__host__ float get_Person_s2_variable_time_step(unsigned int index);
 
 /** float get_Person_s2_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Person agent in the s2 state on the host. 
@@ -5087,25 +5066,6 @@ int min_Person_default_lastinfectedid_variable();
  */
 int max_Person_default_lastinfectedid_variable();
 
-/** float reduce_Person_default_time_step_variable();
- * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the reduced variable value of the specified agent name and state
- */
-float reduce_Person_default_time_step_variable();
-
-
-
-/** float min_Person_default_time_step_variable();
- * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-float min_Person_default_time_step_variable();
-/** float max_Person_default_time_step_variable();
- * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-float max_Person_default_time_step_variable();
-
 /** float reduce_Person_default_lambda_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -6117,25 +6077,6 @@ int min_Person_s2_lastinfectedid_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 int max_Person_s2_lastinfectedid_variable();
-
-/** float reduce_Person_s2_time_step_variable();
- * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the reduced variable value of the specified agent name and state
- */
-float reduce_Person_s2_time_step_variable();
-
-
-
-/** float min_Person_s2_time_step_variable();
- * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-float min_Person_s2_time_step_variable();
-/** float max_Person_s2_time_step_variable();
- * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
- * @return the minimum variable value of the specified agent name and state
- */
-float max_Person_s2_time_step_variable();
 
 /** float reduce_Person_s2_lambda_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -7226,6 +7167,22 @@ __constant__ float SCHOOL_V;
 
 __constant__ unsigned int SEED;
 
+__constant__ float HOUSEHOLD_EXP;
+
+__constant__ float CHURCH_EXP;
+
+__constant__ float TRANSPORT_EXP;
+
+__constant__ float CLINIC_EXP;
+
+__constant__ float WORKPLACE_EXP;
+
+__constant__ float BAR_EXP;
+
+__constant__ float SCHOOL_EXP;
+
+__constant__ float PROB;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -7962,6 +7919,94 @@ extern const unsigned int* get_SEED();
 
 
 extern unsigned int h_env_SEED;
+
+/** set_HOUSEHOLD_EXP
+ * Sets the constant variable HOUSEHOLD_EXP on the device which can then be used in the agent functions.
+ * @param h_HOUSEHOLD_EXP value to set the variable
+ */
+extern void set_HOUSEHOLD_EXP(float* h_HOUSEHOLD_EXP);
+
+extern const float* get_HOUSEHOLD_EXP();
+
+
+extern float h_env_HOUSEHOLD_EXP;
+
+/** set_CHURCH_EXP
+ * Sets the constant variable CHURCH_EXP on the device which can then be used in the agent functions.
+ * @param h_CHURCH_EXP value to set the variable
+ */
+extern void set_CHURCH_EXP(float* h_CHURCH_EXP);
+
+extern const float* get_CHURCH_EXP();
+
+
+extern float h_env_CHURCH_EXP;
+
+/** set_TRANSPORT_EXP
+ * Sets the constant variable TRANSPORT_EXP on the device which can then be used in the agent functions.
+ * @param h_TRANSPORT_EXP value to set the variable
+ */
+extern void set_TRANSPORT_EXP(float* h_TRANSPORT_EXP);
+
+extern const float* get_TRANSPORT_EXP();
+
+
+extern float h_env_TRANSPORT_EXP;
+
+/** set_CLINIC_EXP
+ * Sets the constant variable CLINIC_EXP on the device which can then be used in the agent functions.
+ * @param h_CLINIC_EXP value to set the variable
+ */
+extern void set_CLINIC_EXP(float* h_CLINIC_EXP);
+
+extern const float* get_CLINIC_EXP();
+
+
+extern float h_env_CLINIC_EXP;
+
+/** set_WORKPLACE_EXP
+ * Sets the constant variable WORKPLACE_EXP on the device which can then be used in the agent functions.
+ * @param h_WORKPLACE_EXP value to set the variable
+ */
+extern void set_WORKPLACE_EXP(float* h_WORKPLACE_EXP);
+
+extern const float* get_WORKPLACE_EXP();
+
+
+extern float h_env_WORKPLACE_EXP;
+
+/** set_BAR_EXP
+ * Sets the constant variable BAR_EXP on the device which can then be used in the agent functions.
+ * @param h_BAR_EXP value to set the variable
+ */
+extern void set_BAR_EXP(float* h_BAR_EXP);
+
+extern const float* get_BAR_EXP();
+
+
+extern float h_env_BAR_EXP;
+
+/** set_SCHOOL_EXP
+ * Sets the constant variable SCHOOL_EXP on the device which can then be used in the agent functions.
+ * @param h_SCHOOL_EXP value to set the variable
+ */
+extern void set_SCHOOL_EXP(float* h_SCHOOL_EXP);
+
+extern const float* get_SCHOOL_EXP();
+
+
+extern float h_env_SCHOOL_EXP;
+
+/** set_PROB
+ * Sets the constant variable PROB on the device which can then be used in the agent functions.
+ * @param h_PROB value to set the variable
+ */
+extern void set_PROB(float* h_PROB);
+
+extern const float* get_PROB();
+
+
+extern float h_env_PROB;
 
 
 /** getMaximumBound

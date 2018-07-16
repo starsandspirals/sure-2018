@@ -280,6 +280,14 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   unsigned int seed = *get_SEED();
 
+  float household_a = *get_HOUSEHOLD_A();
+  float church_a = *get_CHURCH_A();
+  float transport_a = *get_TRANSPORT_A();
+  float clinic_a = *get_CLINIC_A();
+  float workplace_a = *get_WORKPLACE_A();
+  float bar_a = *get_BAR_A();
+  float school_a = *get_SCHOOL_A();
+
   srand(seed);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
@@ -704,7 +712,6 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         h_person->lastinfected = -1;
         h_person->lastinfectedid = -1;
 
-        h_person->time_step = time_step;
         h_add_agent_Person_default(h_person);
 
         h_free_agent_Person(&h_person);
@@ -1153,7 +1160,26 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   set_HOUSEHOLDS(&householdcount);
 
   unsigned int bars = get_agent_Bar_bdefault_count();
-  set_BARS(&barcount);
+  set_BARS(&bars);
+
+  float household_exp = exp(-household_a * (time_step / 12));
+  float church_exp = exp(-church_a * (time_step / 12));
+  float transport_exp = exp(-transport_a * (time_step / 12));
+  float clinic_exp = exp(-clinic_a * (time_step / 12));
+  float workplace_exp = exp(-workplace_a * (time_step / 12));
+  float bar_exp = exp(-bar_a * (time_step / 12));
+  float school_exp = exp(-school_a * (time_step / 12));
+  float prob = 1 - exp(6.0 / 365);
+
+  set_HOUSEHOLD_EXP(&household_exp);
+  set_CHURCH_EXP(&church_exp);
+  set_TRANSPORT_EXP(&transport_exp);
+  set_CLINIC_EXP(&clinic_exp);
+  set_WORKPLACE_EXP(&workplace_exp);
+  set_BAR_EXP(&bar_exp);
+  set_SCHOOL_EXP(&school_exp);
+  set_PROB(&prob);
+
 
   fclose(file);
 }
@@ -1298,9 +1324,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       if (person->churchfreq == 0)
       {
         float random = rnd<CONTINUOUS>(rand48);
-        float prob = 1 - device_exp(-6.0 / 365);
 
-        if (random < prob)
+        if (random < PROB)
         {
           person->startstep = person->step;
           person->busy = 1;
@@ -1473,39 +1498,39 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 
   if (person->location == 0 && person->busy == 1)
   {
-    person->timevisiting += 5 * person->time_step;
+    person->timevisiting += 5 * TIME_STEP;
   }
   else if (person->location == 0)
   {
-    person->householdtime += 5 * person->time_step;
+    person->householdtime += 5 * TIME_STEP;
   }
   else if (person->location == 1)
   {
-    person->churchtime += 5 * person->time_step;
+    person->churchtime += 5 * TIME_STEP;
   }
   else if (person->location == 2)
   {
-    person->transporttime += 5 * person->time_step;
+    person->transporttime += 5 * TIME_STEP;
   }
   else if (person->location == 3)
   {
-    person->clinictime += 5 * person->time_step;
+    person->clinictime += 5 * TIME_STEP;
   }
   else if (person->location == 4)
   {
-    person->workplacetime += 5 * person->time_step;
+    person->workplacetime += 5 * TIME_STEP;
   }
   else if (person->location == 5)
   {
-    person->bartime += 5 * person->time_step;
+    person->bartime += 5 * TIME_STEP;
   }
   else if (person->location == 6)
   {
-    person->schooltime += 5 * person->time_step;
+    person->schooltime += 5 * TIME_STEP;
   }
   else if (person->location == 7)
   {
-    person->outsidetime += 5 * person->time_step;
+    person->outsidetime += 5 * TIME_STEP;
   }
 
   if (person->activetb == 1)
@@ -1514,7 +1539,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
                          person->locationid, person->p, person->q);
   }
 
-  person->step += person->time_step;
+  person->step += TIME_STEP;
 
   return 0;
 }
@@ -1678,7 +1703,7 @@ __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
 {
 
   float prob =
-      1 - device_exp(-person->p * person->lambda * (person->time_step / 12));
+      1 - device_exp(-person->p * person->lambda * (TIME_STEP / 12));
   float random = rnd<CONTINUOUS>(rand48);
 
   if (random < prob)
@@ -1714,9 +1739,9 @@ hhupdate(xmachine_memory_Household *household,
   }
 
   household->lambda =
-      (household->lambda * device_exp(-HOUSEHOLD_A * (TIME_STEP / 12))) +
+      (household->lambda * HOUSEHOLD_EXP) +
       ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
-       (1 - device_exp(-HOUSEHOLD_A * (TIME_STEP / 12))));
+       (1 - HOUSEHOLD_EXP));
 
   add_household_infection_message(infection_messages, household->id,
                         household->lambda);
@@ -1746,9 +1771,9 @@ chuupdate(xmachine_memory_Church *church,
         get_next_location_message(location_message, location_messages);
   }
 
-  church->lambda = (church->lambda * device_exp(-CHURCH_A * (TIME_STEP / 12))) +
+  church->lambda = (church->lambda * CHURCH_EXP) +
                    ((qsum / (CHURCH_V_MULTIPLIER * church->size * CHURCH_A)) *
-                    (1 - device_exp(-CHURCH_A * (TIME_STEP / 12))));
+                    (1 - CHURCH_EXP));
 
   add_church_infection_message(infection_messages, church->id, church->lambda);
 
@@ -1778,9 +1803,9 @@ trupdate(xmachine_memory_Transport *transport,
   }
 
   transport->lambda =
-      (transport->lambda * device_exp(-TRANSPORT_A * (TIME_STEP / 12))) +
+      (transport->lambda * TRANSPORT_EXP) +
       ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
-       (1 - device_exp(-TRANSPORT_A * (TIME_STEP / 12))));
+       (1 - TRANSPORT_EXP));
 
   add_transport_infection_message(infection_messages, transport->id,
                         transport->lambda);
@@ -1810,9 +1835,9 @@ clupdate(xmachine_memory_Clinic *clinic,
         get_next_location_message(location_message, location_messages);
   }
 
-  clinic->lambda = (clinic->lambda * device_exp(-CLINIC_A * (TIME_STEP / 12))) +
+  clinic->lambda = (clinic->lambda * CLINIC_EXP) +
                    ((qsum / (CLINIC_V * CLINIC_A)) *
-                    (1 - device_exp(-CLINIC_A * (TIME_STEP / 12))));
+                    (1 - CLINIC_EXP));
 
   add_clinic_infection_message(infection_messages, clinic->id, clinic->lambda);
 
@@ -1842,9 +1867,9 @@ wpupdate(xmachine_memory_Workplace *workplace,
   }
 
   workplace->lambda =
-      (workplace->lambda * device_exp(-WORKPLACE_A * (TIME_STEP / 12))) +
+      (workplace->lambda * WORKPLACE_EXP) +
       ((qsum / (WORKPLACE_V * WORKPLACE_A)) *
-       (1 - device_exp(-WORKPLACE_A * (TIME_STEP / 12))));
+       (1 - WORKPLACE_EXP));
 
   add_workplace_infection_message(infection_messages, workplace->id,
                         workplace->lambda);
@@ -1875,8 +1900,8 @@ bupdate(xmachine_memory_Bar *bar,
   }
 
   bar->lambda =
-      (bar->lambda * device_exp(-BAR_A * (TIME_STEP / 12))) +
-      ((qsum / (BAR_V * BAR_A)) * (1 - device_exp(-BAR_A * (TIME_STEP / 12))));
+      (bar->lambda * BAR_EXP) +
+      ((qsum / (BAR_V * BAR_A)) * (1 - BAR_EXP));
 
   add_bar_infection_message(infection_messages, bar->id, bar->lambda);
 
@@ -1905,9 +1930,9 @@ schupdate(xmachine_memory_School *school,
         get_next_location_message(location_message, location_messages);
   }
 
-  school->lambda = (school->lambda * device_exp(-SCHOOL_A * (TIME_STEP / 12))) +
+  school->lambda = (school->lambda * SCHOOL_EXP) +
                    ((qsum / (SCHOOL_V * SCHOOL_A)) *
-                    (1 - device_exp(-SCHOOL_A * (TIME_STEP / 12))));
+                    (1 - SCHOOL_EXP));
 
   add_school_infection_message(infection_messages, school->id, school->lambda);
 

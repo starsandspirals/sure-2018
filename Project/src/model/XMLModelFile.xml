@@ -340,6 +340,46 @@
         <name>SEED</name>
         <defaultValue>0</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>HOUSEHOLD_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CHURCH_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>TRANSPORT_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CLINIC_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>WORKPLACE_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>SCHOOL_EXP</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>PROB</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->
@@ -516,10 +556,6 @@
         <gpu:variable>
           <type>int</type>
           <name>lastinfectedid</name>
-        </gpu:variable>
-        <gpu:variable>
-          <type>float</type>
-          <name>time_step</name>
         </gpu:variable>
         <gpu:variable>
           <type>float</type>
