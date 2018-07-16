@@ -1187,7 +1187,7 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
             outputFilename.c_str());
 
     fprintf(fp, "ID, gender, age, household_size, household, church, "
-                "workplace, hiv, art, "
+                "workplace, school, hiv, art, "
                 "active_tb, "
                 "time_home, time_visiting, time_church, "
                 "time_transport, time_clinic, time_workplace, time_bar, "
@@ -1199,33 +1199,35 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
-      fprintf(
-          fp,
-          "%u, %u, %u, %u, %u, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, "
-          "%u, %u, "
-          "%u, %i, "
-          "%i\n",
-          get_Person_s2_variable_id(index),
-          get_Person_s2_variable_gender(index),
-          get_Person_s2_variable_age(index),
-          get_Person_s2_variable_householdsize(index),
-          get_Person_s2_variable_household(index),
-          get_Person_s2_variable_church(index),
-          get_Person_s2_variable_workplace(index),
-          get_Person_s2_variable_hiv(index), get_Person_s2_variable_art(index),
-          get_Person_s2_variable_activetb(index),
-          get_Person_s2_variable_householdtime(index),
-          get_Person_s2_variable_timevisiting(index),
-          get_Person_s2_variable_churchtime(index),
-          get_Person_s2_variable_transporttime(index),
-          get_Person_s2_variable_clinictime(index),
-          get_Person_s2_variable_workplacetime(index),
-          get_Person_s2_variable_bartime(index),
-          get_Person_s2_variable_schooltime(index),
-          get_Person_s2_variable_outsidetime(index),
-          get_Person_s2_variable_infections(index),
-          get_Person_s2_variable_lastinfected(index),
-          get_Person_s2_variable_lastinfectedid(index));
+      fprintf(fp,
+              "%u, %u, %u, %u, %u, %i, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, "
+              "%u, %u, "
+              "%u, %u, "
+              "%u, %i, "
+              "%i\n",
+              get_Person_s2_variable_id(index),
+              get_Person_s2_variable_gender(index),
+              get_Person_s2_variable_age(index),
+              get_Person_s2_variable_householdsize(index),
+              get_Person_s2_variable_household(index),
+              get_Person_s2_variable_church(index),
+              get_Person_s2_variable_workplace(index),
+              get_Person_s2_variable_school(index),
+              get_Person_s2_variable_hiv(index),
+              get_Person_s2_variable_art(index),
+              get_Person_s2_variable_activetb(index),
+              get_Person_s2_variable_householdtime(index),
+              get_Person_s2_variable_timevisiting(index),
+              get_Person_s2_variable_churchtime(index),
+              get_Person_s2_variable_transporttime(index),
+              get_Person_s2_variable_clinictime(index),
+              get_Person_s2_variable_workplacetime(index),
+              get_Person_s2_variable_bartime(index),
+              get_Person_s2_variable_schooltime(index),
+              get_Person_s2_variable_outsidetime(index),
+              get_Person_s2_variable_infections(index),
+              get_Person_s2_variable_lastinfected(index),
+              get_Person_s2_variable_lastinfectedid(index));
     }
 
     fflush(fp);
@@ -1388,7 +1390,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
         person->locationid = person->household;
       }
     }
-    else if (person->school != -1 && hour == 9 && hour == 0)
+    else if (person->school != -1 && hour == 9 && minute == 0)
     {
       person->startstep = person->step;
       person->busy = 1;
@@ -1446,7 +1448,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->locationid = person->household;
     }
     else if (person->location == 6 &&
-             (float)(person->step - person->startstep) >= 96)
+             (float)(person->step - person->startstep) >= 72)
     {
       person->busy = 0;
       person->location = 7;
@@ -1529,7 +1531,6 @@ updatelambda(xmachine_memory_Person *person,
         get_next_infection_message(infection_message, infection_messages);
   }
 
-  person->step += person->time_step;
   return 0;
 }
 

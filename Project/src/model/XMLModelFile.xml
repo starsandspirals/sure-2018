@@ -1575,11 +1575,11 @@
       </gpu:layerFunction>
     </layer>
 
-    <layer>
+    <!-- <layer>
       <gpu:layerFunction>
         <name>updatelambda</name>
       </gpu:layerFunction>
-    </layer>
+    </layer> -->
 
     <layer>
       <gpu:layerFunction>
@@ -1627,6 +1627,12 @@
     <layer>
       <gpu:layerFunction>
         <name>schinit</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>personschinit</name>
       </gpu:layerFunction>
     </layer>
 
