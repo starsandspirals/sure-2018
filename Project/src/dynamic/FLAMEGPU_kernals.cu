@@ -281,6 +281,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 			nextState->timevisiting[index] = currentState->timevisiting[index];
 			nextState->bargoing[index] = currentState->bargoing[index];
 			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
 			//set scan input flag to 1
 			nextState->_scan_input[index] = 1;
 		}
@@ -463,7 +464,8 @@ __global__ void scatter_Person_Agents(xmachine_memory_Person_list* agents_dst, x
 		agents_dst->lambda[output_index] = agents_src->lambda[index];        
 		agents_dst->timevisiting[output_index] = agents_src->timevisiting[index];        
 		agents_dst->bargoing[output_index] = agents_src->bargoing[index];        
-		agents_dst->barday[output_index] = agents_src->barday[index];
+		agents_dst->barday[output_index] = agents_src->barday[index];        
+		agents_dst->schooltime[output_index] = agents_src->schooltime[index];
 	}
 }
 
@@ -523,6 +525,7 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
 	    agents_dst->timevisiting[output_index] = agents_src->timevisiting[index];
 	    agents_dst->bargoing[output_index] = agents_src->bargoing[index];
 	    agents_dst->barday[output_index] = agents_src->barday[index];
+	    agents_dst->schooltime[output_index] = agents_src->schooltime[index];
     }
 }
 
@@ -569,9 +572,10 @@ __global__ void append_Person_Agents(xmachine_memory_Person_list* agents_dst, xm
  * @param timevisiting agent variable of type unsigned int
  * @param bargoing agent variable of type unsigned int
  * @param barday agent variable of type unsigned int
+ * @param schooltime agent variable of type unsigned int
  */
 template <int AGENT_TYPE>
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime){
 	
 	int index;
     
@@ -630,12 +634,13 @@ __device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned i
 	agents->timevisiting[index] = timevisiting;
 	agents->bargoing[index] = bargoing;
 	agents->barday[index] = barday;
+	agents->schooltime[index] = schooltime;
 
 }
 
 //non templated version assumes DISCRETE_2D but works also for CONTINUOUS
-__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday){
-    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, workplacetime, bartime, outsidetime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, workplace, school, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda, timevisiting, bargoing, barday);
+__device__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float time_step, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime){
+    add_Person_agent<DISCRETE_2D>(agents, id, step, householdtime, churchtime, transporttime, clinictime, workplacetime, bartime, outsidetime, age, gender, householdsize, churchfreq, churchdur, transportdur, transportday1, transportday2, household, church, transport, workplace, school, busy, startstep, location, locationid, hiv, art, activetb, artday, p, q, infections, lastinfected, lastinfectedid, time_step, lambda, timevisiting, bargoing, barday, schooltime);
 }
 
 /** reorder_Person_agents
@@ -691,6 +696,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 	ordered_agents->timevisiting[index] = unordered_agents->timevisiting[old_pos];
 	ordered_agents->bargoing[index] = unordered_agents->bargoing[old_pos];
 	ordered_agents->barday[index] = unordered_agents->barday[old_pos];
+	ordered_agents->schooltime[index] = unordered_agents->schooltime[old_pos];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3559,6 +3565,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 
 	//FLAME function call
 	int dead = !update(&agent, location_messages	, rand48);
@@ -3608,6 +3615,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 }
 
 /**
@@ -3667,6 +3675,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -3709,6 +3718,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -3762,6 +3772,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 
@@ -3823,6 +3834,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 
 	//FLAME function call
 	int dead = !infect(&agent, rand48);
@@ -3872,6 +3884,7 @@ __global__ void GPUFLAME_infect(xmachine_memory_Person_list* agents, RNG_rand48*
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 }
 
 /**
@@ -3931,6 +3944,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -3973,6 +3987,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -4026,6 +4041,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 
@@ -4086,6 +4102,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -4128,6 +4145,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -4181,6 +4199,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 
@@ -4241,6 +4260,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -4283,6 +4303,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -4336,6 +4357,7 @@ __global__ void GPUFLAME_persontrinit(xmachine_memory_Person_list* agents, xmach
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 
@@ -4396,6 +4418,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -4438,6 +4461,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -4491,6 +4515,7 @@ __global__ void GPUFLAME_personwpinit(xmachine_memory_Person_list* agents, xmach
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 
@@ -4551,6 +4576,7 @@ __global__ void GPUFLAME_personschinit(xmachine_memory_Person_list* agents, xmac
 	agent.timevisiting = agents->timevisiting[index];
 	agent.bargoing = agents->bargoing[index];
 	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
 	} else {
 	
 	agent.id = 0;
@@ -4593,6 +4619,7 @@ __global__ void GPUFLAME_personschinit(xmachine_memory_Person_list* agents, xmac
 	agent.timevisiting = 0;
 	agent.bargoing = 0;
 	agent.barday = 0;
+	agent.schooltime = 0;
 	}
 
 	//FLAME function call
@@ -4646,6 +4673,7 @@ __global__ void GPUFLAME_personschinit(xmachine_memory_Person_list* agents, xmac
 	agents->timevisiting[index] = agent.timevisiting;
 	agents->bargoing[index] = agent.bargoing;
 	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
 	}
 }
 

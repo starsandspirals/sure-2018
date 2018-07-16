@@ -698,6 +698,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</barday>\n", file);
         
+		fputs("<schooltime>", file);
+        sprintf(data, "%u", h_Persons_default->schooltime[i]);
+		fputs(data, file);
+		fputs("</schooltime>\n", file);
+        
 		fputs("</xagent>\n", file);
 	}
 	//Write each Person agent to xml
@@ -904,6 +909,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%u", h_Persons_s2->barday[i]);
 		fputs(data, file);
 		fputs("</barday>\n", file);
+        
+		fputs("<schooltime>", file);
+        sprintf(data, "%u", h_Persons_s2->schooltime[i]);
+		fputs(data, file);
+		fputs("</schooltime>\n", file);
         
 		fputs("</xagent>\n", file);
 	}
@@ -1375,6 +1385,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_timevisiting;
     int in_Person_bargoing;
     int in_Person_barday;
+    int in_Person_schooltime;
     int in_TBAssignment_id;
     int in_Household_id;
     int in_Household_lambda;
@@ -1601,6 +1612,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_timevisiting;
 	unsigned int Person_bargoing;
 	unsigned int Person_barday;
+	unsigned int Person_schooltime;
 	unsigned int TBAssignment_id;
 	unsigned int Household_id;
 	float Household_lambda;
@@ -1760,6 +1772,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_timevisiting = 0;
 	in_Person_bargoing = 0;
 	in_Person_barday = 0;
+	in_Person_schooltime = 0;
 	in_TBAssignment_id = 0;
 	in_Household_id = 0;
 	in_Household_lambda = 0;
@@ -1904,6 +1917,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->timevisiting[k] = 0;
 		h_Persons->bargoing[k] = 0;
 		h_Persons->barday[k] = 0;
+		h_Persons->schooltime[k] = 0;
 	}
 	
 	//set all TBAssignment values to 0
@@ -2060,6 +2074,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_timevisiting = 0;
     Person_bargoing = 0;
     Person_barday = 0;
+    Person_schooltime = 0;
     TBAssignment_id = 0;
     Household_id = 0;
     Household_lambda = 0;
@@ -2263,6 +2278,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->timevisiting[*h_xmachine_memory_Person_count] = Person_timevisiting;
 					h_Persons->bargoing[*h_xmachine_memory_Person_count] = Person_bargoing;
 					h_Persons->barday[*h_xmachine_memory_Person_count] = Person_barday;
+					h_Persons->schooltime[*h_xmachine_memory_Person_count] = Person_schooltime;
 					(*h_xmachine_memory_Person_count) ++;	
 				}
 				else if(strcmp(agentname, "TBAssignment") == 0)
@@ -2490,6 +2506,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_timevisiting = 0;
                 Person_bargoing = 0;
                 Person_barday = 0;
+                Person_schooltime = 0;
                 TBAssignment_id = 0;
                 Household_id = 0;
                 Household_lambda = 0;
@@ -2607,6 +2624,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/bargoing") == 0) in_Person_bargoing = 0;
 			if(strcmp(buffer, "barday") == 0) in_Person_barday = 1;
 			if(strcmp(buffer, "/barday") == 0) in_Person_barday = 0;
+			if(strcmp(buffer, "schooltime") == 0) in_Person_schooltime = 1;
+			if(strcmp(buffer, "/schooltime") == 0) in_Person_schooltime = 0;
 			if(strcmp(buffer, "id") == 0) in_TBAssignment_id = 1;
 			if(strcmp(buffer, "/id") == 0) in_TBAssignment_id = 0;
 			if(strcmp(buffer, "id") == 0) in_Household_id = 1;
@@ -2946,6 +2965,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_barday){
                     Person_barday = (unsigned int) fpgu_strtoul(buffer); 
+                }
+				if(in_Person_schooltime){
+                    Person_schooltime = (unsigned int) fpgu_strtoul(buffer); 
                 }
 				if(in_TBAssignment_id){
                     TBAssignment_id = (unsigned int) fpgu_strtoul(buffer); 

@@ -532,6 +532,10 @@
           <type>unsigned int</type>
           <name>barday</name>
         </gpu:variable>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>schooltime</name>
+        </gpu:variable>
       </memory>
 
       <!-- Functions belonging to the agent -->
