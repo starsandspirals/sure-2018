@@ -559,14 +559,149 @@
           <gpu:RNG>true</gpu:RNG>
         </gpu:function>
         <gpu:function>
-          <name>updatelambda</name>
+          <name>updatelambdahh</name>
           <currentState>s2</currentState>
           <nextState>s2</nextState>
           <inputs>
             <gpu:input>
-              <messageName>infection</messageName>
+              <messageName>household_infection</messageName>
             </gpu:input>
           </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>0</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdachu</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>church_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>1</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdatr</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>transport_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>2</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdacl</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>clinic_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>3</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdawp</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>workplace_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>4</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdab</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>bar_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>5</value>
+            </rhs>
+          </condition>
+          <gpu:reallocate>false</gpu:reallocate>
+          <gpu:RNG>false</gpu:RNG>
+        </gpu:function>
+        <gpu:function>
+          <name>updatelambdasch</name>
+          <currentState>s2</currentState>
+          <nextState>s2</nextState>
+          <inputs>
+            <gpu:input>
+              <messageName>school_infection</messageName>
+            </gpu:input>
+          </inputs>
+          <condition>
+            <lhs>
+              <agentVariable>location</agentVariable>
+            </lhs>
+            <operator>==</operator>
+            <rhs>
+              <value>6</value>
+            </rhs>
+          </condition>
           <gpu:reallocate>false</gpu:reallocate>
           <gpu:RNG>false</gpu:RNG>
         </gpu:function>
@@ -774,7 +909,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>household_infection</messageName>
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -897,7 +1032,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>church_infection</messageName>
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1003,7 +1138,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>transport_infection</messageName>
               <gpu:type>single_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1105,7 +1240,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>clinic_infection</messageName>
               <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1152,7 +1287,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>workplace_infection</messageName>
               <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1241,7 +1376,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>bar_infection</messageName>
               <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1288,7 +1423,7 @@
           </inputs>
           <outputs>
             <gpu:output>
-              <messageName>infection</messageName>
+              <messageName>school_infection</messageName>
               <gpu:type>optional_message</gpu:type>
             </gpu:output>
           </outputs>
@@ -1508,13 +1643,9 @@
     </gpu:message>
 
     <gpu:message>
-      <name>infection</name>
+      <name>household_infection</name>
       <description>A message containing the lambda value for a given location at a given time</description>
       <variables>
-        <gpu:variable>
-          <type>unsigned int</type>
-          <name>location</name>
-        </gpu:variable>
         <gpu:variable>
           <type>unsigned int</type>
           <name>locationid</name>
@@ -1525,7 +1656,109 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>church_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>256</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>transport_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>2048</gpu:bufferSize>
+    </gpu:message>
+
+   <gpu:message>
+      <name>clinic_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>2</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>workplace_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>8192</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>bar_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>4096</gpu:bufferSize>
+    </gpu:message>
+
+    <gpu:message>
+      <name>school_infection</name>
+      <description>A message containing the lambda value for a given location at a given time</description>
+      <variables>
+        <gpu:variable>
+          <type>unsigned int</type>
+          <name>locationid</name>
+        </gpu:variable>
+        <gpu:variable>
+          <type>float</type>
+          <name>lambda</name>
+        </gpu:variable>
+      </variables>
+      <gpu:partitioningNone/>
+      <gpu:bufferSize>2048</gpu:bufferSize>
     </gpu:message>
 
   </messages>
@@ -1580,11 +1813,47 @@
       </gpu:layerFunction>
     </layer>
 
-    <!-- <layer>
+    <layer>
       <gpu:layerFunction>
-        <name>updatelambda</name>
+        <name>updatelambdahh</name>
       </gpu:layerFunction>
-    </layer> -->
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdachu</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdatr</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdacl</name>
+      </gpu:layerFunction>
+    </layer>
+   
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdawp</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdab</name>
+      </gpu:layerFunction>
+    </layer>
+
+    <layer>
+      <gpu:layerFunction>
+        <name>updatelambdasch</name>
+      </gpu:layerFunction>
+    </layer>
 
     <layer>
       <gpu:layerFunction>

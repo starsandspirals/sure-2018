@@ -1520,24 +1520,154 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
 }
 
 __FLAME_GPU_FUNC__ int
-updatelambda(xmachine_memory_Person *person,
-             xmachine_message_infection_list *infection_messages)
+updatelambdahh(xmachine_memory_Person *person,
+               xmachine_message_household_infection_list *infection_messages)
 {
 
-  xmachine_message_infection *infection_message =
-      get_first_infection_message(infection_messages);
-  unsigned int location = person->location;
+  xmachine_message_household_infection *infection_message =
+      get_first_household_infection_message(infection_messages);
   unsigned int locationid = person->locationid;
 
   while (infection_message)
   {
-    if (location == infection_message->location &&
-        locationid == infection_message->locationid)
+    if (locationid == infection_message->locationid)
     {
       person->lambda = infection_message->lambda;
     }
     infection_message =
-        get_next_infection_message(infection_message, infection_messages);
+        get_next_household_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdachu(xmachine_memory_Person *person,
+               xmachine_message_church_infection_list *infection_messages)
+{
+
+  xmachine_message_church_infection *infection_message =
+      get_first_church_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_church_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdatr(xmachine_memory_Person *person,
+               xmachine_message_transport_infection_list *infection_messages)
+{
+
+  xmachine_message_transport_infection *infection_message =
+      get_first_transport_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_transport_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdacl(xmachine_memory_Person *person,
+               xmachine_message_clinic_infection_list *infection_messages)
+{
+
+  xmachine_message_clinic_infection *infection_message =
+      get_first_clinic_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_clinic_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdawp(xmachine_memory_Person *person,
+               xmachine_message_workplace_infection_list *infection_messages)
+{
+
+  xmachine_message_workplace_infection *infection_message =
+      get_first_workplace_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_workplace_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdab(xmachine_memory_Person *person,
+               xmachine_message_bar_infection_list *infection_messages)
+{
+
+  xmachine_message_bar_infection *infection_message =
+      get_first_bar_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_bar_infection_message(infection_message, infection_messages);
+  }
+
+  return 0;
+}
+
+__FLAME_GPU_FUNC__ int
+updatelambdasch(xmachine_memory_Person *person,
+               xmachine_message_school_infection_list *infection_messages)
+{
+
+  xmachine_message_school_infection *infection_message =
+      get_first_school_infection_message(infection_messages);
+  unsigned int locationid = person->locationid;
+
+  while (infection_message)
+  {
+    if (locationid == infection_message->locationid)
+    {
+      person->lambda = infection_message->lambda;
+    }
+    infection_message =
+        get_next_school_infection_message(infection_message, infection_messages);
   }
 
   return 0;
@@ -1564,7 +1694,7 @@ __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
 __FLAME_GPU_FUNC__ int
 hhupdate(xmachine_memory_Household *household,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages)
+         xmachine_message_household_infection_list *infection_messages)
 {
 
   float qsum = 0.0;
@@ -1588,7 +1718,7 @@ hhupdate(xmachine_memory_Household *household,
       ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
        (1 - device_exp(-HOUSEHOLD_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 0, household->id,
+  add_household_infection_message(infection_messages, household->id,
                         household->lambda);
 
   return 0;
@@ -1597,7 +1727,7 @@ hhupdate(xmachine_memory_Household *household,
 __FLAME_GPU_FUNC__ int
 chuupdate(xmachine_memory_Church *church,
           xmachine_message_location_list *location_messages,
-          xmachine_message_infection_list *infection_messages)
+          xmachine_message_church_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1620,7 +1750,7 @@ chuupdate(xmachine_memory_Church *church,
                    ((qsum / (CHURCH_V_MULTIPLIER * church->size * CHURCH_A)) *
                     (1 - device_exp(-CHURCH_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 1, church->id, church->lambda);
+  add_church_infection_message(infection_messages, church->id, church->lambda);
 
   return 0;
 }
@@ -1628,7 +1758,7 @@ chuupdate(xmachine_memory_Church *church,
 __FLAME_GPU_FUNC__ int
 trupdate(xmachine_memory_Transport *transport,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages)
+         xmachine_message_transport_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1652,7 +1782,7 @@ trupdate(xmachine_memory_Transport *transport,
       ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
        (1 - device_exp(-TRANSPORT_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 2, transport->id,
+  add_transport_infection_message(infection_messages, transport->id,
                         transport->lambda);
 
   return 0;
@@ -1661,7 +1791,7 @@ trupdate(xmachine_memory_Transport *transport,
 __FLAME_GPU_FUNC__ int
 clupdate(xmachine_memory_Clinic *clinic,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages)
+         xmachine_message_clinic_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1684,7 +1814,7 @@ clupdate(xmachine_memory_Clinic *clinic,
                    ((qsum / (CLINIC_V * CLINIC_A)) *
                     (1 - device_exp(-CLINIC_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 3, clinic->id, clinic->lambda);
+  add_clinic_infection_message(infection_messages, clinic->id, clinic->lambda);
 
   return 0;
 }
@@ -1692,7 +1822,7 @@ clupdate(xmachine_memory_Clinic *clinic,
 __FLAME_GPU_FUNC__ int
 wpupdate(xmachine_memory_Workplace *workplace,
          xmachine_message_location_list *location_messages,
-         xmachine_message_infection_list *infection_messages)
+         xmachine_message_workplace_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1716,7 +1846,7 @@ wpupdate(xmachine_memory_Workplace *workplace,
       ((qsum / (WORKPLACE_V * WORKPLACE_A)) *
        (1 - device_exp(-WORKPLACE_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 4, workplace->id,
+  add_workplace_infection_message(infection_messages, workplace->id,
                         workplace->lambda);
 
   return 0;
@@ -1725,7 +1855,7 @@ wpupdate(xmachine_memory_Workplace *workplace,
 __FLAME_GPU_FUNC__ int
 bupdate(xmachine_memory_Bar *bar,
         xmachine_message_location_list *location_messages,
-        xmachine_message_infection_list *infection_messages)
+        xmachine_message_bar_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1748,7 +1878,7 @@ bupdate(xmachine_memory_Bar *bar,
       (bar->lambda * device_exp(-BAR_A * (TIME_STEP / 12))) +
       ((qsum / (BAR_V * BAR_A)) * (1 - device_exp(-BAR_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 5, bar->id, bar->lambda);
+  add_bar_infection_message(infection_messages, bar->id, bar->lambda);
 
   return 0;
 }
@@ -1756,7 +1886,7 @@ bupdate(xmachine_memory_Bar *bar,
 __FLAME_GPU_FUNC__ int
 schupdate(xmachine_memory_School *school,
           xmachine_message_location_list *location_messages,
-          xmachine_message_infection_list *infection_messages)
+          xmachine_message_school_infection_list *infection_messages)
 {
 
   float qsum = 0;
@@ -1779,7 +1909,7 @@ schupdate(xmachine_memory_School *school,
                    ((qsum / (SCHOOL_V * SCHOOL_A)) *
                     (1 - device_exp(-SCHOOL_A * (TIME_STEP / 12))));
 
-  add_infection_message(infection_messages, 5, school->id, school->lambda);
+  add_school_infection_message(infection_messages, school->id, school->lambda);
 
   return 0;
 }
@@ -1891,9 +2021,9 @@ __FLAME_GPU_FUNC__ int personschinit(
     xmachine_memory_Person *person,
     xmachine_message_school_membership_list *school_membership_messages)
 {
-  // unsigned int personid = person->id;
+  unsigned int personid = person->id;
   person->school = -1;
-  /* xmachine_message_school_membership *school_membership_message =
+  xmachine_message_school_membership *school_membership_message =
       get_first_school_membership_message(school_membership_messages);
 
   while (school_membership_message)
@@ -1904,7 +2034,7 @@ __FLAME_GPU_FUNC__ int personschinit(
     }
     school_membership_message = get_next_school_membership_message(
         school_membership_message, school_membership_messages);
-  } */
+  } 
 
   return 0;
 }

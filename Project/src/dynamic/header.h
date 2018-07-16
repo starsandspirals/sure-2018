@@ -124,8 +124,26 @@ typedef glm::dvec4 dvec4;
 //Maximum population size of xmachine_mmessage_location
 #define xmachine_message_location_MAX 32768
 
-//Maximum population size of xmachine_mmessage_infection
-#define xmachine_message_infection_MAX 32768
+//Maximum population size of xmachine_mmessage_household_infection
+#define xmachine_message_household_infection_MAX 8192
+
+//Maximum population size of xmachine_mmessage_church_infection
+#define xmachine_message_church_infection_MAX 256
+
+//Maximum population size of xmachine_mmessage_transport_infection
+#define xmachine_message_transport_infection_MAX 2048
+
+//Maximum population size of xmachine_mmessage_clinic_infection
+#define xmachine_message_clinic_infection_MAX 2
+
+//Maximum population size of xmachine_mmessage_workplace_infection
+#define xmachine_message_workplace_infection_MAX 8192
+
+//Maximum population size of xmachine_mmessage_bar_infection
+#define xmachine_message_bar_infection_MAX 4096
+
+//Maximum population size of xmachine_mmessage_school_infection
+#define xmachine_message_school_infection_MAX 2048
 
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
@@ -137,7 +155,13 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_workplace_membership_partitioningNone
 #define xmachine_message_school_membership_partitioningNone
 #define xmachine_message_location_partitioningNone
-#define xmachine_message_infection_partitioningNone
+#define xmachine_message_household_infection_partitioningNone
+#define xmachine_message_church_infection_partitioningNone
+#define xmachine_message_transport_infection_partitioningNone
+#define xmachine_message_clinic_infection_partitioningNone
+#define xmachine_message_workplace_infection_partitioningNone
+#define xmachine_message_bar_infection_partitioningNone
+#define xmachine_message_school_infection_partitioningNone
 
 /* Spatial partitioning grid size definitions */
   
@@ -465,16 +489,93 @@ struct __align__(16) xmachine_message_location
     float q;        /**< Message variable q of type float.*/
 };
 
-/** struct xmachine_message_infection
+/** struct xmachine_message_household_infection
  * Brute force: No Partitioning
  * Holds all message variables and is aligned to help with coalesced reads on the GPU
  */
-struct __align__(16) xmachine_message_infection
+struct __align__(16) xmachine_message_household_infection
 {	
     /* Brute force Partitioning Variables */
     int _position;          /**< 1D position of message in linear message list */   
       
-    unsigned int location;        /**< Message variable location of type unsigned int.*/  
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_church_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_church_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_transport_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_transport_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_clinic_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_clinic_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_workplace_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_workplace_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_bar_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_bar_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
+    unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
+    float lambda;        /**< Message variable lambda of type float.*/
+};
+
+/** struct xmachine_message_school_infection
+ * Brute force: No Partitioning
+ * Holds all message variables and is aligned to help with coalesced reads on the GPU
+ */
+struct __align__(16) xmachine_message_school_infection
+{	
+    /* Brute force Partitioning Variables */
+    int _position;          /**< 1D position of message in linear message list */   
+      
     unsigned int locationid;        /**< Message variable locationid of type unsigned int.*/  
     float lambda;        /**< Message variable lambda of type float.*/
 };
@@ -843,19 +944,108 @@ struct xmachine_message_location_list
     
 };
 
-/** struct xmachine_message_infection_list
+/** struct xmachine_message_household_infection_list
  * Brute force: No Partitioning
  * Structure of Array for memory coalescing 
  */
-struct xmachine_message_infection_list
+struct xmachine_message_household_infection_list
 {
     /* Non discrete messages have temp variables used for reductions with optional message outputs */
-    int _position [xmachine_message_infection_MAX];    /**< Holds agents position in the 1D agent list */
-    int _scan_input [xmachine_message_infection_MAX];  /**< Used during parallel prefix sum */
+    int _position [xmachine_message_household_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_household_infection_MAX];  /**< Used during parallel prefix sum */
     
-    unsigned int location [xmachine_message_infection_MAX];    /**< Message memory variable list location of type unsigned int.*/
-    unsigned int locationid [xmachine_message_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
-    float lambda [xmachine_message_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    unsigned int locationid [xmachine_message_household_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_household_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_church_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_church_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_church_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_church_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_church_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_church_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_transport_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_transport_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_transport_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_transport_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_transport_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_transport_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_clinic_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_clinic_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_clinic_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_clinic_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_clinic_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_clinic_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_workplace_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_workplace_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_workplace_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_workplace_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_workplace_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_workplace_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_bar_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_bar_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_bar_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_bar_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_bar_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_bar_infection_MAX];    /**< Message memory variable list lambda of type float.*/
+    
+};
+
+/** struct xmachine_message_school_infection_list
+ * Brute force: No Partitioning
+ * Structure of Array for memory coalescing 
+ */
+struct xmachine_message_school_infection_list
+{
+    /* Non discrete messages have temp variables used for reductions with optional message outputs */
+    int _position [xmachine_message_school_infection_MAX];    /**< Holds agents position in the 1D agent list */
+    int _scan_input [xmachine_message_school_infection_MAX];  /**< Used during parallel prefix sum */
+    
+    unsigned int locationid [xmachine_message_school_infection_MAX];    /**< Message memory variable list locationid of type unsigned int.*/
+    float lambda [xmachine_message_school_infection_MAX];    /**< Message memory variable list lambda of type float.*/
     
 };
 
@@ -909,11 +1099,53 @@ __FLAME_GPU_FUNC__ float rnd(RNG_rand48* rand48);
 __FLAME_GPU_FUNC__ int update(xmachine_memory_Person* agent, xmachine_message_location_list* location_messages, RNG_rand48* rand48);
 
 /**
- * updatelambda FLAMEGPU Agent Function
+ * updatelambdahh FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
- * @param infection_messages  infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_infection_message and get_next_infection_message functions.
+ * @param household_infection_messages  household_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_household_infection_message and get_next_household_infection_message functions.
  */
-__FLAME_GPU_FUNC__ int updatelambda(xmachine_memory_Person* agent, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int updatelambdahh(xmachine_memory_Person* agent, xmachine_message_household_infection_list* household_infection_messages);
+
+/**
+ * updatelambdachu FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param church_infection_messages  church_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_church_infection_message and get_next_church_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdachu(xmachine_memory_Person* agent, xmachine_message_church_infection_list* church_infection_messages);
+
+/**
+ * updatelambdatr FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param transport_infection_messages  transport_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_transport_infection_message and get_next_transport_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdatr(xmachine_memory_Person* agent, xmachine_message_transport_infection_list* transport_infection_messages);
+
+/**
+ * updatelambdacl FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param clinic_infection_messages  clinic_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_clinic_infection_message and get_next_clinic_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdacl(xmachine_memory_Person* agent, xmachine_message_clinic_infection_list* clinic_infection_messages);
+
+/**
+ * updatelambdawp FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param workplace_infection_messages  workplace_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_workplace_infection_message and get_next_workplace_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdawp(xmachine_memory_Person* agent, xmachine_message_workplace_infection_list* workplace_infection_messages);
+
+/**
+ * updatelambdab FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param bar_infection_messages  bar_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_bar_infection_message and get_next_bar_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdab(xmachine_memory_Person* agent, xmachine_message_bar_infection_list* bar_infection_messages);
+
+/**
+ * updatelambdasch FLAMEGPU Agent Function
+ * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
+ * @param school_infection_messages  school_infection_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_school_infection_message and get_next_school_infection_message functions.
+ */
+__FLAME_GPU_FUNC__ int updatelambdasch(xmachine_memory_Person* agent, xmachine_message_school_infection_list* school_infection_messages);
 
 /**
  * infect FLAMEGPU Agent Function
@@ -967,9 +1199,9 @@ __FLAME_GPU_FUNC__ int tbinit(xmachine_memory_TBAssignment* agent, xmachine_mess
 /**
  * hhupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Household. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param household_infection_messages Pointer to output message list of type xmachine_message_household_infection_list. Must be passed as an argument to the add_household_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int hhupdate(xmachine_memory_Household* agent, xmachine_message_location_list* location_messages, xmachine_message_household_infection_list* household_infection_messages);
 
 /**
  * hhinit FLAMEGPU Agent Function
@@ -981,9 +1213,9 @@ __FLAME_GPU_FUNC__ int hhinit(xmachine_memory_HouseholdMembership* agent, xmachi
 /**
  * chuupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Church. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param church_infection_messages Pointer to output message list of type xmachine_message_church_infection_list. Must be passed as an argument to the add_church_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int chuupdate(xmachine_memory_Church* agent, xmachine_message_location_list* location_messages, xmachine_message_church_infection_list* church_infection_messages);
 
 /**
  * chuinit FLAMEGPU Agent Function
@@ -995,9 +1227,9 @@ __FLAME_GPU_FUNC__ int chuinit(xmachine_memory_ChurchMembership* agent, xmachine
 /**
  * trupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Transport. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param transport_infection_messages Pointer to output message list of type xmachine_message_transport_infection_list. Must be passed as an argument to the add_transport_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int trupdate(xmachine_memory_Transport* agent, xmachine_message_location_list* location_messages, xmachine_message_transport_infection_list* transport_infection_messages);
 
 /**
  * trinit FLAMEGPU Agent Function
@@ -1009,16 +1241,16 @@ __FLAME_GPU_FUNC__ int trinit(xmachine_memory_TransportMembership* agent, xmachi
 /**
  * clupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Clinic. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param clinic_infection_messages Pointer to output message list of type xmachine_message_clinic_infection_list. Must be passed as an argument to the add_clinic_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int clupdate(xmachine_memory_Clinic* agent, xmachine_message_location_list* location_messages, xmachine_message_clinic_infection_list* clinic_infection_messages);
 
 /**
  * wpupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Workplace. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param workplace_infection_messages Pointer to output message list of type xmachine_message_workplace_infection_list. Must be passed as an argument to the add_workplace_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int wpupdate(xmachine_memory_Workplace* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int wpupdate(xmachine_memory_Workplace* agent, xmachine_message_location_list* location_messages, xmachine_message_workplace_infection_list* workplace_infection_messages);
 
 /**
  * wpinit FLAMEGPU Agent Function
@@ -1030,16 +1262,16 @@ __FLAME_GPU_FUNC__ int wpinit(xmachine_memory_WorkplaceMembership* agent, xmachi
 /**
  * bupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Bar. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param bar_infection_messages Pointer to output message list of type xmachine_message_bar_infection_list. Must be passed as an argument to the add_bar_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int bupdate(xmachine_memory_Bar* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int bupdate(xmachine_memory_Bar* agent, xmachine_message_location_list* location_messages, xmachine_message_bar_infection_list* bar_infection_messages);
 
 /**
  * schupdate FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_School. This represents a single agent instance and can be modified directly.
- * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param infection_messages Pointer to output message list of type xmachine_message_infection_list. Must be passed as an argument to the add_infection_message function ??.
+ * @param location_messages  location_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_location_message and get_next_location_message functions.* @param school_infection_messages Pointer to output message list of type xmachine_message_school_infection_list. Must be passed as an argument to the add_school_infection_message function ??.
  */
-__FLAME_GPU_FUNC__ int schupdate(xmachine_memory_School* agent, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ int schupdate(xmachine_memory_School* agent, xmachine_message_location_list* location_messages, xmachine_message_school_infection_list* school_infection_messages);
 
 /**
  * schinit FLAMEGPU Agent Function
@@ -1253,33 +1485,200 @@ __FLAME_GPU_FUNC__ xmachine_message_location * get_first_location_message(xmachi
 __FLAME_GPU_FUNC__ xmachine_message_location * get_next_location_message(xmachine_message_location* current, xmachine_message_location_list* location_messages);
 
   
-/* Message Function Prototypes for Brute force (No Partitioning) infection message implemented in FLAMEGPU_Kernels */
+/* Message Function Prototypes for Brute force (No Partitioning) household_infection message implemented in FLAMEGPU_Kernels */
 
-/** add_infection_message
+/** add_household_infection_message
  * Function for all types of message partitioning
- * Adds a new infection agent to the xmachine_memory_infection_list list using a linear mapping
- * @param agents	xmachine_memory_infection_list agent list
- * @param location	message variable of type unsigned int
+ * Adds a new household_infection agent to the xmachine_memory_household_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_household_infection_list agent list
  * @param locationid	message variable of type unsigned int
  * @param lambda	message variable of type float
  */
  
- __FLAME_GPU_FUNC__ void add_infection_message(xmachine_message_infection_list* infection_messages, unsigned int location, unsigned int locationid, float lambda);
+ __FLAME_GPU_FUNC__ void add_household_infection_message(xmachine_message_household_infection_list* household_infection_messages, unsigned int locationid, float lambda);
  
-/** get_first_infection_message
+/** get_first_household_infection_message
  * Get first message function for non partitioned (brute force) messages
- * @param infection_messages message list
+ * @param household_infection_messages message list
  * @return        returns the first message from the message list (offset depending on agent block)
  */
-__FLAME_GPU_FUNC__ xmachine_message_infection * get_first_infection_message(xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ xmachine_message_household_infection * get_first_household_infection_message(xmachine_message_household_infection_list* household_infection_messages);
 
-/** get_next_infection_message
+/** get_next_household_infection_message
  * Get first message function for non partitioned (brute force) messages
  * @param current the current message struct
- * @param infection_messages message list
+ * @param household_infection_messages message list
  * @return        returns the first message from the message list (offset depending on agent block)
  */
-__FLAME_GPU_FUNC__ xmachine_message_infection * get_next_infection_message(xmachine_message_infection* current, xmachine_message_infection_list* infection_messages);
+__FLAME_GPU_FUNC__ xmachine_message_household_infection * get_next_household_infection_message(xmachine_message_household_infection* current, xmachine_message_household_infection_list* household_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) church_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_church_infection_message
+ * Function for all types of message partitioning
+ * Adds a new church_infection agent to the xmachine_memory_church_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_church_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_church_infection_message(xmachine_message_church_infection_list* church_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_church_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param church_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_church_infection * get_first_church_infection_message(xmachine_message_church_infection_list* church_infection_messages);
+
+/** get_next_church_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param church_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_church_infection * get_next_church_infection_message(xmachine_message_church_infection* current, xmachine_message_church_infection_list* church_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) transport_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_transport_infection_message
+ * Function for all types of message partitioning
+ * Adds a new transport_infection agent to the xmachine_memory_transport_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_transport_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_transport_infection_message(xmachine_message_transport_infection_list* transport_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_transport_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param transport_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_transport_infection * get_first_transport_infection_message(xmachine_message_transport_infection_list* transport_infection_messages);
+
+/** get_next_transport_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param transport_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_transport_infection * get_next_transport_infection_message(xmachine_message_transport_infection* current, xmachine_message_transport_infection_list* transport_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) clinic_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_clinic_infection_message
+ * Function for all types of message partitioning
+ * Adds a new clinic_infection agent to the xmachine_memory_clinic_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_clinic_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_clinic_infection_message(xmachine_message_clinic_infection_list* clinic_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_clinic_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param clinic_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_clinic_infection * get_first_clinic_infection_message(xmachine_message_clinic_infection_list* clinic_infection_messages);
+
+/** get_next_clinic_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param clinic_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_clinic_infection * get_next_clinic_infection_message(xmachine_message_clinic_infection* current, xmachine_message_clinic_infection_list* clinic_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) workplace_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_workplace_infection_message
+ * Function for all types of message partitioning
+ * Adds a new workplace_infection agent to the xmachine_memory_workplace_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_workplace_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_workplace_infection_message(xmachine_message_workplace_infection_list* workplace_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_workplace_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param workplace_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_workplace_infection * get_first_workplace_infection_message(xmachine_message_workplace_infection_list* workplace_infection_messages);
+
+/** get_next_workplace_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param workplace_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_workplace_infection * get_next_workplace_infection_message(xmachine_message_workplace_infection* current, xmachine_message_workplace_infection_list* workplace_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) bar_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_bar_infection_message
+ * Function for all types of message partitioning
+ * Adds a new bar_infection agent to the xmachine_memory_bar_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_bar_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_bar_infection_message(xmachine_message_bar_infection_list* bar_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_bar_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param bar_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_bar_infection * get_first_bar_infection_message(xmachine_message_bar_infection_list* bar_infection_messages);
+
+/** get_next_bar_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param bar_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_bar_infection * get_next_bar_infection_message(xmachine_message_bar_infection* current, xmachine_message_bar_infection_list* bar_infection_messages);
+
+  
+/* Message Function Prototypes for Brute force (No Partitioning) school_infection message implemented in FLAMEGPU_Kernels */
+
+/** add_school_infection_message
+ * Function for all types of message partitioning
+ * Adds a new school_infection agent to the xmachine_memory_school_infection_list list using a linear mapping
+ * @param agents	xmachine_memory_school_infection_list agent list
+ * @param locationid	message variable of type unsigned int
+ * @param lambda	message variable of type float
+ */
+ 
+ __FLAME_GPU_FUNC__ void add_school_infection_message(xmachine_message_school_infection_list* school_infection_messages, unsigned int locationid, float lambda);
+ 
+/** get_first_school_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param school_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_school_infection * get_first_school_infection_message(xmachine_message_school_infection_list* school_infection_messages);
+
+/** get_next_school_infection_message
+ * Get first message function for non partitioned (brute force) messages
+ * @param current the current message struct
+ * @param school_infection_messages message list
+ * @return        returns the first message from the message list (offset depending on agent block)
+ */
+__FLAME_GPU_FUNC__ xmachine_message_school_infection * get_next_school_infection_message(xmachine_message_school_infection* current, xmachine_message_school_infection_list* school_infection_messages);
   
   
   

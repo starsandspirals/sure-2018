@@ -123,10 +123,40 @@ __constant__ int d_message_school_membership_output_type;   /**< message output 
 __constant__ int d_message_location_count;         /**< message list counter*/
 __constant__ int d_message_location_output_type;   /**< message output type (single or optional)*/
 
-/* infection Message variables */
+/* household_infection Message variables */
 /* Non partitioned and spatial partitioned message variables  */
-__constant__ int d_message_infection_count;         /**< message list counter*/
-__constant__ int d_message_infection_output_type;   /**< message output type (single or optional)*/
+__constant__ int d_message_household_infection_count;         /**< message list counter*/
+__constant__ int d_message_household_infection_output_type;   /**< message output type (single or optional)*/
+
+/* church_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_church_infection_count;         /**< message list counter*/
+__constant__ int d_message_church_infection_output_type;   /**< message output type (single or optional)*/
+
+/* transport_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_transport_infection_count;         /**< message list counter*/
+__constant__ int d_message_transport_infection_output_type;   /**< message output type (single or optional)*/
+
+/* clinic_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_clinic_infection_count;         /**< message list counter*/
+__constant__ int d_message_clinic_infection_output_type;   /**< message output type (single or optional)*/
+
+/* workplace_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_workplace_infection_count;         /**< message list counter*/
+__constant__ int d_message_workplace_infection_output_type;   /**< message output type (single or optional)*/
+
+/* bar_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_bar_infection_count;         /**< message list counter*/
+__constant__ int d_message_bar_infection_output_type;   /**< message output type (single or optional)*/
+
+/* school_infection Message variables */
+/* Non partitioned and spatial partitioned message variables  */
+__constant__ int d_message_school_infection_count;         /**< message list counter*/
+__constant__ int d_message_school_infection_output_type;   /**< message output type (single or optional)*/
 
 	
     
@@ -135,6 +165,12 @@ __constant__ int d_message_infection_output_type;   /**< message output type (si
 #include "functions.c"
     
 /* Texture bindings */
+
+
+
+
+
+
 
 
 
@@ -224,6 +260,489 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 	return false;
 }
 
+
+/** updatelambdahh_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdahh_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==0)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdachu_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdachu_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==1)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdatr_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdatr_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==2)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdacl_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdacl_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==3)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdawp_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdawp_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==4)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdab_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdab_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==5)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
+
+/** updatelambdasch_function_filter
+ *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
+ * @param currentState xmachine_memory_Person_list representing agent i the current state
+ * @param nextState xmachine_memory_Person_list representing agent i the next state
+ */
+ __global__ void updatelambdasch_function_filter(xmachine_memory_Person_list* currentState, xmachine_memory_Person_list* nextState)
+ {
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+	
+	//check thread max
+	if (index < d_xmachine_memory_Person_count){
+	
+		//apply the filter
+		if (currentState->location[index]==6)
+		{	//copy agent data to newstate list
+			nextState->id[index] = currentState->id[index];
+			nextState->step[index] = currentState->step[index];
+			nextState->householdtime[index] = currentState->householdtime[index];
+			nextState->churchtime[index] = currentState->churchtime[index];
+			nextState->transporttime[index] = currentState->transporttime[index];
+			nextState->clinictime[index] = currentState->clinictime[index];
+			nextState->workplacetime[index] = currentState->workplacetime[index];
+			nextState->bartime[index] = currentState->bartime[index];
+			nextState->outsidetime[index] = currentState->outsidetime[index];
+			nextState->age[index] = currentState->age[index];
+			nextState->gender[index] = currentState->gender[index];
+			nextState->householdsize[index] = currentState->householdsize[index];
+			nextState->churchfreq[index] = currentState->churchfreq[index];
+			nextState->churchdur[index] = currentState->churchdur[index];
+			nextState->transportdur[index] = currentState->transportdur[index];
+			nextState->transportday1[index] = currentState->transportday1[index];
+			nextState->transportday2[index] = currentState->transportday2[index];
+			nextState->household[index] = currentState->household[index];
+			nextState->church[index] = currentState->church[index];
+			nextState->transport[index] = currentState->transport[index];
+			nextState->workplace[index] = currentState->workplace[index];
+			nextState->school[index] = currentState->school[index];
+			nextState->busy[index] = currentState->busy[index];
+			nextState->startstep[index] = currentState->startstep[index];
+			nextState->location[index] = currentState->location[index];
+			nextState->locationid[index] = currentState->locationid[index];
+			nextState->hiv[index] = currentState->hiv[index];
+			nextState->art[index] = currentState->art[index];
+			nextState->activetb[index] = currentState->activetb[index];
+			nextState->artday[index] = currentState->artday[index];
+			nextState->p[index] = currentState->p[index];
+			nextState->q[index] = currentState->q[index];
+			nextState->infections[index] = currentState->infections[index];
+			nextState->lastinfected[index] = currentState->lastinfected[index];
+			nextState->lastinfectedid[index] = currentState->lastinfectedid[index];
+			nextState->time_step[index] = currentState->time_step[index];
+			nextState->lambda[index] = currentState->lambda[index];
+			nextState->timevisiting[index] = currentState->timevisiting[index];
+			nextState->bargoing[index] = currentState->bargoing[index];
+			nextState->barday[index] = currentState->barday[index];
+			nextState->schooltime[index] = currentState->schooltime[index];
+			//set scan input flag to 1
+			nextState->_scan_input[index] = 1;
+		}
+		else
+		{
+			//set scan input flag of current state to 1 (keep agent)
+			currentState->_scan_input[index] = 1;
+		}
+	
+	}
+ }
 
 /** infect_function_filter
  *	Standard agent condition function. Filters agents from one state list to the next depending on the condition
@@ -3345,48 +3864,46 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created infection message functions */
+/* Dyanamically created household_infection message functions */
 
 
-/** add_infection_message
- * Add non partitioned or spatially partitioned infection message
- * @param messages xmachine_message_infection_list message list to add too
- * @param location agent variable of type unsigned int
+/** add_household_infection_message
+ * Add non partitioned or spatially partitioned household_infection message
+ * @param messages xmachine_message_household_infection_list message list to add too
  * @param locationid agent variable of type unsigned int
  * @param lambda agent variable of type float
  */
-__device__ void add_infection_message(xmachine_message_infection_list* messages, unsigned int location, unsigned int locationid, float lambda){
+__device__ void add_household_infection_message(xmachine_message_household_infection_list* messages, unsigned int locationid, float lambda){
 
 	//global thread index
-	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_infection_count;
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_household_infection_count;
 
 	int _position;
 	int _scan_input;
 
 	//decide output position
-	if(d_message_infection_output_type == single_message){
+	if(d_message_household_infection_output_type == single_message){
 		_position = index; //same as agent position
 		_scan_input = 0;
-	}else if (d_message_infection_output_type == optional_message){
+	}else if (d_message_household_infection_output_type == optional_message){
 		_position = 0;	   //to be calculated using Prefix sum
 		_scan_input = 1;
 	}
 
-	//AoS - xmachine_message_infection Coalesced memory write
+	//AoS - xmachine_message_household_infection Coalesced memory write
 	messages->_scan_input[index] = _scan_input;	
 	messages->_position[index] = _position;
-	messages->location[index] = location;
 	messages->locationid[index] = locationid;
 	messages->lambda[index] = lambda;
 
 }
 
 /**
- * Scatter non partitioned or spatially partitioned infection message (for optional messages)
- * @param messages scatter_optional_infection_messages Sparse xmachine_message_infection_list message list
- * @param message_swap temp xmachine_message_infection_list message list to scatter sparse messages to
+ * Scatter non partitioned or spatially partitioned household_infection message (for optional messages)
+ * @param messages scatter_optional_household_infection_messages Sparse xmachine_message_household_infection_list message list
+ * @param message_swap temp xmachine_message_household_infection_list message list to scatter sparse messages to
  */
-__global__ void scatter_optional_infection_messages(xmachine_message_infection_list* messages, xmachine_message_infection_list* messages_swap){
+__global__ void scatter_optional_household_infection_messages(xmachine_message_household_infection_list* messages, xmachine_message_household_infection_list* messages_swap){
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
 
@@ -3394,21 +3911,20 @@ __global__ void scatter_optional_infection_messages(xmachine_message_infection_l
 
 	//if optional message is to be written
 	if (_scan_input == 1){
-		int output_index = messages_swap->_position[index] + d_message_infection_count;
+		int output_index = messages_swap->_position[index] + d_message_household_infection_count;
 
-		//AoS - xmachine_message_infection Un-Coalesced scattered memory write
+		//AoS - xmachine_message_household_infection Un-Coalesced scattered memory write
 		messages->_position[output_index] = output_index;
-		messages->location[output_index] = messages_swap->location[index];
 		messages->locationid[output_index] = messages_swap->locationid[index];
 		messages->lambda[output_index] = messages_swap->lambda[index];				
 	}
 }
 
-/** reset_infection_swaps
- * Reset non partitioned or spatially partitioned infection message swaps (for scattering optional messages)
+/** reset_household_infection_swaps
+ * Reset non partitioned or spatially partitioned household_infection message swaps (for scattering optional messages)
  * @param message_swap message list to reset _position and _scan_input values back to 0
  */
-__global__ void reset_infection_swaps(xmachine_message_infection_list* messages_swap){
+__global__ void reset_household_infection_swaps(xmachine_message_household_infection_list* messages_swap){
 
 	//global thread index
 	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
@@ -3419,13 +3935,13 @@ __global__ void reset_infection_swaps(xmachine_message_infection_list* messages_
 
 /* Message functions */
 
-__device__ xmachine_message_infection* get_first_infection_message(xmachine_message_infection_list* messages){
+__device__ xmachine_message_household_infection* get_first_household_infection_message(xmachine_message_household_infection_list* messages){
 
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&sm_data[0];
 	
 	//wrap size is the number of tiles required to load all messages
-	int wrap_size = (ceil((float)d_message_infection_count/ blockDim.x)* blockDim.x);
+	int wrap_size = (ceil((float)d_message_household_infection_count/ blockDim.x)* blockDim.x);
 
 	//if no messages then return a null pointer (false)
 	if (wrap_size == 0)
@@ -3437,36 +3953,35 @@ __device__ xmachine_message_infection* get_first_infection_message(xmachine_mess
 	//global thread index
 	int index = WRAP(global_index, wrap_size);
 
-	//SoA to AoS - xmachine_message_infection Coalesced memory read
-	xmachine_message_infection temp_message;
+	//SoA to AoS - xmachine_message_household_infection Coalesced memory read
+	xmachine_message_household_infection temp_message;
 	temp_message._position = messages->_position[index];
-	temp_message.location = messages->location[index];
 	temp_message.locationid = messages->locationid[index];
 	temp_message.lambda = messages->lambda[index];
 
 	//AoS to shared memory
-	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_infection));
-	xmachine_message_infection* sm_message = ((xmachine_message_infection*)&message_share[message_index]);
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_infection));
+	xmachine_message_household_infection* sm_message = ((xmachine_message_household_infection*)&message_share[message_index]);
 	sm_message[0] = temp_message;
 
 	__syncthreads();
 
   //HACK FOR 64 bit addressing issue in sm
-	return ((xmachine_message_infection*)&message_share[d_SM_START]);
+	return ((xmachine_message_household_infection*)&message_share[d_SM_START]);
 }
 
-__device__ xmachine_message_infection* get_next_infection_message(xmachine_message_infection* message, xmachine_message_infection_list* messages){
+__device__ xmachine_message_household_infection* get_next_household_infection_message(xmachine_message_household_infection* message, xmachine_message_household_infection_list* messages){
 
 	extern __shared__ int sm_data [];
 	char* message_share = (char*)&sm_data[0];
 	
 	//wrap size is the number of tiles required to load all messages
-	int wrap_size = ceil((float)d_message_infection_count/ blockDim.x)*blockDim.x;
+	int wrap_size = ceil((float)d_message_household_infection_count/ blockDim.x)*blockDim.x;
 
 	int i = WRAP((message->_position + 1),wrap_size);
 
 	//If end of messages (last message not multiple of gridsize) go to 0 index
-	if (i >= d_message_infection_count)
+	if (i >= d_message_household_infection_count)
 		i = 0;
 
 	//Check if back to start position of first message
@@ -3480,24 +3995,929 @@ __device__ xmachine_message_infection* get_next_infection_message(xmachine_messa
 	if (i == 0){
 		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
 		
-		//SoA to AoS - xmachine_message_infection Coalesced memory read
+		//SoA to AoS - xmachine_message_household_infection Coalesced memory read
 		int index = (tile* blockDim.x) + threadIdx.x;
-		xmachine_message_infection temp_message;
+		xmachine_message_household_infection temp_message;
 		temp_message._position = messages->_position[index];
-		temp_message.location = messages->location[index];
 		temp_message.locationid = messages->locationid[index];
 		temp_message.lambda = messages->lambda[index];
 
 		//AoS to shared memory
-		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_infection));
-		xmachine_message_infection* sm_message = ((xmachine_message_infection*)&message_share[message_index]);
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_household_infection));
+		xmachine_message_household_infection* sm_message = ((xmachine_message_household_infection*)&message_share[message_index]);
 		sm_message[0] = temp_message;
 
 		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
 	}
 
-	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_infection));
-	return ((xmachine_message_infection*)&message_share[message_index]);
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_household_infection));
+	return ((xmachine_message_household_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created church_infection message functions */
+
+
+/** add_church_infection_message
+ * Add non partitioned or spatially partitioned church_infection message
+ * @param messages xmachine_message_church_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_church_infection_message(xmachine_message_church_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_church_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_church_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_church_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_church_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned church_infection message (for optional messages)
+ * @param messages scatter_optional_church_infection_messages Sparse xmachine_message_church_infection_list message list
+ * @param message_swap temp xmachine_message_church_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_church_infection_messages(xmachine_message_church_infection_list* messages, xmachine_message_church_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_church_infection_count;
+
+		//AoS - xmachine_message_church_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_church_infection_swaps
+ * Reset non partitioned or spatially partitioned church_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_church_infection_swaps(xmachine_message_church_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_church_infection* get_first_church_infection_message(xmachine_message_church_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_church_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_church_infection Coalesced memory read
+	xmachine_message_church_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_church_infection));
+	xmachine_message_church_infection* sm_message = ((xmachine_message_church_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_church_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_church_infection* get_next_church_infection_message(xmachine_message_church_infection* message, xmachine_message_church_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_church_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_church_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_church_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_church_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_church_infection));
+		xmachine_message_church_infection* sm_message = ((xmachine_message_church_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_church_infection));
+	return ((xmachine_message_church_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created transport_infection message functions */
+
+
+/** add_transport_infection_message
+ * Add non partitioned or spatially partitioned transport_infection message
+ * @param messages xmachine_message_transport_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_transport_infection_message(xmachine_message_transport_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_transport_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_transport_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_transport_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_transport_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned transport_infection message (for optional messages)
+ * @param messages scatter_optional_transport_infection_messages Sparse xmachine_message_transport_infection_list message list
+ * @param message_swap temp xmachine_message_transport_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_transport_infection_messages(xmachine_message_transport_infection_list* messages, xmachine_message_transport_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_transport_infection_count;
+
+		//AoS - xmachine_message_transport_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_transport_infection_swaps
+ * Reset non partitioned or spatially partitioned transport_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_transport_infection_swaps(xmachine_message_transport_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_transport_infection* get_first_transport_infection_message(xmachine_message_transport_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_transport_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_transport_infection Coalesced memory read
+	xmachine_message_transport_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_transport_infection));
+	xmachine_message_transport_infection* sm_message = ((xmachine_message_transport_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_transport_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_transport_infection* get_next_transport_infection_message(xmachine_message_transport_infection* message, xmachine_message_transport_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_transport_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_transport_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_transport_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_transport_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_transport_infection));
+		xmachine_message_transport_infection* sm_message = ((xmachine_message_transport_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_transport_infection));
+	return ((xmachine_message_transport_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created clinic_infection message functions */
+
+
+/** add_clinic_infection_message
+ * Add non partitioned or spatially partitioned clinic_infection message
+ * @param messages xmachine_message_clinic_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_clinic_infection_message(xmachine_message_clinic_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_clinic_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_clinic_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_clinic_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_clinic_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned clinic_infection message (for optional messages)
+ * @param messages scatter_optional_clinic_infection_messages Sparse xmachine_message_clinic_infection_list message list
+ * @param message_swap temp xmachine_message_clinic_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_clinic_infection_messages(xmachine_message_clinic_infection_list* messages, xmachine_message_clinic_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_clinic_infection_count;
+
+		//AoS - xmachine_message_clinic_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_clinic_infection_swaps
+ * Reset non partitioned or spatially partitioned clinic_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_clinic_infection_swaps(xmachine_message_clinic_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_clinic_infection* get_first_clinic_infection_message(xmachine_message_clinic_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_clinic_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_clinic_infection Coalesced memory read
+	xmachine_message_clinic_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_clinic_infection));
+	xmachine_message_clinic_infection* sm_message = ((xmachine_message_clinic_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_clinic_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_clinic_infection* get_next_clinic_infection_message(xmachine_message_clinic_infection* message, xmachine_message_clinic_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_clinic_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_clinic_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_clinic_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_clinic_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_clinic_infection));
+		xmachine_message_clinic_infection* sm_message = ((xmachine_message_clinic_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_clinic_infection));
+	return ((xmachine_message_clinic_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created workplace_infection message functions */
+
+
+/** add_workplace_infection_message
+ * Add non partitioned or spatially partitioned workplace_infection message
+ * @param messages xmachine_message_workplace_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_workplace_infection_message(xmachine_message_workplace_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_workplace_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_workplace_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_workplace_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_workplace_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned workplace_infection message (for optional messages)
+ * @param messages scatter_optional_workplace_infection_messages Sparse xmachine_message_workplace_infection_list message list
+ * @param message_swap temp xmachine_message_workplace_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_workplace_infection_messages(xmachine_message_workplace_infection_list* messages, xmachine_message_workplace_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_workplace_infection_count;
+
+		//AoS - xmachine_message_workplace_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_workplace_infection_swaps
+ * Reset non partitioned or spatially partitioned workplace_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_workplace_infection_swaps(xmachine_message_workplace_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_workplace_infection* get_first_workplace_infection_message(xmachine_message_workplace_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_workplace_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_workplace_infection Coalesced memory read
+	xmachine_message_workplace_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_workplace_infection));
+	xmachine_message_workplace_infection* sm_message = ((xmachine_message_workplace_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_workplace_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_workplace_infection* get_next_workplace_infection_message(xmachine_message_workplace_infection* message, xmachine_message_workplace_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_workplace_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_workplace_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_workplace_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_workplace_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_workplace_infection));
+		xmachine_message_workplace_infection* sm_message = ((xmachine_message_workplace_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_workplace_infection));
+	return ((xmachine_message_workplace_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created bar_infection message functions */
+
+
+/** add_bar_infection_message
+ * Add non partitioned or spatially partitioned bar_infection message
+ * @param messages xmachine_message_bar_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_bar_infection_message(xmachine_message_bar_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_bar_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_bar_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_bar_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_bar_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned bar_infection message (for optional messages)
+ * @param messages scatter_optional_bar_infection_messages Sparse xmachine_message_bar_infection_list message list
+ * @param message_swap temp xmachine_message_bar_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_bar_infection_messages(xmachine_message_bar_infection_list* messages, xmachine_message_bar_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_bar_infection_count;
+
+		//AoS - xmachine_message_bar_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_bar_infection_swaps
+ * Reset non partitioned or spatially partitioned bar_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_bar_infection_swaps(xmachine_message_bar_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_bar_infection* get_first_bar_infection_message(xmachine_message_bar_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_bar_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_bar_infection Coalesced memory read
+	xmachine_message_bar_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_bar_infection));
+	xmachine_message_bar_infection* sm_message = ((xmachine_message_bar_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_bar_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_bar_infection* get_next_bar_infection_message(xmachine_message_bar_infection* message, xmachine_message_bar_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_bar_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_bar_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_bar_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_bar_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_bar_infection));
+		xmachine_message_bar_infection* sm_message = ((xmachine_message_bar_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_bar_infection));
+	return ((xmachine_message_bar_infection*)&message_share[message_index]);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* Dyanamically created school_infection message functions */
+
+
+/** add_school_infection_message
+ * Add non partitioned or spatially partitioned school_infection message
+ * @param messages xmachine_message_school_infection_list message list to add too
+ * @param locationid agent variable of type unsigned int
+ * @param lambda agent variable of type float
+ */
+__device__ void add_school_infection_message(xmachine_message_school_infection_list* messages, unsigned int locationid, float lambda){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x + d_message_school_infection_count;
+
+	int _position;
+	int _scan_input;
+
+	//decide output position
+	if(d_message_school_infection_output_type == single_message){
+		_position = index; //same as agent position
+		_scan_input = 0;
+	}else if (d_message_school_infection_output_type == optional_message){
+		_position = 0;	   //to be calculated using Prefix sum
+		_scan_input = 1;
+	}
+
+	//AoS - xmachine_message_school_infection Coalesced memory write
+	messages->_scan_input[index] = _scan_input;	
+	messages->_position[index] = _position;
+	messages->locationid[index] = locationid;
+	messages->lambda[index] = lambda;
+
+}
+
+/**
+ * Scatter non partitioned or spatially partitioned school_infection message (for optional messages)
+ * @param messages scatter_optional_school_infection_messages Sparse xmachine_message_school_infection_list message list
+ * @param message_swap temp xmachine_message_school_infection_list message list to scatter sparse messages to
+ */
+__global__ void scatter_optional_school_infection_messages(xmachine_message_school_infection_list* messages, xmachine_message_school_infection_list* messages_swap){
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	int _scan_input = messages_swap->_scan_input[index];
+
+	//if optional message is to be written
+	if (_scan_input == 1){
+		int output_index = messages_swap->_position[index] + d_message_school_infection_count;
+
+		//AoS - xmachine_message_school_infection Un-Coalesced scattered memory write
+		messages->_position[output_index] = output_index;
+		messages->locationid[output_index] = messages_swap->locationid[index];
+		messages->lambda[output_index] = messages_swap->lambda[index];				
+	}
+}
+
+/** reset_school_infection_swaps
+ * Reset non partitioned or spatially partitioned school_infection message swaps (for scattering optional messages)
+ * @param message_swap message list to reset _position and _scan_input values back to 0
+ */
+__global__ void reset_school_infection_swaps(xmachine_message_school_infection_list* messages_swap){
+
+	//global thread index
+	int index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	messages_swap->_position[index] = 0;
+	messages_swap->_scan_input[index] = 0;
+}
+
+/* Message functions */
+
+__device__ xmachine_message_school_infection* get_first_school_infection_message(xmachine_message_school_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = (ceil((float)d_message_school_infection_count/ blockDim.x)* blockDim.x);
+
+	//if no messages then return a null pointer (false)
+	if (wrap_size == 0)
+		return nullptr;
+
+	//global thread index
+	int global_index = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+	//global thread index
+	int index = WRAP(global_index, wrap_size);
+
+	//SoA to AoS - xmachine_message_school_infection Coalesced memory read
+	xmachine_message_school_infection temp_message;
+	temp_message._position = messages->_position[index];
+	temp_message.locationid = messages->locationid[index];
+	temp_message.lambda = messages->lambda[index];
+
+	//AoS to shared memory
+	int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_school_infection));
+	xmachine_message_school_infection* sm_message = ((xmachine_message_school_infection*)&message_share[message_index]);
+	sm_message[0] = temp_message;
+
+	__syncthreads();
+
+  //HACK FOR 64 bit addressing issue in sm
+	return ((xmachine_message_school_infection*)&message_share[d_SM_START]);
+}
+
+__device__ xmachine_message_school_infection* get_next_school_infection_message(xmachine_message_school_infection* message, xmachine_message_school_infection_list* messages){
+
+	extern __shared__ int sm_data [];
+	char* message_share = (char*)&sm_data[0];
+	
+	//wrap size is the number of tiles required to load all messages
+	int wrap_size = ceil((float)d_message_school_infection_count/ blockDim.x)*blockDim.x;
+
+	int i = WRAP((message->_position + 1),wrap_size);
+
+	//If end of messages (last message not multiple of gridsize) go to 0 index
+	if (i >= d_message_school_infection_count)
+		i = 0;
+
+	//Check if back to start position of first message
+	if (i == WRAP((blockDim.x* blockIdx.x), wrap_size))
+		return nullptr;
+
+	int tile = floor((float)i/(blockDim.x)); //tile is round down position over blockDim
+	i = i % blockDim.x;						 //mod i for shared memory index
+
+	//if count == Block Size load next tile int shared memory values
+	if (i == 0){
+		__syncthreads();					//make sure we don't change shared memory until all threads are here (important for emu-debug mode)
+		
+		//SoA to AoS - xmachine_message_school_infection Coalesced memory read
+		int index = (tile* blockDim.x) + threadIdx.x;
+		xmachine_message_school_infection temp_message;
+		temp_message._position = messages->_position[index];
+		temp_message.locationid = messages->locationid[index];
+		temp_message.lambda = messages->lambda[index];
+
+		//AoS to shared memory
+		int message_index = SHARE_INDEX(threadIdx.y*blockDim.x+threadIdx.x, sizeof(xmachine_message_school_infection));
+		xmachine_message_school_infection* sm_message = ((xmachine_message_school_infection*)&message_share[message_index]);
+		sm_message[0] = temp_message;
+
+		__syncthreads();					//make sure we don't start returning messages until all threads have updated shared memory
+	}
+
+	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_school_infection));
+	return ((xmachine_message_school_infection*)&message_share[message_index]);
 }
 
 
@@ -3621,7 +5041,7 @@ __global__ void GPUFLAME_update(xmachine_memory_Person_list* agents, xmachine_me
 /**
  *
  */
-__global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_updatelambdahh(xmachine_memory_Person_list* agents, xmachine_message_household_infection_list* household_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -3630,7 +5050,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
     //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
     
 
-	//SoA to AoS - xmachine_memory_updatelambda Coalesced memory read (arrays point to first item for agent index)
+	//SoA to AoS - xmachine_memory_updatelambdahh Coalesced memory read (arrays point to first item for agent index)
 	xmachine_memory_Person agent;
     //No partitioned input may launch more threads than required - only load agent data within bounds. 
     if (index < d_xmachine_memory_Person_count){
@@ -3722,7 +5142,7 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
 	}
 
 	//FLAME function call
-	int dead = !updatelambda(&agent, infection_messages);
+	int dead = !updatelambdahh(&agent, household_infection_messages);
 	
 
 	
@@ -3731,7 +5151,955 @@ __global__ void GPUFLAME_updatelambda(xmachine_memory_Person_list* agents, xmach
     //continuous agent: set reallocation flag
 	agents->_scan_input[index]  = dead; 
 
-	//AoS to SoA - xmachine_memory_updatelambda Coalesced memory write (ignore arrays)
+	//AoS to SoA - xmachine_memory_updatelambdahh Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdachu(xmachine_memory_Person_list* agents, xmachine_message_church_infection_list* church_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdachu Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdachu(&agent, church_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdachu Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdatr(xmachine_memory_Person_list* agents, xmachine_message_transport_infection_list* transport_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdatr Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdatr(&agent, transport_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdatr Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdacl(xmachine_memory_Person_list* agents, xmachine_message_clinic_infection_list* clinic_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdacl Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdacl(&agent, clinic_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdacl Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdawp(xmachine_memory_Person_list* agents, xmachine_message_workplace_infection_list* workplace_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdawp Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdawp(&agent, workplace_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdawp Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdab(xmachine_memory_Person_list* agents, xmachine_message_bar_infection_list* bar_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdab Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdab(&agent, bar_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdab Coalesced memory write (ignore arrays)
+	agents->id[index] = agent.id;
+	agents->step[index] = agent.step;
+	agents->householdtime[index] = agent.householdtime;
+	agents->churchtime[index] = agent.churchtime;
+	agents->transporttime[index] = agent.transporttime;
+	agents->clinictime[index] = agent.clinictime;
+	agents->workplacetime[index] = agent.workplacetime;
+	agents->bartime[index] = agent.bartime;
+	agents->outsidetime[index] = agent.outsidetime;
+	agents->age[index] = agent.age;
+	agents->gender[index] = agent.gender;
+	agents->householdsize[index] = agent.householdsize;
+	agents->churchfreq[index] = agent.churchfreq;
+	agents->churchdur[index] = agent.churchdur;
+	agents->transportdur[index] = agent.transportdur;
+	agents->transportday1[index] = agent.transportday1;
+	agents->transportday2[index] = agent.transportday2;
+	agents->household[index] = agent.household;
+	agents->church[index] = agent.church;
+	agents->transport[index] = agent.transport;
+	agents->workplace[index] = agent.workplace;
+	agents->school[index] = agent.school;
+	agents->busy[index] = agent.busy;
+	agents->startstep[index] = agent.startstep;
+	agents->location[index] = agent.location;
+	agents->locationid[index] = agent.locationid;
+	agents->hiv[index] = agent.hiv;
+	agents->art[index] = agent.art;
+	agents->activetb[index] = agent.activetb;
+	agents->artday[index] = agent.artday;
+	agents->p[index] = agent.p;
+	agents->q[index] = agent.q;
+	agents->infections[index] = agent.infections;
+	agents->lastinfected[index] = agent.lastinfected;
+	agents->lastinfectedid[index] = agent.lastinfectedid;
+	agents->time_step[index] = agent.time_step;
+	agents->lambda[index] = agent.lambda;
+	agents->timevisiting[index] = agent.timevisiting;
+	agents->bargoing[index] = agent.bargoing;
+	agents->barday[index] = agent.barday;
+	agents->schooltime[index] = agent.schooltime;
+	}
+}
+
+/**
+ *
+ */
+__global__ void GPUFLAME_updatelambdasch(xmachine_memory_Person_list* agents, xmachine_message_school_infection_list* school_infection_messages){
+	
+	//continuous agent: index is agent position in 1D agent list
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+    
+    //No partitioned input requires threads to be launched beyond the agent count to ensure full block sizes
+    
+
+	//SoA to AoS - xmachine_memory_updatelambdasch Coalesced memory read (arrays point to first item for agent index)
+	xmachine_memory_Person agent;
+    //No partitioned input may launch more threads than required - only load agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    
+	agent.id = agents->id[index];
+	agent.step = agents->step[index];
+	agent.householdtime = agents->householdtime[index];
+	agent.churchtime = agents->churchtime[index];
+	agent.transporttime = agents->transporttime[index];
+	agent.clinictime = agents->clinictime[index];
+	agent.workplacetime = agents->workplacetime[index];
+	agent.bartime = agents->bartime[index];
+	agent.outsidetime = agents->outsidetime[index];
+	agent.age = agents->age[index];
+	agent.gender = agents->gender[index];
+	agent.householdsize = agents->householdsize[index];
+	agent.churchfreq = agents->churchfreq[index];
+	agent.churchdur = agents->churchdur[index];
+	agent.transportdur = agents->transportdur[index];
+	agent.transportday1 = agents->transportday1[index];
+	agent.transportday2 = agents->transportday2[index];
+	agent.household = agents->household[index];
+	agent.church = agents->church[index];
+	agent.transport = agents->transport[index];
+	agent.workplace = agents->workplace[index];
+	agent.school = agents->school[index];
+	agent.busy = agents->busy[index];
+	agent.startstep = agents->startstep[index];
+	agent.location = agents->location[index];
+	agent.locationid = agents->locationid[index];
+	agent.hiv = agents->hiv[index];
+	agent.art = agents->art[index];
+	agent.activetb = agents->activetb[index];
+	agent.artday = agents->artday[index];
+	agent.p = agents->p[index];
+	agent.q = agents->q[index];
+	agent.infections = agents->infections[index];
+	agent.lastinfected = agents->lastinfected[index];
+	agent.lastinfectedid = agents->lastinfectedid[index];
+	agent.time_step = agents->time_step[index];
+	agent.lambda = agents->lambda[index];
+	agent.timevisiting = agents->timevisiting[index];
+	agent.bargoing = agents->bargoing[index];
+	agent.barday = agents->barday[index];
+	agent.schooltime = agents->schooltime[index];
+	} else {
+	
+	agent.id = 0;
+	agent.step = 0;
+	agent.householdtime = 0;
+	agent.churchtime = 0;
+	agent.transporttime = 0;
+	agent.clinictime = 0;
+	agent.workplacetime = 0;
+	agent.bartime = 0;
+	agent.outsidetime = 0;
+	agent.age = 0;
+	agent.gender = 0;
+	agent.householdsize = 0;
+	agent.churchfreq = 0;
+	agent.churchdur = 0;
+	agent.transportdur = 0;
+	agent.transportday1 = 0;
+	agent.transportday2 = 0;
+	agent.household = 0;
+	agent.church = 0;
+	agent.transport = 0;
+	agent.workplace = 0;
+	agent.school = 0;
+	agent.busy = 0;
+	agent.startstep = 0;
+	agent.location = 0;
+	agent.locationid = 0;
+	agent.hiv = 0;
+	agent.art = 0;
+	agent.activetb = 0;
+	agent.artday = 0;
+	agent.p = 0;
+	agent.q = 0;
+	agent.infections = 0;
+	agent.lastinfected = 0;
+	agent.lastinfectedid = 0;
+	agent.time_step = 0;
+	agent.lambda = 0;
+	agent.timevisiting = 0;
+	agent.bargoing = 0;
+	agent.barday = 0;
+	agent.schooltime = 0;
+	}
+
+	//FLAME function call
+	int dead = !updatelambdasch(&agent, school_infection_messages);
+	
+
+	
+    //No partitioned input may launch more threads than required - only write agent data within bounds. 
+    if (index < d_xmachine_memory_Person_count){
+    //continuous agent: set reallocation flag
+	agents->_scan_input[index]  = dead; 
+
+	//AoS to SoA - xmachine_memory_updatelambdasch Coalesced memory write (ignore arrays)
 	agents->id[index] = agent.id;
 	agents->step[index] = agent.step;
 	agents->householdtime[index] = agent.householdtime;
@@ -4711,7 +7079,7 @@ __global__ void GPUFLAME_tbinit(xmachine_memory_TBAssignment_list* agents, xmach
 /**
  *
  */
-__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachine_message_location_list* location_messages, xmachine_message_household_infection_list* household_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -4736,7 +7104,7 @@ __global__ void GPUFLAME_hhupdate(xmachine_memory_Household_list* agents, xmachi
 	}
 
 	//FLAME function call
-	int dead = !hhupdate(&agent, location_messages, infection_messages	);
+	int dead = !hhupdate(&agent, location_messages, household_infection_messages	);
 	
 
 	
@@ -4805,7 +7173,7 @@ __global__ void GPUFLAME_hhinit(xmachine_memory_HouseholdMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine_message_location_list* location_messages, xmachine_message_church_infection_list* church_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -4832,7 +7200,7 @@ __global__ void GPUFLAME_chuupdate(xmachine_memory_Church_list* agents, xmachine
 	}
 
 	//FLAME function call
-	int dead = !chuupdate(&agent, location_messages, infection_messages	);
+	int dead = !chuupdate(&agent, location_messages, church_infection_messages	);
 	
 
 	
@@ -4887,7 +7255,7 @@ __global__ void GPUFLAME_chuinit(xmachine_memory_ChurchMembership_list* agents, 
 /**
  *
  */
-__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachine_message_location_list* location_messages, xmachine_message_transport_infection_list* transport_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -4912,7 +7280,7 @@ __global__ void GPUFLAME_trupdate(xmachine_memory_Transport_list* agents, xmachi
 	}
 
 	//FLAME function call
-	int dead = !trupdate(&agent, location_messages, infection_messages	);
+	int dead = !trupdate(&agent, location_messages, transport_infection_messages	);
 	
 
 	
@@ -4966,7 +7334,7 @@ __global__ void GPUFLAME_trinit(xmachine_memory_TransportMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_message_location_list* location_messages, xmachine_message_clinic_infection_list* clinic_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -4989,7 +7357,7 @@ __global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_
 	}
 
 	//FLAME function call
-	int dead = !clupdate(&agent, location_messages, infection_messages	);
+	int dead = !clupdate(&agent, location_messages, clinic_infection_messages	);
 	
 
 	
@@ -5007,7 +7375,7 @@ __global__ void GPUFLAME_clupdate(xmachine_memory_Clinic_list* agents, xmachine_
 /**
  *
  */
-__global__ void GPUFLAME_wpupdate(xmachine_memory_Workplace_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_wpupdate(xmachine_memory_Workplace_list* agents, xmachine_message_location_list* location_messages, xmachine_message_workplace_infection_list* workplace_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -5030,7 +7398,7 @@ __global__ void GPUFLAME_wpupdate(xmachine_memory_Workplace_list* agents, xmachi
 	}
 
 	//FLAME function call
-	int dead = !wpupdate(&agent, location_messages, infection_messages	);
+	int dead = !wpupdate(&agent, location_messages, workplace_infection_messages	);
 	
 
 	
@@ -5081,7 +7449,7 @@ __global__ void GPUFLAME_wpinit(xmachine_memory_WorkplaceMembership_list* agents
 /**
  *
  */
-__global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_message_location_list* location_messages, xmachine_message_bar_infection_list* bar_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -5104,7 +7472,7 @@ __global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_mess
 	}
 
 	//FLAME function call
-	int dead = !bupdate(&agent, location_messages, infection_messages	);
+	int dead = !bupdate(&agent, location_messages, bar_infection_messages	);
 	
 
 	
@@ -5122,7 +7490,7 @@ __global__ void GPUFLAME_bupdate(xmachine_memory_Bar_list* agents, xmachine_mess
 /**
  *
  */
-__global__ void GPUFLAME_schupdate(xmachine_memory_School_list* agents, xmachine_message_location_list* location_messages, xmachine_message_infection_list* infection_messages){
+__global__ void GPUFLAME_schupdate(xmachine_memory_School_list* agents, xmachine_message_location_list* location_messages, xmachine_message_school_infection_list* school_infection_messages){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -5145,7 +7513,7 @@ __global__ void GPUFLAME_schupdate(xmachine_memory_School_list* agents, xmachine
 	}
 
 	//FLAME function call
-	int dead = !schupdate(&agent, location_messages, infection_messages	);
+	int dead = !schupdate(&agent, location_messages, school_infection_messages	);
 	
 
 	
