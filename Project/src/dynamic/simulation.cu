@@ -2588,6 +2588,7 @@ float h_env_BAR_A;
 float h_env_BAR_V;
 float h_env_SCHOOL_A;
 float h_env_SCHOOL_V;
+unsigned int h_env_SEED;
 
 
 //constant setter
@@ -3444,6 +3445,19 @@ void set_SCHOOL_V(float* h_SCHOOL_V){
 //constant getter
 const float* get_SCHOOL_V(){
     return &h_env_SCHOOL_V;
+}
+
+
+
+//constant setter
+void set_SEED(unsigned int* h_SEED){
+    gpuErrchk(cudaMemcpyToSymbol(SEED, h_SEED, sizeof(unsigned int)));
+    memcpy(&h_env_SEED, h_SEED,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_SEED(){
+    return &h_env_SEED;
 }
 
 

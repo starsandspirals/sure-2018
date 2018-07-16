@@ -6825,6 +6825,8 @@ __constant__ float SCHOOL_A;
 
 __constant__ float SCHOOL_V;
 
+__constant__ unsigned int SEED;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -7550,6 +7552,17 @@ extern const float* get_SCHOOL_V();
 
 
 extern float h_env_SCHOOL_V;
+
+/** set_SEED
+ * Sets the constant variable SEED on the device which can then be used in the agent functions.
+ * @param h_SEED value to set the variable
+ */
+extern void set_SEED(unsigned int* h_SEED);
+
+extern const unsigned int* get_SEED();
+
+
+extern unsigned int h_env_SEED;
 
 
 /** getMaximumBound

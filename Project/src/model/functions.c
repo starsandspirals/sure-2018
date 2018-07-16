@@ -278,7 +278,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   unsigned int bar_size = *get_BAR_SIZE();
   unsigned int school_size = *get_SCHOOL_SIZE();
 
-  srand(0);
+  unsigned int seed = *get_SEED();
+
+  srand(seed);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
   // of memory for each one.

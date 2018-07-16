@@ -491,6 +491,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_SCHOOL_V()));
     fputs(data, file);
     fputs("</SCHOOL_V>\n", file);
+    fputs("\t<SEED>", file);
+    sprintf(data, "%u", (*get_SEED()));
+    fputs(data, file);
+    fputs("</SEED>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1324,6 +1328,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_SCHOOL_A(&t_SCHOOL_A);
     float t_SCHOOL_V = (float)40;
     set_SCHOOL_V(&t_SCHOOL_V);
+    unsigned int t_SEED = (unsigned int)0;
+    set_SEED(&t_SEED);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1555,6 +1561,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_SCHOOL_V;
     
+    int in_env_SEED;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1715,6 +1723,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_BAR_V;
     float env_SCHOOL_A;
     float env_SCHOOL_V;
+    unsigned int env_SEED;
     
 
 
@@ -1873,6 +1882,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_BAR_V = 0;
     in_env_SCHOOL_A = 0;
     in_env_SCHOOL_V = 0;
+    in_env_SEED = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -2177,6 +2187,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_V = 0;
     env_SCHOOL_A = 0;
     env_SCHOOL_V = 0;
+    env_SEED = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2828,6 +2839,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/SCHOOL_A") == 0) in_env_SCHOOL_A = 0;
 			if(strcmp(buffer, "SCHOOL_V") == 0) in_env_SCHOOL_V = 1;
             if(strcmp(buffer, "/SCHOOL_V") == 0) in_env_SCHOOL_V = 0;
+			if(strcmp(buffer, "SEED") == 0) in_env_SEED = 1;
+            if(strcmp(buffer, "/SEED") == 0) in_env_SEED = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -3534,6 +3547,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_SCHOOL_V = (float) fgpu_atof(buffer);
                     
                     set_SCHOOL_V(&env_SCHOOL_V);
+                  
+              }
+            if(in_env_SEED){
+              
+                    env_SEED = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_SEED(&env_SEED);
                   
               }
             
