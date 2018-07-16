@@ -1266,7 +1266,14 @@ __FLAME_GPU_EXIT_FUNC__ void exitFunction()
   h_free_agent_TransportMembership_array(&h_trmembership_AoS,
                                          h_trmembership_AoS_MAX);
 
-  printf("Population for exit function: %u\n", get_agent_Person_s2_count());
+  unsigned int population =
+      get_agent_Person_s2_count() + get_agent_Household_hhdefault_count() +
+      get_agent_Church_chudefault_count() +
+      get_agent_Transport_trdefault_count() +
+      get_agent_Workplace_wpdefault_count() + get_agent_Bar_bdefault_count() +
+      get_agent_School_schdefault_count();
+
+  printf("Population for exit function: %u\n", population);
 }
 
 // The update functions for each agent type, which are involved in deciding
@@ -1882,9 +1889,9 @@ __FLAME_GPU_FUNC__ int personschinit(
     xmachine_memory_Person *person,
     xmachine_message_school_membership_list *school_membership_messages)
 {
-  unsigned int personid = person->id;
+  // unsigned int personid = person->id;
   person->school = -1;
-  xmachine_message_school_membership *school_membership_message =
+  /* xmachine_message_school_membership *school_membership_message =
       get_first_school_membership_message(school_membership_messages);
 
   while (school_membership_message)
@@ -1895,7 +1902,7 @@ __FLAME_GPU_FUNC__ int personschinit(
     }
     school_membership_message = get_next_school_membership_message(
         school_membership_message, school_membership_messages);
-  }
+  } */
 
   return 0;
 }
