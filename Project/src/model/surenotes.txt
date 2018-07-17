@@ -1,0 +1,279 @@
+Building types
+0: household
+1: church
+2: transport
+3: clinic
+4: workplace
+5: bar
+6: school
+
+Input parameters
+
+STARTING_POPULATION
+The number of person agents that will be generated, scaling the values in the histogram
+Default value: 30000
+
+MAX_AGE
+The maximum age that will be generated in categories where the upper bound is “inf”
+Default value: 100
+
+TIME_STEP
+How much time passes on each iteration, in increments of 5 minutes
+Default value: 1
+
+SEED
+The seed for the random number generator (don’t use 1 for this)
+Default value: 0
+
+CHURCH_BETA0
+Default value: 2.19261
+
+CHURCH_BETA1
+Default value: 0.14679
+
+CHURCH_PROB0
+The cumulative probability that someone will have been to church 0 times last week
+Default value: 0.285569106
+
+CHURCH_PROB1
+Default value: 0.704268293
+
+CHURCH_PROB2
+Default value: 0.864329269
+
+CHURCH_PROB3
+Default value: 0.944613822
+
+CHURCH_PROB4
+Default value: 0.978658537
+
+CHURCH_PROB5
+Default value: 0.981707317
+
+CHURCH_PROB6
+Default value: 0.985772358
+
+(church_prob7 is calculated automatically, as 1 – church_prob6)
+
+CHURCH_PROPORTION
+The proportion of churches that will have a duration of 1.5 hours
+Default value: 0.5
+
+CHURCH_K1
+Default value: 13
+
+CHURCH_K2
+Default value: 35
+
+CHURCH_K3
+Default value: 100
+
+CHURCH_P1
+The cumulative proportion of churches with size K1
+Default value: 0.14
+
+CHURCH_P2
+Default value: 0.32
+
+(church_p3 is calculated automatically, as 1 – church_p2)
+
+TRANSPORT_BETA0
+Default value: 1.682127
+
+TRANSPORT_BETA1
+Default value: -0.007739
+
+TRANSPORT_FREQ0
+The cumulative proportion of transport users who travel 0x per week
+Default value: 0.4337998
+
+TRANSPORT_FREQ2
+Default value: 0.8439182
+
+(transport_freq4 is calculated automatically, as 1 – transport_freq2)
+
+TRANSPORT_DUR20
+The cumulative proportion of transports with a trip length of 20 mins
+Default value: 0.5011086
+
+TRANSPORT_DUR45
+Default value: 0.8381374
+
+(transport_dur60 is calculated automatically, as 1 – transport_dur45)
+
+TRANSPORT_SIZE
+The number of people who travel on a given transport
+Default value: 15
+
+WORKPLACE_BETA0
+Default value: -1.78923
+
+WORKPLACE_BETAA
+Default value: -0.03557
+
+WORKPLACE_BETAS
+Default value: 0.16305
+
+WORKPLACE_BETAAS
+Default value: 0.04272
+WORKPLACE_DUR
+The time people spend at the workplace, in hours
+Default value: 8
+
+WORKPLACE_SIZE
+The number of people at a given workplace
+Default value: 20
+
+BAR_BETA0
+Default value: -1.80628
+
+BAR_BETAA
+Default value: -0.02073
+
+BAR_BETAS
+Default value: -0.02073
+
+BAR_BETAAS
+Default value: 0.02204
+
+BAR_M_PROB1
+The cumulative probability that a man will go to the bar 1x per week
+Default value: 0.22
+
+BAR_M_PROB2
+Default value: 0.37
+
+BAR_M_PROB3
+Default value: 0.51
+
+BAR_M_PROB4
+Default value: 0.59
+
+BAR_M_PROB5
+Default value: 0.63
+
+BAR_M_PROB7
+Default value: 0.74
+
+(remainder visit 1x per month)
+
+BAR_F_PROB1
+Default value: 0.23
+
+BAR_F_PROB2
+Default value: 0.38
+
+BAR_F_PROB3
+Default value: 0.55
+
+BAR_F_PROB4
+Default value: 0.62
+
+BAR_F_PROB5
+Default value: 0.67
+
+BAR_F_PROB7
+Default value: 0.71
+
+BAR_DUR
+The time people spend at the bar, in minutes
+Default value: 90
+
+BAR_SIZE
+The mean number of people at a given bar
+Default value: 20
+
+SCHOOL_DUR
+The time people spend at school, in hours
+Default value: 6
+
+SCHOOL_SIZE
+The number of people at a given school (classroom)
+Default value: 40
+
+CLINIC_DUR
+The time people spend at the clinic, in hours
+Default value: 3
+
+TB_PREVALENCE
+Default value: 0.005
+
+RR_AS_F_18
+The risk ratio for age and sex for women aged 18-25
+Default value: 1.00
+
+RR_AS_F_26
+The risk ratio for age and sex for women aged 26-45
+Default value: 1.25
+
+RR_AS_F_46
+The risk ratio for age and sex for women aged 46+
+Default value: 0.50
+
+RR_AS_M_18
+Default value: 1.00
+
+RR_AS_M_26
+Default value: 3.75
+
+RR_AS_M_46
+Default value: 1.25
+
+HIV_PREVALENCE
+Proportion of people aged over 18 who have HIV
+Default value: 0.14
+
+ART_COVERAGE
+Proportion of people with HIV who are on ART
+Default value: 0.21
+
+RR_HIV
+Default value: 4.5
+
+RR_ART
+Default value: 0.4
+
+DEFAULT_Q
+The default q value for a person agent
+Default value: 1
+
+DEFAULT_P
+Default value: 0.36
+
+HOUSEHOLD_A
+CHURCH_A
+TRANSPORT_A
+CLINIC_A
+WORKPLACE_A
+BAR_A
+SCHOOL_A
+Default value: 3
+
+TRANSPORT_V
+Default value: 20
+
+HOUSEHOLD_V
+Default value: 30
+
+CLINIC_V
+Default value: 40
+
+WORKPLACE_V
+Default value: 40
+
+BAR_V
+Default value: 40
+
+SCHOOL_V
+Default value: 40
+
+CHURCH_V_MULTIPLIER
+The amount of volume in a church per unit of size (per adult who attends the church)
+Default value: 1
+
+
+
+
+
+
+
