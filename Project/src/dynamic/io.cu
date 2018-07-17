@@ -359,6 +359,14 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_DEFAULT_Q()));
     fputs(data, file);
     fputs("</DEFAULT_Q>\n", file);
+    fputs("\t<DEFAULT_K>", file);
+    sprintf(data, "%u", (*get_DEFAULT_K()));
+    fputs(data, file);
+    fputs("</DEFAULT_K>\n", file);
+    fputs("\t<THETA>", file);
+    sprintf(data, "%f", (*get_THETA()));
+    fputs(data, file);
+    fputs("</THETA>\n", file);
     fputs("\t<TRANSPORT_A>", file);
     sprintf(data, "%f", (*get_TRANSPORT_A()));
     fputs(data, file);
@@ -1352,6 +1360,10 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_DEFAULT_F_P(&t_DEFAULT_F_P);
     float t_DEFAULT_Q = (float)1;
     set_DEFAULT_Q(&t_DEFAULT_Q);
+    unsigned int t_DEFAULT_K = (unsigned int)1;
+    set_DEFAULT_K(&t_DEFAULT_K);
+    float t_THETA = (float)0;
+    set_THETA(&t_THETA);
     float t_TRANSPORT_A = (float)3;
     set_TRANSPORT_A(&t_TRANSPORT_A);
     float t_CHURCH_A = (float)3;
@@ -1634,6 +1646,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_DEFAULT_Q;
     
+    int in_env_DEFAULT_K;
+    
+    int in_env_THETA;
+    
     int in_env_TRANSPORT_A;
     
     int in_env_CHURCH_A;
@@ -1878,6 +1894,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_DEFAULT_M_P;
     float env_DEFAULT_F_P;
     float env_DEFAULT_Q;
+    unsigned int env_DEFAULT_K;
+    float env_THETA;
     float env_TRANSPORT_A;
     float env_CHURCH_A;
     float env_CLINIC_A;
@@ -2061,6 +2079,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_DEFAULT_M_P = 0;
     in_env_DEFAULT_F_P = 0;
     in_env_DEFAULT_Q = 0;
+    in_env_DEFAULT_K = 0;
+    in_env_THETA = 0;
     in_env_TRANSPORT_A = 0;
     in_env_CHURCH_A = 0;
     in_env_CLINIC_A = 0;
@@ -2389,6 +2409,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_DEFAULT_M_P = 0;
     env_DEFAULT_F_P = 0;
     env_DEFAULT_Q = 0;
+    env_DEFAULT_K = 0;
+    env_THETA = 0;
     env_TRANSPORT_A = 0;
     env_CHURCH_A = 0;
     env_CLINIC_A = 0;
@@ -3029,6 +3051,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/DEFAULT_F_P") == 0) in_env_DEFAULT_F_P = 0;
 			if(strcmp(buffer, "DEFAULT_Q") == 0) in_env_DEFAULT_Q = 1;
             if(strcmp(buffer, "/DEFAULT_Q") == 0) in_env_DEFAULT_Q = 0;
+			if(strcmp(buffer, "DEFAULT_K") == 0) in_env_DEFAULT_K = 1;
+            if(strcmp(buffer, "/DEFAULT_K") == 0) in_env_DEFAULT_K = 0;
+			if(strcmp(buffer, "THETA") == 0) in_env_THETA = 1;
+            if(strcmp(buffer, "/THETA") == 0) in_env_THETA = 0;
 			if(strcmp(buffer, "TRANSPORT_A") == 0) in_env_TRANSPORT_A = 1;
             if(strcmp(buffer, "/TRANSPORT_A") == 0) in_env_TRANSPORT_A = 0;
 			if(strcmp(buffer, "CHURCH_A") == 0) in_env_CHURCH_A = 1;
@@ -3619,6 +3645,20 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_DEFAULT_Q = (float) fgpu_atof(buffer);
                     
                     set_DEFAULT_Q(&env_DEFAULT_Q);
+                  
+              }
+            if(in_env_DEFAULT_K){
+              
+                    env_DEFAULT_K = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_DEFAULT_K(&env_DEFAULT_K);
+                  
+              }
+            if(in_env_THETA){
+              
+                    env_THETA = (float) fgpu_atof(buffer);
+                    
+                    set_THETA(&env_THETA);
                   
               }
             if(in_env_TRANSPORT_A){

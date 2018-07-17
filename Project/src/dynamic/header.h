@@ -1162,9 +1162,9 @@ __FLAME_GPU_FUNC__ int personhhinit(xmachine_memory_Person* agent, xmachine_mess
 /**
  * persontbinit FLAMEGPU Agent Function
  * @param agent Pointer to an agent structure of type xmachine_memory_Person. This represents a single agent instance and can be modified directly.
- * @param tb_assignment_messages  tb_assignment_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_tb_assignment_message and get_next_tb_assignment_message functions.
+ * @param tb_assignment_messages  tb_assignment_messages Pointer to input message list of type xmachine_message__list. Must be passed as an argument to the get_first_tb_assignment_message and get_next_tb_assignment_message functions.* @param rand48 Pointer to the seed list of type RNG_rand48. Must be passed as an argument to the rand48 function for generating random numbers on the GPU.
  */
-__FLAME_GPU_FUNC__ int persontbinit(xmachine_memory_Person* agent, xmachine_message_tb_assignment_list* tb_assignment_messages);
+__FLAME_GPU_FUNC__ int persontbinit(xmachine_memory_Person* agent, xmachine_message_tb_assignment_list* tb_assignment_messages, RNG_rand48* rand48);
 
 /**
  * persontrinit FLAMEGPU Agent Function
@@ -7099,6 +7099,10 @@ __constant__ float DEFAULT_F_P;
 
 __constant__ float DEFAULT_Q;
 
+__constant__ unsigned int DEFAULT_K;
+
+__constant__ float THETA;
+
 __constant__ float TRANSPORT_A;
 
 __constant__ float CHURCH_A;
@@ -7579,6 +7583,28 @@ extern const float* get_DEFAULT_Q();
 
 
 extern float h_env_DEFAULT_Q;
+
+/** set_DEFAULT_K
+ * Sets the constant variable DEFAULT_K on the device which can then be used in the agent functions.
+ * @param h_DEFAULT_K value to set the variable
+ */
+extern void set_DEFAULT_K(unsigned int* h_DEFAULT_K);
+
+extern const unsigned int* get_DEFAULT_K();
+
+
+extern unsigned int h_env_DEFAULT_K;
+
+/** set_THETA
+ * Sets the constant variable THETA on the device which can then be used in the agent functions.
+ * @param h_THETA value to set the variable
+ */
+extern void set_THETA(float* h_THETA);
+
+extern const float* get_THETA();
+
+
+extern float h_env_THETA;
 
 /** set_TRANSPORT_A
  * Sets the constant variable TRANSPORT_A on the device which can then be used in the agent functions.

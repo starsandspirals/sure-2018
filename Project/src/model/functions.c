@@ -1193,6 +1193,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   set_SCHOOL_EXP(&school_exp);
   set_PROB(&prob);
 
+  float theta = *get_DEFAULT_Q() / *get_DEFAULT_K();
+
+  set_THETA(&theta);
+
   fclose(file);
 }
 
@@ -2031,9 +2035,11 @@ __FLAME_GPU_FUNC__ int hhinit(
 
 __FLAME_GPU_FUNC__ int
 persontbinit(xmachine_memory_Person *person,
-             xmachine_message_tb_assignment_list *tb_assignment_messages)
+             xmachine_message_tb_assignment_list *tb_assignment_messages,
+             RNG_rand48 *rand48)
 {
   unsigned int personid = person->id;
+  float usum;
 
   if (person->gender == 1)
   {
@@ -2043,7 +2049,16 @@ persontbinit(xmachine_memory_Person *person,
   {
     person->p = DEFAULT_F_P;
   }
-  person->q = DEFAULT_Q;
+
+  for (unsigned int i = 0; i < DEFAULT_K; i++) {
+    float random = rnd<CONTINUOUS>(rand48);
+
+    float u = log(random);
+
+    usum += u;
+  }
+
+  person->q = -usum * THETA;
 
   xmachine_message_tb_assignment *tb_assignment_message =
       get_first_tb_assignment_message(tb_assignment_messages);

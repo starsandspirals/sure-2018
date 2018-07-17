@@ -171,6 +171,16 @@
         <defaultValue>1</defaultValue>
       </gpu:variable>
       <gpu:variable>
+        <type>unsigned int</type>
+        <name>DEFAULT_K</name>
+        <defaultValue>1</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>THETA</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
         <type>float</type>
         <name>TRANSPORT_A</name>
         <defaultValue>3</defaultValue>
@@ -904,7 +914,7 @@
             </gpu:input>
           </inputs>
           <gpu:reallocate>false</gpu:reallocate>
-          <gpu:RNG>false</gpu:RNG>
+          <gpu:RNG>true</gpu:RNG>
         </gpu:function>
         <gpu:function>
           <name>persontrinit</name>

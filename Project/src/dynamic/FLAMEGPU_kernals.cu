@@ -6375,7 +6375,7 @@ __global__ void GPUFLAME_personhhinit(xmachine_memory_Person_list* agents, xmach
 /**
  *
  */
-__global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmachine_message_tb_assignment_list* tb_assignment_messages){
+__global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmachine_message_tb_assignment_list* tb_assignment_messages, RNG_rand48* rand48){
 	
 	//continuous agent: index is agent position in 1D agent list
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -6474,7 +6474,7 @@ __global__ void GPUFLAME_persontbinit(xmachine_memory_Person_list* agents, xmach
 	}
 
 	//FLAME function call
-	int dead = !persontbinit(&agent, tb_assignment_messages);
+	int dead = !persontbinit(&agent, tb_assignment_messages, rand48);
 	
 
 	

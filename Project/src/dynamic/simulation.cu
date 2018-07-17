@@ -2844,6 +2844,8 @@ float h_env_TB_PREVALENCE;
 float h_env_DEFAULT_M_P;
 float h_env_DEFAULT_F_P;
 float h_env_DEFAULT_Q;
+unsigned int h_env_DEFAULT_K;
+float h_env_THETA;
 float h_env_TRANSPORT_A;
 float h_env_CHURCH_A;
 float h_env_CLINIC_A;
@@ -3330,6 +3332,32 @@ void set_DEFAULT_Q(float* h_DEFAULT_Q){
 //constant getter
 const float* get_DEFAULT_Q(){
     return &h_env_DEFAULT_Q;
+}
+
+
+
+//constant setter
+void set_DEFAULT_K(unsigned int* h_DEFAULT_K){
+    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_K, h_DEFAULT_K, sizeof(unsigned int)));
+    memcpy(&h_env_DEFAULT_K, h_DEFAULT_K,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_DEFAULT_K(){
+    return &h_env_DEFAULT_K;
+}
+
+
+
+//constant setter
+void set_THETA(float* h_THETA){
+    gpuErrchk(cudaMemcpyToSymbol(THETA, h_THETA, sizeof(float)));
+    memcpy(&h_env_THETA, h_THETA,sizeof(float));
+}
+
+//constant getter
+const float* get_THETA(){
+    return &h_env_THETA;
 }
 
 
@@ -15476,7 +15504,7 @@ void Person_persontbinit(cudaStream_t &stream){
 	//Input        : tb_assignment
 	//Output       : 
 	//Agent Output : 
-	GPUFLAME_persontbinit<<<g, b, sm_size, stream>>>(d_Persons, d_tb_assignments);
+	GPUFLAME_persontbinit<<<g, b, sm_size, stream>>>(d_Persons, d_tb_assignments, d_rand48);
 	gpuErrchkLaunch();
 	
 	
