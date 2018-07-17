@@ -21,6 +21,10 @@ TIME_STEP
 How much time passes on each iteration, in increments of 5 minutes
 Default value: 1
 
+OUTPUT_ID
+A distinguishing integer that will be appended to the output filename
+Default value: 0
+
 SEED
 The seed for the random number generator (don’t use 1 for this)
 Default value: 0
@@ -53,7 +57,7 @@ Default value: 0.981707317
 CHURCH_PROB6
 Default value: 0.985772358
 
-(church_prob7 is calculated automatically, as 1 – church_prob6)
+(Remaining probability is assigned to people who go to church 7x a week)
 
 CHURCH_PROPORTION
 The proportion of churches that will have a duration of 1.5 hours
@@ -75,7 +79,7 @@ Default value: 0.14
 CHURCH_P2
 Default value: 0.32
 
-(church_p3 is calculated automatically, as 1 – church_p2)
+(Remaining probability is assigned to churches of size K3)
 
 TRANSPORT_BETA0
 Default value: 1.682127
@@ -90,7 +94,7 @@ Default value: 0.4337998
 TRANSPORT_FREQ2
 Default value: 0.8439182
 
-(transport_freq4 is calculated automatically, as 1 – transport_freq2)
+(Remaining probability is assigned to transport users who travel 4x a week)
 
 TRANSPORT_DUR20
 The cumulative proportion of transports with a trip length of 20 mins
@@ -99,7 +103,7 @@ Default value: 0.5011086
 TRANSPORT_DUR45
 Default value: 0.8381374
 
-(transport_dur60 is calculated automatically, as 1 – transport_dur45)
+(Remaining probability is assigned to transports with a trip length of 60 mins)
 
 TRANSPORT_SIZE
 The number of people who travel on a given transport
@@ -234,18 +238,38 @@ RR_ART
 Default value: 0.4
 
 DEFAULT_Q
-The default q value for a person agent
+The mean q value for a person agent, equal to k * theta
 Default value: 1
 
-DEFAULT_P
+DEFAULT_K
+The value of k used to calculate theta, must be an integer
+Default value: 1
+
+DEFAULT_M_P
+The default p value for a male person agent
+Default value: 0.36
+
+DEFAULT_F_P
 Default value: 0.36
 
 HOUSEHOLD_A
+Default value: 3
+
 CHURCH_A
+Default value: 3
+
 TRANSPORT_A
+Default value: 3
+
 CLINIC_A
+Default value: 3
+
 WORKPLACE_A
+Default value: 3
+
 BAR_A
+Default value: 3
+
 SCHOOL_A
 Default value: 3
 
