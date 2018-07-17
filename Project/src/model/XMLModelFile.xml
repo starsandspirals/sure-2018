@@ -475,6 +475,11 @@
         <name>VISITING_DUR</name>
         <defaultValue>40</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>unsigned int</type>
+        <name>OUTPUT_ID</name>
+        <defaultValue>0</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

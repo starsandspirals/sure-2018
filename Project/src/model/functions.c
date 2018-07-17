@@ -1218,11 +1218,13 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
   // check which iteration we are currently on.
   const char *directory = getOutputDir();
 
+  int output_id = *get_OUTPUT_ID();
+
   // If there is new information about the person agents to output, this code
   // creates a csv file and outputs data about people and their variables to
   // that file.
   std::string outputFilename =
-      std::string(std::string(directory) + "person-output.csv");
+      std::string(std::string(directory) + "person-output-" + std::to_string(output_id) + ".csv");
 
   FILE *fp = fopen(outputFilename.c_str(), "w");
 

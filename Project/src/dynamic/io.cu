@@ -603,6 +603,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_VISITING_DUR()));
     fputs(data, file);
     fputs("</VISITING_DUR>\n", file);
+    fputs("\t<OUTPUT_ID>", file);
+    sprintf(data, "%u", (*get_OUTPUT_ID()));
+    fputs(data, file);
+    fputs("</OUTPUT_ID>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1492,6 +1496,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_SCHOOL_DUR(&t_SCHOOL_DUR);
     float t_VISITING_DUR = (float)40;
     set_VISITING_DUR(&t_VISITING_DUR);
+    unsigned int t_OUTPUT_ID = (unsigned int)0;
+    set_OUTPUT_ID(&t_OUTPUT_ID);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1779,6 +1785,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_VISITING_DUR;
     
+    int in_env_OUTPUT_ID;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1967,6 +1975,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_BAR_DUR;
     float env_SCHOOL_DUR;
     float env_VISITING_DUR;
+    unsigned int env_OUTPUT_ID;
     
 
 
@@ -2153,6 +2162,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_BAR_DUR = 0;
     in_env_SCHOOL_DUR = 0;
     in_env_VISITING_DUR = 0;
+    in_env_OUTPUT_ID = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -2485,6 +2495,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_DUR = 0;
     env_SCHOOL_DUR = 0;
     env_VISITING_DUR = 0;
+    env_OUTPUT_ID = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -3192,6 +3203,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/SCHOOL_DUR") == 0) in_env_SCHOOL_DUR = 0;
 			if(strcmp(buffer, "VISITING_DUR") == 0) in_env_VISITING_DUR = 1;
             if(strcmp(buffer, "/VISITING_DUR") == 0) in_env_VISITING_DUR = 0;
+			if(strcmp(buffer, "OUTPUT_ID") == 0) in_env_OUTPUT_ID = 1;
+            if(strcmp(buffer, "/OUTPUT_ID") == 0) in_env_OUTPUT_ID = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -4094,6 +4107,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_VISITING_DUR = (float) fgpu_atof(buffer);
                     
                     set_VISITING_DUR(&env_VISITING_DUR);
+                  
+              }
+            if(in_env_OUTPUT_ID){
+              
+                    env_OUTPUT_ID = (unsigned int) fpgu_strtoul(buffer);
+                    
+                    set_OUTPUT_ID(&env_OUTPUT_ID);
                   
               }
             

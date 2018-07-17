@@ -7294,6 +7294,8 @@ __constant__ float SCHOOL_DUR;
 
 __constant__ float VISITING_DUR;
 
+__constant__ unsigned int OUTPUT_ID;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -8327,6 +8329,17 @@ extern const float* get_VISITING_DUR();
 
 
 extern float h_env_VISITING_DUR;
+
+/** set_OUTPUT_ID
+ * Sets the constant variable OUTPUT_ID on the device which can then be used in the agent functions.
+ * @param h_OUTPUT_ID value to set the variable
+ */
+extern void set_OUTPUT_ID(unsigned int* h_OUTPUT_ID);
+
+extern const unsigned int* get_OUTPUT_ID();
+
+
+extern unsigned int h_env_OUTPUT_ID;
 
 
 /** getMaximumBound

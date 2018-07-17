@@ -2909,6 +2909,7 @@ float h_env_CLINIC_DUR;
 float h_env_BAR_DUR;
 float h_env_SCHOOL_DUR;
 float h_env_VISITING_DUR;
+unsigned int h_env_OUTPUT_ID;
 
 
 //constant setter
@@ -4129,6 +4130,19 @@ void set_VISITING_DUR(float* h_VISITING_DUR){
 //constant getter
 const float* get_VISITING_DUR(){
     return &h_env_VISITING_DUR;
+}
+
+
+
+//constant setter
+void set_OUTPUT_ID(unsigned int* h_OUTPUT_ID){
+    gpuErrchk(cudaMemcpyToSymbol(OUTPUT_ID, h_OUTPUT_ID, sizeof(unsigned int)));
+    memcpy(&h_env_OUTPUT_ID, h_OUTPUT_ID,sizeof(unsigned int));
+}
+
+//constant getter
+const unsigned int* get_OUTPUT_ID(){
+    return &h_env_OUTPUT_ID;
 }
 
 
