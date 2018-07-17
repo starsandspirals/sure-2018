@@ -653,6 +653,10 @@
           <name>lastinfectedid</name>
         </gpu:variable>
         <gpu:variable>
+          <type>int</type>
+          <name>lastinfectedtime</name>
+        </gpu:variable>
+        <gpu:variable>
           <type>float</type>
           <name>lambda</name>
         </gpu:variable>

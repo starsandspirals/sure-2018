@@ -240,6 +240,7 @@ struct __align__(16) xmachine_memory_Person
     unsigned int infections;    /**< X-machine memory variable infections of type unsigned int.*/
     int lastinfected;    /**< X-machine memory variable lastinfected of type int.*/
     int lastinfectedid;    /**< X-machine memory variable lastinfectedid of type int.*/
+    int lastinfectedtime;    /**< X-machine memory variable lastinfectedtime of type int.*/
     float lambda;    /**< X-machine memory variable lambda of type float.*/
     unsigned int timevisiting;    /**< X-machine memory variable timevisiting of type unsigned int.*/
     unsigned int bargoing;    /**< X-machine memory variable bargoing of type unsigned int.*/
@@ -628,6 +629,7 @@ struct xmachine_memory_Person_list
     unsigned int infections [xmachine_memory_Person_MAX];    /**< X-machine memory variable list infections of type unsigned int.*/
     int lastinfected [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfected of type int.*/
     int lastinfectedid [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfectedid of type int.*/
+    int lastinfectedtime [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lastinfectedtime of type int.*/
     float lambda [xmachine_memory_Person_MAX];    /**< X-machine memory variable list lambda of type float.*/
     unsigned int timevisiting [xmachine_memory_Person_MAX];    /**< X-machine memory variable list timevisiting of type unsigned int.*/
     unsigned int bargoing [xmachine_memory_Person_MAX];    /**< X-machine memory variable list bargoing of type unsigned int.*/
@@ -1720,13 +1722,14 @@ __FLAME_GPU_FUNC__ xmachine_message_school_infection * get_next_school_infection
  * @param infections	agent agent variable of type unsigned int
  * @param lastinfected	agent agent variable of type int
  * @param lastinfectedid	agent agent variable of type int
+ * @param lastinfectedtime	agent agent variable of type int
  * @param lambda	agent agent variable of type float
  * @param timevisiting	agent agent variable of type unsigned int
  * @param bargoing	agent agent variable of type unsigned int
  * @param barday	agent agent variable of type unsigned int
  * @param schooltime	agent agent variable of type unsigned int
  */
-__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime);
+__FLAME_GPU_FUNC__ void add_Person_agent(xmachine_memory_Person_list* agents, unsigned int id, unsigned int step, unsigned int householdtime, unsigned int churchtime, unsigned int transporttime, unsigned int clinictime, unsigned int workplacetime, unsigned int bartime, unsigned int outsidetime, unsigned int age, unsigned int gender, unsigned int householdsize, unsigned int churchfreq, float churchdur, unsigned int transportdur, int transportday1, int transportday2, unsigned int household, int church, int transport, int workplace, int school, unsigned int busy, unsigned int startstep, unsigned int location, unsigned int locationid, unsigned int hiv, unsigned int art, unsigned int activetb, unsigned int artday, float p, float q, unsigned int infections, int lastinfected, int lastinfectedid, int lastinfectedtime, float lambda, unsigned int timevisiting, unsigned int bargoing, unsigned int barday, unsigned int schooltime);
 
 /** add_TBAssignment_agent
  * Adds a new continuous valued TBAssignment agent to the xmachine_memory_TBAssignment_list list using a linear mapping. Note that any agent variables with an arrayLength are ommited and not support during the creation of new agents on the fly.
@@ -2860,6 +2863,15 @@ __host__ int get_Person_default_variable_lastinfected(unsigned int index);
  */
 __host__ int get_Person_default_variable_lastinfectedid(unsigned int index);
 
+/** int get_Person_default_variable_lastinfectedtime(unsigned int index)
+ * Gets the value of the lastinfectedtime variable of an Person agent in the default state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedtime
+ */
+__host__ int get_Person_default_variable_lastinfectedtime(unsigned int index);
+
 /** float get_Person_default_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Person agent in the default state on the host. 
  * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
@@ -3219,6 +3231,15 @@ __host__ int get_Person_s2_variable_lastinfected(unsigned int index);
  * @return value of agent variable lastinfectedid
  */
 __host__ int get_Person_s2_variable_lastinfectedid(unsigned int index);
+
+/** int get_Person_s2_variable_lastinfectedtime(unsigned int index)
+ * Gets the value of the lastinfectedtime variable of an Person agent in the s2 state on the host. 
+ * If the data is not currently on the host, a memcpy of the data of all agents in that state list will be issued, via a global.
+ * This has a potentially significant performance impact if used improperly.
+ * @param index the index of the agent within the list.
+ * @return value of agent variable lastinfectedtime
+ */
+__host__ int get_Person_s2_variable_lastinfectedtime(unsigned int index);
 
 /** float get_Person_s2_variable_lambda(unsigned int index)
  * Gets the value of the lambda variable of an Person agent in the s2 state on the host. 
@@ -5066,6 +5087,32 @@ int min_Person_default_lastinfectedid_variable();
  */
 int max_Person_default_lastinfectedid_variable();
 
+/** int reduce_Person_default_lastinfectedtime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_default_lastinfectedtime_variable();
+
+
+
+/** int count_Person_default_lastinfectedtime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_default_lastinfectedtime_variable(int count_value);
+
+/** int min_Person_default_lastinfectedtime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_default_lastinfectedtime_variable();
+/** int max_Person_default_lastinfectedtime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_default_lastinfectedtime_variable();
+
 /** float reduce_Person_default_lambda_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
@@ -6077,6 +6124,32 @@ int min_Person_s2_lastinfectedid_variable();
  * @return the minimum variable value of the specified agent name and state
  */
 int max_Person_s2_lastinfectedid_variable();
+
+/** int reduce_Person_s2_lastinfectedtime_variable();
+ * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the reduced variable value of the specified agent name and state
+ */
+int reduce_Person_s2_lastinfectedtime_variable();
+
+
+
+/** int count_Person_s2_lastinfectedtime_variable(int count_value){
+ * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
+ * @param count_value The unique value which should be counted
+ * @return The number of unique values of the count_value found in the agent state variable list
+ */
+int count_Person_s2_lastinfectedtime_variable(int count_value);
+
+/** int min_Person_s2_lastinfectedtime_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_Person_s2_lastinfectedtime_variable();
+/** int max_Person_s2_lastinfectedtime_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_Person_s2_lastinfectedtime_variable();
 
 /** float reduce_Person_s2_lambda_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables

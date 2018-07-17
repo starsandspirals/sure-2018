@@ -724,6 +724,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         // Generate the agent and free them from memory on the host.
         h_person->lastinfected = -1;
         h_person->lastinfectedid = -1;
+        h_person->lastinfectedtime = -1;
 
         h_add_agent_Person_default(h_person);
 
@@ -1238,17 +1239,14 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
                 "time_school, time_outside, "
                 "infections, "
                 "last_infected_type, "
-                "last_infected_id\n");
+                "last_infected_id, last_infected_time\n");
 
     for (int index = 0; index < get_agent_Person_s2_count(); index++)
     {
 
       fprintf(fp,
               "%u, %u, %u, %u, %u, %i, %i, %i, %u, %u, %u, %u, %u, %u, %u, %u, "
-              "%u, %u, "
-              "%u, %u, "
-              "%u, %i, "
-              "%i\n",
+              "%u, %u, %u, %u, %u, %i, %i, %i\n",
               get_Person_s2_variable_id(index),
               get_Person_s2_variable_gender(index),
               get_Person_s2_variable_age(index),
@@ -1271,7 +1269,8 @@ __FLAME_GPU_EXIT_FUNC__ void customOutputFunction()
               get_Person_s2_variable_outsidetime(index),
               get_Person_s2_variable_infections(index),
               get_Person_s2_variable_lastinfected(index),
-              get_Person_s2_variable_lastinfectedid(index));
+              get_Person_s2_variable_lastinfectedid(index),
+              get_Person_s2_variable_lastinfectedtime(index));
     }
 
     fflush(fp);
@@ -1476,7 +1475,8 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->locationid = 0;
     }
     else if (person->location == 3 &&
-             (float)(person->step - person->startstep) >= (CLINIC_DUR * 12 * TIME_STEP))
+             (float)(person->step - person->startstep) >=
+                 (CLINIC_DUR * 12 * TIME_STEP))
     {
       person->busy = 0;
       person->location = 7;
@@ -1491,21 +1491,24 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->locationid = 0;
     }
     else if (person->location == 5 &&
-             (float)(person->step - person->startstep) >= ((BAR_DUR / 5) * TIME_STEP))
+             (float)(person->step - person->startstep) >=
+                 ((BAR_DUR / 5) * TIME_STEP))
     {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
     }
     else if (person->location == 6 &&
-             (float)(person->step - person->startstep) >= (SCHOOL_DUR * 12 * TIME_STEP))
+             (float)(person->step - person->startstep) >=
+                 (SCHOOL_DUR * 12 * TIME_STEP))
     {
       person->busy = 0;
       person->location = 7;
       person->locationid = 0;
     }
     else if (person->location == 0 &&
-             (float)(person->step - person->startstep) >= ((VISITING_DUR / 12) * TIME_STEP))
+             (float)(person->step - person->startstep) >=
+                 ((VISITING_DUR / 12) * TIME_STEP))
     {
       person->busy = 0;
       person->locationid = person->household;
@@ -1575,8 +1578,8 @@ updatelambdahh(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_household_infection_message(infection_message, infection_messages);
+    infection_message = get_next_household_infection_message(
+        infection_message, infection_messages);
   }
 
   return 0;
@@ -1597,8 +1600,8 @@ updatelambdachu(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_church_infection_message(infection_message, infection_messages);
+    infection_message = get_next_church_infection_message(infection_message,
+                                                          infection_messages);
   }
 
   return 0;
@@ -1619,8 +1622,8 @@ updatelambdatr(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_transport_infection_message(infection_message, infection_messages);
+    infection_message = get_next_transport_infection_message(
+        infection_message, infection_messages);
   }
 
   return 0;
@@ -1641,8 +1644,8 @@ updatelambdacl(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_clinic_infection_message(infection_message, infection_messages);
+    infection_message = get_next_clinic_infection_message(infection_message,
+                                                          infection_messages);
   }
 
   return 0;
@@ -1663,8 +1666,8 @@ updatelambdawp(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_workplace_infection_message(infection_message, infection_messages);
+    infection_message = get_next_workplace_infection_message(
+        infection_message, infection_messages);
   }
 
   return 0;
@@ -1707,8 +1710,8 @@ updatelambdasch(xmachine_memory_Person *person,
     {
       person->lambda = infection_message->lambda;
     }
-    infection_message =
-        get_next_school_infection_message(infection_message, infection_messages);
+    infection_message = get_next_school_infection_message(infection_message,
+                                                          infection_messages);
   }
 
   return 0;
@@ -1718,8 +1721,7 @@ __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
                               RNG_rand48 *rand48)
 {
 
-  float prob =
-      1 - device_exp(-person->p * person->lambda * (TIME_STEP / 12));
+  float prob = 1 - device_exp(-person->p * person->lambda * (TIME_STEP / 12));
   float random = rnd<CONTINUOUS>(rand48);
 
   if (random < prob)
@@ -1727,6 +1729,7 @@ __FLAME_GPU_FUNC__ int infect(xmachine_memory_Person *person,
     person->infections++;
     person->lastinfected = person->location;
     person->lastinfectedid = person->locationid;
+    person->lastinfectedtime = person->step * 5 * TIME_STEP;
   }
 
   return 0;
@@ -1756,8 +1759,7 @@ hhupdate(xmachine_memory_Household *household,
 
   household->lambda =
       (household->lambda * HOUSEHOLD_EXP) +
-      ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) *
-       (1 - HOUSEHOLD_EXP));
+      ((qsum / (HOUSEHOLD_V * HOUSEHOLD_A)) * (1 - HOUSEHOLD_EXP));
 
   add_household_infection_message(infection_messages, household->id,
                                   household->lambda);
@@ -1820,8 +1822,7 @@ trupdate(xmachine_memory_Transport *transport,
 
   transport->lambda =
       (transport->lambda * TRANSPORT_EXP) +
-      ((qsum / (TRANSPORT_V * TRANSPORT_A)) *
-       (1 - TRANSPORT_EXP));
+      ((qsum / (TRANSPORT_V * TRANSPORT_A)) * (1 - TRANSPORT_EXP));
 
   add_transport_infection_message(infection_messages, transport->id,
                                   transport->lambda);
@@ -1852,8 +1853,7 @@ clupdate(xmachine_memory_Clinic *clinic,
   }
 
   clinic->lambda = (clinic->lambda * CLINIC_EXP) +
-                   ((qsum / (CLINIC_V * CLINIC_A)) *
-                    (1 - CLINIC_EXP));
+                   ((qsum / (CLINIC_V * CLINIC_A)) * (1 - CLINIC_EXP));
 
   add_clinic_infection_message(infection_messages, clinic->id, clinic->lambda);
 
@@ -1884,8 +1884,7 @@ wpupdate(xmachine_memory_Workplace *workplace,
 
   workplace->lambda =
       (workplace->lambda * WORKPLACE_EXP) +
-      ((qsum / (WORKPLACE_V * WORKPLACE_A)) *
-       (1 - WORKPLACE_EXP));
+      ((qsum / (WORKPLACE_V * WORKPLACE_A)) * (1 - WORKPLACE_EXP));
 
   add_workplace_infection_message(infection_messages, workplace->id,
                                   workplace->lambda);
@@ -1916,8 +1915,7 @@ bupdate(xmachine_memory_Bar *bar,
   }
 
   bar->lambda =
-      (bar->lambda * BAR_EXP) +
-      ((qsum / (BAR_V * BAR_A)) * (1 - BAR_EXP));
+      (bar->lambda * BAR_EXP) + ((qsum / (BAR_V * BAR_A)) * (1 - BAR_EXP));
 
   add_bar_infection_message(infection_messages, bar->id, bar->lambda);
 
@@ -1947,8 +1945,7 @@ schupdate(xmachine_memory_School *school,
   }
 
   school->lambda = (school->lambda * SCHOOL_EXP) +
-                   ((qsum / (SCHOOL_V * SCHOOL_A)) *
-                    (1 - SCHOOL_EXP));
+                   ((qsum / (SCHOOL_V * SCHOOL_A)) * (1 - SCHOOL_EXP));
 
   add_school_infection_message(infection_messages, school->id, school->lambda);
 
@@ -2050,7 +2047,8 @@ persontbinit(xmachine_memory_Person *person,
     person->p = DEFAULT_F_P;
   }
 
-  for (unsigned int i = 0; i < DEFAULT_K; i++) {
+  for (unsigned int i = 0; i < DEFAULT_K; i++)
+  {
     float random = rnd<CONTINUOUS>(rand48);
 
     float u = log(random);

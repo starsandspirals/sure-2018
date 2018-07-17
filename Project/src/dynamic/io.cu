@@ -785,6 +785,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
         
+		fputs("<lastinfectedtime>", file);
+        sprintf(data, "%d", h_Persons_default->lastinfectedtime[i]);
+		fputs(data, file);
+		fputs("</lastinfectedtime>\n", file);
+        
 		fputs("<lambda>", file);
         sprintf(data, "%f", h_Persons_default->lambda[i]);
 		fputs(data, file);
@@ -991,6 +996,11 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
         sprintf(data, "%d", h_Persons_s2->lastinfectedid[i]);
 		fputs(data, file);
 		fputs("</lastinfectedid>\n", file);
+        
+		fputs("<lastinfectedtime>", file);
+        sprintf(data, "%d", h_Persons_s2->lastinfectedtime[i]);
+		fputs(data, file);
+		fputs("</lastinfectedtime>\n", file);
         
 		fputs("<lambda>", file);
         sprintf(data, "%f", h_Persons_s2->lambda[i]);
@@ -1538,6 +1548,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_Person_infections;
     int in_Person_lastinfected;
     int in_Person_lastinfectedid;
+    int in_Person_lastinfectedtime;
     int in_Person_lambda;
     int in_Person_timevisiting;
     int in_Person_bargoing;
@@ -1820,6 +1831,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	unsigned int Person_infections;
 	int Person_lastinfected;
 	int Person_lastinfectedid;
+	int Person_lastinfectedtime;
 	float Person_lambda;
 	unsigned int Person_timevisiting;
 	unsigned int Person_bargoing;
@@ -2007,6 +2019,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	in_Person_infections = 0;
 	in_Person_lastinfected = 0;
 	in_Person_lastinfectedid = 0;
+	in_Person_lastinfectedtime = 0;
 	in_Person_lambda = 0;
 	in_Person_timevisiting = 0;
 	in_Person_bargoing = 0;
@@ -2179,6 +2192,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 		h_Persons->infections[k] = 0;
 		h_Persons->lastinfected[k] = 0;
 		h_Persons->lastinfectedid[k] = 0;
+		h_Persons->lastinfectedtime[k] = 0;
 		h_Persons->lambda[k] = 0;
 		h_Persons->timevisiting[k] = 0;
 		h_Persons->bargoing[k] = 0;
@@ -2335,6 +2349,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     Person_infections = 0;
     Person_lastinfected = 0;
     Person_lastinfectedid = 0;
+    Person_lastinfectedtime = 0;
     Person_lambda = 0;
     Person_timevisiting = 0;
     Person_bargoing = 0;
@@ -2566,6 +2581,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 					h_Persons->infections[*h_xmachine_memory_Person_count] = Person_infections;
 					h_Persons->lastinfected[*h_xmachine_memory_Person_count] = Person_lastinfected;
 					h_Persons->lastinfectedid[*h_xmachine_memory_Person_count] = Person_lastinfectedid;
+					h_Persons->lastinfectedtime[*h_xmachine_memory_Person_count] = Person_lastinfectedtime;
 					h_Persons->lambda[*h_xmachine_memory_Person_count] = Person_lambda;
 					h_Persons->timevisiting[*h_xmachine_memory_Person_count] = Person_timevisiting;
 					h_Persons->bargoing[*h_xmachine_memory_Person_count] = Person_bargoing;
@@ -2793,6 +2809,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 Person_infections = 0;
                 Person_lastinfected = 0;
                 Person_lastinfectedid = 0;
+                Person_lastinfectedtime = 0;
                 Person_lambda = 0;
                 Person_timevisiting = 0;
                 Person_bargoing = 0;
@@ -2905,6 +2922,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 			if(strcmp(buffer, "/lastinfected") == 0) in_Person_lastinfected = 0;
 			if(strcmp(buffer, "lastinfectedid") == 0) in_Person_lastinfectedid = 1;
 			if(strcmp(buffer, "/lastinfectedid") == 0) in_Person_lastinfectedid = 0;
+			if(strcmp(buffer, "lastinfectedtime") == 0) in_Person_lastinfectedtime = 1;
+			if(strcmp(buffer, "/lastinfectedtime") == 0) in_Person_lastinfectedtime = 0;
 			if(strcmp(buffer, "lambda") == 0) in_Person_lambda = 1;
 			if(strcmp(buffer, "/lambda") == 0) in_Person_lambda = 0;
 			if(strcmp(buffer, "timevisiting") == 0) in_Person_timevisiting = 1;
@@ -3295,6 +3314,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                 }
 				if(in_Person_lastinfectedid){
                     Person_lastinfectedid = (int) fpgu_strtol(buffer); 
+                }
+				if(in_Person_lastinfectedtime){
+                    Person_lastinfectedtime = (int) fpgu_strtol(buffer); 
                 }
 				if(in_Person_lambda){
                     Person_lambda = (float) fgpu_atof(buffer); 
