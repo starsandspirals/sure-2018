@@ -380,6 +380,66 @@
         <name>PROB</name>
         <defaultValue>0</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB1</name>
+        <defaultValue>0.22</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB2</name>
+        <defaultValue>0.37</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB3</name>
+        <defaultValue>0.51</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB4</name>
+        <defaultValue>0.59</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB5</name>
+        <defaultValue>0.63</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_M_PROB7</name>
+        <defaultValue>0.74</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB1</name>
+        <defaultValue>0.23</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB2</name>
+        <defaultValue>0.38</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB3</name>
+        <defaultValue>0.55</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB4</name>
+        <defaultValue>0.62</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB5</name>
+        <defaultValue>0.67</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_F_PROB7</name>
+        <defaultValue>0.71</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

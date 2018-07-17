@@ -288,6 +288,19 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   float bar_a = *get_BAR_A();
   float school_a = *get_SCHOOL_A();
 
+  float bar_m_prob1 = *get_BAR_M_PROB1();
+  float bar_m_prob2 = *get_BAR_M_PROB2();
+  float bar_m_prob3 = *get_BAR_M_PROB3();
+  float bar_m_prob4 = *get_BAR_M_PROB4();
+  float bar_m_prob5 = *get_BAR_M_PROB5();
+  float bar_m_prob7 = *get_BAR_M_PROB7();
+  float bar_f_prob1 = *get_BAR_F_PROB1();
+  float bar_f_prob2 = *get_BAR_F_PROB2();
+  float bar_f_prob3 = *get_BAR_F_PROB3();
+  float bar_f_prob4 = *get_BAR_F_PROB4();
+  float bar_f_prob5 = *get_BAR_F_PROB5();
+  float bar_f_prob7 = *get_BAR_F_PROB7();
+
   srand(seed);
 
   // Initialise all of the agent types with an id of 1 and allocating an array
@@ -580,32 +593,32 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
           if (sex == 0)
           {
-            if (random < 0.23)
+            if (random < bar_f_prob1)
             {
               h_person->barday = 1;
               barcount++;
             }
-            else if (random < 0.38)
+            else if (random < bar_f_prob2)
             {
               h_person->barday = 2;
               barcount += 2;
             }
-            else if (random < 0.55)
+            else if (random < bar_f_prob3)
             {
               h_person->barday = 3;
               barcount += 3;
             }
-            else if (random < 0.62)
+            else if (random < bar_f_prob4)
             {
               h_person->barday = 4;
               barcount += 4;
             }
-            else if (random < 0.67)
+            else if (random < bar_f_prob5)
             {
               h_person->barday = 5;
               barcount += 5;
             }
-            else if (random < 0.71)
+            else if (random < bar_f_prob7)
             {
               h_person->barday = 7;
               barcount += 7;
@@ -618,32 +631,32 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
           }
           else
           {
-            if (random < 0.22)
+            if (random < bar_m_prob1)
             {
               h_person->barday = 1;
               barcount++;
             }
-            else if (random < 0.37)
+            else if (random < bar_m_prob2)
             {
               h_person->barday = 2;
               barcount += 2;
             }
-            else if (random < 0.51)
+            else if (random < bar_m_prob3)
             {
               h_person->barday = 3;
               barcount += 3;
             }
-            else if (random < 0.59)
+            else if (random < bar_m_prob4)
             {
               h_person->barday = 4;
               barcount += 4;
             }
-            else if (random < 0.63)
+            else if (random < bar_m_prob5)
             {
               h_person->barday = 5;
               barcount += 5;
             }
-            else if (random < 0.74)
+            else if (random < bar_m_prob7)
             {
               h_person->barday = 7;
               barcount += 7;

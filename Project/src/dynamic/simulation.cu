@@ -2886,6 +2886,18 @@ float h_env_WORKPLACE_EXP;
 float h_env_BAR_EXP;
 float h_env_SCHOOL_EXP;
 float h_env_PROB;
+float h_env_BAR_M_PROB1;
+float h_env_BAR_M_PROB2;
+float h_env_BAR_M_PROB3;
+float h_env_BAR_M_PROB4;
+float h_env_BAR_M_PROB5;
+float h_env_BAR_M_PROB7;
+float h_env_BAR_F_PROB1;
+float h_env_BAR_F_PROB2;
+float h_env_BAR_F_PROB3;
+float h_env_BAR_F_PROB4;
+float h_env_BAR_F_PROB5;
+float h_env_BAR_F_PROB7;
 
 
 //constant setter
@@ -3859,6 +3871,162 @@ void set_PROB(float* h_PROB){
 //constant getter
 const float* get_PROB(){
     return &h_env_PROB;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB1(float* h_BAR_M_PROB1){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB1, h_BAR_M_PROB1, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB1, h_BAR_M_PROB1,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB1(){
+    return &h_env_BAR_M_PROB1;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB2(float* h_BAR_M_PROB2){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB2, h_BAR_M_PROB2, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB2, h_BAR_M_PROB2,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB2(){
+    return &h_env_BAR_M_PROB2;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB3(float* h_BAR_M_PROB3){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB3, h_BAR_M_PROB3, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB3, h_BAR_M_PROB3,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB3(){
+    return &h_env_BAR_M_PROB3;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB4(float* h_BAR_M_PROB4){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB4, h_BAR_M_PROB4, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB4, h_BAR_M_PROB4,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB4(){
+    return &h_env_BAR_M_PROB4;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB5(float* h_BAR_M_PROB5){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB5, h_BAR_M_PROB5, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB5, h_BAR_M_PROB5,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB5(){
+    return &h_env_BAR_M_PROB5;
+}
+
+
+
+//constant setter
+void set_BAR_M_PROB7(float* h_BAR_M_PROB7){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_M_PROB7, h_BAR_M_PROB7, sizeof(float)));
+    memcpy(&h_env_BAR_M_PROB7, h_BAR_M_PROB7,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_M_PROB7(){
+    return &h_env_BAR_M_PROB7;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB1(float* h_BAR_F_PROB1){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB1, h_BAR_F_PROB1, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB1, h_BAR_F_PROB1,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB1(){
+    return &h_env_BAR_F_PROB1;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB2(float* h_BAR_F_PROB2){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB2, h_BAR_F_PROB2, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB2, h_BAR_F_PROB2,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB2(){
+    return &h_env_BAR_F_PROB2;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB3(float* h_BAR_F_PROB3){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB3, h_BAR_F_PROB3, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB3, h_BAR_F_PROB3,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB3(){
+    return &h_env_BAR_F_PROB3;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB4(float* h_BAR_F_PROB4){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB4, h_BAR_F_PROB4, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB4, h_BAR_F_PROB4,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB4(){
+    return &h_env_BAR_F_PROB4;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB5(float* h_BAR_F_PROB5){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB5, h_BAR_F_PROB5, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB5, h_BAR_F_PROB5,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB5(){
+    return &h_env_BAR_F_PROB5;
+}
+
+
+
+//constant setter
+void set_BAR_F_PROB7(float* h_BAR_F_PROB7){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_F_PROB7, h_BAR_F_PROB7, sizeof(float)));
+    memcpy(&h_env_BAR_F_PROB7, h_BAR_F_PROB7,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_F_PROB7(){
+    return &h_env_BAR_F_PROB7;
 }
 
 

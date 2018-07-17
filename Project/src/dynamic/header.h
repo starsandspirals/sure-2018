@@ -7183,6 +7183,30 @@ __constant__ float SCHOOL_EXP;
 
 __constant__ float PROB;
 
+__constant__ float BAR_M_PROB1;
+
+__constant__ float BAR_M_PROB2;
+
+__constant__ float BAR_M_PROB3;
+
+__constant__ float BAR_M_PROB4;
+
+__constant__ float BAR_M_PROB5;
+
+__constant__ float BAR_M_PROB7;
+
+__constant__ float BAR_F_PROB1;
+
+__constant__ float BAR_F_PROB2;
+
+__constant__ float BAR_F_PROB3;
+
+__constant__ float BAR_F_PROB4;
+
+__constant__ float BAR_F_PROB5;
+
+__constant__ float BAR_F_PROB7;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -8007,6 +8031,138 @@ extern const float* get_PROB();
 
 
 extern float h_env_PROB;
+
+/** set_BAR_M_PROB1
+ * Sets the constant variable BAR_M_PROB1 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB1 value to set the variable
+ */
+extern void set_BAR_M_PROB1(float* h_BAR_M_PROB1);
+
+extern const float* get_BAR_M_PROB1();
+
+
+extern float h_env_BAR_M_PROB1;
+
+/** set_BAR_M_PROB2
+ * Sets the constant variable BAR_M_PROB2 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB2 value to set the variable
+ */
+extern void set_BAR_M_PROB2(float* h_BAR_M_PROB2);
+
+extern const float* get_BAR_M_PROB2();
+
+
+extern float h_env_BAR_M_PROB2;
+
+/** set_BAR_M_PROB3
+ * Sets the constant variable BAR_M_PROB3 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB3 value to set the variable
+ */
+extern void set_BAR_M_PROB3(float* h_BAR_M_PROB3);
+
+extern const float* get_BAR_M_PROB3();
+
+
+extern float h_env_BAR_M_PROB3;
+
+/** set_BAR_M_PROB4
+ * Sets the constant variable BAR_M_PROB4 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB4 value to set the variable
+ */
+extern void set_BAR_M_PROB4(float* h_BAR_M_PROB4);
+
+extern const float* get_BAR_M_PROB4();
+
+
+extern float h_env_BAR_M_PROB4;
+
+/** set_BAR_M_PROB5
+ * Sets the constant variable BAR_M_PROB5 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB5 value to set the variable
+ */
+extern void set_BAR_M_PROB5(float* h_BAR_M_PROB5);
+
+extern const float* get_BAR_M_PROB5();
+
+
+extern float h_env_BAR_M_PROB5;
+
+/** set_BAR_M_PROB7
+ * Sets the constant variable BAR_M_PROB7 on the device which can then be used in the agent functions.
+ * @param h_BAR_M_PROB7 value to set the variable
+ */
+extern void set_BAR_M_PROB7(float* h_BAR_M_PROB7);
+
+extern const float* get_BAR_M_PROB7();
+
+
+extern float h_env_BAR_M_PROB7;
+
+/** set_BAR_F_PROB1
+ * Sets the constant variable BAR_F_PROB1 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB1 value to set the variable
+ */
+extern void set_BAR_F_PROB1(float* h_BAR_F_PROB1);
+
+extern const float* get_BAR_F_PROB1();
+
+
+extern float h_env_BAR_F_PROB1;
+
+/** set_BAR_F_PROB2
+ * Sets the constant variable BAR_F_PROB2 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB2 value to set the variable
+ */
+extern void set_BAR_F_PROB2(float* h_BAR_F_PROB2);
+
+extern const float* get_BAR_F_PROB2();
+
+
+extern float h_env_BAR_F_PROB2;
+
+/** set_BAR_F_PROB3
+ * Sets the constant variable BAR_F_PROB3 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB3 value to set the variable
+ */
+extern void set_BAR_F_PROB3(float* h_BAR_F_PROB3);
+
+extern const float* get_BAR_F_PROB3();
+
+
+extern float h_env_BAR_F_PROB3;
+
+/** set_BAR_F_PROB4
+ * Sets the constant variable BAR_F_PROB4 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB4 value to set the variable
+ */
+extern void set_BAR_F_PROB4(float* h_BAR_F_PROB4);
+
+extern const float* get_BAR_F_PROB4();
+
+
+extern float h_env_BAR_F_PROB4;
+
+/** set_BAR_F_PROB5
+ * Sets the constant variable BAR_F_PROB5 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB5 value to set the variable
+ */
+extern void set_BAR_F_PROB5(float* h_BAR_F_PROB5);
+
+extern const float* get_BAR_F_PROB5();
+
+
+extern float h_env_BAR_F_PROB5;
+
+/** set_BAR_F_PROB7
+ * Sets the constant variable BAR_F_PROB7 on the device which can then be used in the agent functions.
+ * @param h_BAR_F_PROB7 value to set the variable
+ */
+extern void set_BAR_F_PROB7(float* h_BAR_F_PROB7);
+
+extern const float* get_BAR_F_PROB7();
+
+
+extern float h_env_BAR_F_PROB7;
 
 
 /** getMaximumBound

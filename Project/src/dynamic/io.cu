@@ -527,6 +527,54 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_PROB()));
     fputs(data, file);
     fputs("</PROB>\n", file);
+    fputs("\t<BAR_M_PROB1>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB1()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB1>\n", file);
+    fputs("\t<BAR_M_PROB2>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB2()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB2>\n", file);
+    fputs("\t<BAR_M_PROB3>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB3()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB3>\n", file);
+    fputs("\t<BAR_M_PROB4>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB4()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB4>\n", file);
+    fputs("\t<BAR_M_PROB5>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB5()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB5>\n", file);
+    fputs("\t<BAR_M_PROB7>", file);
+    sprintf(data, "%f", (*get_BAR_M_PROB7()));
+    fputs(data, file);
+    fputs("</BAR_M_PROB7>\n", file);
+    fputs("\t<BAR_F_PROB1>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB1()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB1>\n", file);
+    fputs("\t<BAR_F_PROB2>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB2()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB2>\n", file);
+    fputs("\t<BAR_F_PROB3>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB3()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB3>\n", file);
+    fputs("\t<BAR_F_PROB4>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB4()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB4>\n", file);
+    fputs("\t<BAR_F_PROB5>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB5()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB5>\n", file);
+    fputs("\t<BAR_F_PROB7>", file);
+    sprintf(data, "%f", (*get_BAR_F_PROB7()));
+    fputs(data, file);
+    fputs("</BAR_F_PROB7>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1368,6 +1416,30 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_SCHOOL_EXP(&t_SCHOOL_EXP);
     float t_PROB = (float)0;
     set_PROB(&t_PROB);
+    float t_BAR_M_PROB1 = (float)0.22;
+    set_BAR_M_PROB1(&t_BAR_M_PROB1);
+    float t_BAR_M_PROB2 = (float)0.37;
+    set_BAR_M_PROB2(&t_BAR_M_PROB2);
+    float t_BAR_M_PROB3 = (float)0.51;
+    set_BAR_M_PROB3(&t_BAR_M_PROB3);
+    float t_BAR_M_PROB4 = (float)0.59;
+    set_BAR_M_PROB4(&t_BAR_M_PROB4);
+    float t_BAR_M_PROB5 = (float)0.63;
+    set_BAR_M_PROB5(&t_BAR_M_PROB5);
+    float t_BAR_M_PROB7 = (float)0.74;
+    set_BAR_M_PROB7(&t_BAR_M_PROB7);
+    float t_BAR_F_PROB1 = (float)0.23;
+    set_BAR_F_PROB1(&t_BAR_F_PROB1);
+    float t_BAR_F_PROB2 = (float)0.38;
+    set_BAR_F_PROB2(&t_BAR_F_PROB2);
+    float t_BAR_F_PROB3 = (float)0.55;
+    set_BAR_F_PROB3(&t_BAR_F_PROB3);
+    float t_BAR_F_PROB4 = (float)0.62;
+    set_BAR_F_PROB4(&t_BAR_F_PROB4);
+    float t_BAR_F_PROB5 = (float)0.67;
+    set_BAR_F_PROB5(&t_BAR_F_PROB5);
+    float t_BAR_F_PROB7 = (float)0.71;
+    set_BAR_F_PROB7(&t_BAR_F_PROB7);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1616,6 +1688,30 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_PROB;
     
+    int in_env_BAR_M_PROB1;
+    
+    int in_env_BAR_M_PROB2;
+    
+    int in_env_BAR_M_PROB3;
+    
+    int in_env_BAR_M_PROB4;
+    
+    int in_env_BAR_M_PROB5;
+    
+    int in_env_BAR_M_PROB7;
+    
+    int in_env_BAR_F_PROB1;
+    
+    int in_env_BAR_F_PROB2;
+    
+    int in_env_BAR_F_PROB3;
+    
+    int in_env_BAR_F_PROB4;
+    
+    int in_env_BAR_F_PROB5;
+    
+    int in_env_BAR_F_PROB7;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1784,6 +1880,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_BAR_EXP;
     float env_SCHOOL_EXP;
     float env_PROB;
+    float env_BAR_M_PROB1;
+    float env_BAR_M_PROB2;
+    float env_BAR_M_PROB3;
+    float env_BAR_M_PROB4;
+    float env_BAR_M_PROB5;
+    float env_BAR_M_PROB7;
+    float env_BAR_F_PROB1;
+    float env_BAR_F_PROB2;
+    float env_BAR_F_PROB3;
+    float env_BAR_F_PROB4;
+    float env_BAR_F_PROB5;
+    float env_BAR_F_PROB7;
     
 
 
@@ -1950,6 +2058,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_BAR_EXP = 0;
     in_env_SCHOOL_EXP = 0;
     in_env_PROB = 0;
+    in_env_BAR_M_PROB1 = 0;
+    in_env_BAR_M_PROB2 = 0;
+    in_env_BAR_M_PROB3 = 0;
+    in_env_BAR_M_PROB4 = 0;
+    in_env_BAR_M_PROB5 = 0;
+    in_env_BAR_M_PROB7 = 0;
+    in_env_BAR_F_PROB1 = 0;
+    in_env_BAR_F_PROB2 = 0;
+    in_env_BAR_F_PROB3 = 0;
+    in_env_BAR_F_PROB4 = 0;
+    in_env_BAR_F_PROB5 = 0;
+    in_env_BAR_F_PROB7 = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -2261,6 +2381,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_EXP = 0;
     env_SCHOOL_EXP = 0;
     env_PROB = 0;
+    env_BAR_M_PROB1 = 0;
+    env_BAR_M_PROB2 = 0;
+    env_BAR_M_PROB3 = 0;
+    env_BAR_M_PROB4 = 0;
+    env_BAR_M_PROB5 = 0;
+    env_BAR_M_PROB7 = 0;
+    env_BAR_F_PROB1 = 0;
+    env_BAR_F_PROB2 = 0;
+    env_BAR_F_PROB3 = 0;
+    env_BAR_F_PROB4 = 0;
+    env_BAR_F_PROB5 = 0;
+    env_BAR_F_PROB7 = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2926,6 +3058,30 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/SCHOOL_EXP") == 0) in_env_SCHOOL_EXP = 0;
 			if(strcmp(buffer, "PROB") == 0) in_env_PROB = 1;
             if(strcmp(buffer, "/PROB") == 0) in_env_PROB = 0;
+			if(strcmp(buffer, "BAR_M_PROB1") == 0) in_env_BAR_M_PROB1 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB1") == 0) in_env_BAR_M_PROB1 = 0;
+			if(strcmp(buffer, "BAR_M_PROB2") == 0) in_env_BAR_M_PROB2 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB2") == 0) in_env_BAR_M_PROB2 = 0;
+			if(strcmp(buffer, "BAR_M_PROB3") == 0) in_env_BAR_M_PROB3 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB3") == 0) in_env_BAR_M_PROB3 = 0;
+			if(strcmp(buffer, "BAR_M_PROB4") == 0) in_env_BAR_M_PROB4 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB4") == 0) in_env_BAR_M_PROB4 = 0;
+			if(strcmp(buffer, "BAR_M_PROB5") == 0) in_env_BAR_M_PROB5 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB5") == 0) in_env_BAR_M_PROB5 = 0;
+			if(strcmp(buffer, "BAR_M_PROB7") == 0) in_env_BAR_M_PROB7 = 1;
+            if(strcmp(buffer, "/BAR_M_PROB7") == 0) in_env_BAR_M_PROB7 = 0;
+			if(strcmp(buffer, "BAR_F_PROB1") == 0) in_env_BAR_F_PROB1 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB1") == 0) in_env_BAR_F_PROB1 = 0;
+			if(strcmp(buffer, "BAR_F_PROB2") == 0) in_env_BAR_F_PROB2 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB2") == 0) in_env_BAR_F_PROB2 = 0;
+			if(strcmp(buffer, "BAR_F_PROB3") == 0) in_env_BAR_F_PROB3 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB3") == 0) in_env_BAR_F_PROB3 = 0;
+			if(strcmp(buffer, "BAR_F_PROB4") == 0) in_env_BAR_F_PROB4 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB4") == 0) in_env_BAR_F_PROB4 = 0;
+			if(strcmp(buffer, "BAR_F_PROB5") == 0) in_env_BAR_F_PROB5 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB5") == 0) in_env_BAR_F_PROB5 = 0;
+			if(strcmp(buffer, "BAR_F_PROB7") == 0) in_env_BAR_F_PROB7 = 1;
+            if(strcmp(buffer, "/BAR_F_PROB7") == 0) in_env_BAR_F_PROB7 = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -3692,6 +3848,90 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_PROB = (float) fgpu_atof(buffer);
                     
                     set_PROB(&env_PROB);
+                  
+              }
+            if(in_env_BAR_M_PROB1){
+              
+                    env_BAR_M_PROB1 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB1(&env_BAR_M_PROB1);
+                  
+              }
+            if(in_env_BAR_M_PROB2){
+              
+                    env_BAR_M_PROB2 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB2(&env_BAR_M_PROB2);
+                  
+              }
+            if(in_env_BAR_M_PROB3){
+              
+                    env_BAR_M_PROB3 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB3(&env_BAR_M_PROB3);
+                  
+              }
+            if(in_env_BAR_M_PROB4){
+              
+                    env_BAR_M_PROB4 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB4(&env_BAR_M_PROB4);
+                  
+              }
+            if(in_env_BAR_M_PROB5){
+              
+                    env_BAR_M_PROB5 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB5(&env_BAR_M_PROB5);
+                  
+              }
+            if(in_env_BAR_M_PROB7){
+              
+                    env_BAR_M_PROB7 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_M_PROB7(&env_BAR_M_PROB7);
+                  
+              }
+            if(in_env_BAR_F_PROB1){
+              
+                    env_BAR_F_PROB1 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB1(&env_BAR_F_PROB1);
+                  
+              }
+            if(in_env_BAR_F_PROB2){
+              
+                    env_BAR_F_PROB2 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB2(&env_BAR_F_PROB2);
+                  
+              }
+            if(in_env_BAR_F_PROB3){
+              
+                    env_BAR_F_PROB3 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB3(&env_BAR_F_PROB3);
+                  
+              }
+            if(in_env_BAR_F_PROB4){
+              
+                    env_BAR_F_PROB4 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB4(&env_BAR_F_PROB4);
+                  
+              }
+            if(in_env_BAR_F_PROB5){
+              
+                    env_BAR_F_PROB5 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB5(&env_BAR_F_PROB5);
+                  
+              }
+            if(in_env_BAR_F_PROB7){
+              
+                    env_BAR_F_PROB7 = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_F_PROB7(&env_BAR_F_PROB7);
                   
               }
             
