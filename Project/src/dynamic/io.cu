@@ -295,10 +295,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_CHURCH_PROB6()));
     fputs(data, file);
     fputs("</CHURCH_PROB6>\n", file);
-    fputs("\t<CHURCH_DURATION>", file);
-    sprintf(data, "%f", (*get_CHURCH_DURATION()));
+    fputs("\t<CHURCH_PROPORTION>", file);
+    sprintf(data, "%f", (*get_CHURCH_PROPORTION()));
     fputs(data, file);
-    fputs("</CHURCH_DURATION>\n", file);
+    fputs("</CHURCH_PROPORTION>\n", file);
     fputs("\t<TRANSPORT_BETA0>", file);
     sprintf(data, "%f", (*get_TRANSPORT_BETA0()));
     fputs(data, file);
@@ -347,10 +347,14 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_TB_PREVALENCE()));
     fputs(data, file);
     fputs("</TB_PREVALENCE>\n", file);
-    fputs("\t<DEFAULT_P>", file);
-    sprintf(data, "%f", (*get_DEFAULT_P()));
+    fputs("\t<DEFAULT_M_P>", file);
+    sprintf(data, "%f", (*get_DEFAULT_M_P()));
     fputs(data, file);
-    fputs("</DEFAULT_P>\n", file);
+    fputs("</DEFAULT_M_P>\n", file);
+    fputs("\t<DEFAULT_F_P>", file);
+    sprintf(data, "%f", (*get_DEFAULT_F_P()));
+    fputs(data, file);
+    fputs("</DEFAULT_F_P>\n", file);
     fputs("\t<DEFAULT_Q>", file);
     sprintf(data, "%f", (*get_DEFAULT_Q()));
     fputs(data, file);
@@ -1316,8 +1320,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_CHURCH_PROB5(&t_CHURCH_PROB5);
     float t_CHURCH_PROB6 = (float)0.985772358;
     set_CHURCH_PROB6(&t_CHURCH_PROB6);
-    float t_CHURCH_DURATION = (float)0.5;
-    set_CHURCH_DURATION(&t_CHURCH_DURATION);
+    float t_CHURCH_PROPORTION = (float)0.5;
+    set_CHURCH_PROPORTION(&t_CHURCH_PROPORTION);
     float t_TRANSPORT_BETA0 = (float)1.682127;
     set_TRANSPORT_BETA0(&t_TRANSPORT_BETA0);
     float t_TRANSPORT_BETA1 = (float)-0.007739;
@@ -1342,8 +1346,10 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_RR_ART(&t_RR_ART);
     float t_TB_PREVALENCE = (float)0.005;
     set_TB_PREVALENCE(&t_TB_PREVALENCE);
-    float t_DEFAULT_P = (float)0.36;
-    set_DEFAULT_P(&t_DEFAULT_P);
+    float t_DEFAULT_M_P = (float)0.36;
+    set_DEFAULT_M_P(&t_DEFAULT_M_P);
+    float t_DEFAULT_F_P = (float)0.36;
+    set_DEFAULT_F_P(&t_DEFAULT_F_P);
     float t_DEFAULT_Q = (float)1;
     set_DEFAULT_Q(&t_DEFAULT_Q);
     float t_TRANSPORT_A = (float)3;
@@ -1596,7 +1602,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_CHURCH_PROB6;
     
-    int in_env_CHURCH_DURATION;
+    int in_env_CHURCH_PROPORTION;
     
     int in_env_TRANSPORT_BETA0;
     
@@ -1622,7 +1628,9 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_TB_PREVALENCE;
     
-    int in_env_DEFAULT_P;
+    int in_env_DEFAULT_M_P;
+    
+    int in_env_DEFAULT_F_P;
     
     int in_env_DEFAULT_Q;
     
@@ -1854,7 +1862,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_CHURCH_PROB4;
     float env_CHURCH_PROB5;
     float env_CHURCH_PROB6;
-    float env_CHURCH_DURATION;
+    float env_CHURCH_PROPORTION;
     float env_TRANSPORT_BETA0;
     float env_TRANSPORT_BETA1;
     float env_TRANSPORT_FREQ0;
@@ -1867,7 +1875,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_RR_HIV;
     float env_RR_ART;
     float env_TB_PREVALENCE;
-    float env_DEFAULT_P;
+    float env_DEFAULT_M_P;
+    float env_DEFAULT_F_P;
     float env_DEFAULT_Q;
     float env_TRANSPORT_A;
     float env_CHURCH_A;
@@ -2036,7 +2045,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_CHURCH_PROB4 = 0;
     in_env_CHURCH_PROB5 = 0;
     in_env_CHURCH_PROB6 = 0;
-    in_env_CHURCH_DURATION = 0;
+    in_env_CHURCH_PROPORTION = 0;
     in_env_TRANSPORT_BETA0 = 0;
     in_env_TRANSPORT_BETA1 = 0;
     in_env_TRANSPORT_FREQ0 = 0;
@@ -2049,7 +2058,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_RR_HIV = 0;
     in_env_RR_ART = 0;
     in_env_TB_PREVALENCE = 0;
-    in_env_DEFAULT_P = 0;
+    in_env_DEFAULT_M_P = 0;
+    in_env_DEFAULT_F_P = 0;
     in_env_DEFAULT_Q = 0;
     in_env_TRANSPORT_A = 0;
     in_env_CHURCH_A = 0;
@@ -2363,7 +2373,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_CHURCH_PROB4 = 0;
     env_CHURCH_PROB5 = 0;
     env_CHURCH_PROB6 = 0;
-    env_CHURCH_DURATION = 0;
+    env_CHURCH_PROPORTION = 0;
     env_TRANSPORT_BETA0 = 0;
     env_TRANSPORT_BETA1 = 0;
     env_TRANSPORT_FREQ0 = 0;
@@ -2376,7 +2386,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_RR_HIV = 0;
     env_RR_ART = 0;
     env_TB_PREVALENCE = 0;
-    env_DEFAULT_P = 0;
+    env_DEFAULT_M_P = 0;
+    env_DEFAULT_F_P = 0;
     env_DEFAULT_Q = 0;
     env_TRANSPORT_A = 0;
     env_CHURCH_A = 0;
@@ -2986,8 +2997,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/CHURCH_PROB5") == 0) in_env_CHURCH_PROB5 = 0;
 			if(strcmp(buffer, "CHURCH_PROB6") == 0) in_env_CHURCH_PROB6 = 1;
             if(strcmp(buffer, "/CHURCH_PROB6") == 0) in_env_CHURCH_PROB6 = 0;
-			if(strcmp(buffer, "CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 1;
-            if(strcmp(buffer, "/CHURCH_DURATION") == 0) in_env_CHURCH_DURATION = 0;
+			if(strcmp(buffer, "CHURCH_PROPORTION") == 0) in_env_CHURCH_PROPORTION = 1;
+            if(strcmp(buffer, "/CHURCH_PROPORTION") == 0) in_env_CHURCH_PROPORTION = 0;
 			if(strcmp(buffer, "TRANSPORT_BETA0") == 0) in_env_TRANSPORT_BETA0 = 1;
             if(strcmp(buffer, "/TRANSPORT_BETA0") == 0) in_env_TRANSPORT_BETA0 = 0;
 			if(strcmp(buffer, "TRANSPORT_BETA1") == 0) in_env_TRANSPORT_BETA1 = 1;
@@ -3012,8 +3023,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/RR_ART") == 0) in_env_RR_ART = 0;
 			if(strcmp(buffer, "TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 1;
             if(strcmp(buffer, "/TB_PREVALENCE") == 0) in_env_TB_PREVALENCE = 0;
-			if(strcmp(buffer, "DEFAULT_P") == 0) in_env_DEFAULT_P = 1;
-            if(strcmp(buffer, "/DEFAULT_P") == 0) in_env_DEFAULT_P = 0;
+			if(strcmp(buffer, "DEFAULT_M_P") == 0) in_env_DEFAULT_M_P = 1;
+            if(strcmp(buffer, "/DEFAULT_M_P") == 0) in_env_DEFAULT_M_P = 0;
+			if(strcmp(buffer, "DEFAULT_F_P") == 0) in_env_DEFAULT_F_P = 1;
+            if(strcmp(buffer, "/DEFAULT_F_P") == 0) in_env_DEFAULT_F_P = 0;
 			if(strcmp(buffer, "DEFAULT_Q") == 0) in_env_DEFAULT_Q = 1;
             if(strcmp(buffer, "/DEFAULT_Q") == 0) in_env_DEFAULT_Q = 0;
 			if(strcmp(buffer, "TRANSPORT_A") == 0) in_env_TRANSPORT_A = 1;
@@ -3496,11 +3509,11 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     set_CHURCH_PROB6(&env_CHURCH_PROB6);
                   
               }
-            if(in_env_CHURCH_DURATION){
+            if(in_env_CHURCH_PROPORTION){
               
-                    env_CHURCH_DURATION = (float) fgpu_atof(buffer);
+                    env_CHURCH_PROPORTION = (float) fgpu_atof(buffer);
                     
-                    set_CHURCH_DURATION(&env_CHURCH_DURATION);
+                    set_CHURCH_PROPORTION(&env_CHURCH_PROPORTION);
                   
               }
             if(in_env_TRANSPORT_BETA0){
@@ -3587,11 +3600,18 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     set_TB_PREVALENCE(&env_TB_PREVALENCE);
                   
               }
-            if(in_env_DEFAULT_P){
+            if(in_env_DEFAULT_M_P){
               
-                    env_DEFAULT_P = (float) fgpu_atof(buffer);
+                    env_DEFAULT_M_P = (float) fgpu_atof(buffer);
                     
-                    set_DEFAULT_P(&env_DEFAULT_P);
+                    set_DEFAULT_M_P(&env_DEFAULT_M_P);
+                  
+              }
+            if(in_env_DEFAULT_F_P){
+              
+                    env_DEFAULT_F_P = (float) fgpu_atof(buffer);
+                    
+                    set_DEFAULT_F_P(&env_DEFAULT_F_P);
                   
               }
             if(in_env_DEFAULT_Q){

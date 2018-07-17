@@ -2828,7 +2828,7 @@ float h_env_CHURCH_PROB3;
 float h_env_CHURCH_PROB4;
 float h_env_CHURCH_PROB5;
 float h_env_CHURCH_PROB6;
-float h_env_CHURCH_DURATION;
+float h_env_CHURCH_PROPORTION;
 float h_env_TRANSPORT_BETA0;
 float h_env_TRANSPORT_BETA1;
 float h_env_TRANSPORT_FREQ0;
@@ -2841,7 +2841,8 @@ float h_env_ART_COVERAGE;
 float h_env_RR_HIV;
 float h_env_RR_ART;
 float h_env_TB_PREVALENCE;
-float h_env_DEFAULT_P;
+float h_env_DEFAULT_M_P;
+float h_env_DEFAULT_F_P;
 float h_env_DEFAULT_Q;
 float h_env_TRANSPORT_A;
 float h_env_CHURCH_A;
@@ -3126,14 +3127,14 @@ const float* get_CHURCH_PROB6(){
 
 
 //constant setter
-void set_CHURCH_DURATION(float* h_CHURCH_DURATION){
-    gpuErrchk(cudaMemcpyToSymbol(CHURCH_DURATION, h_CHURCH_DURATION, sizeof(float)));
-    memcpy(&h_env_CHURCH_DURATION, h_CHURCH_DURATION,sizeof(float));
+void set_CHURCH_PROPORTION(float* h_CHURCH_PROPORTION){
+    gpuErrchk(cudaMemcpyToSymbol(CHURCH_PROPORTION, h_CHURCH_PROPORTION, sizeof(float)));
+    memcpy(&h_env_CHURCH_PROPORTION, h_CHURCH_PROPORTION,sizeof(float));
 }
 
 //constant getter
-const float* get_CHURCH_DURATION(){
-    return &h_env_CHURCH_DURATION;
+const float* get_CHURCH_PROPORTION(){
+    return &h_env_CHURCH_PROPORTION;
 }
 
 
@@ -3295,14 +3296,27 @@ const float* get_TB_PREVALENCE(){
 
 
 //constant setter
-void set_DEFAULT_P(float* h_DEFAULT_P){
-    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_P, h_DEFAULT_P, sizeof(float)));
-    memcpy(&h_env_DEFAULT_P, h_DEFAULT_P,sizeof(float));
+void set_DEFAULT_M_P(float* h_DEFAULT_M_P){
+    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_M_P, h_DEFAULT_M_P, sizeof(float)));
+    memcpy(&h_env_DEFAULT_M_P, h_DEFAULT_M_P,sizeof(float));
 }
 
 //constant getter
-const float* get_DEFAULT_P(){
-    return &h_env_DEFAULT_P;
+const float* get_DEFAULT_M_P(){
+    return &h_env_DEFAULT_M_P;
+}
+
+
+
+//constant setter
+void set_DEFAULT_F_P(float* h_DEFAULT_F_P){
+    gpuErrchk(cudaMemcpyToSymbol(DEFAULT_F_P, h_DEFAULT_F_P, sizeof(float)));
+    memcpy(&h_env_DEFAULT_F_P, h_DEFAULT_F_P,sizeof(float));
+}
+
+//constant getter
+const float* get_DEFAULT_F_P(){
+    return &h_env_DEFAULT_F_P;
 }
 
 

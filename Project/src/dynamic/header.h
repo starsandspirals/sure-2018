@@ -7067,7 +7067,7 @@ __constant__ float CHURCH_PROB5;
 
 __constant__ float CHURCH_PROB6;
 
-__constant__ float CHURCH_DURATION;
+__constant__ float CHURCH_PROPORTION;
 
 __constant__ float TRANSPORT_BETA0;
 
@@ -7093,7 +7093,9 @@ __constant__ float RR_ART;
 
 __constant__ float TB_PREVALENCE;
 
-__constant__ float DEFAULT_P;
+__constant__ float DEFAULT_M_P;
+
+__constant__ float DEFAULT_F_P;
 
 __constant__ float DEFAULT_Q;
 
@@ -7402,16 +7404,16 @@ extern const float* get_CHURCH_PROB6();
 
 extern float h_env_CHURCH_PROB6;
 
-/** set_CHURCH_DURATION
- * Sets the constant variable CHURCH_DURATION on the device which can then be used in the agent functions.
- * @param h_CHURCH_DURATION value to set the variable
+/** set_CHURCH_PROPORTION
+ * Sets the constant variable CHURCH_PROPORTION on the device which can then be used in the agent functions.
+ * @param h_CHURCH_PROPORTION value to set the variable
  */
-extern void set_CHURCH_DURATION(float* h_CHURCH_DURATION);
+extern void set_CHURCH_PROPORTION(float* h_CHURCH_PROPORTION);
 
-extern const float* get_CHURCH_DURATION();
+extern const float* get_CHURCH_PROPORTION();
 
 
-extern float h_env_CHURCH_DURATION;
+extern float h_env_CHURCH_PROPORTION;
 
 /** set_TRANSPORT_BETA0
  * Sets the constant variable TRANSPORT_BETA0 on the device which can then be used in the agent functions.
@@ -7545,16 +7547,27 @@ extern const float* get_TB_PREVALENCE();
 
 extern float h_env_TB_PREVALENCE;
 
-/** set_DEFAULT_P
- * Sets the constant variable DEFAULT_P on the device which can then be used in the agent functions.
- * @param h_DEFAULT_P value to set the variable
+/** set_DEFAULT_M_P
+ * Sets the constant variable DEFAULT_M_P on the device which can then be used in the agent functions.
+ * @param h_DEFAULT_M_P value to set the variable
  */
-extern void set_DEFAULT_P(float* h_DEFAULT_P);
+extern void set_DEFAULT_M_P(float* h_DEFAULT_M_P);
 
-extern const float* get_DEFAULT_P();
+extern const float* get_DEFAULT_M_P();
 
 
-extern float h_env_DEFAULT_P;
+extern float h_env_DEFAULT_M_P;
+
+/** set_DEFAULT_F_P
+ * Sets the constant variable DEFAULT_F_P on the device which can then be used in the agent functions.
+ * @param h_DEFAULT_F_P value to set the variable
+ */
+extern void set_DEFAULT_F_P(float* h_DEFAULT_F_P);
+
+extern const float* get_DEFAULT_F_P();
+
+
+extern float h_env_DEFAULT_F_P;
 
 /** set_DEFAULT_Q
  * Sets the constant variable DEFAULT_Q on the device which can then be used in the agent functions.

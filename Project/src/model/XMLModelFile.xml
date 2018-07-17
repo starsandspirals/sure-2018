@@ -157,7 +157,12 @@
       </gpu:variable>
       <gpu:variable>
         <type>float</type>
-        <name>DEFAULT_P</name>
+        <name>DEFAULT_M_P</name>
+        <defaultValue>0.36</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>DEFAULT_F_P</name>
         <defaultValue>0.36</defaultValue>
       </gpu:variable>
       <gpu:variable>
