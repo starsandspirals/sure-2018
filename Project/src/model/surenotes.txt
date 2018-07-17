@@ -1,3 +1,17 @@
+Workflow for the project
+1. Clone the project repository ("git clone https://github.com/salamanderhill/sure-2018.git")
+2. Clone the FLAMEGPU repository in the sure-2018 directory ("git clone https://github.com/FLAMEGPU/FLAMEGPU.git")
+(It looks like v1.5 has been released now, so you shouldn't need to mess about with branches, but if it doesn't work try "git checkout release-1.5" in the FLAMEGPU folder)
+3. From the sure-2018/Project directory, run "make"
+4. Run "python3 preprocess.py" to generate the data.in file
+(You'll have to repeat that if you make any changes to the histo.csv data)
+5. Go to the sure-2018/Project/bin/linux-x64/Release_Console directory
+6. Run the executable as follows: "./Project input.xml 8761", where the first argument is the xml file with input parameters and the second argument is the number of time steps; output will be
+generated in the same Release_Console directory
+(There's an example input.xml file in there so you can see the format; you shouldn't need to change anything but the parameters, and you only need to include parameters where the value
+is not the default value; the number of time steps is in increments of 5 minutes, but no update happens on time step 1, so for example 1 month is 8761 time steps)
+If anything goes horribly wrong, ask a FLAME GPU person or email me!
+
 Building types
 0: household
 1: church
@@ -22,7 +36,7 @@ How much time passes on each iteration, in increments of 5 minutes
 Default value: 1
 
 OUTPUT_ID
-A distinguishing integer that will be appended to the output filename
+A distinguishing integer that will be appended to the output filename ("person-output-0.csv", for example)
 Default value: 0
 
 SEED
