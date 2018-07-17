@@ -92,7 +92,7 @@
       </gpu:variable>
       <gpu:variable>
         <type>float</type>
-        <name>CHURCH_DURATION</name>
+        <name>CHURCH_PROPORTION</name>
         <defaultValue>0.5</defaultValue>
       </gpu:variable>
       <gpu:variable>

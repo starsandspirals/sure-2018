@@ -237,7 +237,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   unsigned int church_k2 = *get_CHURCH_K2();
   unsigned int church_k3 = *get_CHURCH_K3();
 
-  float church_duration = *get_CHURCH_DURATION();
+  float church_proportion = *get_CHURCH_PROPORTION();
 
   float transport_beta0 = *get_TRANSPORT_BETA0();
   float transport_beta1 = *get_TRANSPORT_BETA1();
@@ -980,7 +980,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     // on the input probability.
     random = ((float)rand() / (RAND_MAX));
 
-    if (random < church_duration)
+    if (random < church_proportion)
     {
       duration = 1.5;
     }
