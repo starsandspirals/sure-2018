@@ -1473,7 +1473,7 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
       person->locationid = 0;
     }
     else if (person->location == 3 &&
-             (float)(person->step - person->startstep) >= 36)
+             (float)(person->step - person->startstep) >= (CLINIC_DUR * 12 * TIME_STEP))
     {
       person->busy = 0;
       person->location = 7;
@@ -1481,28 +1481,28 @@ __FLAME_GPU_FUNC__ int update(xmachine_memory_Person *person,
     }
     else if (person->location == 4 &&
              (float)(person->step - person->startstep) >=
-                 WORKPLACE_DUR * 12)
+                 WORKPLACE_DUR * 12 * TIME_STEP)
     {
       person->busy = 0;
       person->location = 7;
       person->locationid = 0;
     }
     else if (person->location == 5 &&
-             (float)(person->step - person->startstep) >= 18)
+             (float)(person->step - person->startstep) >= ((BAR_DUR  / 5) * TIME_STEP))
     {
       person->busy = 0;
       person->location = 0;
       person->locationid = person->household;
     }
     else if (person->location == 6 &&
-             (float)(person->step - person->startstep) >= 72)
+             (float)(person->step - person->startstep) >= (SCHOOL_DUR * 12 * TIME_STEP))
     {
       person->busy = 0;
       person->location = 7;
       person->locationid = 0;
     }
     else if (person->location == 0 &&
-             (float)(person->step - person->startstep) >= 8)
+             (float)(person->step - person->startstep) >= ((VISITING_DUR / 12) * TIME_STEP))
     {
       person->busy = 0;
       person->locationid = person->household;

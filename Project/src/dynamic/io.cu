@@ -575,6 +575,22 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%f", (*get_BAR_F_PROB7()));
     fputs(data, file);
     fputs("</BAR_F_PROB7>\n", file);
+    fputs("\t<CLINIC_DUR>", file);
+    sprintf(data, "%f", (*get_CLINIC_DUR()));
+    fputs(data, file);
+    fputs("</CLINIC_DUR>\n", file);
+    fputs("\t<BAR_DUR>", file);
+    sprintf(data, "%f", (*get_BAR_DUR()));
+    fputs(data, file);
+    fputs("</BAR_DUR>\n", file);
+    fputs("\t<SCHOOL_DUR>", file);
+    sprintf(data, "%f", (*get_SCHOOL_DUR()));
+    fputs(data, file);
+    fputs("</SCHOOL_DUR>\n", file);
+    fputs("\t<VISITING_DUR>", file);
+    sprintf(data, "%f", (*get_VISITING_DUR()));
+    fputs(data, file);
+    fputs("</VISITING_DUR>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1440,6 +1456,14 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_BAR_F_PROB5(&t_BAR_F_PROB5);
     float t_BAR_F_PROB7 = (float)0.71;
     set_BAR_F_PROB7(&t_BAR_F_PROB7);
+    float t_CLINIC_DUR = (float)3;
+    set_CLINIC_DUR(&t_CLINIC_DUR);
+    float t_BAR_DUR = (float)90;
+    set_BAR_DUR(&t_BAR_DUR);
+    float t_SCHOOL_DUR = (float)6;
+    set_SCHOOL_DUR(&t_SCHOOL_DUR);
+    float t_VISITING_DUR = (float)40;
+    set_VISITING_DUR(&t_VISITING_DUR);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1712,6 +1736,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_BAR_F_PROB7;
     
+    int in_env_CLINIC_DUR;
+    
+    int in_env_BAR_DUR;
+    
+    int in_env_SCHOOL_DUR;
+    
+    int in_env_VISITING_DUR;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
 	*h_xmachine_memory_TBAssignment_count = 0;
@@ -1892,6 +1924,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_BAR_F_PROB4;
     float env_BAR_F_PROB5;
     float env_BAR_F_PROB7;
+    float env_CLINIC_DUR;
+    float env_BAR_DUR;
+    float env_SCHOOL_DUR;
+    float env_VISITING_DUR;
     
 
 
@@ -2070,6 +2106,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_BAR_F_PROB4 = 0;
     in_env_BAR_F_PROB5 = 0;
     in_env_BAR_F_PROB7 = 0;
+    in_env_CLINIC_DUR = 0;
+    in_env_BAR_DUR = 0;
+    in_env_SCHOOL_DUR = 0;
+    in_env_VISITING_DUR = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -2393,6 +2433,10 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_F_PROB4 = 0;
     env_BAR_F_PROB5 = 0;
     env_BAR_F_PROB7 = 0;
+    env_CLINIC_DUR = 0;
+    env_BAR_DUR = 0;
+    env_SCHOOL_DUR = 0;
+    env_VISITING_DUR = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -3082,6 +3126,14 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/BAR_F_PROB5") == 0) in_env_BAR_F_PROB5 = 0;
 			if(strcmp(buffer, "BAR_F_PROB7") == 0) in_env_BAR_F_PROB7 = 1;
             if(strcmp(buffer, "/BAR_F_PROB7") == 0) in_env_BAR_F_PROB7 = 0;
+			if(strcmp(buffer, "CLINIC_DUR") == 0) in_env_CLINIC_DUR = 1;
+            if(strcmp(buffer, "/CLINIC_DUR") == 0) in_env_CLINIC_DUR = 0;
+			if(strcmp(buffer, "BAR_DUR") == 0) in_env_BAR_DUR = 1;
+            if(strcmp(buffer, "/BAR_DUR") == 0) in_env_BAR_DUR = 0;
+			if(strcmp(buffer, "SCHOOL_DUR") == 0) in_env_SCHOOL_DUR = 1;
+            if(strcmp(buffer, "/SCHOOL_DUR") == 0) in_env_SCHOOL_DUR = 0;
+			if(strcmp(buffer, "VISITING_DUR") == 0) in_env_VISITING_DUR = 1;
+            if(strcmp(buffer, "/VISITING_DUR") == 0) in_env_VISITING_DUR = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -3932,6 +3984,34 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     env_BAR_F_PROB7 = (float) fgpu_atof(buffer);
                     
                     set_BAR_F_PROB7(&env_BAR_F_PROB7);
+                  
+              }
+            if(in_env_CLINIC_DUR){
+              
+                    env_CLINIC_DUR = (float) fgpu_atof(buffer);
+                    
+                    set_CLINIC_DUR(&env_CLINIC_DUR);
+                  
+              }
+            if(in_env_BAR_DUR){
+              
+                    env_BAR_DUR = (float) fgpu_atof(buffer);
+                    
+                    set_BAR_DUR(&env_BAR_DUR);
+                  
+              }
+            if(in_env_SCHOOL_DUR){
+              
+                    env_SCHOOL_DUR = (float) fgpu_atof(buffer);
+                    
+                    set_SCHOOL_DUR(&env_SCHOOL_DUR);
+                  
+              }
+            if(in_env_VISITING_DUR){
+              
+                    env_VISITING_DUR = (float) fgpu_atof(buffer);
+                    
+                    set_VISITING_DUR(&env_VISITING_DUR);
                   
               }
             

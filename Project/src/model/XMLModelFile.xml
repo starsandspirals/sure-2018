@@ -440,6 +440,26 @@
         <name>BAR_F_PROB7</name>
         <defaultValue>0.71</defaultValue>
       </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>CLINIC_DUR</name>
+        <defaultValue>3</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>BAR_DUR</name>
+        <defaultValue>90</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>SCHOOL_DUR</name>
+        <defaultValue>6</defaultValue>
+      </gpu:variable>
+      <gpu:variable>
+        <type>float</type>
+        <name>VISITING_DUR</name>
+        <defaultValue>40</defaultValue>
+      </gpu:variable>
     </gpu:constants>
 
     <!-- Files of C code with initialisation, step and exit functions -->

@@ -7207,6 +7207,14 @@ __constant__ float BAR_F_PROB5;
 
 __constant__ float BAR_F_PROB7;
 
+__constant__ float CLINIC_DUR;
+
+__constant__ float BAR_DUR;
+
+__constant__ float SCHOOL_DUR;
+
+__constant__ float VISITING_DUR;
+
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
  * @param h_TIME_STEP value to set the variable
@@ -8163,6 +8171,50 @@ extern const float* get_BAR_F_PROB7();
 
 
 extern float h_env_BAR_F_PROB7;
+
+/** set_CLINIC_DUR
+ * Sets the constant variable CLINIC_DUR on the device which can then be used in the agent functions.
+ * @param h_CLINIC_DUR value to set the variable
+ */
+extern void set_CLINIC_DUR(float* h_CLINIC_DUR);
+
+extern const float* get_CLINIC_DUR();
+
+
+extern float h_env_CLINIC_DUR;
+
+/** set_BAR_DUR
+ * Sets the constant variable BAR_DUR on the device which can then be used in the agent functions.
+ * @param h_BAR_DUR value to set the variable
+ */
+extern void set_BAR_DUR(float* h_BAR_DUR);
+
+extern const float* get_BAR_DUR();
+
+
+extern float h_env_BAR_DUR;
+
+/** set_SCHOOL_DUR
+ * Sets the constant variable SCHOOL_DUR on the device which can then be used in the agent functions.
+ * @param h_SCHOOL_DUR value to set the variable
+ */
+extern void set_SCHOOL_DUR(float* h_SCHOOL_DUR);
+
+extern const float* get_SCHOOL_DUR();
+
+
+extern float h_env_SCHOOL_DUR;
+
+/** set_VISITING_DUR
+ * Sets the constant variable VISITING_DUR on the device which can then be used in the agent functions.
+ * @param h_VISITING_DUR value to set the variable
+ */
+extern void set_VISITING_DUR(float* h_VISITING_DUR);
+
+extern const float* get_VISITING_DUR();
+
+
+extern float h_env_VISITING_DUR;
 
 
 /** getMaximumBound

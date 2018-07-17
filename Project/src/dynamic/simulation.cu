@@ -2898,6 +2898,10 @@ float h_env_BAR_F_PROB3;
 float h_env_BAR_F_PROB4;
 float h_env_BAR_F_PROB5;
 float h_env_BAR_F_PROB7;
+float h_env_CLINIC_DUR;
+float h_env_BAR_DUR;
+float h_env_SCHOOL_DUR;
+float h_env_VISITING_DUR;
 
 
 //constant setter
@@ -4027,6 +4031,58 @@ void set_BAR_F_PROB7(float* h_BAR_F_PROB7){
 //constant getter
 const float* get_BAR_F_PROB7(){
     return &h_env_BAR_F_PROB7;
+}
+
+
+
+//constant setter
+void set_CLINIC_DUR(float* h_CLINIC_DUR){
+    gpuErrchk(cudaMemcpyToSymbol(CLINIC_DUR, h_CLINIC_DUR, sizeof(float)));
+    memcpy(&h_env_CLINIC_DUR, h_CLINIC_DUR,sizeof(float));
+}
+
+//constant getter
+const float* get_CLINIC_DUR(){
+    return &h_env_CLINIC_DUR;
+}
+
+
+
+//constant setter
+void set_BAR_DUR(float* h_BAR_DUR){
+    gpuErrchk(cudaMemcpyToSymbol(BAR_DUR, h_BAR_DUR, sizeof(float)));
+    memcpy(&h_env_BAR_DUR, h_BAR_DUR,sizeof(float));
+}
+
+//constant getter
+const float* get_BAR_DUR(){
+    return &h_env_BAR_DUR;
+}
+
+
+
+//constant setter
+void set_SCHOOL_DUR(float* h_SCHOOL_DUR){
+    gpuErrchk(cudaMemcpyToSymbol(SCHOOL_DUR, h_SCHOOL_DUR, sizeof(float)));
+    memcpy(&h_env_SCHOOL_DUR, h_SCHOOL_DUR,sizeof(float));
+}
+
+//constant getter
+const float* get_SCHOOL_DUR(){
+    return &h_env_SCHOOL_DUR;
+}
+
+
+
+//constant setter
+void set_VISITING_DUR(float* h_VISITING_DUR){
+    gpuErrchk(cudaMemcpyToSymbol(VISITING_DUR, h_VISITING_DUR, sizeof(float)));
+    memcpy(&h_env_VISITING_DUR, h_VISITING_DUR,sizeof(float));
+}
+
+//constant getter
+const float* get_VISITING_DUR(){
+    return &h_env_VISITING_DUR;
 }
 
 
