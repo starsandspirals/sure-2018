@@ -713,7 +713,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
           weight = rr_as;
         }
 
-        weights[h_person->id] = weight;
+        weights[h_person->id - 1] = weight;
 
         // Update the arrays of information with this person's household size
         // and age.
@@ -759,16 +759,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
   }
 
   float weightsum = 0;
-  float weightsc[total];
-  weightsc[0] = weights[0];
 
   for (unsigned int i = 0; i < total; i++)
   {
     weightsum += weights[i];
-  }
-
-  for (unsigned int i = 1; i < total; i++) {
-    weightsc[i] = weightsc[i-1] + weights[i];
   }
 
   unsigned int tbnumber = ceil(total * tb_prevalence);
@@ -787,7 +781,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
     for (unsigned int j = 0; j < total; j++)
     {
-      if (randomweight < weightsc[j])
+      if (randomweight < weights[j])
       {
 
         xmachine_memory_TBAssignment *h_tbassignment =
@@ -796,7 +790,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
         h_tbassignment->id = tbarray[j];
         activepeople[tbarray[j]] = 1;
         weightsum -= weights[j];
-        weightsc[j] = 0.0;
+        weights[j] = 0.0;
 
         h_add_agent_TBAssignment_tbdefault(h_tbassignment);
 

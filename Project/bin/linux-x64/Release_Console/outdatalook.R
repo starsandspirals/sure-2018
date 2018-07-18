@@ -1,11 +1,8 @@
 library(data.table)
 library(ggplot2)
 
-
-setwd('updateandsomemoredata')
-
 ## read in data
-D <- fread('person-output-10.csv')
+D <- fread('person-output-0.csv')
 names(D)
 D[,acat:=cut(age,breaks=c(0,5,15,25,35,45,55,65,Inf),include.lowest = TRUE)]
 D[,acat2:=cut(age,breaks=c(0,17,25,45,Inf),include.lowest = TRUE)]
@@ -23,7 +20,7 @@ dm <- as.matrix(DM[,-1,with=FALSE])
 print(sum(dm,na.rm=TRUE))
 (dm <- dm/sum(dm,na.rm=TRUE))
 
-H <- fread('../histo.csv',header=TRUE)
+H <- fread('histo.csv',header=TRUE)
 h <- as.matrix(H[,-1,with=FALSE])
 print(sum(h))
 (h <- h/sum(h))
