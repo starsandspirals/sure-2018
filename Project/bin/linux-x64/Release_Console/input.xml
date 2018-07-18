@@ -1,7 +1,9 @@
 <states>
   <itno>0</itno>
   <environment>
-    <OUTPUT_ID>25</OUTPUT_ID>
-    <STARTING_POPULATION>25000</STARTING_POPULATION>
+    <STARTING_POPULATION>30000</STARTING_POPULATION>
+    <TIME_STEP>1.0</TIME_STEP>
+    <MAX_AGE>100</MAX_AGE>
+    <SEED>0</SEED>
   </environment>
 </states>
