@@ -410,6 +410,10 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     gender = strtol(fgets(line, sizeof(line), file), NULL, 0);
     minage = strtol(fgets(line, sizeof(line), file), NULL, 0);
 
+    if ((int)minage != 0) {
+      minage++;
+    }
+
     maxagestring = fgets(line, sizeof(line), file);
 
     if (not strcmp(maxagestring, "Inf\n"))
@@ -453,7 +457,7 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
         // Pick a random age for the person between the bounds of the age
         // interval they belong to.
-        age = (rand() % (maxage - minage)) + minage;
+        age = (rand() % (maxage + 1 - minage)) + minage;
 
         if (gender == 2)
         {
@@ -2157,7 +2161,7 @@ __FLAME_GPU_FUNC__ int personhhinit(
     if (household_membership_message->person_id == personid)
     {
       person->household = household_membership_message->household_id;
-      person->householdsize = household_membership_message->household_size;
+     // person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;
       person->churchfreq = household_membership_message->churchfreq;
       person->churchdur = household_membership_message->churchdur;
