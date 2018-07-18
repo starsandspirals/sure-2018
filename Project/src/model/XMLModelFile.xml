@@ -978,7 +978,7 @@
       <gpu:type>continuous</gpu:type>
 
       <!-- The buffer size that should be allocated to the agent - unpredictable results if too many agents generated -->
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1016,7 +1016,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1076,7 +1076,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1135,7 +1135,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1199,7 +1199,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>256</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1245,7 +1245,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1305,7 +1305,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1351,7 +1351,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1398,7 +1398,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>2</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1445,7 +1445,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1487,7 +1487,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1534,7 +1534,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>4096</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1581,7 +1581,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
     <gpu:xagent>
@@ -1623,7 +1623,7 @@
 
       <gpu:type>continuous</gpu:type>
 
-      <gpu:bufferSize>16384</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:xagent>
 
   </xagents>
@@ -1641,7 +1641,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1674,7 +1674,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1695,7 +1695,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1716,7 +1716,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1733,7 +1733,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1750,7 +1750,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>16384</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1779,7 +1779,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>32768</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1796,7 +1796,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1813,7 +1813,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>256</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1830,7 +1830,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
    <gpu:message>
@@ -1847,7 +1847,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>2</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1864,7 +1864,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>8192</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1881,7 +1881,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>4096</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
     <gpu:message>
@@ -1898,7 +1898,7 @@
         </gpu:variable>
       </variables>
       <gpu:partitioningNone/>
-      <gpu:bufferSize>2048</gpu:bufferSize>
+      <gpu:bufferSize>262144</gpu:bufferSize>
     </gpu:message>
 
   </messages>

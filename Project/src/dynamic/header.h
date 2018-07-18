@@ -55,95 +55,95 @@ typedef glm::dvec4 dvec4;
 
 /* Agent population size definitions must be a multiple of THREADS_PER_TILE (default 64) */
 //Maximum buffer size (largest agent buffer size)
-#define buffer_size_MAX 32768
+#define buffer_size_MAX 262144
 
 //Maximum population size of xmachine_memory_Person
-#define xmachine_memory_Person_MAX 32768
+#define xmachine_memory_Person_MAX 262144
 
 //Maximum population size of xmachine_memory_TBAssignment
-#define xmachine_memory_TBAssignment_MAX 32768
+#define xmachine_memory_TBAssignment_MAX 262144
 
 //Maximum population size of xmachine_memory_Household
-#define xmachine_memory_Household_MAX 8192
+#define xmachine_memory_Household_MAX 262144
 
 //Maximum population size of xmachine_memory_HouseholdMembership
-#define xmachine_memory_HouseholdMembership_MAX 32768
+#define xmachine_memory_HouseholdMembership_MAX 262144
 
 //Maximum population size of xmachine_memory_Church
-#define xmachine_memory_Church_MAX 256
+#define xmachine_memory_Church_MAX 262144
 
 //Maximum population size of xmachine_memory_ChurchMembership
-#define xmachine_memory_ChurchMembership_MAX 8192
+#define xmachine_memory_ChurchMembership_MAX 262144
 
 //Maximum population size of xmachine_memory_Transport
-#define xmachine_memory_Transport_MAX 2048
+#define xmachine_memory_Transport_MAX 262144
 
 //Maximum population size of xmachine_memory_TransportMembership
-#define xmachine_memory_TransportMembership_MAX 32768
+#define xmachine_memory_TransportMembership_MAX 262144
 
 //Maximum population size of xmachine_memory_Clinic
-#define xmachine_memory_Clinic_MAX 2
+#define xmachine_memory_Clinic_MAX 262144
 
 //Maximum population size of xmachine_memory_Workplace
-#define xmachine_memory_Workplace_MAX 8192
+#define xmachine_memory_Workplace_MAX 262144
 
 //Maximum population size of xmachine_memory_WorkplaceMembership
-#define xmachine_memory_WorkplaceMembership_MAX 32768
+#define xmachine_memory_WorkplaceMembership_MAX 262144
 
 //Maximum population size of xmachine_memory_Bar
-#define xmachine_memory_Bar_MAX 4096
+#define xmachine_memory_Bar_MAX 262144
 
 //Maximum population size of xmachine_memory_School
-#define xmachine_memory_School_MAX 2048
+#define xmachine_memory_School_MAX 262144
 
 //Maximum population size of xmachine_memory_SchoolMembership
-#define xmachine_memory_SchoolMembership_MAX 16384
+#define xmachine_memory_SchoolMembership_MAX 262144
 
 
   
   
 /* Message population size definitions */
 //Maximum population size of xmachine_mmessage_tb_assignment
-#define xmachine_message_tb_assignment_MAX 32768
+#define xmachine_message_tb_assignment_MAX 262144
 
 //Maximum population size of xmachine_mmessage_household_membership
-#define xmachine_message_household_membership_MAX 32768
+#define xmachine_message_household_membership_MAX 262144
 
 //Maximum population size of xmachine_mmessage_church_membership
-#define xmachine_message_church_membership_MAX 8192
+#define xmachine_message_church_membership_MAX 262144
 
 //Maximum population size of xmachine_mmessage_transport_membership
-#define xmachine_message_transport_membership_MAX 32768
+#define xmachine_message_transport_membership_MAX 262144
 
 //Maximum population size of xmachine_mmessage_workplace_membership
-#define xmachine_message_workplace_membership_MAX 32768
+#define xmachine_message_workplace_membership_MAX 262144
 
 //Maximum population size of xmachine_mmessage_school_membership
-#define xmachine_message_school_membership_MAX 16384
+#define xmachine_message_school_membership_MAX 262144
 
 //Maximum population size of xmachine_mmessage_location
-#define xmachine_message_location_MAX 32768
+#define xmachine_message_location_MAX 262144
 
 //Maximum population size of xmachine_mmessage_household_infection
-#define xmachine_message_household_infection_MAX 8192
+#define xmachine_message_household_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_church_infection
-#define xmachine_message_church_infection_MAX 256
+#define xmachine_message_church_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_transport_infection
-#define xmachine_message_transport_infection_MAX 2048
+#define xmachine_message_transport_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_clinic_infection
-#define xmachine_message_clinic_infection_MAX 2
+#define xmachine_message_clinic_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_workplace_infection
-#define xmachine_message_workplace_infection_MAX 8192
+#define xmachine_message_workplace_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_bar_infection
-#define xmachine_message_bar_infection_MAX 4096
+#define xmachine_message_bar_infection_MAX 262144
 
 //Maximum population size of xmachine_mmessage_school_infection
-#define xmachine_message_school_infection_MAX 2048
+#define xmachine_message_school_infection_MAX 262144
 
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
