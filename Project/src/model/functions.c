@@ -186,6 +186,28 @@ __device__ unsigned int dayofmonth(unsigned int step)
   return (step % 8064) / 288;
 }
 
+__device__ float cadgamma(float kk, float u, float v, float w)
+{
+  float xi = 1.0;
+  float eta = 1.0;
+
+  while (eta > pow(xi, (kk - 1)) * exp(-xi))
+  {
+    if (u * (E + kk) < E)
+    {
+      xi = pow(v, 1 / kk);
+      eta = w * v / xi;
+    }
+    else
+    {
+      xi = 1 - log(v);
+      eta = w * v / E;
+    }
+  }
+
+  return xi;
+}
+
 // A struct to represent a time of day, and a function that returns a time of
 // day given an iteration number of increments of 5 minutes.
 struct Time
@@ -410,7 +432,8 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
     gender = strtol(fgets(line, sizeof(line), file), NULL, 0);
     minage = strtol(fgets(line, sizeof(line), file), NULL, 0);
 
-    if ((int)minage != 0) {
+    if ((int)minage != 0)
+    {
       minage++;
     }
 
@@ -1202,6 +1225,9 @@ __FLAME_GPU_INIT_FUNC__ void initialiseHost()
 
   set_THETA(&theta);
 
+  float e = exp(1.0);
+  set_E(&e);
+
   fclose(file);
 }
 
@@ -1759,6 +1785,7 @@ hhupdate(xmachine_memory_Household *household,
     {
       qsum += location_message->q;
     }
+    printf("%u", qsum);
     location_message =
         get_next_location_message(location_message, location_messages);
   }
@@ -2062,6 +2089,13 @@ persontbinit(xmachine_memory_Person *person,
     usum += u;
   }
 
+  float u = rnd<CONTINUOUS>(rand48);
+  float v = rnd<CONTINUOUS>(rand48);
+  float w = rnd<CONTINUOUS>(rand48);
+
+  float dev = cadgamma(DELTA, u, v, w);
+  usum += dev;
+
   person->q = -usum * THETA;
 
   xmachine_message_tb_assignment *tb_assignment_message =
@@ -2161,7 +2195,7 @@ __FLAME_GPU_FUNC__ int personhhinit(
     if (household_membership_message->person_id == personid)
     {
       person->household = household_membership_message->household_id;
-     // person->householdsize = household_membership_message->household_size;
+      // person->householdsize = household_membership_message->household_size;
       person->church = household_membership_message->church_id;
       person->churchfreq = household_membership_message->churchfreq;
       person->churchdur = household_membership_message->churchdur;

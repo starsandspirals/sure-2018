@@ -89,76 +89,85 @@ __constant__ int d_xmachine_memory_SchoolMembership_schmembershipdefault_count;
 /* Message constants */
 
 /* tb_assignment Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_tb_assignment_count;         /**< message list counter*/
 __constant__ int d_message_tb_assignment_output_type;   /**< message output type (single or optional)*/
 
 /* household_membership Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_household_membership_count;         /**< message list counter*/
 __constant__ int d_message_household_membership_output_type;   /**< message output type (single or optional)*/
 
 /* church_membership Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_church_membership_count;         /**< message list counter*/
 __constant__ int d_message_church_membership_output_type;   /**< message output type (single or optional)*/
 
 /* transport_membership Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_transport_membership_count;         /**< message list counter*/
 __constant__ int d_message_transport_membership_output_type;   /**< message output type (single or optional)*/
 
 /* workplace_membership Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_workplace_membership_count;         /**< message list counter*/
 __constant__ int d_message_workplace_membership_output_type;   /**< message output type (single or optional)*/
 
 /* school_membership Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_school_membership_count;         /**< message list counter*/
 __constant__ int d_message_school_membership_output_type;   /**< message output type (single or optional)*/
 
 /* location Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_location_count;         /**< message list counter*/
 __constant__ int d_message_location_output_type;   /**< message output type (single or optional)*/
 
 /* household_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_household_infection_count;         /**< message list counter*/
 __constant__ int d_message_household_infection_output_type;   /**< message output type (single or optional)*/
 
 /* church_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_church_infection_count;         /**< message list counter*/
 __constant__ int d_message_church_infection_output_type;   /**< message output type (single or optional)*/
 
 /* transport_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_transport_infection_count;         /**< message list counter*/
 __constant__ int d_message_transport_infection_output_type;   /**< message output type (single or optional)*/
 
 /* clinic_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_clinic_infection_count;         /**< message list counter*/
 __constant__ int d_message_clinic_infection_output_type;   /**< message output type (single or optional)*/
 
 /* workplace_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_workplace_infection_count;         /**< message list counter*/
 __constant__ int d_message_workplace_infection_output_type;   /**< message output type (single or optional)*/
 
 /* bar_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_bar_infection_count;         /**< message list counter*/
 __constant__ int d_message_bar_infection_output_type;   /**< message output type (single or optional)*/
 
 /* school_infection Message variables */
-/* Non partitioned and spatial partitioned message variables  */
+/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
 __constant__ int d_message_school_infection_count;         /**< message list counter*/
 __constant__ int d_message_school_infection_output_type;   /**< message output type (single or optional)*/
 
 	
+
+/* Graph Constants */
+
+
+/* Graph device array pointer(s) */
+
+
+/* Graph host array pointer(s) */
+
     
 //include each function file
 
@@ -908,7 +917,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Person agent functions */
+/* Dynamically created Person agent functions */
 
 /** reset_Person_scan_input
  * Person agent reset scan input function
@@ -1219,7 +1228,7 @@ __global__ void reorder_Person_agents(unsigned int* values, xmachine_memory_Pers
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created TBAssignment agent functions */
+/* Dynamically created TBAssignment agent functions */
 
 /** reset_TBAssignment_scan_input
  * TBAssignment agent reset scan input function
@@ -1330,7 +1339,7 @@ __global__ void reorder_TBAssignment_agents(unsigned int* values, xmachine_memor
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Household agent functions */
+/* Dynamically created Household agent functions */
 
 /** reset_Household_scan_input
  * Household agent reset scan input function
@@ -1451,7 +1460,7 @@ __global__ void reorder_Household_agents(unsigned int* values, xmachine_memory_H
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created HouseholdMembership agent functions */
+/* Dynamically created HouseholdMembership agent functions */
 
 /** reset_HouseholdMembership_scan_input
  * HouseholdMembership agent reset scan input function
@@ -1582,7 +1591,7 @@ __global__ void reorder_HouseholdMembership_agents(unsigned int* values, xmachin
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Church agent functions */
+/* Dynamically created Church agent functions */
 
 /** reset_Church_scan_input
  * Church agent reset scan input function
@@ -1708,7 +1717,7 @@ __global__ void reorder_Church_agents(unsigned int* values, xmachine_memory_Chur
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created ChurchMembership agent functions */
+/* Dynamically created ChurchMembership agent functions */
 
 /** reset_ChurchMembership_scan_input
  * ChurchMembership agent reset scan input function
@@ -1829,7 +1838,7 @@ __global__ void reorder_ChurchMembership_agents(unsigned int* values, xmachine_m
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Transport agent functions */
+/* Dynamically created Transport agent functions */
 
 /** reset_Transport_scan_input
  * Transport agent reset scan input function
@@ -1950,7 +1959,7 @@ __global__ void reorder_Transport_agents(unsigned int* values, xmachine_memory_T
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created TransportMembership agent functions */
+/* Dynamically created TransportMembership agent functions */
 
 /** reset_TransportMembership_scan_input
  * TransportMembership agent reset scan input function
@@ -2071,7 +2080,7 @@ __global__ void reorder_TransportMembership_agents(unsigned int* values, xmachin
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Clinic agent functions */
+/* Dynamically created Clinic agent functions */
 
 /** reset_Clinic_scan_input
  * Clinic agent reset scan input function
@@ -2187,7 +2196,7 @@ __global__ void reorder_Clinic_agents(unsigned int* values, xmachine_memory_Clin
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Workplace agent functions */
+/* Dynamically created Workplace agent functions */
 
 /** reset_Workplace_scan_input
  * Workplace agent reset scan input function
@@ -2303,7 +2312,7 @@ __global__ void reorder_Workplace_agents(unsigned int* values, xmachine_memory_W
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created WorkplaceMembership agent functions */
+/* Dynamically created WorkplaceMembership agent functions */
 
 /** reset_WorkplaceMembership_scan_input
  * WorkplaceMembership agent reset scan input function
@@ -2419,7 +2428,7 @@ __global__ void reorder_WorkplaceMembership_agents(unsigned int* values, xmachin
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created Bar agent functions */
+/* Dynamically created Bar agent functions */
 
 /** reset_Bar_scan_input
  * Bar agent reset scan input function
@@ -2535,7 +2544,7 @@ __global__ void reorder_Bar_agents(unsigned int* values, xmachine_memory_Bar_lis
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created School agent functions */
+/* Dynamically created School agent functions */
 
 /** reset_School_scan_input
  * School agent reset scan input function
@@ -2651,7 +2660,7 @@ __global__ void reorder_School_agents(unsigned int* values, xmachine_memory_Scho
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created SchoolMembership agent functions */
+/* Dynamically created SchoolMembership agent functions */
 
 /** reset_SchoolMembership_scan_input
  * SchoolMembership agent reset scan input function
@@ -2767,7 +2776,7 @@ __global__ void reorder_SchoolMembership_agents(unsigned int* values, xmachine_m
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created tb_assignment message functions */
+/* Dynamically created tb_assignment message functions */
 
 
 /** add_tb_assignment_message
@@ -2913,7 +2922,7 @@ __device__ xmachine_message_tb_assignment* get_next_tb_assignment_message(xmachi
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created household_membership message functions */
+/* Dynamically created household_membership message functions */
 
 
 /** add_household_membership_message
@@ -3084,7 +3093,7 @@ __device__ xmachine_message_household_membership* get_next_household_membership_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created church_membership message functions */
+/* Dynamically created church_membership message functions */
 
 
 /** add_church_membership_message
@@ -3240,7 +3249,7 @@ __device__ xmachine_message_church_membership* get_next_church_membership_messag
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created transport_membership message functions */
+/* Dynamically created transport_membership message functions */
 
 
 /** add_transport_membership_message
@@ -3396,7 +3405,7 @@ __device__ xmachine_message_transport_membership* get_next_transport_membership_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created workplace_membership message functions */
+/* Dynamically created workplace_membership message functions */
 
 
 /** add_workplace_membership_message
@@ -3547,7 +3556,7 @@ __device__ xmachine_message_workplace_membership* get_next_workplace_membership_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created school_membership message functions */
+/* Dynamically created school_membership message functions */
 
 
 /** add_school_membership_message
@@ -3698,7 +3707,7 @@ __device__ xmachine_message_school_membership* get_next_school_membership_messag
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created location message functions */
+/* Dynamically created location message functions */
 
 
 /** add_location_message
@@ -3864,7 +3873,7 @@ __device__ xmachine_message_location* get_next_location_message(xmachine_message
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created household_infection message functions */
+/* Dynamically created household_infection message functions */
 
 
 /** add_household_infection_message
@@ -4015,7 +4024,7 @@ __device__ xmachine_message_household_infection* get_next_household_infection_me
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created church_infection message functions */
+/* Dynamically created church_infection message functions */
 
 
 /** add_church_infection_message
@@ -4166,7 +4175,7 @@ __device__ xmachine_message_church_infection* get_next_church_infection_message(
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created transport_infection message functions */
+/* Dynamically created transport_infection message functions */
 
 
 /** add_transport_infection_message
@@ -4317,7 +4326,7 @@ __device__ xmachine_message_transport_infection* get_next_transport_infection_me
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created clinic_infection message functions */
+/* Dynamically created clinic_infection message functions */
 
 
 /** add_clinic_infection_message
@@ -4468,7 +4477,7 @@ __device__ xmachine_message_clinic_infection* get_next_clinic_infection_message(
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created workplace_infection message functions */
+/* Dynamically created workplace_infection message functions */
 
 
 /** add_workplace_infection_message
@@ -4619,7 +4628,7 @@ __device__ xmachine_message_workplace_infection* get_next_workplace_infection_me
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created bar_infection message functions */
+/* Dynamically created bar_infection message functions */
 
 
 /** add_bar_infection_message
@@ -4770,7 +4779,7 @@ __device__ xmachine_message_bar_infection* get_next_bar_infection_message(xmachi
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dyanamically created school_infection message functions */
+/* Dynamically created school_infection message functions */
 
 
 /** add_school_infection_message
@@ -4919,7 +4928,6 @@ __device__ xmachine_message_school_infection* get_next_school_infection_message(
 	int message_index = SHARE_INDEX(i, sizeof(xmachine_message_school_infection));
 	return ((xmachine_message_school_infection*)&message_share[message_index]);
 }
-
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -7563,6 +7571,10 @@ __global__ void GPUFLAME_schinit(xmachine_memory_SchoolMembership_list* agents, 
 
 	
 	
+/* Graph utility functions */
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Rand48 functions */
 

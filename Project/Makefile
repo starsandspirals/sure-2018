@@ -193,7 +193,7 @@ else
 		XSLTPROC := $(shell command -v xsltproc 2> /dev/null)
 		XMLLINT := $(shell command -v xmllint 2> /dev/null)
 		# Pass specific nvcc flags for linux
-		NVCCFLAGS += -std=c++11 -ccbin g++-5
+		NVCCFLAGS += -std=c++11 -ccbin=g++-5
 		CCFLAGS += -Wall
 		# On linux we generate a runpath via -rpath and --enable-new-dtags. This enables a simple location for users who cannot install system wide dependencies a sensible place to put lib files.
 		# Library files are looked for in LD_LIBRARY_PATH, the LIB_DIR, then system paths.
@@ -222,7 +222,7 @@ CONSOLE_INCLUDES := $(addprefix -I ,$(INCLUDE_DIRS))
 VISUALISATION_INCLUDES := $(addprefix -I ,$(INCLUDE_DIRS_VISUALISATION))
 
 # Generate the full path to target executable files
-TARGET_VISUALISATION := $(BIN_DIR)/$(Mode_TYPE)_Visualisation/$(EXAMPLE)$(BIN_EXT)
+TARGET_VISUALISATION := $(BIN_DIR)/$(Mode_TYPE)_Visualisation/$(EXAMPLhereE)$(BIN_EXT)
 TARGET_CONSOLE := $(BIN_DIR)/$(Mode_TYPE)_Console/$(EXAMPLE)$(BIN_EXT)
 
 # Dependancies for the targets

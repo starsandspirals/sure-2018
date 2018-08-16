@@ -23,6 +23,11 @@
 #include <string.h>
 #include <cmath>
 #include <limits.h>
+#include <algorithm>
+#include <string>
+#include <vector>
+
+
 
 #ifdef _WIN32
 #define strtok_r strtok_s
@@ -70,7 +75,7 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
     token = strtok_r(buffer, s, &end_str);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
+            printf("Error: variable array has too many items, expected %d!\n", expected_items);
             exit(EXIT_FAILURE);
         }
         
@@ -79,7 +84,7 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
         token = strtok_r(NULL, s, &end_str);
     }
     if (i != expected_items){
-        printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
+        printf("Error: variable array has %d items, expected %d!\n", i, expected_items);
         exit(EXIT_FAILURE);
     }
 }
@@ -363,6 +368,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_DEFAULT_K()));
     fputs(data, file);
     fputs("</DEFAULT_K>\n", file);
+    fputs("\t<DELTA>", file);
+    sprintf(data, "%f", (*get_DELTA()));
+    fputs(data, file);
+    fputs("</DELTA>\n", file);
     fputs("\t<THETA>", file);
     sprintf(data, "%f", (*get_THETA()));
     fputs(data, file);
@@ -607,6 +616,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_P
     sprintf(data, "%u", (*get_OUTPUT_ID()));
     fputs(data, file);
     fputs("</OUTPUT_ID>\n", file);
+    fputs("\t<E>", file);
+    sprintf(data, "%f", (*get_E()));
+    fputs(data, file);
+    fputs("</E>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each Person agent to xml
@@ -1376,6 +1389,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_DEFAULT_Q(&t_DEFAULT_Q);
     unsigned int t_DEFAULT_K = (unsigned int)1;
     set_DEFAULT_K(&t_DEFAULT_K);
+    float t_DELTA = (float)0.5;
+    set_DELTA(&t_DELTA);
     float t_THETA = (float)0;
     set_THETA(&t_THETA);
     float t_TRANSPORT_A = (float)3;
@@ -1498,6 +1513,8 @@ PROFILE_SCOPED_RANGE("initEnvVars");
     set_VISITING_DUR(&t_VISITING_DUR);
     unsigned int t_OUTPUT_ID = (unsigned int)0;
     set_OUTPUT_ID(&t_OUTPUT_ID);
+    float t_E = (float)0;
+    set_E(&t_E);
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, int* h_xmachine_memory_Person_count,xmachine_memory_TBAssignment_list* h_TBAssignments, int* h_xmachine_memory_TBAssignment_count,xmachine_memory_Household_list* h_Households, int* h_xmachine_memory_Household_count,xmachine_memory_HouseholdMembership_list* h_HouseholdMemberships, int* h_xmachine_memory_HouseholdMembership_count,xmachine_memory_Church_list* h_Churchs, int* h_xmachine_memory_Church_count,xmachine_memory_ChurchMembership_list* h_ChurchMemberships, int* h_xmachine_memory_ChurchMembership_count,xmachine_memory_Transport_list* h_Transports, int* h_xmachine_memory_Transport_count,xmachine_memory_TransportMembership_list* h_TransportMemberships, int* h_xmachine_memory_TransportMembership_count,xmachine_memory_Clinic_list* h_Clinics, int* h_xmachine_memory_Clinic_count,xmachine_memory_Workplace_list* h_Workplaces, int* h_xmachine_memory_Workplace_count,xmachine_memory_WorkplaceMembership_list* h_WorkplaceMemberships, int* h_xmachine_memory_WorkplaceMembership_count,xmachine_memory_Bar_list* h_Bars, int* h_xmachine_memory_Bar_count,xmachine_memory_School_list* h_Schools, int* h_xmachine_memory_School_count,xmachine_memory_SchoolMembership_list* h_SchoolMemberships, int* h_xmachine_memory_SchoolMembership_count)
@@ -1511,14 +1528,15 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
 	FILE *file;
 	/* Char and char buffer for reading file to */
 	char c = ' ';
-	char buffer[10000];
+	const int bufferSize = 10000;
+	char buffer[bufferSize];
 	char agentname[1000];
 
 	/* Pointer to x-memory for initial state data */
 	/*xmachine * current_xmachine;*/
 	/* Variables for checking tags */
 	int reading, i;
-	int in_tag, in_itno, in_xagent, in_name;
+	int in_tag, in_itno, in_xagent, in_name, in_comment;
     int in_Person_id;
     int in_Person_step;
     int in_Person_householdtime;
@@ -1665,6 +1683,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     
     int in_env_DEFAULT_K;
     
+    int in_env_DELTA;
+    
     int in_env_THETA;
     
     int in_env_TRANSPORT_A;
@@ -1786,6 +1806,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     int in_env_VISITING_DUR;
     
     int in_env_OUTPUT_ID;
+    
+    int in_env_E;
     
 	/* set agent count to zero */
 	*h_xmachine_memory_Person_count = 0;
@@ -1915,6 +1937,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_DEFAULT_F_P;
     float env_DEFAULT_Q;
     unsigned int env_DEFAULT_K;
+    float env_DELTA;
     float env_THETA;
     float env_TRANSPORT_A;
     float env_CHURCH_A;
@@ -1976,6 +1999,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     float env_SCHOOL_DUR;
     float env_VISITING_DUR;
     unsigned int env_OUTPUT_ID;
+    float env_E;
     
 
 
@@ -1988,6 +2012,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     agent_minimum.y = 0;
     agent_minimum.z = 0;
 	reading = 1;
+    in_comment = 0;
 	in_tag = 0;
 	in_itno = 0;
     in_env = 0;
@@ -2102,6 +2127,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_DEFAULT_F_P = 0;
     in_env_DEFAULT_Q = 0;
     in_env_DEFAULT_K = 0;
+    in_env_DELTA = 0;
     in_env_THETA = 0;
     in_env_TRANSPORT_A = 0;
     in_env_CHURCH_A = 0;
@@ -2163,6 +2189,7 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     in_env_SCHOOL_DUR = 0;
     in_env_VISITING_DUR = 0;
     in_env_OUTPUT_ID = 0;
+    in_env_E = 0;
 	//set all Person values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_Person_MAX; k++)
@@ -2401,75 +2428,76 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     SchoolMembership_school_id = 0;
 
     /* Default variables for environment variables */
-    env_TIME_STEP = 0;
-    env_MAX_AGE = 0;
-    env_STARTING_POPULATION = 0;
-    env_CHURCH_BETA0 = 0;
-    env_CHURCH_BETA1 = 0;
-    env_CHURCH_K1 = 0;
-    env_CHURCH_K2 = 0;
-    env_CHURCH_K3 = 0;
-    env_CHURCH_P1 = 0;
-    env_CHURCH_P2 = 0;
-    env_CHURCH_PROB0 = 0;
-    env_CHURCH_PROB1 = 0;
-    env_CHURCH_PROB2 = 0;
-    env_CHURCH_PROB3 = 0;
-    env_CHURCH_PROB4 = 0;
-    env_CHURCH_PROB5 = 0;
-    env_CHURCH_PROB6 = 0;
-    env_CHURCH_PROPORTION = 0;
-    env_TRANSPORT_BETA0 = 0;
-    env_TRANSPORT_BETA1 = 0;
-    env_TRANSPORT_FREQ0 = 0;
-    env_TRANSPORT_FREQ2 = 0;
-    env_TRANSPORT_DUR20 = 0;
-    env_TRANSPORT_DUR45 = 0;
-    env_TRANSPORT_SIZE = 0;
-    env_HIV_PREVALENCE = 0;
-    env_ART_COVERAGE = 0;
-    env_RR_HIV = 0;
-    env_RR_ART = 0;
-    env_TB_PREVALENCE = 0;
-    env_DEFAULT_M_P = 0;
-    env_DEFAULT_F_P = 0;
-    env_DEFAULT_Q = 0;
-    env_DEFAULT_K = 0;
+    env_TIME_STEP = 1.0;
+    env_MAX_AGE = 100;
+    env_STARTING_POPULATION = 30000.0;
+    env_CHURCH_BETA0 = 2.19261;
+    env_CHURCH_BETA1 = 0.14679;
+    env_CHURCH_K1 = 13;
+    env_CHURCH_K2 = 35;
+    env_CHURCH_K3 = 100;
+    env_CHURCH_P1 = 0.14;
+    env_CHURCH_P2 = 0.32;
+    env_CHURCH_PROB0 = 0.285569106;
+    env_CHURCH_PROB1 = 0.704268293;
+    env_CHURCH_PROB2 = 0.864329269;
+    env_CHURCH_PROB3 = 0.944613822;
+    env_CHURCH_PROB4 = 0.978658537;
+    env_CHURCH_PROB5 = 0.981707317;
+    env_CHURCH_PROB6 = 0.985772358;
+    env_CHURCH_PROPORTION = 0.5;
+    env_TRANSPORT_BETA0 = 1.682127;
+    env_TRANSPORT_BETA1 = -0.007739;
+    env_TRANSPORT_FREQ0 = 0.4337998;
+    env_TRANSPORT_FREQ2 = 0.8439182;
+    env_TRANSPORT_DUR20 = 0.5011086;
+    env_TRANSPORT_DUR45 = 0.8381374;
+    env_TRANSPORT_SIZE = 15;
+    env_HIV_PREVALENCE = 0.14;
+    env_ART_COVERAGE = 0.21;
+    env_RR_HIV = 4.5;
+    env_RR_ART = 0.4;
+    env_TB_PREVALENCE = 0.005;
+    env_DEFAULT_M_P = 0.36;
+    env_DEFAULT_F_P = 0.36;
+    env_DEFAULT_Q = 1;
+    env_DEFAULT_K = 1;
+    env_DELTA = 0.5;
     env_THETA = 0;
-    env_TRANSPORT_A = 0;
-    env_CHURCH_A = 0;
-    env_CLINIC_A = 0;
-    env_HOUSEHOLD_A = 0;
-    env_TRANSPORT_V = 0;
-    env_HOUSEHOLD_V = 0;
-    env_CLINIC_V = 0;
-    env_CHURCH_V_MULTIPLIER = 0;
-    env_WORKPLACE_BETA0 = 0;
-    env_WORKPLACE_BETAA = 0;
-    env_WORKPLACE_BETAS = 0;
-    env_WORKPLACE_BETAAS = 0;
-    env_WORKPLACE_A = 0;
-    env_WORKPLACE_DUR = 0;
-    env_WORKPLACE_SIZE = 0;
-    env_WORKPLACE_V = 0;
+    env_TRANSPORT_A = 3;
+    env_CHURCH_A = 3;
+    env_CLINIC_A = 3;
+    env_HOUSEHOLD_A = 3;
+    env_TRANSPORT_V = 20;
+    env_HOUSEHOLD_V = 30;
+    env_CLINIC_V = 40;
+    env_CHURCH_V_MULTIPLIER = 1;
+    env_WORKPLACE_BETA0 = -1.78923;
+    env_WORKPLACE_BETAA = -0.03557;
+    env_WORKPLACE_BETAS = 0.16305;
+    env_WORKPLACE_BETAAS = 0.04272;
+    env_WORKPLACE_A = 3;
+    env_WORKPLACE_DUR = 8;
+    env_WORKPLACE_SIZE = 20;
+    env_WORKPLACE_V = 40;
     env_HOUSEHOLDS = 0;
     env_BARS = 0;
-    env_RR_AS_F_46 = 0;
-    env_RR_AS_F_26 = 0;
-    env_RR_AS_F_18 = 0;
-    env_RR_AS_M_46 = 0;
-    env_RR_AS_M_26 = 0;
-    env_RR_AS_M_18 = 0;
-    env_BAR_BETA0 = 0;
-    env_BAR_BETAA = 0;
-    env_BAR_BETAS = 0;
-    env_BAR_BETAAS = 0;
-    env_BAR_SIZE = 0;
-    env_SCHOOL_SIZE = 0;
-    env_BAR_A = 0;
-    env_BAR_V = 0;
-    env_SCHOOL_A = 0;
-    env_SCHOOL_V = 0;
+    env_RR_AS_F_46 = 0.50;
+    env_RR_AS_F_26 = 1.25;
+    env_RR_AS_F_18 = 1.00;
+    env_RR_AS_M_46 = 1.25;
+    env_RR_AS_M_26 = 3.75;
+    env_RR_AS_M_18 = 1.00;
+    env_BAR_BETA0 = -1.80628;
+    env_BAR_BETAA = -0.02073;
+    env_BAR_BETAS = -0.02073;
+    env_BAR_BETAAS = 0.02204;
+    env_BAR_SIZE = 20;
+    env_SCHOOL_SIZE = 40;
+    env_BAR_A = 3;
+    env_BAR_V = 40;
+    env_SCHOOL_A = 3;
+    env_SCHOOL_V = 40;
     env_SEED = 0;
     env_HOUSEHOLD_EXP = 0;
     env_CHURCH_EXP = 0;
@@ -2479,23 +2507,24 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     env_BAR_EXP = 0;
     env_SCHOOL_EXP = 0;
     env_PROB = 0;
-    env_BAR_M_PROB1 = 0;
-    env_BAR_M_PROB2 = 0;
-    env_BAR_M_PROB3 = 0;
-    env_BAR_M_PROB4 = 0;
-    env_BAR_M_PROB5 = 0;
-    env_BAR_M_PROB7 = 0;
-    env_BAR_F_PROB1 = 0;
-    env_BAR_F_PROB2 = 0;
-    env_BAR_F_PROB3 = 0;
-    env_BAR_F_PROB4 = 0;
-    env_BAR_F_PROB5 = 0;
-    env_BAR_F_PROB7 = 0;
-    env_CLINIC_DUR = 0;
-    env_BAR_DUR = 0;
-    env_SCHOOL_DUR = 0;
-    env_VISITING_DUR = 0;
+    env_BAR_M_PROB1 = 0.22;
+    env_BAR_M_PROB2 = 0.37;
+    env_BAR_M_PROB3 = 0.51;
+    env_BAR_M_PROB4 = 0.59;
+    env_BAR_M_PROB5 = 0.63;
+    env_BAR_M_PROB7 = 0.74;
+    env_BAR_F_PROB1 = 0.23;
+    env_BAR_F_PROB2 = 0.38;
+    env_BAR_F_PROB3 = 0.55;
+    env_BAR_F_PROB4 = 0.62;
+    env_BAR_F_PROB5 = 0.67;
+    env_BAR_F_PROB7 = 0.71;
+    env_CLINIC_DUR = 3;
+    env_BAR_DUR = 90;
+    env_SCHOOL_DUR = 6;
+    env_VISITING_DUR = 40;
     env_OUTPUT_ID = 0;
+    env_E = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -2520,6 +2549,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
     i = 0;
 	while(reading==1)
 	{
+        // If I exceeds our buffer size we must abort
+        if(i >= bufferSize){
+            fprintf(stderr, "Error: XML Parsing failed Tag name or content too long (> %d characters)\n", bufferSize);
+            exit(EXIT_FAILURE);
+        }
+
 		/* Get the next char from the file */
 		c = (char)fgetc(file);
 
@@ -2531,8 +2566,39 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         // Increment byte counter.
         bytesRead++;
 
+        /*If in a  comment, look for the end of a comment */
+        if(in_comment){
+
+            /* Look for an end tag following two (or more) hyphens.
+               To support very long comments, we use the minimal amount of buffer we can. 
+               If we see a hyphen, store it and increment i (but don't increment i)
+               If we see a > check if we have a correct terminating comment
+               If we see any other characters, reset i.
+            */
+
+            if(c == '-'){
+                buffer[i] = c;
+                i++;
+            } else if(c == '>' && i >= 2){
+                in_comment = 0;
+                i = 0;
+            } else {
+                i = 0;
+            }
+
+            /*// If we see the end tag, check the preceding two characters for a close comment, if enough characters have been read for -->
+            if(c == '>' && i >= 2 && buffer[i-1] == '-' && buffer[i-2] == '-'){
+                in_comment = 0;
+                buffer[0] = 0;
+                i = 0;
+            } else {
+                // Otherwise just store it in the buffer so we can keep checking for close tags
+                buffer[i] = c;
+                i++;
+            }*/
+        }
 		/* If the end of a tag */
-		if(c == '>')
+		else if(c == '>')
 		{
 			/* Place 0 at end of buffer to make chars a string */
 			buffer[i] = 0;
@@ -3083,6 +3149,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/DEFAULT_Q") == 0) in_env_DEFAULT_Q = 0;
 			if(strcmp(buffer, "DEFAULT_K") == 0) in_env_DEFAULT_K = 1;
             if(strcmp(buffer, "/DEFAULT_K") == 0) in_env_DEFAULT_K = 0;
+			if(strcmp(buffer, "DELTA") == 0) in_env_DELTA = 1;
+            if(strcmp(buffer, "/DELTA") == 0) in_env_DELTA = 0;
 			if(strcmp(buffer, "THETA") == 0) in_env_THETA = 1;
             if(strcmp(buffer, "/THETA") == 0) in_env_THETA = 0;
 			if(strcmp(buffer, "TRANSPORT_A") == 0) in_env_TRANSPORT_A = 1;
@@ -3205,6 +3273,8 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
             if(strcmp(buffer, "/VISITING_DUR") == 0) in_env_VISITING_DUR = 0;
 			if(strcmp(buffer, "OUTPUT_ID") == 0) in_env_OUTPUT_ID = 1;
             if(strcmp(buffer, "/OUTPUT_ID") == 0) in_env_OUTPUT_ID = 0;
+			if(strcmp(buffer, "E") == 0) in_env_E = 1;
+            if(strcmp(buffer, "/E") == 0) in_env_E = 0;
 			
 
 			/* End of tag and reset buffer */
@@ -3689,6 +3759,13 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     set_DEFAULT_K(&env_DEFAULT_K);
                   
               }
+            if(in_env_DELTA){
+              
+                    env_DELTA = (float) fgpu_atof(buffer);
+                    
+                    set_DELTA(&env_DELTA);
+                  
+              }
             if(in_env_THETA){
               
                     env_THETA = (float) fgpu_atof(buffer);
@@ -4116,16 +4193,33 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
                     set_OUTPUT_ID(&env_OUTPUT_ID);
                   
               }
+            if(in_env_E){
+              
+                    env_E = (float) fgpu_atof(buffer);
+                    
+                    set_E(&env_E);
+                  
+              }
             
-          }
+            }
 		/* Reset buffer */
 			i = 0;
 		}
 		/* If in tag put read char into buffer */
 		else if(in_tag)
 		{
-			buffer[i] = c;
-			i++;
+            // Check if we are a comment, when we are in a tag and buffer[0:2] == "!--"
+            if(i == 2 && c == '-' && buffer[1] == '-' && buffer[0] == '!'){
+                in_comment = 1;
+                // Reset the buffer and i.
+                buffer[0] = 0;
+                i = 0;
+            }
+
+            // Store the character and increment the counter
+            buffer[i] = c;
+            i++;
+
 		}
 		/* If in data read char into buffer */
 		else
@@ -4140,6 +4234,12 @@ void readInitialStates(char* inputpath, xmachine_memory_Person_list* h_Persons, 
         fflush(stdout);
     }
 
+    // If the in_comment flag is still marked, issue a warning.
+    if(in_comment){
+        fprintf(stdout, "Warning: Un-terminated comment in %s\n", inputpath);
+        fflush(stdout);
+    }    
+
 	/* Close the file */
 	fclose(file);
 }
@@ -4152,3 +4252,5 @@ glm::vec3 getMinimumBounds(){
     return agent_minimum;
 }
 
+
+/* Methods to load static networks from disk */

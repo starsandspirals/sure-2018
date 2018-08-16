@@ -17,8 +17,15 @@
  */
 
 
+
 #ifndef __HEADER
 #define __HEADER
+
+#if defined __NVCC__
+   // Disable annotation on defaulted function warnings (glm 0.9.9 and CUDA 9.0 introduced this warning)
+   #pragma diag_suppress esa_on_defaulted_function_ignored 
+#endif
+
 #define GLM_FORCE_NO_CTOR_INIT
 #include <glm/glm.hpp>
 
@@ -31,9 +38,15 @@
 #define __FLAME_GPU_INIT_FUNC__
 #define __FLAME_GPU_STEP_FUNC__
 #define __FLAME_GPU_EXIT_FUNC__
+#define __FLAME_GPU_HOST_FUNC__ __host__
 
 #define USE_CUDA_STREAMS
 #define FAST_ATOMIC_SORTING
+
+// FLAME GPU Version Macros.
+#define FLAME_GPU_MAJOR_VERSION 1
+#define FLAME_GPU_MINOR_VERSION 5
+#define FLAME_GPU_PATCH_VERSION 0
 
 typedef unsigned int uint;
 
@@ -55,95 +68,95 @@ typedef glm::dvec4 dvec4;
 
 /* Agent population size definitions must be a multiple of THREADS_PER_TILE (default 64) */
 //Maximum buffer size (largest agent buffer size)
-#define buffer_size_MAX 262144
+#define buffer_size_MAX 32768
 
 //Maximum population size of xmachine_memory_Person
-#define xmachine_memory_Person_MAX 262144
+#define xmachine_memory_Person_MAX 32768
 
 //Maximum population size of xmachine_memory_TBAssignment
-#define xmachine_memory_TBAssignment_MAX 262144
+#define xmachine_memory_TBAssignment_MAX 32768
 
 //Maximum population size of xmachine_memory_Household
-#define xmachine_memory_Household_MAX 262144
+#define xmachine_memory_Household_MAX 8192
 
 //Maximum population size of xmachine_memory_HouseholdMembership
-#define xmachine_memory_HouseholdMembership_MAX 262144
+#define xmachine_memory_HouseholdMembership_MAX 32768
 
 //Maximum population size of xmachine_memory_Church
-#define xmachine_memory_Church_MAX 262144
+#define xmachine_memory_Church_MAX 256
 
 //Maximum population size of xmachine_memory_ChurchMembership
-#define xmachine_memory_ChurchMembership_MAX 262144
+#define xmachine_memory_ChurchMembership_MAX 8192
 
 //Maximum population size of xmachine_memory_Transport
-#define xmachine_memory_Transport_MAX 262144
+#define xmachine_memory_Transport_MAX 2048
 
 //Maximum population size of xmachine_memory_TransportMembership
-#define xmachine_memory_TransportMembership_MAX 262144
+#define xmachine_memory_TransportMembership_MAX 32768
 
 //Maximum population size of xmachine_memory_Clinic
-#define xmachine_memory_Clinic_MAX 262144
+#define xmachine_memory_Clinic_MAX 2
 
 //Maximum population size of xmachine_memory_Workplace
-#define xmachine_memory_Workplace_MAX 262144
+#define xmachine_memory_Workplace_MAX 8192
 
 //Maximum population size of xmachine_memory_WorkplaceMembership
-#define xmachine_memory_WorkplaceMembership_MAX 262144
+#define xmachine_memory_WorkplaceMembership_MAX 32768
 
 //Maximum population size of xmachine_memory_Bar
-#define xmachine_memory_Bar_MAX 262144
+#define xmachine_memory_Bar_MAX 4096
 
 //Maximum population size of xmachine_memory_School
-#define xmachine_memory_School_MAX 262144
+#define xmachine_memory_School_MAX 2048
 
 //Maximum population size of xmachine_memory_SchoolMembership
-#define xmachine_memory_SchoolMembership_MAX 262144
+#define xmachine_memory_SchoolMembership_MAX 16384
 
 
   
   
 /* Message population size definitions */
 //Maximum population size of xmachine_mmessage_tb_assignment
-#define xmachine_message_tb_assignment_MAX 262144
+#define xmachine_message_tb_assignment_MAX 32768
 
 //Maximum population size of xmachine_mmessage_household_membership
-#define xmachine_message_household_membership_MAX 262144
+#define xmachine_message_household_membership_MAX 32768
 
 //Maximum population size of xmachine_mmessage_church_membership
-#define xmachine_message_church_membership_MAX 262144
+#define xmachine_message_church_membership_MAX 8192
 
 //Maximum population size of xmachine_mmessage_transport_membership
-#define xmachine_message_transport_membership_MAX 262144
+#define xmachine_message_transport_membership_MAX 32768
 
 //Maximum population size of xmachine_mmessage_workplace_membership
-#define xmachine_message_workplace_membership_MAX 262144
+#define xmachine_message_workplace_membership_MAX 32768
 
 //Maximum population size of xmachine_mmessage_school_membership
-#define xmachine_message_school_membership_MAX 262144
+#define xmachine_message_school_membership_MAX 16384
 
 //Maximum population size of xmachine_mmessage_location
-#define xmachine_message_location_MAX 262144
+#define xmachine_message_location_MAX 32768
 
 //Maximum population size of xmachine_mmessage_household_infection
-#define xmachine_message_household_infection_MAX 262144
+#define xmachine_message_household_infection_MAX 8192
 
 //Maximum population size of xmachine_mmessage_church_infection
-#define xmachine_message_church_infection_MAX 262144
+#define xmachine_message_church_infection_MAX 256
 
 //Maximum population size of xmachine_mmessage_transport_infection
-#define xmachine_message_transport_infection_MAX 262144
+#define xmachine_message_transport_infection_MAX 4096
 
 //Maximum population size of xmachine_mmessage_clinic_infection
-#define xmachine_message_clinic_infection_MAX 262144
+#define xmachine_message_clinic_infection_MAX 2
 
 //Maximum population size of xmachine_mmessage_workplace_infection
-#define xmachine_message_workplace_infection_MAX 262144
+#define xmachine_message_workplace_infection_MAX 8192
 
 //Maximum population size of xmachine_mmessage_bar_infection
-#define xmachine_message_bar_infection_MAX 262144
+#define xmachine_message_bar_infection_MAX 4096
 
 //Maximum population size of xmachine_mmessage_school_infection
-#define xmachine_message_school_infection_MAX 262144
+#define xmachine_message_school_infection_MAX 2048
 
 
 /* Define preprocessor symbols for each message to specify the type, to simplify / improve portability */
@@ -164,6 +177,8 @@ typedef glm::dvec4 dvec4;
 #define xmachine_message_school_infection_partitioningNone
 
 /* Spatial partitioning grid size definitions */
+
+/* Static Graph size definitions*/
   
 
 /* Default visualisation Colour indices */
@@ -1055,6 +1070,15 @@ struct xmachine_message_school_infection_list
 
 
 
+/* Graph structures */
+
+
+/* Graph Edge Partitioned message boundary structures */
+
+
+/* Graph utility functions, usable in agent functions and implemented in FLAMEGPU_Kernels */
+
+
   /* Random */
   /** struct RNG_rand48
   *	structure used to hold list seeds
@@ -1679,8 +1703,7 @@ __FLAME_GPU_FUNC__ xmachine_message_school_infection * get_first_school_infectio
  * @return        returns the first message from the message list (offset depending on agent block)
  */
 __FLAME_GPU_FUNC__ xmachine_message_school_infection * get_next_school_infection_message(xmachine_message_school_infection* current, xmachine_message_school_infection_list* school_infection_messages);
-  
-  
+
   
 /* Agent Function Prototypes implemented in FLAMEGPU_Kernels */
 
@@ -1842,6 +1865,9 @@ __FLAME_GPU_FUNC__ void add_School_agent(xmachine_memory_School_list* agents, un
  * @param school_id	agent agent variable of type unsigned int
  */
 __FLAME_GPU_FUNC__ void add_SchoolMembership_agent(xmachine_memory_SchoolMembership_list* agents, unsigned int person_id, unsigned int school_id);
+
+
+/* Graph loading function prototypes implemented in io.cu */
 
 
   
@@ -4206,12 +4232,12 @@ unsigned int reduce_Person_default_id_variable();
 
 
 
-/** unsigned int count_Person_default_id_variable(int count_value){
+/** unsigned int count_Person_default_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_id_variable(int count_value);
+unsigned int count_Person_default_id_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4232,12 +4258,12 @@ unsigned int reduce_Person_default_step_variable();
 
 
 
-/** unsigned int count_Person_default_step_variable(int count_value){
+/** unsigned int count_Person_default_step_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_step_variable(int count_value);
+unsigned int count_Person_default_step_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_step_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4258,12 +4284,12 @@ unsigned int reduce_Person_default_householdtime_variable();
 
 
 
-/** unsigned int count_Person_default_householdtime_variable(int count_value){
+/** unsigned int count_Person_default_householdtime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_householdtime_variable(int count_value);
+unsigned int count_Person_default_householdtime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_householdtime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4284,12 +4310,12 @@ unsigned int reduce_Person_default_churchtime_variable();
 
 
 
-/** unsigned int count_Person_default_churchtime_variable(int count_value){
+/** unsigned int count_Person_default_churchtime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_churchtime_variable(int count_value);
+unsigned int count_Person_default_churchtime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_churchtime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4310,12 +4336,12 @@ unsigned int reduce_Person_default_transporttime_variable();
 
 
 
-/** unsigned int count_Person_default_transporttime_variable(int count_value){
+/** unsigned int count_Person_default_transporttime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_transporttime_variable(int count_value);
+unsigned int count_Person_default_transporttime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_transporttime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4336,12 +4362,12 @@ unsigned int reduce_Person_default_clinictime_variable();
 
 
 
-/** unsigned int count_Person_default_clinictime_variable(int count_value){
+/** unsigned int count_Person_default_clinictime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_clinictime_variable(int count_value);
+unsigned int count_Person_default_clinictime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_clinictime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4362,12 +4388,12 @@ unsigned int reduce_Person_default_workplacetime_variable();
 
 
 
-/** unsigned int count_Person_default_workplacetime_variable(int count_value){
+/** unsigned int count_Person_default_workplacetime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_workplacetime_variable(int count_value);
+unsigned int count_Person_default_workplacetime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_workplacetime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4388,12 +4414,12 @@ unsigned int reduce_Person_default_bartime_variable();
 
 
 
-/** unsigned int count_Person_default_bartime_variable(int count_value){
+/** unsigned int count_Person_default_bartime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_bartime_variable(int count_value);
+unsigned int count_Person_default_bartime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_bartime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4414,12 +4440,12 @@ unsigned int reduce_Person_default_outsidetime_variable();
 
 
 
-/** unsigned int count_Person_default_outsidetime_variable(int count_value){
+/** unsigned int count_Person_default_outsidetime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_outsidetime_variable(int count_value);
+unsigned int count_Person_default_outsidetime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_outsidetime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4440,12 +4466,12 @@ unsigned int reduce_Person_default_age_variable();
 
 
 
-/** unsigned int count_Person_default_age_variable(int count_value){
+/** unsigned int count_Person_default_age_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_age_variable(int count_value);
+unsigned int count_Person_default_age_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_age_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4466,12 +4492,12 @@ unsigned int reduce_Person_default_gender_variable();
 
 
 
-/** unsigned int count_Person_default_gender_variable(int count_value){
+/** unsigned int count_Person_default_gender_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_gender_variable(int count_value);
+unsigned int count_Person_default_gender_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_gender_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4492,12 +4518,12 @@ unsigned int reduce_Person_default_householdsize_variable();
 
 
 
-/** unsigned int count_Person_default_householdsize_variable(int count_value){
+/** unsigned int count_Person_default_householdsize_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_householdsize_variable(int count_value);
+unsigned int count_Person_default_householdsize_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_householdsize_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4518,12 +4544,12 @@ unsigned int reduce_Person_default_churchfreq_variable();
 
 
 
-/** unsigned int count_Person_default_churchfreq_variable(int count_value){
+/** unsigned int count_Person_default_churchfreq_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_churchfreq_variable(int count_value);
+unsigned int count_Person_default_churchfreq_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_churchfreq_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4563,12 +4589,12 @@ unsigned int reduce_Person_default_transportdur_variable();
 
 
 
-/** unsigned int count_Person_default_transportdur_variable(int count_value){
+/** unsigned int count_Person_default_transportdur_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_transportdur_variable(int count_value);
+unsigned int count_Person_default_transportdur_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_transportdur_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4641,12 +4667,12 @@ unsigned int reduce_Person_default_household_variable();
 
 
 
-/** unsigned int count_Person_default_household_variable(int count_value){
+/** unsigned int count_Person_default_household_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_household_variable(int count_value);
+unsigned int count_Person_default_household_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_household_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4771,12 +4797,12 @@ unsigned int reduce_Person_default_busy_variable();
 
 
 
-/** unsigned int count_Person_default_busy_variable(int count_value){
+/** unsigned int count_Person_default_busy_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_busy_variable(int count_value);
+unsigned int count_Person_default_busy_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_busy_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4797,12 +4823,12 @@ unsigned int reduce_Person_default_startstep_variable();
 
 
 
-/** unsigned int count_Person_default_startstep_variable(int count_value){
+/** unsigned int count_Person_default_startstep_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_startstep_variable(int count_value);
+unsigned int count_Person_default_startstep_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_startstep_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4823,12 +4849,12 @@ unsigned int reduce_Person_default_location_variable();
 
 
 
-/** unsigned int count_Person_default_location_variable(int count_value){
+/** unsigned int count_Person_default_location_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_location_variable(int count_value);
+unsigned int count_Person_default_location_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_location_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4849,12 +4875,12 @@ unsigned int reduce_Person_default_locationid_variable();
 
 
 
-/** unsigned int count_Person_default_locationid_variable(int count_value){
+/** unsigned int count_Person_default_locationid_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_locationid_variable(int count_value);
+unsigned int count_Person_default_locationid_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_locationid_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4875,12 +4901,12 @@ unsigned int reduce_Person_default_hiv_variable();
 
 
 
-/** unsigned int count_Person_default_hiv_variable(int count_value){
+/** unsigned int count_Person_default_hiv_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_hiv_variable(int count_value);
+unsigned int count_Person_default_hiv_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_hiv_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4901,12 +4927,12 @@ unsigned int reduce_Person_default_art_variable();
 
 
 
-/** unsigned int count_Person_default_art_variable(int count_value){
+/** unsigned int count_Person_default_art_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_art_variable(int count_value);
+unsigned int count_Person_default_art_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_art_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4927,12 +4953,12 @@ unsigned int reduce_Person_default_activetb_variable();
 
 
 
-/** unsigned int count_Person_default_activetb_variable(int count_value){
+/** unsigned int count_Person_default_activetb_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_activetb_variable(int count_value);
+unsigned int count_Person_default_activetb_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_activetb_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -4953,12 +4979,12 @@ unsigned int reduce_Person_default_artday_variable();
 
 
 
-/** unsigned int count_Person_default_artday_variable(int count_value){
+/** unsigned int count_Person_default_artday_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_artday_variable(int count_value);
+unsigned int count_Person_default_artday_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_artday_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5017,12 +5043,12 @@ unsigned int reduce_Person_default_infections_variable();
 
 
 
-/** unsigned int count_Person_default_infections_variable(int count_value){
+/** unsigned int count_Person_default_infections_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_infections_variable(int count_value);
+unsigned int count_Person_default_infections_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_infections_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5140,12 +5166,12 @@ unsigned int reduce_Person_default_timevisiting_variable();
 
 
 
-/** unsigned int count_Person_default_timevisiting_variable(int count_value){
+/** unsigned int count_Person_default_timevisiting_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_timevisiting_variable(int count_value);
+unsigned int count_Person_default_timevisiting_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_timevisiting_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5166,12 +5192,12 @@ unsigned int reduce_Person_default_bargoing_variable();
 
 
 
-/** unsigned int count_Person_default_bargoing_variable(int count_value){
+/** unsigned int count_Person_default_bargoing_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_bargoing_variable(int count_value);
+unsigned int count_Person_default_bargoing_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_bargoing_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5192,12 +5218,12 @@ unsigned int reduce_Person_default_barday_variable();
 
 
 
-/** unsigned int count_Person_default_barday_variable(int count_value){
+/** unsigned int count_Person_default_barday_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_barday_variable(int count_value);
+unsigned int count_Person_default_barday_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_barday_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5218,12 +5244,12 @@ unsigned int reduce_Person_default_schooltime_variable();
 
 
 
-/** unsigned int count_Person_default_schooltime_variable(int count_value){
+/** unsigned int count_Person_default_schooltime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_default_schooltime_variable(int count_value);
+unsigned int count_Person_default_schooltime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_default_schooltime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5244,12 +5270,12 @@ unsigned int reduce_Person_s2_id_variable();
 
 
 
-/** unsigned int count_Person_s2_id_variable(int count_value){
+/** unsigned int count_Person_s2_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_id_variable(int count_value);
+unsigned int count_Person_s2_id_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5270,12 +5296,12 @@ unsigned int reduce_Person_s2_step_variable();
 
 
 
-/** unsigned int count_Person_s2_step_variable(int count_value){
+/** unsigned int count_Person_s2_step_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_step_variable(int count_value);
+unsigned int count_Person_s2_step_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_step_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5296,12 +5322,12 @@ unsigned int reduce_Person_s2_householdtime_variable();
 
 
 
-/** unsigned int count_Person_s2_householdtime_variable(int count_value){
+/** unsigned int count_Person_s2_householdtime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_householdtime_variable(int count_value);
+unsigned int count_Person_s2_householdtime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_householdtime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5322,12 +5348,12 @@ unsigned int reduce_Person_s2_churchtime_variable();
 
 
 
-/** unsigned int count_Person_s2_churchtime_variable(int count_value){
+/** unsigned int count_Person_s2_churchtime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_churchtime_variable(int count_value);
+unsigned int count_Person_s2_churchtime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_churchtime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5348,12 +5374,12 @@ unsigned int reduce_Person_s2_transporttime_variable();
 
 
 
-/** unsigned int count_Person_s2_transporttime_variable(int count_value){
+/** unsigned int count_Person_s2_transporttime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_transporttime_variable(int count_value);
+unsigned int count_Person_s2_transporttime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_transporttime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5374,12 +5400,12 @@ unsigned int reduce_Person_s2_clinictime_variable();
 
 
 
-/** unsigned int count_Person_s2_clinictime_variable(int count_value){
+/** unsigned int count_Person_s2_clinictime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_clinictime_variable(int count_value);
+unsigned int count_Person_s2_clinictime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_clinictime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5400,12 +5426,12 @@ unsigned int reduce_Person_s2_workplacetime_variable();
 
 
 
-/** unsigned int count_Person_s2_workplacetime_variable(int count_value){
+/** unsigned int count_Person_s2_workplacetime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_workplacetime_variable(int count_value);
+unsigned int count_Person_s2_workplacetime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_workplacetime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5426,12 +5452,12 @@ unsigned int reduce_Person_s2_bartime_variable();
 
 
 
-/** unsigned int count_Person_s2_bartime_variable(int count_value){
+/** unsigned int count_Person_s2_bartime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_bartime_variable(int count_value);
+unsigned int count_Person_s2_bartime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_bartime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5452,12 +5478,12 @@ unsigned int reduce_Person_s2_outsidetime_variable();
 
 
 
-/** unsigned int count_Person_s2_outsidetime_variable(int count_value){
+/** unsigned int count_Person_s2_outsidetime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_outsidetime_variable(int count_value);
+unsigned int count_Person_s2_outsidetime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_outsidetime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5478,12 +5504,12 @@ unsigned int reduce_Person_s2_age_variable();
 
 
 
-/** unsigned int count_Person_s2_age_variable(int count_value){
+/** unsigned int count_Person_s2_age_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_age_variable(int count_value);
+unsigned int count_Person_s2_age_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_age_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5504,12 +5530,12 @@ unsigned int reduce_Person_s2_gender_variable();
 
 
 
-/** unsigned int count_Person_s2_gender_variable(int count_value){
+/** unsigned int count_Person_s2_gender_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_gender_variable(int count_value);
+unsigned int count_Person_s2_gender_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_gender_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5530,12 +5556,12 @@ unsigned int reduce_Person_s2_householdsize_variable();
 
 
 
-/** unsigned int count_Person_s2_householdsize_variable(int count_value){
+/** unsigned int count_Person_s2_householdsize_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_householdsize_variable(int count_value);
+unsigned int count_Person_s2_householdsize_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_householdsize_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5556,12 +5582,12 @@ unsigned int reduce_Person_s2_churchfreq_variable();
 
 
 
-/** unsigned int count_Person_s2_churchfreq_variable(int count_value){
+/** unsigned int count_Person_s2_churchfreq_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_churchfreq_variable(int count_value);
+unsigned int count_Person_s2_churchfreq_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_churchfreq_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5601,12 +5627,12 @@ unsigned int reduce_Person_s2_transportdur_variable();
 
 
 
-/** unsigned int count_Person_s2_transportdur_variable(int count_value){
+/** unsigned int count_Person_s2_transportdur_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_transportdur_variable(int count_value);
+unsigned int count_Person_s2_transportdur_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_transportdur_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5679,12 +5705,12 @@ unsigned int reduce_Person_s2_household_variable();
 
 
 
-/** unsigned int count_Person_s2_household_variable(int count_value){
+/** unsigned int count_Person_s2_household_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_household_variable(int count_value);
+unsigned int count_Person_s2_household_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_household_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5809,12 +5835,12 @@ unsigned int reduce_Person_s2_busy_variable();
 
 
 
-/** unsigned int count_Person_s2_busy_variable(int count_value){
+/** unsigned int count_Person_s2_busy_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_busy_variable(int count_value);
+unsigned int count_Person_s2_busy_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_busy_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5835,12 +5861,12 @@ unsigned int reduce_Person_s2_startstep_variable();
 
 
 
-/** unsigned int count_Person_s2_startstep_variable(int count_value){
+/** unsigned int count_Person_s2_startstep_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_startstep_variable(int count_value);
+unsigned int count_Person_s2_startstep_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_startstep_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5861,12 +5887,12 @@ unsigned int reduce_Person_s2_location_variable();
 
 
 
-/** unsigned int count_Person_s2_location_variable(int count_value){
+/** unsigned int count_Person_s2_location_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_location_variable(int count_value);
+unsigned int count_Person_s2_location_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_location_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5887,12 +5913,12 @@ unsigned int reduce_Person_s2_locationid_variable();
 
 
 
-/** unsigned int count_Person_s2_locationid_variable(int count_value){
+/** unsigned int count_Person_s2_locationid_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_locationid_variable(int count_value);
+unsigned int count_Person_s2_locationid_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_locationid_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5913,12 +5939,12 @@ unsigned int reduce_Person_s2_hiv_variable();
 
 
 
-/** unsigned int count_Person_s2_hiv_variable(int count_value){
+/** unsigned int count_Person_s2_hiv_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_hiv_variable(int count_value);
+unsigned int count_Person_s2_hiv_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_hiv_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5939,12 +5965,12 @@ unsigned int reduce_Person_s2_art_variable();
 
 
 
-/** unsigned int count_Person_s2_art_variable(int count_value){
+/** unsigned int count_Person_s2_art_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_art_variable(int count_value);
+unsigned int count_Person_s2_art_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_art_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5965,12 +5991,12 @@ unsigned int reduce_Person_s2_activetb_variable();
 
 
 
-/** unsigned int count_Person_s2_activetb_variable(int count_value){
+/** unsigned int count_Person_s2_activetb_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_activetb_variable(int count_value);
+unsigned int count_Person_s2_activetb_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_activetb_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -5991,12 +6017,12 @@ unsigned int reduce_Person_s2_artday_variable();
 
 
 
-/** unsigned int count_Person_s2_artday_variable(int count_value){
+/** unsigned int count_Person_s2_artday_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_artday_variable(int count_value);
+unsigned int count_Person_s2_artday_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_artday_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6055,12 +6081,12 @@ unsigned int reduce_Person_s2_infections_variable();
 
 
 
-/** unsigned int count_Person_s2_infections_variable(int count_value){
+/** unsigned int count_Person_s2_infections_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_infections_variable(int count_value);
+unsigned int count_Person_s2_infections_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_infections_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6178,12 +6204,12 @@ unsigned int reduce_Person_s2_timevisiting_variable();
 
 
 
-/** unsigned int count_Person_s2_timevisiting_variable(int count_value){
+/** unsigned int count_Person_s2_timevisiting_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_timevisiting_variable(int count_value);
+unsigned int count_Person_s2_timevisiting_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_timevisiting_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6204,12 +6230,12 @@ unsigned int reduce_Person_s2_bargoing_variable();
 
 
 
-/** unsigned int count_Person_s2_bargoing_variable(int count_value){
+/** unsigned int count_Person_s2_bargoing_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_bargoing_variable(int count_value);
+unsigned int count_Person_s2_bargoing_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_bargoing_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6230,12 +6256,12 @@ unsigned int reduce_Person_s2_barday_variable();
 
 
 
-/** unsigned int count_Person_s2_barday_variable(int count_value){
+/** unsigned int count_Person_s2_barday_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_barday_variable(int count_value);
+unsigned int count_Person_s2_barday_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_barday_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6256,12 +6282,12 @@ unsigned int reduce_Person_s2_schooltime_variable();
 
 
 
-/** unsigned int count_Person_s2_schooltime_variable(int count_value){
+/** unsigned int count_Person_s2_schooltime_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Person_s2_schooltime_variable(int count_value);
+unsigned int count_Person_s2_schooltime_variable(unsigned int count_value);
 
 /** unsigned int min_Person_s2_schooltime_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6282,12 +6308,12 @@ unsigned int reduce_TBAssignment_tbdefault_id_variable();
 
 
 
-/** unsigned int count_TBAssignment_tbdefault_id_variable(int count_value){
+/** unsigned int count_TBAssignment_tbdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_TBAssignment_tbdefault_id_variable(int count_value);
+unsigned int count_TBAssignment_tbdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_TBAssignment_tbdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6308,12 +6334,12 @@ unsigned int reduce_Household_hhdefault_id_variable();
 
 
 
-/** unsigned int count_Household_hhdefault_id_variable(int count_value){
+/** unsigned int count_Household_hhdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Household_hhdefault_id_variable(int count_value);
+unsigned int count_Household_hhdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Household_hhdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6353,12 +6379,12 @@ unsigned int reduce_Household_hhdefault_active_variable();
 
 
 
-/** unsigned int count_Household_hhdefault_active_variable(int count_value){
+/** unsigned int count_Household_hhdefault_active_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Household_hhdefault_active_variable(int count_value);
+unsigned int count_Household_hhdefault_active_variable(unsigned int count_value);
 
 /** unsigned int min_Household_hhdefault_active_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6379,12 +6405,12 @@ unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_id_variabl
 
 
 
-/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(int count_value){
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(int count_value);
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_id_variable(unsigned int count_value);
 
 /** unsigned int min_HouseholdMembership_hhmembershipdefault_household_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6405,12 +6431,12 @@ unsigned int reduce_HouseholdMembership_hhmembershipdefault_person_id_variable()
 
 
 
-/** unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(int count_value){
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(int count_value);
+unsigned int count_HouseholdMembership_hhmembershipdefault_person_id_variable(unsigned int count_value);
 
 /** unsigned int min_HouseholdMembership_hhmembershipdefault_person_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6431,12 +6457,12 @@ unsigned int reduce_HouseholdMembership_hhmembershipdefault_household_size_varia
 
 
 
-/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(int count_value){
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(int count_value);
+unsigned int count_HouseholdMembership_hhmembershipdefault_household_size_variable(unsigned int count_value);
 
 /** unsigned int min_HouseholdMembership_hhmembershipdefault_household_size_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6457,12 +6483,12 @@ unsigned int reduce_HouseholdMembership_hhmembershipdefault_churchgoing_variable
 
 
 
-/** unsigned int count_HouseholdMembership_hhmembershipdefault_churchgoing_variable(int count_value){
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_churchgoing_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_HouseholdMembership_hhmembershipdefault_churchgoing_variable(int count_value);
+unsigned int count_HouseholdMembership_hhmembershipdefault_churchgoing_variable(unsigned int count_value);
 
 /** unsigned int min_HouseholdMembership_hhmembershipdefault_churchgoing_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6483,12 +6509,12 @@ unsigned int reduce_HouseholdMembership_hhmembershipdefault_churchfreq_variable(
 
 
 
-/** unsigned int count_HouseholdMembership_hhmembershipdefault_churchfreq_variable(int count_value){
+/** unsigned int count_HouseholdMembership_hhmembershipdefault_churchfreq_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_HouseholdMembership_hhmembershipdefault_churchfreq_variable(int count_value);
+unsigned int count_HouseholdMembership_hhmembershipdefault_churchfreq_variable(unsigned int count_value);
 
 /** unsigned int min_HouseholdMembership_hhmembershipdefault_churchfreq_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6509,12 +6535,12 @@ unsigned int reduce_Church_chudefault_id_variable();
 
 
 
-/** unsigned int count_Church_chudefault_id_variable(int count_value){
+/** unsigned int count_Church_chudefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Church_chudefault_id_variable(int count_value);
+unsigned int count_Church_chudefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Church_chudefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6535,12 +6561,12 @@ unsigned int reduce_Church_chudefault_size_variable();
 
 
 
-/** unsigned int count_Church_chudefault_size_variable(int count_value){
+/** unsigned int count_Church_chudefault_size_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Church_chudefault_size_variable(int count_value);
+unsigned int count_Church_chudefault_size_variable(unsigned int count_value);
 
 /** unsigned int min_Church_chudefault_size_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6580,12 +6606,12 @@ unsigned int reduce_Church_chudefault_active_variable();
 
 
 
-/** unsigned int count_Church_chudefault_active_variable(int count_value){
+/** unsigned int count_Church_chudefault_active_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Church_chudefault_active_variable(int count_value);
+unsigned int count_Church_chudefault_active_variable(unsigned int count_value);
 
 /** unsigned int min_Church_chudefault_active_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6606,12 +6632,12 @@ unsigned int reduce_ChurchMembership_chumembershipdefault_church_id_variable();
 
 
 
-/** unsigned int count_ChurchMembership_chumembershipdefault_church_id_variable(int count_value){
+/** unsigned int count_ChurchMembership_chumembershipdefault_church_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_ChurchMembership_chumembershipdefault_church_id_variable(int count_value);
+unsigned int count_ChurchMembership_chumembershipdefault_church_id_variable(unsigned int count_value);
 
 /** unsigned int min_ChurchMembership_chumembershipdefault_church_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6632,12 +6658,12 @@ unsigned int reduce_ChurchMembership_chumembershipdefault_household_id_variable(
 
 
 
-/** unsigned int count_ChurchMembership_chumembershipdefault_household_id_variable(int count_value){
+/** unsigned int count_ChurchMembership_chumembershipdefault_household_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_ChurchMembership_chumembershipdefault_household_id_variable(int count_value);
+unsigned int count_ChurchMembership_chumembershipdefault_household_id_variable(unsigned int count_value);
 
 /** unsigned int min_ChurchMembership_chumembershipdefault_household_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6677,12 +6703,12 @@ unsigned int reduce_Transport_trdefault_id_variable();
 
 
 
-/** unsigned int count_Transport_trdefault_id_variable(int count_value){
+/** unsigned int count_Transport_trdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Transport_trdefault_id_variable(int count_value);
+unsigned int count_Transport_trdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Transport_trdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6722,12 +6748,12 @@ unsigned int reduce_Transport_trdefault_active_variable();
 
 
 
-/** unsigned int count_Transport_trdefault_active_variable(int count_value){
+/** unsigned int count_Transport_trdefault_active_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Transport_trdefault_active_variable(int count_value);
+unsigned int count_Transport_trdefault_active_variable(unsigned int count_value);
 
 /** unsigned int min_Transport_trdefault_active_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6774,12 +6800,12 @@ unsigned int reduce_TransportMembership_trmembershipdefault_transport_id_variabl
 
 
 
-/** unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(int count_value){
+/** unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(int count_value);
+unsigned int count_TransportMembership_trmembershipdefault_transport_id_variable(unsigned int count_value);
 
 /** unsigned int min_TransportMembership_trmembershipdefault_transport_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6800,12 +6826,12 @@ unsigned int reduce_TransportMembership_trmembershipdefault_duration_variable();
 
 
 
-/** unsigned int count_TransportMembership_trmembershipdefault_duration_variable(int count_value){
+/** unsigned int count_TransportMembership_trmembershipdefault_duration_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_TransportMembership_trmembershipdefault_duration_variable(int count_value);
+unsigned int count_TransportMembership_trmembershipdefault_duration_variable(unsigned int count_value);
 
 /** unsigned int min_TransportMembership_trmembershipdefault_duration_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6826,12 +6852,12 @@ unsigned int reduce_Clinic_cldefault_id_variable();
 
 
 
-/** unsigned int count_Clinic_cldefault_id_variable(int count_value){
+/** unsigned int count_Clinic_cldefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Clinic_cldefault_id_variable(int count_value);
+unsigned int count_Clinic_cldefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Clinic_cldefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6871,12 +6897,12 @@ unsigned int reduce_Workplace_wpdefault_id_variable();
 
 
 
-/** unsigned int count_Workplace_wpdefault_id_variable(int count_value){
+/** unsigned int count_Workplace_wpdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Workplace_wpdefault_id_variable(int count_value);
+unsigned int count_Workplace_wpdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Workplace_wpdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6916,12 +6942,12 @@ unsigned int reduce_WorkplaceMembership_wpmembershipdefault_person_id_variable()
 
 
 
-/** unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(int count_value){
+/** unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(int count_value);
+unsigned int count_WorkplaceMembership_wpmembershipdefault_person_id_variable(unsigned int count_value);
 
 /** unsigned int min_WorkplaceMembership_wpmembershipdefault_person_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6942,12 +6968,12 @@ unsigned int reduce_WorkplaceMembership_wpmembershipdefault_workplace_id_variabl
 
 
 
-/** unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(int count_value){
+/** unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(int count_value);
+unsigned int count_WorkplaceMembership_wpmembershipdefault_workplace_id_variable(unsigned int count_value);
 
 /** unsigned int min_WorkplaceMembership_wpmembershipdefault_workplace_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -6968,12 +6994,12 @@ unsigned int reduce_Bar_bdefault_id_variable();
 
 
 
-/** unsigned int count_Bar_bdefault_id_variable(int count_value){
+/** unsigned int count_Bar_bdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_Bar_bdefault_id_variable(int count_value);
+unsigned int count_Bar_bdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_Bar_bdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -7013,12 +7039,12 @@ unsigned int reduce_School_schdefault_id_variable();
 
 
 
-/** unsigned int count_School_schdefault_id_variable(int count_value){
+/** unsigned int count_School_schdefault_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_School_schdefault_id_variable(int count_value);
+unsigned int count_School_schdefault_id_variable(unsigned int count_value);
 
 /** unsigned int min_School_schdefault_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -7058,12 +7084,12 @@ unsigned int reduce_SchoolMembership_schmembershipdefault_person_id_variable();
 
 
 
-/** unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(int count_value){
+/** unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(int count_value);
+unsigned int count_SchoolMembership_schmembershipdefault_person_id_variable(unsigned int count_value);
 
 /** unsigned int min_SchoolMembership_schmembershipdefault_person_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -7084,12 +7110,12 @@ unsigned int reduce_SchoolMembership_schmembershipdefault_school_id_variable();
 
 
 
-/** unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(int count_value){
+/** unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(unsigned int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
  * @return The number of unique values of the count_value found in the agent state variable list
  */
-unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(int count_value);
+unsigned int count_SchoolMembership_schmembershipdefault_school_id_variable(unsigned int count_value);
 
 /** unsigned int min_SchoolMembership_schmembershipdefault_school_id_variable();
  * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -7173,6 +7199,8 @@ __constant__ float DEFAULT_F_P;
 __constant__ float DEFAULT_Q;
 
 __constant__ unsigned int DEFAULT_K;
+
+__constant__ float DELTA;
 
 __constant__ float THETA;
 
@@ -7295,6 +7323,8 @@ __constant__ float SCHOOL_DUR;
 __constant__ float VISITING_DUR;
 
 __constant__ unsigned int OUTPUT_ID;
+
+__constant__ float E;
 
 /** set_TIME_STEP
  * Sets the constant variable TIME_STEP on the device which can then be used in the agent functions.
@@ -7669,6 +7699,17 @@ extern const unsigned int* get_DEFAULT_K();
 
 
 extern unsigned int h_env_DEFAULT_K;
+
+/** set_DELTA
+ * Sets the constant variable DELTA on the device which can then be used in the agent functions.
+ * @param h_DELTA value to set the variable
+ */
+extern void set_DELTA(float* h_DELTA);
+
+extern const float* get_DELTA();
+
+
+extern float h_env_DELTA;
 
 /** set_THETA
  * Sets the constant variable THETA on the device which can then be used in the agent functions.
@@ -8340,6 +8381,17 @@ extern const unsigned int* get_OUTPUT_ID();
 
 
 extern unsigned int h_env_OUTPUT_ID;
+
+/** set_E
+ * Sets the constant variable E on the device which can then be used in the agent functions.
+ * @param h_E value to set the variable
+ */
+extern void set_E(float* h_E);
+
+extern const float* get_E();
+
+
+extern float h_env_E;
 
 
 /** getMaximumBound
